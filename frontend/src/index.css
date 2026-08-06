@@ -1,0 +1,37 @@
+@import "tailwindcss";
+
+/* Chrome, Edge, Safari Autofill Fix */
+
+input:-webkit-autofill,
+input:-webkit-autofill:hover,
+input:-webkit-autofill:focus,
+input:-webkit-autofill:active {
+  -webkit-box-shadow: 0 0 0 1000px #222938 inset !important;
+  -webkit-text-fill-color: #ffffff !important;
+  caret-color: #ffffff !important;
+  /* border-radius: inherit; */
+  transition: background-color 9999s ease-in-out 0s;
+}
+
+button,
+a,
+input[type="checkbox"],
+input[type="radio"],
+summary {
+  cursor: pointer !important;
+}
+
+
+
+::-webkit-scrollbar {
+  width: 5px !important;
+  height: 6px !important;
+}
+
+::-webkit-scrollbar-thumb {
+  background-color: rgba(0, 0, 0, 0.2);
+}
+
+::-webkit-scrollbar-track {
+  background: rgba(255, 255, 255, 0.1);
+}

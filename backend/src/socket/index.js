@@ -1,5 +1,6 @@
 import { Server } from "socket.io";
 import env from "../config/env.js";
+import { socketMiddleware } from "./middleware.js";
 
 let io;
 
@@ -11,7 +12,7 @@ export const initializeSocket = (server) => {
     },
     transports: ["websocket"],
   });
-
+  io.use(socketMiddleware);
   return io;
 };
 

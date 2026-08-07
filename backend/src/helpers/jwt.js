@@ -14,5 +14,12 @@ export const generateRefreshToken = (payload) => {
 };
 
 export const verifyAccessToken = (token) => {
-  return jwt.verify(token, env.JWT_ACCESS_SECRET);
+  try {
+    const decoded = jwt.verify(token, env.JWT_ACCESS_SECRET);
+    return decoded;
+  } catch (error) {
+    console.error("JWT Verify Error:", error);
+    throw error;
+  }
 };
+

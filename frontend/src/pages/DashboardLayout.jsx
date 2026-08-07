@@ -18,14 +18,10 @@ export default function DashboardLayout() {
         {/* {showHeader && <ChatHeader />} */}
         <ChatHeader />
 
-        <div className="h-full overflow-y-auto w-full">
+        <div className={`h-full overflow-y-auto w-full ${location.pathname.startsWith("/c/") && "pt-15"}`}>
           <Outlet />
         </div>
-        {/* <div className="flex-1 overflow-y-auto w-full">
-          <div className="pt-15 min-h-full">
-            <Outlet />
-          </div>
-        </div> */}
+        
         {/* <div className="flex-1 overflow-hidden w-full pt-15">
           <Outlet />
         </div> */}

@@ -1,6 +1,9 @@
 import { createContext, useContext, useEffect, useState } from "react";
-import { useSelector } from "react-redux";
+import { useDispatch, useSelector } from "react-redux";
 import socket from "../socket/socket";
+import { handleLogout } from "../utils/logout";
+import { useNavigate } from "react-router-dom";
+import toast from "react-hot-toast";
 
 const SocketContext = createContext(null);
 
@@ -9,9 +12,12 @@ export const useSocket = () => {
 };
 
 export const SocketProvider = ({ children }) => {
-  const { profileDetails, token } = useSelector(
+  const dispatch = useDispatch();
+  const navigate = useNavigate();
+  const { profileDetails, token, refreshToken } = useSelector(
     (state) => state?.authReducer?.AuthSlice,
   );
+
   const [isConnected, setIsConnected] = useState(false);
 
   useEffect(() => {
@@ -39,6 +45,32 @@ export const SocketProvider = ({ children }) => {
 
     socket.on("connect", onConnect);
     socket.on("disconnect", onDisconnect);
+
+    socket.on("connect_error", async (err) => {
+      console.log(err.message);
+      toast.success(err.message)
+      if (err.message === "TOKEN_EXPIRED") {
+        // socket.auth = {
+        //   token: token,
+        // };
+        // socket.connect();
+        await handleLogout({
+          dispatch,
+          navigate,
+          refreshToken,
+        });
+        navigate("/login");
+      }
+      if (err.message === "INVALID_TOKEN") {
+        await handleLogout({
+          dispatch,
+          navigate,
+          refreshToken,
+        });
+        navigate("/login");
+      }
+    });
+
     return () => {
       socket.off("connect", onConnect);
       socket.off("disconnect", onDisconnect);

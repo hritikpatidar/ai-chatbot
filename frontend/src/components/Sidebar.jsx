@@ -275,7 +275,7 @@ export default function Sidebar() {
                 >
                   <button
                     onClick={() => {
-                      dispatch(setActivePage(""));
+                      dispatch(setActivePage("recentChat"));
                       navigate(`/c/${chat._id}`);
                     }}
                     className={`flex h-8 flex-1 items-center gap-3 px-3 text-left text-sm ${

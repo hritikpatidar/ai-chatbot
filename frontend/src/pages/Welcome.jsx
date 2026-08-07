@@ -1,16 +1,25 @@
 import { motion, AnimatePresence } from "framer-motion";
 import { useEffect, useState } from "react";
-import { Image, Globe, Mic, Paperclip, X, SendHorizonal } from "lucide-react";
+import {
+  Image,
+  Globe,
+  Mic,
+  Paperclip,
+  X,
+  SendHorizonal,
+  Square,
+} from "lucide-react";
 import useSpeechRecognition from "../hooks/useSpeechRecognition";
 import { useSelector } from "react-redux";
-import {  useNavigate } from "react-router-dom";
+import { useNavigate } from "react-router-dom";
 
 export default function Welcome() {
-  const navigate = useNavigate()
+  const navigate = useNavigate();
   const {
     conversationId,
     newMessageLoading,
     setNewMessageLoading,
+    isSendDisable,
     messages,
     message,
     setMessage,
@@ -20,6 +29,7 @@ export default function Welcome() {
     toggleListening,
     handlePaste,
     handleSend,
+    handleStopGenerating,
     handleFileSelect,
     removeFile,
     fileInputRef,
@@ -189,7 +199,17 @@ export default function Welcome() {
 
       {/* Input */}
       <div className="mt-10 w-full max-w-4xl px-4">
-        <div className="rounded-3xl border border-white/10 bg-[#171b23]/80 p-4 backdrop-blur-xl">
+        <form
+          onSubmit={(e) => {
+            e.preventDefault();
+            if (isSendDisable) return;
+            handleSend();
+            if (!conversationId) {
+              navigate("/c/1");
+            }
+          }}
+          className="rounded-3xl border border-white/10 bg-[#171b23]/80 p-4 backdrop-blur-xl"
+        >
           {selectedFiles.length > 0 && (
             <div className="mb-4 flex gap-3 overflow-x-auto pb-2">
               {selectedFiles.map((file, index) => {
@@ -215,6 +235,7 @@ export default function Welcome() {
                     )}
 
                     <button
+                      type="button"
                       onClick={() => removeFile(index)}
                       className="absolute -right-2 -top-1 flex h-4 w-4 items-center justify-center rounded-full bg-gray-500 text-xs text-white hover:bg-red-600 z-1"
                     >
@@ -236,6 +257,7 @@ export default function Welcome() {
                 </span>
 
                 <button
+                  type="button"
                   onClick={() =>
                     setTags((prev) => prev.filter((_, i) => i !== index))
                   }
@@ -254,8 +276,7 @@ export default function Welcome() {
             onKeyDown={(e) => {
               if (e.key === "Enter" && !e.shiftKey) {
                 e.preventDefault();
-                handleSend();
-                navigate("/c/1")
+                e.currentTarget.form.requestSubmit();
               }
             }}
             placeholder="Message AI Chat..."
@@ -292,6 +313,7 @@ export default function Welcome() {
 
             <div className="flex items-center gap-2 overflow-x-auto whitespace-nowrap">
               <button
+                type="button"
                 onClick={() => fileInputRef.current.click()}
                 className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-[#232936] transition hover:bg-[#2d3545]"
               >
@@ -299,6 +321,7 @@ export default function Welcome() {
               </button>
 
               <button
+                type="button"
                 onClick={() => setTags((prev) => ["🖼️ Create Image"])}
                 className="flex h-11 shrink-0 items-center gap-2 rounded-xl bg-[#232936] px-3 transition hover:bg-[#2d3545]"
               >
@@ -307,6 +330,7 @@ export default function Welcome() {
               </button>
 
               <button
+                type="button"
                 onClick={() => setTags((prev) => ["🔍 Web Search"])}
                 className="flex h-11 shrink-0 items-center gap-2 rounded-xl bg-[#232936] px-3 transition hover:bg-[#2d3545]"
               >
@@ -315,30 +339,49 @@ export default function Welcome() {
               </button>
             </div>
 
-            {/* Right */}
-
-            {message.trim() ? (
-              <button
-                onClick={handleSend}
-                className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg hover:scale-110 shadow-[0_0_15px_rgba(99,102,241,0.4)]"
-              >
-                <SendHorizonal size={16} />
-              </button>
-            ) : (
-              <button
-                onClick={toggleListening}
-                className={`flex h-10 w-10 shrink-0 items-center justify-center rounded-lg transition-all duration-300
+            <div className="flex items-center">
+              {isSendDisable ? (
+                // Stop Button
+                <button
+                  type="button"
+                  onClick={handleStopGenerating}
+                  className="flex h-10 w-10 items-center justify-center rounded-lg
+                 bg-red-500/10 text-red-400
+                 transition hover:bg-red-500/20 hover:scale-110
+                 shadow-[0_0_15px_rgba(239,68,68,0.4)]"
+                >
+                  <Square size={15} fill="currentColor" />
+                </button>
+              ) : message.trim() ? (
+                // Send Button
+                <button
+                  type="submit"
+                  disabled={isSendDisable}
+                  className="flex h-10 w-10 items-center justify-center rounded-lg
+                 transition hover:scale-110
+                 shadow-[0_0_15px_rgba(99,102,241,0.4)]"
+                >
+                  <SendHorizonal size={17} />
+                </button>
+              ) : (
+                // Mic Button
+                <button
+                  type="button"
+                  onClick={toggleListening}
+                  className={`flex h-10 w-10 items-center justify-center rounded-lg
+                    transition-all duration-300
                     ${
                       isListening
                         ? "bg-red-500 animate-pulse shadow-[0_0_35px_red]"
                         : "hover:scale-110 shadow-[0_0_15px_rgba(99,102,241,0.4)]"
                     }`}
-              >
-                <Mic size={16} />
-              </button>
-            )}
+                >
+                  <Mic size={18} className="text-white" />
+                </button>
+              )}
+            </div>
           </div>
-        </div>
+        </form>
       </div>
 
       {/* Cards */}

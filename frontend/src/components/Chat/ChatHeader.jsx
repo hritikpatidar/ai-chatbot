@@ -1,20 +1,12 @@
-import { ChevronDown, LogIn, LogOut, Share2, User } from "lucide-react";
-import React, { useEffect, useRef, useState } from "react";
+import { ChevronDown, LogOut, Share2 } from "lucide-react";
+import  { useEffect, useRef, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
-import { logoutSuccess, logoutUser } from "../../redux/features/Auth/authSlice";
 import { useNavigate } from "react-router-dom";
 import useSpeechRecognition from "../../hooks/useSpeechRecognition";
-import { setActivePage } from "../../redux/features/Chat/chatSlice";
 import { isLogin } from "../../Utils/Auth";
-import {
-  clearLocalStorage,
-  getItemLocalStorage,
-  removeItemLocalStorage,
-  setItemLocalStorage,
-} from "../../utils/browserServices";
 import profile from "../../assets/profile1.jpg";
-import toast from "react-hot-toast";
 import { useSocket } from "../../context/SocketContext";
+import { handleLogout } from "../../utils/logout";
 
 const ChatHeader = () => {
   const dispatch = useDispatch();
@@ -45,22 +37,13 @@ const ChatHeader = () => {
   }, []);
 
   const handleAuth = async () => {
-    const fcmToken = getItemLocalStorage("fcm_token");
-    try {
-      setIsLogoutLoading(true);
-      await dispatch(logoutUser({ refreshToken: refreshToken })).unwrap();
-      setProfileOpen(false);
-      await navigate("/login");
-    } catch (error) {
-      console.error(error);
-      toast.error(error?.message || "Logout failed");
-    } finally {
-      socket.disconnect();
-      dispatch({ type: "RESET" });
-      clearLocalStorage();
-      setItemLocalStorage("fcm_token", fcmToken);
-      setIsLogoutLoading(false);
-    }
+    await handleLogout({
+      dispatch,
+      navigate,
+      setProfileOpen,
+      setIsLogoutLoading,
+      refreshToken,
+    });
   };
 
   return (

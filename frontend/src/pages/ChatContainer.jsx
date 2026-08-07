@@ -1,29 +1,40 @@
 import { motion, AnimatePresence } from "framer-motion";
-import { Bot, User, SendHorizonal, Paperclip, Mic } from "lucide-react";
+import {
+  SendHorizonal,
+  Paperclip,
+  Mic,
+  Square,
+  Check,
+  Copy,
+  ThumbsUp,
+  ThumbsDown,
+  MessageSquarePlus,
+  MoreHorizontal,
+} from "lucide-react";
 import { useEffect, useRef, useState } from "react";
 import useSpeechRecognition from "../hooks/useSpeechRecognition";
-import Markdown from "react-markdown";
-// import remarkGfm from "remark-gfm";
+import AIMessage from "../components/Chat/AIMessage";
 
 export default function ChatContainer() {
   const {
-    conversationId,
     newMessageLoading,
-    setNewMessageLoading,
+    isSendDisable,
     messages,
     message,
-    setMessage,
     selectedFiles,
-    setSelectedFiles,
     isListening,
     toggleListening,
     handlePaste,
     handleSend,
+    handleStopGenerating,
     handleFileSelect,
     removeFile,
     fileInputRef,
     textareaRef,
     handleMessageChange,
+    copiedIndex,
+    handleCopy,
+    handleFeedback,
   } = useSpeechRecognition();
 
   const messagesEndRef = useRef(null);
@@ -38,52 +49,124 @@ export default function ChatContainer() {
     <div className="flex h-full w-full flex-col">
       {/* Chat Area */}
       <div className="flex-1 overflow-y-auto px-4">
-        <div className="mx-auto  w-full max-w-5xl px-3 py-6 md:px-28 lg:px-40">
+        <div className="mx-auto flex min-h-full max-w-5xl flex-col px-3 py-1 md:px-28 lg:px-40">
           {messages.map((msg, index) => (
             <div
               key={index}
-              className={`mb-5 flex ${
+              className={`group mb-4 flex ${
                 msg.role === "user" ? "justify-end" : "justify-start"
               }`}
             >
-              <div
-                className={`flex max-w-[92%] items-start gap-3 lg:max-w-full ${
-                  msg.role === "user" ? "flex-row-reverse" : ""
-                }`}
-              >
-                {/* Avatar */}
-
-                {/* <div
-                  className={`flex h-6 w-6 shrink-0 items-center justify-center rounded-lg ${
-                    msg.role === "assistant"
-                      ? "bg-linear-to-br from-blue-500 to-violet-600"
-                      : "bg-emerald-600"
+              {/* Wrapper */}
+              <div className="relative inline-block max-w-full">
+                {/* Message Bubble */}
+                <div
+                  className={`rounded-2xl px-4 py-3 ${
+                    msg.role === "user"
+                      ? "border border-white/10 bg-[#161f2d]"
+                      : ""
                   }`}
                 >
                   {msg.role === "assistant" ? (
-                    <Bot size={15} className="text-white" />
+                    <AIMessage content={msg.text} />
                   ) : (
-                    <User size={15} className="text-white" />
-                  )}
-                </div> */}
-
-                {/* Bubble */}
-
-                <div
-                  className={`rounded-2xl px-4 py-3 shadow-sm ${
-                    msg.role === "user"
-                      ? "border border-white/10 bg-[#161f2d] text-gray-200"
-                      : "bg-gray-600 text-white"
-                  }`}
-                >
-                  <p className="text-[13px] leading-6 whitespace-pre-wrap">
-                    <Markdown
-                    // remarkPlugins={[remarkGfm]}
-                    >
+                    <p className="whitespace-pre-wrap wrap-break-word text-sm leading-6">
                       {msg.text}
-                    </Markdown>
-                  </p>
+                    </p>
+                  )}
                 </div>
+
+                {/* Actions */}
+                {msg.role === "user" && (
+                  <div
+                    className="
+                       absolute
+                      -bottom-7
+                      right-1
+                      flex
+                      items-center
+                      gap-2
+                      opacity-0
+                      transition
+                      duration-200
+                      group-hover:opacity-200
+                    "
+                  >
+                    <button
+                      onClick={() => handleCopy(msg.text, index)}
+                      className="rounded-md p-1 text-gray-400 hover:bg-gray-800"
+                    >
+                      {copiedIndex === index ? (
+                        <Check size={15} className="text-green-400" />
+                      ) : (
+                        <Copy size={15} />
+                      )}
+                    </button>
+                  </div>
+                )}
+
+                {msg.role === "assistant" && !isSendDisable && (
+                  <div className="ms-3 -mt-4 flex items-center gap-1">
+                    {/* Copy */}
+                    <button
+                      onClick={() => handleCopy(msg.text, index)}
+                      className="rounded-md p-1 text-gray-400 transition hover:bg-gray-800"
+                    >
+                      {copiedIndex === index ? (
+                        <Check size={15} className="text-green-400" />
+                      ) : (
+                        <Copy size={15} />
+                      )}
+                    </button>
+
+                    {/* More */}
+                    <div className="relative group/more">
+                      <button className="rounded-md p-1 text-gray-400 transition hover:bg-gray-800">
+                        <MoreHorizontal size={15} />
+                      </button>
+
+                      {/* Dropdown */}
+                      <div
+                        className="
+                          invisible
+                          absolute
+                          left-0
+                          top-7
+                          z-50
+                          w-32
+                          overflow-hidden
+                          rounded-lg
+                          border
+                          border-white/10
+                          bg-[#1b2232]
+                          py-1
+                          opacity-0
+                          shadow-xl
+                          transition-all
+                          duration-150
+                          group-hover/more:visible
+                          group-hover/more:opacity-100
+                        "
+                      >
+                        <button
+                          onClick={() => handleFeedback("up")}
+                          className="flex w-full items-center gap-2 px-2.5 py-1.5 text-xs text-gray-300 hover:bg-white/10"
+                        >
+                          <ThumbsUp size={13} />
+                          Good
+                        </button>
+
+                        <button
+                          onClick={() => handleFeedback("down")}
+                          className="flex w-full items-center gap-2 px-2.5 py-1.5 text-xs text-gray-300 hover:bg-white/10"
+                        >
+                          <ThumbsDown size={13} />
+                          Bad
+                        </button>
+                      </div>
+                    </div>
+                  </div>
+                )}
               </div>
             </div>
           ))}
@@ -92,7 +175,8 @@ export default function ChatContainer() {
               Thinking<span className="animate-pulse">...</span>
             </p>
           )}
-          <div ref={messagesEndRef} />
+          {/* Spacer */}
+          <div className="mt-auto" />
           {/* Mini Voice Orb */}
           <AnimatePresence mode="wait">
             {isListening && (
@@ -161,9 +245,10 @@ export default function ChatContainer() {
               </motion.div>
             )}
           </AnimatePresence>
-          <p className=" text-center text-[11px] text-gray-500">
+          <p className="pb-2 text-center text-[11px] text-gray-500">
             AI can make mistakes. Verify important information.
           </p>
+          <div ref={messagesEndRef} />
         </div>
       </div>
 
@@ -212,6 +297,7 @@ export default function ChatContainer() {
             <form
               onSubmit={(e) => {
                 e.preventDefault();
+                if (isSendDisable) return;
                 handleSend();
               }}
               className="flex flex-col gap-2"
@@ -262,24 +348,36 @@ export default function ChatContainer() {
                 </button>
 
                 <div className="flex items-center gap-2">
-                  <button
-                    type="button"
-                    onClick={toggleListening}
-                    className={`flex h-9 w-9 items-center justify-center rounded-lg transition-all duration-300 ${
-                      isListening
-                        ? "bg-red-500 animate-pulse"
-                        : "hover:scale-110 shadow-[0_0_15px_rgba(99,102,241,0.4)]"
-                    }`}
-                  >
-                    <Mic size={17} className="text-white" />
-                  </button>
-
-                  <button
-                    type="submit"
-                    className="flex h-9 w-9 items-center justify-center rounded-lg hover:scale-110 shadow-[0_0_15px_rgba(99,102,241,0.4)]"
-                  >
-                    <SendHorizonal size={17} />
-                  </button>
+                  {!isSendDisable && (
+                    <button
+                      type="button"
+                      onClick={toggleListening}
+                      className={`flex h-9 w-9 items-center justify-center rounded-lg transition-all duration-300 ${
+                        isListening
+                          ? "bg-red-500 animate-pulse"
+                          : "hover:scale-110 shadow-[0_0_15px_rgba(99,102,241,0.4)]"
+                      }`}
+                    >
+                      <Mic size={17} className="text-white" />
+                    </button>
+                  )}
+                  {isSendDisable ? (
+                    <button
+                      type="button"
+                      onClick={handleStopGenerating} // stop api/socket emit
+                      className="flex h-9 w-9 items-center justify-center rounded-lg bg-red-500/10 text-red-400 transition hover:bg-red-500/20 hover:scale-110 shadow-[0_0_15px_rgba(239,68,68,0.4)]"
+                    >
+                      <Square size={15} fill="currentColor" />
+                    </button>
+                  ) : (
+                    <button
+                      type="submit"
+                      disabled={isSendDisable}
+                      className="flex h-9 w-9 items-center justify-center rounded-lg hover:scale-110 shadow-[0_0_15px_rgba(99,102,241,0.4)]"
+                    >
+                      <SendHorizonal size={17} />
+                    </button>
+                  )}
                 </div>
               </div>
             </form>

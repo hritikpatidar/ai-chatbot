@@ -2,169 +2,327 @@ import { useEffect, useRef, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { setActivePage } from "../redux/features/Chat/chatSlice";
 import { useNavigate, useParams } from "react-router-dom";
+import axios from "axios";
+import { useSocket } from "../context/SocketContext";
+import {
+  onAIChunk,
+  onAIError,
+  removeAIChunk,
+  sendAIMessage,
+} from "../service/socket.service";
 
-const messagesArray = [
-  {
-    id: 1,
-    role: "assistant",
-    content: `Hello! 👋 I'm your AI assistant.
+// const messagesArray = [
+//   {
+//     id: 1,
+//     role: "assistant",
+//     text: `# 👋 Hello!
 
-I can help you with React, Node.js, MongoDB, Express, JavaScript, interview preparation, debugging, API integration, and much more.
+// I'm your AI assistant.
 
-Feel free to ask anything, and I'll provide step-by-step explanations with examples whenever needed.`,
-  },
+// I can help you with:
 
-  {
-    id: 2,
-    role: "user",
-    content: `Can you explain React Hooks in detail with a practical example?`,
-  },
+// - ⚛️ React
+// - 🚀 Node.js
+// - 🍃 MongoDB
+// - 🌐 Express.js
+// - 📜 JavaScript
+// - 💼 Interview Preparation
+// - 🐞 Debugging
+// - 🔌 API Integration
 
-  {
-    id: 3,
-    role: "assistant",
-    content: `Absolutely!
+// Feel free to ask **anything**. I'll explain concepts **step by step** with practical examples whenever possible.`,
+//   },
 
-React Hooks are special functions introduced in React 16.8 that allow functional components to use state, lifecycle methods, and other React features without writing class components.
+//   {
+//     id: 2,
+//     role: "user",
+//     text: `Can you explain React Hooks in detail with a practical example?`,
+//   },
 
-The most commonly used Hooks are:
+//   {
+//     id: 3,
+//     role: "assistant",
+//     text: `# React Hooks
 
-• useState – Stores component state.
-• useEffect – Handles side effects like API calls.
-• useContext – Shares data across components.
-• useMemo – Optimizes expensive calculations.
-• useCallback – Prevents unnecessary function recreation.
-• useRef – Accesses DOM elements or stores mutable values.
+// React Hooks were introduced in **React 16.8**. They allow functional components to use state and lifecycle features without class components.
 
-Example:
+// ## Most Common Hooks
 
-const [count, setCount] = useState(0);
+// | Hook | Purpose |
+// |------|---------|
+// | \`useState\` | Manage state |
+// | \`useEffect\` | Handle side effects |
+// | \`useContext\` | Share data globally |
+// | \`useMemo\` | Optimize expensive calculations |
+// | \`useCallback\` | Memoize functions |
+// | \`useRef\` | Access DOM or store mutable values |
 
-<button onClick={() => setCount(count + 1)}>
-  Count: {count}
-</button>
+// ## Example
 
-Whenever the button is clicked, React updates the state and automatically re-renders the component.`,
-  },
+// \`\`\`jsx
+// import { useState } from "react";
 
-  {
-    id: 4,
-    role: "user",
-    content: `I'm building a MERN AI chatbot. What folder structure would you recommend for scalability?`,
-  },
+// export default function Counter() {
+//   const [count, setCount] = useState(0);
 
-  {
-    id: 5,
-    role: "assistant",
-    content: `For a scalable MERN project, keep the frontend and backend well organized.
+//   return (
+//     <button onClick={() => setCount(count + 1)}>
+//       Count: {count}
+//     </button>
+//   );
+// }
+// \`\`\`
 
-Frontend (React):
+// ### How it works
 
-src/
- ├── components/
- ├── pages/
- ├── redux/
- ├── hooks/
- ├── services/
- ├── layouts/
- ├── utils/
- ├── routes/
- └── assets/
+// 1. The initial value is **0**.
+// 2. Clicking the button updates the state.
+// 3. React automatically re-renders the component.
+// 4. The updated count appears on the screen.
 
-Backend (Node.js):
+// > **Tip:** Always use the setter function returned by \`useState\`. Never modify state directly.`,
+//   },
 
-src/
- ├── controllers/
- ├── routes/
- ├── models/
- ├── middleware/
- ├── services/
- ├── utils/
- ├── config/
- └── validations/
+//   {
+//     id: 4,
+//     role: "user",
+//     text: `I'm building a MERN AI chatbot. What folder structure would you recommend for scalability?`,
+//   },
 
-This structure makes the project easier to maintain, test, and scale as new features are added.`,
-  },
+//   {
+//     id: 5,
+//     role: "assistant",
+//     text: `# Recommended Folder Structure
 
-  {
-    id: 6,
-    role: "user",
-    content: `How should I connect my React frontend with a Node.js API?`,
-  },
+// A scalable project keeps responsibilities separated.
 
-  {
-    id: 7,
-    role: "assistant",
-    content: `The recommended approach is to create a dedicated API layer instead of calling fetch() directly inside every component.
+// ## 📁 Frontend (React)
 
-Example:
+// \`\`\`
+// src/
+// ├── assets/
+// ├── components/
+// ├── layouts/
+// ├── pages/
+// ├── hooks/
+// ├── services/
+// ├── redux/
+// ├── routes/
+// ├── utils/
+// └── App.jsx
+// \`\`\`
 
-services/chatService.js
+// ## 📁 Backend (Node.js)
 
-export const sendMessage = async (payload) => {
-   return axios.post("/api/chat", payload);
-};
+// \`\`\`
+// src/
+// ├── config/
+// ├── controllers/
+// ├── middleware/
+// ├── models/
+// ├── routes/
+// ├── services/
+// ├── validations/
+// ├── utils/
+// └── app.js
+// \`\`\`
 
-Then inside your React component:
+// ## Why this structure?
 
-const response = await sendMessage({
-   message: prompt,
-});
+// - ✅ Easy to maintain
+// - ✅ Easy to scale
+// - ✅ Better code organization
+// - ✅ Team-friendly
+// - ✅ Easier testing
 
-setMessages(prev => [
-   ...prev,
-   {
-      role: "assistant",
-      content: response.data.answer,
-   },
-]);
+// > As your project grows, you can also separate features into modules.`,
+//   },
 
-This keeps your UI clean and makes future maintenance much easier.`,
-  },
+//   {
+//     id: 6,
+//     role: "user",
+//     text: `How should I connect my React frontend with a Node.js API?`,
+//   },
 
-  {
-    id: 8,
-    role: "user",
-    content: `Thanks! That makes sense.`,
-  },
+//   {
+//     id: 7,
+//     role: "assistant",
+//     text: `# Connecting React with Node.js API
 
-  {
-    id: 9,
-    role: "assistant",
-    content: `You're welcome! 😄
+// Instead of calling \`fetch()\` inside every component, create a dedicated API layer.
 
-As you continue building your AI chatbot, consider adding features like:
+// ## Step 1 — Create a service
 
-• Conversation history
-• Markdown rendering
-• Code syntax highlighting
-• Streaming AI responses
-• Copy message button
-• Regenerate response
-• Dark/Light mode
-• Auto-scroll to latest message
-• Typing animation
-• File upload support
+// \`\`\`js
+// // services/chatService.js
 
-These features will make your chatbot feel much closer to modern AI assistants like ChatGPT and improve the overall user experience.`,
-  },
-];
+// import axios from "axios";
+
+// export const sendMessage = async (payload) => {
+//   return axios.post("/api/chat", payload);
+// };
+// \`\`\`
+
+// ---
+
+// ## Step 2 — Use it inside your component
+
+// \`\`\`jsx
+// const response = await sendMessage({
+//   message: prompt,
+// });
+
+// setMessages((prev) => [
+//   ...prev,
+//   {
+//     role: "assistant",
+//     text: response.data.answer,
+//   },
+// ]);
+// \`\`\`
+
+// ## Benefits
+
+// - 📦 Reusable API calls
+// - 🧹 Cleaner components
+// - 🔄 Easier maintenance
+// - 🧪 Better testing
+
+// > This is the approach used in most production React applications.`,
+//   },
+
+//   {
+//     id: 8,
+//     role: "user",
+//     text: `Thanks! That makes sense.`,
+//   },
+
+//   {
+//     id: 9,
+//     role: "assistant",
+//     text: `# You're Welcome! 🎉
+
+// Glad it helped.
+
+// As you continue building your **MERN AI Chatbot**, here are some features worth adding:
+
+// ## Core Features
+
+// - 💬 Conversation History
+// - ✍️ Markdown Rendering
+// - 🌈 Code Syntax Highlighting
+// - ⚡ Streaming Responses
+// - 📋 Copy Message Button
+// - 🔄 Regenerate Response
+// - 🌓 Dark / Light Mode
+// - 📜 Auto Scroll
+// - ⌨️ Typing Animation
+// - 📎 File Upload
+// - 🖼️ Image Upload
+// - 🎤 Voice Input
+// - 🔊 Text-to-Speech
+
+// ## Advanced Features
+
+// - AI Conversation Memory
+// - Chat Search
+// - Pinned Chats
+// - Export Conversation
+// - Share Conversation
+// - Multi-model Support
+// - Token Usage
+// - Usage Analytics
+// - Custom Prompts
+// - Authentication
+// - Real-time Socket.IO Chat
+
+// ---
+
+// ### 🚀 Production Tech Stack
+
+// - React + Vite
+// - Redux Toolkit
+// - React Router
+// - Tailwind CSS
+// - Framer Motion
+// - React Markdown
+// - react-syntax-highlighter
+// - Axios
+// - Socket.IO
+// - Node.js
+// - Express.js
+// - MongoDB
+// - Redis
+// - JWT Authentication
+
+// ---
+
+// > Keep your components small, APIs reusable, and UI responsive. That's the key to building a production-ready AI chatbot similar to ChatGPT.`,
+//   },
+// ];
 
 export default function useSpeechRecognition() {
   const dispatch = useDispatch();
   const navigate = useNavigate();
   const { conversationId } = useParams();
-
+  const textareaRef = useRef(null);
   const recognitionRef = useRef(null);
   const finalTranscript = useRef("");
   const silenceTimer = useRef(null);
   const fileInputRef = useRef(null);
   const [selectedFiles, setSelectedFiles] = useState([]);
   const [message, setMessage] = useState("");
-  const [loading, setLoading] = useState(false);
-  const [messages, setMessages] = useState(messagesArray);
+  const [newMessageLoading, setNewMessageLoading] = useState(false);
+  const [messages, setMessages] = useState([]);
   const [isListening, setIsListening] = useState(false);
   const { newChat } = useSelector((store) => store.chatSlice);
+  const { socket, isConnected } = useSocket();
+
+  useEffect(() => {
+    const handleChunk = ({ text }) => {
+      debugger;
+      setNewMessageLoading(false);
+      setMessages((prev) => {
+        const list = [...prev];
+        const last = list[list.length - 1];
+        if (last?.role === "assistant") {
+          last.text += text;
+        } else {
+          list.push({
+            role: "assistant",
+            text: text,
+          });
+        }
+        return [...list];
+      });
+    };
+
+    const handleError = ({ message }) => {
+      console.log("error", message);
+      setNewMessageLoading(false);
+      setMessages((prev) => {
+        const list = [...prev];
+        const last = list[list.length - 1];
+        if (last?.isError) {
+          last.text = message;
+        } else {
+          list.push({
+            role: "assistant",
+            text: message,
+            isError: true,
+          });
+        }
+        return list;
+      });
+    };
+
+    onAIChunk(handleChunk);
+    onAIError(handleError);
+
+    return () => {
+      removeAIChunk(handleChunk);
+    };
+  }, []);
 
   const notificationSound = useRef(
     new Audio("/sounds/mixkit-unlock-game-notification-253.wav"),
@@ -280,10 +438,66 @@ export default function useSpeechRecognition() {
     const messagePayload = {
       id: new Date(),
       role: "user",
-      content: message,
+      text: message,
     };
-    setMessages([...messages, messagePayload]);
+    const newMessages = [...messages, messagePayload];
+    setMessages(newMessages);
     setMessage("");
+    setNewMessageLoading(true);
+    sendAIMessage(message);
+    // try {
+    //   // chatGPT api integrate
+    //   // const response = await axios.post(
+    //   //   "https://api.openai.com/v1/chat/completions",
+    //   //   {
+    //   //     model: "gpt-4.1-mini",
+    //   //     messages: [
+    //   //       {
+    //   //         role: "user",
+    //   //         content: message,
+    //   //       },
+    //   //     ],
+    //   //   },
+    //   //   {
+    //   //     headers: {
+    //   //       "Content-Type": "application/json",
+    //   //       Authorization: `Bearer ${import.meta.env.VITE_OPENAI_API_KEY}`,
+    //   //     },
+    //   //   },
+    //   // );
+    //   // gemini api integrate
+    //   // const response = await axios.post(
+    //   //   `https://generativelanguage.googleapis.com/v1beta/models/gemini-3.5-flash:generateContent?key=${
+    //   //     import.meta.env.VITE_GEMINI_API_KEY
+    //   //   }`,
+    //   //   {
+    //   //     contents: [
+    //   //       {
+    //   //         parts: [
+    //   //           {
+    //   //             text: message,
+    //   //           },
+    //   //         ],
+    //   //       },
+    //   //     ],
+    //   //   },
+    //   //   {
+    //   //     headers: {
+    //   //       "Content-Type": "application/json",
+    //   //     },
+    //   //   },
+    //   // );
+    //   // console.log("response", response);
+    //   // const botMessage =
+    //   //   response.data.candidates?.[0]?.content?.parts?.[0]?.text ||
+    //   //   "Sorry, I couldn't generate a response.";
+    //   // setMessages([
+    //   //   ...newMessages,
+    //   //   { id: new Date(), role: "bot", text: botMessage },
+    //   // ]);
+    // } catch (error) {
+    //   console.error("Error generating response", error);
+    // }
 
     if (recognitionRef.current) {
       recognitionRef.current.stop();
@@ -324,10 +538,9 @@ export default function useSpeechRecognition() {
 
   return {
     conversationId,
-    loading,
-    setLoading,
+    newMessageLoading,
+    setNewMessageLoading,
     messages,
-    setMessages,
     message,
     setMessage,
     selectedFiles,
@@ -339,6 +552,7 @@ export default function useSpeechRecognition() {
     handleFileSelect,
     removeFile,
     fileInputRef,
+    textareaRef,
     handleMessageChange,
   };
 }

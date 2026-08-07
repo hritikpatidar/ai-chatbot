@@ -3,15 +3,15 @@ import { useEffect, useState } from "react";
 import { Image, Globe, Mic, Paperclip, X, SendHorizonal } from "lucide-react";
 import useSpeechRecognition from "../hooks/useSpeechRecognition";
 import { useSelector } from "react-redux";
-import socket from "../socket/socket";
+import {  useNavigate } from "react-router-dom";
 
 export default function Welcome() {
+  const navigate = useNavigate()
   const {
     conversationId,
-    loading,
-    setLoading,
+    newMessageLoading,
+    setNewMessageLoading,
     messages,
-    setMessages,
     message,
     setMessage,
     selectedFiles,
@@ -23,25 +23,13 @@ export default function Welcome() {
     handleFileSelect,
     removeFile,
     fileInputRef,
+    textareaRef,
     handleMessageChange,
   } = useSpeechRecognition();
   const [tags, setTags] = useState([]);
   const { profileDetails } = useSelector(
     (store) => store.authReducer.AuthSlice,
   );
-
-  useEffect(() => {
-    socket.connect();
-
-    socket.on("connect", () => {
-      console.log("Connected:", socket.id);
-    });
-
-    return () => {
-      socket.off("connect");
-      socket.disconnect();
-    };
-  }, []);
 
   const getGreeting = () => {
     const hour = new Date().getHours();
@@ -267,6 +255,7 @@ export default function Welcome() {
               if (e.key === "Enter" && !e.shiftKey) {
                 e.preventDefault();
                 handleSend();
+                navigate("/c/1")
               }
             }}
             placeholder="Message AI Chat..."

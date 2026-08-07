@@ -14,6 +14,7 @@ import {
 } from "../../utils/browserServices";
 import profile from "../../assets/profile1.jpg";
 import toast from "react-hot-toast";
+import { useSocket } from "../../context/SocketContext";
 
 const ChatHeader = () => {
   const dispatch = useDispatch();
@@ -26,6 +27,8 @@ const ChatHeader = () => {
   const { profileDetails, refreshToken } = useSelector(
     (store) => store.authReducer.AuthSlice,
   );
+  const [isLogoutLoading, setIsLogoutLoading] = useState(false);
+  const { socket, isConnected } = useSocket();
 
   useEffect(() => {
     const handleClickOutside = (event) => {
@@ -41,36 +44,22 @@ const ChatHeader = () => {
     };
   }, []);
 
-  // const handleAuth = async () => {
-  //   if (token) {
-  //     // Logout
-  //     await dispatch(logoutSuccess(false));
-  //     removeItemLocalStorage("token");
-  //     dispatch(setActivePage("newChat"));
-  //     setProfileOpen(false);
-  //     navigate("/login");
-  //   } else {
-  //     navigate("/login");
-  //   }
-  // };
-
   const handleAuth = async () => {
     const fcmToken = getItemLocalStorage("fcm_token");
-    if (!token) {
-      navigate("/login");
-      return;
-    }
     try {
+      setIsLogoutLoading(true);
       await dispatch(logoutUser({ refreshToken: refreshToken })).unwrap();
+      setProfileOpen(false);
       await navigate("/login");
     } catch (error) {
       console.error(error);
       toast.error(error?.message || "Logout failed");
     } finally {
+      socket.disconnect();
       dispatch({ type: "RESET" });
       clearLocalStorage();
       setItemLocalStorage("fcm_token", fcmToken);
-      setProfileOpen(false);
+      setIsLogoutLoading(false);
     }
   };
 
@@ -122,27 +111,24 @@ const ChatHeader = () => {
       )}
 
       <div className="flex items-center">
-        {token ? (
-          <div className="relative" ref={dropdownRef}>
-            <button
-              onClick={() => setProfileOpen(!profileOpen)}
-              className="flex h-9 items-center gap-2 rounded-lg border border-white/10 bg-[#171b23] px-3 text-xs font-medium text-white transition-all duration-200 hover:border-blue-500 hover:bg-[#1d2432]"
-            >
-              {/* <img
+        <div className="relative" ref={dropdownRef}>
+          <button
+            onClick={() => setProfileOpen(!profileOpen)}
+            className="flex h-9 items-center gap-2 rounded-lg border border-white/10 bg-[#171b23] px-3 text-xs font-medium text-white transition-all duration-200 hover:border-blue-500 hover:bg-[#1d2432]"
+          >
+            {/* <img
                 src="/profile.jpg"
                 alt="Profile"
                 className="h-7 w-7 rounded-full border border-white/20 object-cover"
               /> */}
+            <div className="relative">
               {profileDetails?.profileImage ? (
                 <img
-                  src={profileDetails?.profileImage}
+                  src={profileDetails.profileImage}
                   alt="Profile"
                   className="h-7 w-7 rounded-full border border-white/20 object-cover"
                 />
               ) : (
-                // <div className="flex h-7 w-7 items-center justify-center rounded-full bg-[#232936] border border-white/10">
-                //   <User size={15} className="text-gray-300" />
-                // </div>
                 <img
                   src={profile}
                   alt="Profile"
@@ -150,47 +136,54 @@ const ChatHeader = () => {
                 />
               )}
 
-              <ChevronDown
-                size={14}
-                className={`transition-transform ${
-                  profileOpen ? "rotate-180" : ""
-                }`}
-              />
-            </button>
+              {/* Online Indicator */}
+              {isConnected && (
+                <span
+                  className="
+                  absolute
+                  bottom-0
+                  right-0
+                  h-2.5
+                  w-2.5
+                  rounded-full
+                  border-2
+                  border-[#0b0f17]
+                  bg-green-500
+                "
+                />
+              )}
+            </div>
 
-            {profileOpen && (
-              <div className="absolute right-0 mt-2 w-52 rounded-xl overflow-hidden border border-white/10 bg-[#171b23] shadow-2xl z-50">
-                <div className="border-b border-white/10 px-3 py-2.5">
-                  <p className="truncate text-sm font-semibold">
-                    {profileDetails?.fullName || "User"}{" "}
-                  </p>
-                  <p className="truncate text-xs text-gray-400">
-                    {profileDetails?.email}{" "}
-                  </p>
-                </div>
-
-                <button
-                  onClick={() => {
-                    setProfileOpen(false);
-                    handleAuth();
-                  }}
-                  className="flex w-full items-center gap-2 px-3 py-2.5 text-sm text-red-400 hover:bg-red-500/10"
-                >
-                  <LogOut size={16} />
-                  Logout
-                </button>
-              </div>
-            )}
-          </div>
-        ) : (
-          <button
-            onClick={handleAuth}
-            className="flex h-9 items-center gap-1.5 rounded-lg bg-linear-to-r from-blue-500 to-purple-600 px-3 text-xs font-medium text-white transition hover:scale-105"
-          >
-            <LogIn size={16} />
-            <span className="hidden sm:block">Login</span>
+            <ChevronDown
+              size={14}
+              className={`transition-transform ${
+                profileOpen ? "rotate-180" : ""
+              }`}
+            />
           </button>
-        )}
+
+          {profileOpen && (
+            <div className="absolute right-0 mt-2 w-52 rounded-xl overflow-hidden border border-white/10 bg-[#171b23] shadow-2xl z-50">
+              <div className="border-b border-white/10 px-3 py-2.5">
+                <p className="truncate text-sm font-semibold">
+                  {profileDetails?.fullName || "User"}{" "}
+                </p>
+                <p className="truncate text-xs text-gray-400">
+                  {profileDetails?.email}{" "}
+                </p>
+              </div>
+
+              <button
+                onClick={handleAuth}
+                disabled={isLogoutLoading}
+                className="flex w-full items-center gap-2 px-3 py-2.5 text-sm text-red-400 hover:bg-red-500/10"
+              >
+                <LogOut size={16} />
+                {isLogoutLoading ? "Logging out..." : "Logout"}
+              </button>
+            </div>
+          )}
+        </div>
       </div>
     </div>
   );

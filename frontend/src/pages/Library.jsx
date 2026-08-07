@@ -117,9 +117,9 @@ export default function Library() {
             ["Images", "15"],
             ["Projects", "8"],
             ["Favorites", "11"],
-          ].map(([title, count]) => (
+          ].map(([title, count],index) => (
             <div
-              key={title}
+              key={index}
               className="rounded-xl border border-white/10 bg-[#171b23] p-3 transition hover:border-blue-500"
             >
               <Folder className="mb-2 text-blue-400" />
@@ -136,9 +136,9 @@ export default function Library() {
           <h2 className="mb-4 text-lg font-semibold">Recent Files</h2>
 
           <div className="h-[calc(100vh-320px)] overflow-y-auto pr-2 space-y-4">
-            {files.map((item) => (
+            {files.map((item,index) => (
               <div
-                key={item.id}
+                key={index}
                 className="flex flex-col gap-3 rounded-xl border border-white/10 bg-[#171b23] p-3 transition hover:border-blue-500 sm:flex-row sm:items-center sm:justify-between"
               >
                 <div className="flex items-center gap-4">

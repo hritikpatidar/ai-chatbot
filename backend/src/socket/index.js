@@ -9,9 +9,16 @@ export const initializeSocket = (server) => {
       origin: env.CLIENT_URL,
       credentials: true,
     },
+    transports: ["websocket"],
   });
 
   return io;
 };
 
-export const getIO = () => io;
+export const getIO = () => {
+  if (!io) {
+    throw new Error("Socket.IO not initialized");
+  }
+
+  return io;
+};

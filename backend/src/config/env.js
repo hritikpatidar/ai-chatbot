@@ -32,6 +32,12 @@ const env = {
   MAIL_USER: process.env.MAIL_USER,
   MAIL_PASSWORD: process.env.MAIL_PASSWORD,
   MAIL_FROM: process.env.MAIL_FROM,
+
+  // Gemini API
+  GEMINI_API_KEY: process.env.GEMINI_API_KEY,
+
+  // ChatGPT API
+  VITE_OPENAI_API_KEY: process.env.VITE_OPENAI_API_KEY
 };
 
 export default env;

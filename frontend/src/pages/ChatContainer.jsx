@@ -2,14 +2,15 @@ import { motion, AnimatePresence } from "framer-motion";
 import { Bot, User, SendHorizonal, Paperclip, Mic } from "lucide-react";
 import { useEffect, useRef, useState } from "react";
 import useSpeechRecognition from "../hooks/useSpeechRecognition";
+import Markdown from "react-markdown";
+// import remarkGfm from "remark-gfm";
 
 export default function ChatContainer() {
   const {
     conversationId,
-    loading,
-    setLoading,
+    newMessageLoading,
+    setNewMessageLoading,
     messages,
-    setMessages,
     message,
     setMessage,
     selectedFiles,
@@ -21,11 +22,11 @@ export default function ChatContainer() {
     handleFileSelect,
     removeFile,
     fileInputRef,
+    textareaRef,
     handleMessageChange,
   } = useSpeechRecognition();
 
   const messagesEndRef = useRef(null);
-  const textareaRef = useRef(null);
 
   useEffect(() => {
     messagesEndRef.current?.scrollIntoView({
@@ -37,7 +38,7 @@ export default function ChatContainer() {
     <div className="flex h-full w-full flex-col">
       {/* Chat Area */}
       <div className="flex-1 overflow-y-auto px-4">
-        <div className="mx-auto w-full max-w-5xl px-3 py-6 md:px-28 lg:px-40">
+        <div className="mx-auto  w-full max-w-5xl px-3 py-6 md:px-28 lg:px-40">
           {messages.map((msg, index) => (
             <div
               key={index}
@@ -70,18 +71,27 @@ export default function ChatContainer() {
 
                 <div
                   className={`rounded-2xl px-4 py-3 shadow-sm ${
-                    msg.role === "assistant"
+                    msg.role === "user"
                       ? "border border-white/10 bg-[#161f2d] text-gray-200"
                       : "bg-gray-600 text-white"
                   }`}
                 >
                   <p className="text-[13px] leading-6 whitespace-pre-wrap">
-                    {msg.content}
+                    <Markdown
+                    // remarkPlugins={[remarkGfm]}
+                    >
+                      {msg.text}
+                    </Markdown>
                   </p>
                 </div>
               </div>
             </div>
           ))}
+          {newMessageLoading && (
+            <p className="mb-3 text-sm font-medium text-gray-400">
+              Thinking<span className="animate-pulse">...</span>
+            </p>
+          )}
           <div ref={messagesEndRef} />
           {/* Mini Voice Orb */}
           <AnimatePresence mode="wait">
@@ -199,7 +209,13 @@ export default function ChatContainer() {
             )}
 
             {/* Input Row */}
-            <div className="flex flex-col gap-2">
+            <form
+              onSubmit={(e) => {
+                e.preventDefault();
+                handleSend();
+              }}
+              className="flex flex-col gap-2"
+            >
               {/* Textarea */}
               <textarea
                 ref={textareaRef}
@@ -208,6 +224,12 @@ export default function ChatContainer() {
                 onChange={handleMessageChange}
                 onPaste={handlePaste}
                 placeholder="Ask anything..."
+                onKeyDown={(e) => {
+                  if (e.key === "Enter" && !e.shiftKey) {
+                    e.preventDefault();
+                    e.currentTarget.form.requestSubmit();
+                  }
+                }}
                 className="
                   w-full
                   resize-none
@@ -232,6 +254,7 @@ export default function ChatContainer() {
               {/* Bottom Icons */}
               <div className="flex items-center justify-between">
                 <button
+                  type="button"
                   onClick={() => fileInputRef.current.click()}
                   className="flex h-9 w-9 items-center justify-center rounded-lg text-gray-400 transition hover:scale-110 shadow-[0_0_15px_rgba(99,102,241,0.4)]"
                 >
@@ -240,6 +263,7 @@ export default function ChatContainer() {
 
                 <div className="flex items-center gap-2">
                   <button
+                    type="button"
                     onClick={toggleListening}
                     className={`flex h-9 w-9 items-center justify-center rounded-lg transition-all duration-300 ${
                       isListening
@@ -251,14 +275,14 @@ export default function ChatContainer() {
                   </button>
 
                   <button
-                    onClick={handleSend}
+                    type="submit"
                     className="flex h-9 w-9 items-center justify-center rounded-lg hover:scale-110 shadow-[0_0_15px_rgba(99,102,241,0.4)]"
                   >
                     <SendHorizonal size={17} />
                   </button>
                 </div>
               </div>
-            </div>
+            </form>
           </div>
         </div>
       </div>

@@ -1,7 +1,7 @@
 import { Routes, Route } from "react-router-dom";
 import { PublicRoute } from "./PublicRoute";
-import Login from '../pages/Login'
-import Signup from '../pages/Signup'
+import Login from "../pages/Login";
+import Signup from "../pages/Signup";
 import { PrivateRoute } from "./PrivateRoute";
 import Welcome from "../pages/Welcome";
 import ChatContainer from "../pages/ChatContainer";
@@ -16,36 +16,36 @@ import ForgotPassword from "../pages/ForgotPassword";
 import OTPVerification from "../pages/OTPVerification";
 import PrivacyPolicy from "../pages/PrivacyPolicy";
 import ResetPassword from "../pages/ResetPassword";
+import { SocketProvider } from "../context/SocketContext";
 
 export default function AppRoutes() {
   return (
-    <Routes>
-      {/* Public */}
-      <Route element={<PublicRoute />}>
-        <Route path="/login" element={<Login />} />
-        <Route path="/signup" element={<Signup />} />
-        <Route path="/forgot-password" element={<ForgotPassword />} />
-        <Route path="/otp-verification" element={<OTPVerification />} />
-        <Route path="/reset-password" element={<ResetPassword />} />
-        <Route path="/terms-and-conditions" element={<TermsConditions />} />
-        <Route path="//privacy-policy" element={<PrivacyPolicy />} />
-      </Route>
-
-      {/* Private */}
-      <Route element={<PrivateRoute />}>
-        <Route element={<DashboardLayout />}>
-          <Route index element={<Welcome />} />
-          <Route
-            path="/c/:conversationId"
-            element={<ChatContainer />}
-          />
-          <Route path="/library" element={<Library />} />
-          <Route path="/projects" element={<Projects />} />
-          {/* <Route path="/scheduled" element={<Scheduled />} />
-          <Route path="/plugins" element={<Plugins />} /> */}
-          <Route path="/settings" element={<Settings />} />
+    <SocketProvider>
+      <Routes>
+        {/* Public */}
+        <Route element={<PublicRoute />}>
+          <Route path="/login" element={<Login />} />
+          <Route path="/signup" element={<Signup />} />
+          <Route path="/forgot-password" element={<ForgotPassword />} />
+          <Route path="/otp-verification" element={<OTPVerification />} />
+          <Route path="/reset-password" element={<ResetPassword />} />
+          <Route path="/terms-and-conditions" element={<TermsConditions />} />
+          <Route path="//privacy-policy" element={<PrivacyPolicy />} />
         </Route>
-      </Route>
-    </Routes>
+
+        {/* Private */}
+        <Route element={<PrivateRoute />}>
+          <Route element={<DashboardLayout />}>
+            <Route index element={<Welcome />} />
+            <Route path="/c/:conversationId" element={<ChatContainer />} />
+            <Route path="/library" element={<Library />} />
+            <Route path="/projects" element={<Projects />} />
+            {/* <Route path="/scheduled" element={<Scheduled />} />
+          <Route path="/plugins" element={<Plugins />} /> */}
+            <Route path="/settings" element={<Settings />} />
+          </Route>
+        </Route>
+      </Routes>
+    </SocketProvider>
   );
 }

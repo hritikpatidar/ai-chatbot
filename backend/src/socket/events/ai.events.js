@@ -17,8 +17,11 @@ export const registerAIEvents = (io, socket) => {
   socket.on("ai:message", async (data) => {
     try {
       const { conversationId, message } = data;
-      console.log("conversationId", conversationId);
-      console.log("message", message);
+      console.log("🔥 ai:message received", {
+        socketId: socket.id,
+        conversationId,
+        message,
+      });
       if (!message) {
         socket.emit("ai:error", {
           success: false,
@@ -48,7 +51,7 @@ export const registerAIEvents = (io, socket) => {
         });
 
         socket.emit("conversation:created", {
-          conversationId: conversation._id,
+          conversation: conversation,
         });
       }
 
@@ -99,7 +102,7 @@ export const registerAIEvents = (io, socket) => {
         response: fullResponse,
       });
     } catch (error) {
-      console.error(error);
+      console.error("ai message error", error);
       activeStreams.delete(socket.id);
       let message = "Something went wrong. Please try again.";
       if (error.status === 429) {

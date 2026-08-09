@@ -7,7 +7,6 @@ export const createConversation = async (data) => {
 
 // Find Conversation By Id
 export const findConversationById = async (conversationId) => {
-    console.log("repository conversation",conversationId)
   return await Conversation.findById(conversationId);
 };
 

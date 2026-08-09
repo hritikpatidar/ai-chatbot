@@ -13,12 +13,32 @@ import {
   Share2,
   Trash2,
   MoreHorizontal,
+  Pin,
 } from "lucide-react";
-import { useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
-import { useLocation, useNavigate } from "react-router-dom";
+import { useLocation, useNavigate, useParams } from "react-router-dom";
 import { motion, AnimatePresence } from "framer-motion";
-import { setActivePage } from "../redux/features/Chat/chatSlice";
+import {
+  addConversation,
+  clearMessages,
+  removeConversation,
+  setActivePage,
+  setConversationList,
+  setConversationLoading,
+} from "../redux/features/Chat/chatSlice";
+import {
+  deleteConversation,
+  onConversationCreated,
+  onConversationDeleted,
+  onConversationError,
+  onConversationList,
+  removeConversationCreated,
+  removeConversationDeleted,
+  removeConversationError,
+  removeConversationList,
+} from "../service/conversation.services";
+import toast from "react-hot-toast";
 
 export default function Sidebar() {
   const navigate = useNavigate();
@@ -26,12 +46,78 @@ export default function Sidebar() {
   const dispatch = useDispatch();
   const [menuOpen, setMenuOpen] = useState(null);
   const [deleteChat, setDeleteChat] = useState(null);
-  const { activePage } = useSelector((store) => store.chatSlice);
+  const { activePage, conversationList } = useSelector(
+    (store) => store.chatSlice,
+  );
+  const { conversationId } = useParams();
+
   const location = useLocation();
 
   const activeChatId = location.pathname.startsWith("/c/")
     ? location.pathname.split("/c/")[1]
     : null;
+  const [dropdownPosition, setDropdownPosition] = useState("bottom");
+  const [isLoading, setLoading] = useState(false);
+  const activeChatIdRef = useRef(null);
+
+  useEffect(() => {
+    activeChatIdRef.current = activeChatId;
+  }, [activeChatId]);
+
+  useEffect(() => {
+    const handleConversationCreate = async ({ conversation }) => {
+      await dispatch(addConversation(conversation));
+      dispatch(setActivePage("recentChat"));
+      navigate(`/c/${conversation?._id}`, {
+        state: {
+          isNewConversation: true,
+        },
+      });
+    };
+
+    const handleConversation = async (data) => {
+      await dispatch(setConversationList(data.conversations));
+    };
+
+    const handleConversationError = async (data) => {
+      dispatch(setActivePage("newChat"));
+      navigate("/", {
+        replace: true,
+      });
+      toast.error(data?.message || "Somthing went wrong", {
+        id: "conversation-error",
+      });
+    };
+
+    const handleConversationDeleteRes = (data) => {
+      const deletedId = data?.conversationId;
+      const currentActiveId = activeChatIdRef.current;
+      setDeleteChat(null);
+      setLoading(false);
+      dispatch(removeConversation(deletedId));
+      if (currentActiveId === deletedId) {
+        dispatch(setActivePage("newChat"));
+        navigate("/", {
+          replace: true,
+        });
+      }
+
+      toast.success(data?.message || "Conversation deleted successfully", {
+        id: "conversation-delete",
+      });
+    };
+
+    onConversationCreated(handleConversationCreate);
+    onConversationList(handleConversation);
+    onConversationError(handleConversationError);
+    onConversationDeleted(handleConversationDeleteRes);
+    return () => {
+      removeConversationCreated(handleConversationCreate);
+      removeConversationList(handleConversation);
+      removeConversationError(handleConversationError);
+      removeConversationDeleted(handleConversationDeleteRes);
+    };
+  }, []);
 
   const handleShare = async (chatId) => {
     const url = `${window.location.origin}/c/${chatId}`;
@@ -58,59 +144,15 @@ export default function Sidebar() {
   };
 
   const handleDelete = (id) => {
-    // API Call
-    // await deleteConversation(id)
-
-    console.log("Delete:", id);
-
-    setDeleteChat(null);
+    if (!id) return;
+    setLoading(true);
+    deleteConversation(id);
   };
 
-  const chats = [
-    {
-      _id: "1",
-      title: "React Interview",
-    },
-    {
-      _id: "2",
-      title: "Node API",
-    },
-    {
-      _id: "3",
-      title: "MongoDB",
-    },
-    {
-      _id: "4",
-      title: "Stripe Integration",
-    },
-    {
-      _id: "5",
-      title: "MERN Project",
-    },
-    {
-      _id: "6",
-      title: "React Interview",
-    },
-    {
-      _id: "7",
-      title: "Node API",
-    },
-    {
-      _id: "8",
-      title: "MongoDB",
-    },
-    {
-      _id: "9",
-      title: "Stripe Integration",
-    },
-    {
-      _id: "10",
-      title: "MERN Project",
-    },
-  ];
-
   const handleMenu = (page) => {
+    setOpen(false);
     dispatch(setActivePage(page));
+    dispatch(clearMessages([]));
     if (page === "newChat") navigate(`/`);
     else if (page === "recentChat") navigate(`/c/${new Date().getTime()}`);
     else navigate(`/${page}`);
@@ -130,6 +172,14 @@ export default function Sidebar() {
         : "bg-white/5 text-gray-400 group-hover:text-blue-400"
     }`;
 
+  const handleConversationNavigate = async (chat) => {
+    await dispatch(clearMessages([]));
+    await dispatch(setConversationLoading(true));
+    await dispatch(setActivePage("recentChat"));
+    setOpen(false);
+    navigate(`/c/${chat._id}`);
+  };
+
   return (
     <div className="z-50">
       {/* Mobile Menu Button */}
@@ -144,28 +194,36 @@ export default function Sidebar() {
       {open && (
         <div
           onClick={() => setOpen(false)}
-          className="fixed inset-0 z-40 bg-black/50 lg:hidden"
+          className="fixed inset-0 z-50 bg-black/50 lg:hidden"
         />
       )}
 
       {/* Sidebar */}
       <aside
         className={`
-          fixed lg:static
-          top-0 left-0
+          fixed
+          lg:static
+          top-0
+          left-0
           z-50
-          flex h-screen
+          flex
+          h-screen
           w-72
           flex-col
-          border-r border-white/10
+          border-r
+          border-white/10
           bg-[#111827]
-          transition-transform duration-300
+          transition-transform
+          duration-300
           ${open ? "translate-x-0" : "-translate-x-full lg:translate-x-0"}
         `}
       >
         {/* Header */}
-        <div className="flex items-center justify-between border-b border-white/10 px-5 py-4">
-          <div className="flex items-center gap-3 cursor-pointer" onClick={() => navigate("/")}>
+        <div className="flex shrink-0 items-center justify-between border-b border-white/10 px-4 py-4">
+          <div
+            className="flex items-center gap-3 cursor-pointer"
+            onClick={() => navigate("/")}
+          >
             <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-linear-to-br from-blue-500 to-purple-600">
               <Sparkles size={20} className="text-white" />
             </div>
@@ -185,20 +243,24 @@ export default function Sidebar() {
             <X size={18} />
           </button>
         </div>
-        <div className="overflow-y-auto">
+
+        {/* Main Sidebar Content */}
+        <div className="flex min-h-0 flex-1 flex-col overflow-y-auto">
           {/* Search */}
-          <div className="px-3 py-2">
+          <div className="shrink-0 px-3 py-2">
             <div className="flex h-10 items-center rounded-xl border border-white/10 bg-white/5 px-3 transition-all duration-200 hover:bg-white/8 focus-within:border-blue-500">
               <Search size={16} className="mr-2 text-gray-400" />
+
               <input
                 type="text"
                 placeholder="Search"
-                className="flex-1 bg-transparent text-sm text-white placeholder:text-gray-400 outline-none"
+                className="flex-1 bg-transparent text-sm text-white outline-none placeholder:text-gray-400"
               />
             </div>
           </div>
-          {/* New Chat */}
-          <div className="px-2 py-2">
+
+          {/* Navigation */}
+          <div className="shrink-0 px-2 py-2">
             <nav className="space-y-0.5">
               {/* New Chat */}
               <button
@@ -208,6 +270,7 @@ export default function Sidebar() {
                 <div className={getIconClass("newChat")}>
                   <Plus size={16} />
                 </div>
+
                 <span>New Chat</span>
               </button>
 
@@ -219,6 +282,7 @@ export default function Sidebar() {
                 <div className={getIconClass("library")}>
                   <BookOpen size={16} />
                 </div>
+
                 <span>Library</span>
               </button>
 
@@ -230,126 +294,266 @@ export default function Sidebar() {
                 <div className={getIconClass("projects")}>
                   <FolderKanban size={16} />
                 </div>
+
                 <span>Projects</span>
               </button>
-
-              {/* Scheduled */}
-              {/* <button
-                onClick={() => handleMenu("scheduled")}
-                className={getMenuClass("scheduled")}
-              >
-                <div className={getIconClass("scheduled")}>
-                  <CalendarClock size={16} />
-                </div>
-                <span>Scheduled</span>
-              </button> */}
-
-              {/* Plugins */}
-              {/* <button
-                onClick={() => handleMenu("plugins")}
-                className={getMenuClass("plugins")}
-              >
-                <div className={getIconClass("plugins")}>
-                  <Puzzle size={16} />
-                </div>
-                <span>Plugins</span>
-              </button> */}
             </nav>
           </div>
 
-          {/* Chats */}
-          <div className="mt-5 flex-1  px-3">
+          {/* Recent Chats */}
+          <div className="min-h-0 flex-1 overflow-y-auto px-3 pb-4">
             <p className="mb-3 px-3 text-xs uppercase tracking-widest text-gray-500">
               Recent Chats
             </p>
 
-            <div className="space-y-1">
-              {chats.map((chat) => (
-                <div
-                  key={chat._id}
-                  className={`group relative flex items-center rounded-xl transition ${
-                    activeChatId === chat._id
-                      ? "bg-blue-500/15"
-                      : "hover:bg-[#1d2432]"
-                  }`}
-                >
-                  <button
-                    onClick={() => {
-                      dispatch(setActivePage("recentChat"));
-                      navigate(`/c/${chat._id}`);
-                    }}
-                    className={`flex h-8 flex-1 items-center gap-3 px-3 text-left text-sm ${
-                      activeChatId === chat._id
-                        ? "text-blue-400"
-                        : "text-gray-300"
-                    }`}
-                  >
-                    <MessageSquare
-                      size={17}
-                      className={
-                        activeChatId === chat._id
-                          ? "text-blue-400"
-                          : "text-gray-500 group-hover:text-blue-400"
-                      }
-                    />
-
-                    <span className="flex-1 truncate">{chat.title}</span>
-                  </button>
-
-                  {/* Three Dots */}
-                  <button
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      setMenuOpen(menuOpen === chat._id ? null : chat._id);
-                    }}
-                    className="mr-2 rounded-md p-1 opacity-0 transition group-hover:opacity-100 hover:bg-white/10 "
-                  >
-                    <MoreHorizontal size={16} className="text-gray-400" />
-                  </button>
-
-                  {/* Dropdown */}
-                  {menuOpen === chat._id && (
-                    <div className="absolute right-2 top-9 z-50 w-40 rounded-xl border border-white/10 bg-[#1a202c] py-1 shadow-xl">
+            {conversationList?.length > 0 ? (
+              <div className="space-y-1">
+                {conversationList.map((chat, index) => {
+                  const isLastItem =
+                    conversationList.length <= 2
+                      ? false
+                      : index >= conversationList.length - 3;
+                  const isSelected = conversationId === chat._id;
+                  return (
+                    <div
+                      className={`
+                        group
+                        relative
+                        flex
+                        w-full
+                        min-w-0
+                        items-center
+                        rounded-lg
+                        transition-colors
+                        hover:bg-blue-500/15
+                        ${isSelected ? "bg-blue-500/15" : ""}
+                      `}
+                    >
+                      {/* Chat Button */}
                       <button
+                        type="button"
                         onClick={() => {
+                          navigate(`/c/${chat._id}`);
                           setMenuOpen(null);
-                          handleShare(chat._id);
                         }}
-                        className="flex w-full items-center gap-2 px-3 py-2 text-sm text-white hover:bg-white/10"
+                        className="
+                          flex
+                          min-w-0
+                          flex-1
+                          items-center
+                          gap-3
+                          overflow-hidden
+                          rounded-lg
+                          px-4
+                          py-2.5
+                          text-left
+                        "
                       >
-                        <Share2 size={16} />
-                        Share
+                        {/* Chat Icon */}
+                        <MessageSquare
+                          size={18}
+                          className={`
+                            shrink-0
+                            transition-colors
+                            ${
+                              isSelected
+                                ? "text-blue-400"
+                                : "text-gray-500 group-hover:text-blue-400"
+                            }
+                          `}
+                        />
+
+                        {/* Title */}
+                        <span
+                          className={`
+                            min-w-0
+                            flex-1
+                            truncate
+                            text-sm
+                            transition-colors
+                            ${isSelected ? "text-blue-400" : "text-gray-300"}
+                          `}
+                        >
+                          {chat.title || "New Conversation"}
+                        </span>
                       </button>
 
-                      <button
-                        onClick={() => {
-                          setMenuOpen(null);
-                          setDeleteChat(chat);
-                        }}
-                        className="flex w-full items-center gap-2 px-3 py-2 text-sm text-red-400 hover:bg-red-500/10"
+                      {/* Hover Actions */}
+                      <div
+                        className="
+                          absolute
+                          right-2
+                          top-1/2
+                          z-10
+                          flex
+                          -translate-y-1/2
+                          items-center
+                          gap-1
+                          rounded-md
+                          bg-[#1f1f1f]
+                          px-1
+                          pointer-events-none
+                          opacity-0
+                          transition-opacity
+                          duration-150
+                          group-hover:pointer-events-auto
+                          group-hover:opacity-100
+                        "
                       >
-                        <Trash2 size={16} />
-                        Delete
-                      </button>
+                        {/* Pin */}
+                        <button
+                          type="button"
+                          onClick={(e) => {
+                            e.stopPropagation();
+
+                            console.log("Pin conversation:", chat._id);
+                          }}
+                          className="
+                            flex
+                            h-7
+                            w-7
+                            items-center
+                            justify-center
+                            rounded-md
+                            text-gray-400
+                            transition
+                            hover:bg-white/10
+                            hover:text-blue-400
+                          "
+                          title="Pin"
+                        >
+                          <Pin size={15} />
+                        </button>
+
+                        {/* Three Dots */}
+                        <button
+                          type="button"
+                          onClick={(e) => {
+                            e.stopPropagation();
+
+                            setMenuOpen(
+                              menuOpen === chat._id ? null : chat._id,
+                            );
+                          }}
+                          className="
+                            flex
+                            h-7
+                            w-7
+                            items-center
+                            justify-center
+                            rounded-md
+                            text-gray-400
+                            transition
+                            hover:bg-white/10
+                            hover:text-blue-400
+                          "
+                          title="More"
+                        >
+                          <MoreHorizontal size={17} />
+                        </button>
+                      </div>
+
+                      {/* Dropdown */}
+                      {menuOpen === chat._id && (
+                        <div
+                          className={`
+                            absolute
+                            right-2
+                            z-50
+                            w-40
+                            rounded-xl
+                            border
+                            border-white/10
+                            bg-[#1a202c]
+                            py-1
+                            shadow-xl
+                            ${isLastItem ? "bottom-10" : "top-10"}
+                          `}
+                        >
+                          {/* Share */}
+                          <button
+                            type="button"
+                            onClick={() => {
+                              setMenuOpen(null);
+                              handleShare(chat._id);
+                            }}
+                            className="
+                              flex
+                              w-full
+                              items-center
+                              gap-2
+                              px-3
+                              py-2
+                              text-sm
+                              text-white
+                              transition
+                              hover:bg-white/10
+                            "
+                          >
+                            <Share2 size={16} />
+                            Share
+                          </button>
+
+                          {/* Delete */}
+                          <button
+                            type="button"
+                            onClick={() => {
+                              setMenuOpen(null);
+                              setDeleteChat(chat);
+                            }}
+                            className="
+                              flex
+                              w-full
+                              items-center
+                              gap-2
+                              px-3
+                              py-2
+                              text-sm
+                              text-red-400
+                              transition
+                              hover:bg-red-500/10
+                            "
+                          >
+                            <Trash2 size={16} />
+                            Delete
+                          </button>
+                        </div>
+                      )}
                     </div>
-                  )}
+                  );
+                })}
+              </div>
+            ) : (
+              /* No Conversations */
+              <div className="flex flex-col items-center justify-center px-4 py-10 text-center">
+                <div className="mb-3 flex h-10 w-10 items-center justify-center rounded-xl bg-white/5">
+                  <MessageSquare size={18} className="text-gray-500" />
                 </div>
-              ))}
-            </div>
+
+                <p className="text-sm font-medium text-gray-400">
+                  No conversations
+                </p>
+
+                <p className="mt-1 text-xs leading-5 text-gray-600">
+                  Start a new chat to see your conversations here.
+                </p>
+              </div>
+            )}
           </div>
         </div>
-        {/* Bottom */}
-        <div className="border-t border-white/10 p-4">
+
+        {/* Settings - Always Bottom */}
+        <div className="shrink-0 border-t border-white/10 bg-[#111827] p-4">
           <button
             onClick={() => handleMenu("settings")}
             className={getMenuClass("settings")}
           >
             <Settings size={17} className={getIconClass("settings")} />
-            Settings
+
+            <span>Settings</span>
           </button>
         </div>
       </aside>
-
       <AnimatePresence>
         {deleteChat && (
           <motion.div
@@ -375,17 +579,27 @@ export default function Sidebar() {
 
               <div className="mt-6 flex justify-end gap-3">
                 <button
-                  onClick={() => setDeleteChat(null)}
+                  type="button"
+                  onClick={(e) => {
+                    setDeleteChat(null);
+                    setLoading(false);
+                  }}
+                  disabled={isLoading}
                   className="rounded-lg border border-white/10 px-4 py-2 text-sm text-white hover:bg-white/10"
                 >
                   Cancel
                 </button>
 
                 <button
-                  onClick={() => handleDelete(deleteChat._id)}
+                  type="button"
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    handleDelete(deleteChat._id);
+                  }}
+                  disabled={isLoading}
                   className="rounded-lg bg-red-500 px-4 py-2 text-sm text-white hover:bg-red-600"
                 >
-                  Delete
+                  {isLoading ? "Deleting..." : "Delete"}
                 </button>
               </div>
             </motion.div>

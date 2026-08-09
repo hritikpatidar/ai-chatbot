@@ -22,60 +22,69 @@ export const SocketProvider = ({ children }) => {
 
   useEffect(() => {
     if (!token || !profileDetails?._id) {
+       if (socket.connected) {
       socket.disconnect();
+    }
       setIsConnected(false);
-      console.log("socket disconnected");
+      console.log("Socket disconnected - no auth");
       return;
     }
     socket.auth = {
       token,
     };
-    if (!socket.connected) {
-      socket.connect();
-    }
+   
     const onConnect = () => {
-      console.log("Connected:", socket.id);
+     console.log("✅ Socket connected:", socket.id);
       setIsConnected(true);
     };
 
-    const onDisconnect = () => {
-      console.log("❌ Disconnected");
+    const onDisconnect = (reason) => {
+       console.log("❌ Socket disconnected:", reason);
       setIsConnected(false);
     };
 
+    const handleConnectError = async (err) => {
+      console.log("❌ connect_error:", err.message);
+
+      if (
+        err.message === "TOKEN_EXPIRED" ||
+        err.message === "INVALID_TOKEN" ||
+        err.message === "websocket error"
+      ) {
+        toast.error(err.message, {
+          id: "TOKEN_EXPIRED",
+        });
+
+        await handleLogout({
+          dispatch,
+          navigate,
+          refreshToken,
+        });
+
+        navigate("/login");
+      }
+    };
+
+    socket.off("connect", onConnect);
+    socket.off("disconnect", onDisconnect);
+    socket.off("connect_error", handleConnectError);
+
     socket.on("connect", onConnect);
     socket.on("disconnect", onDisconnect);
+    socket.on("connect_error", handleConnectError);
 
-    socket.on("connect_error", async (err) => {
-      console.log(err.message);
-      toast.success(err.message)
-      if (err.message === "TOKEN_EXPIRED") {
-        // socket.auth = {
-        //   token: token,
-        // };
-        // socket.connect();
-        await handleLogout({
-          dispatch,
-          navigate,
-          refreshToken,
-        });
-        navigate("/login");
-      }
-      if (err.message === "INVALID_TOKEN") {
-        await handleLogout({
-          dispatch,
-          navigate,
-          refreshToken,
-        });
-        navigate("/login");
-      }
-    });
+     if (!socket.connected) {
+      socket.connect();
+    }
+
 
     return () => {
+      console.log("🧹 SocketProvider cleanup");
       socket.off("connect", onConnect);
       socket.off("disconnect", onDisconnect);
+       socket.off("connect_error", handleConnectError);
     };
-  }, [token, profileDetails]);
+  }, [token, profileDetails?._id, refreshToken, dispatch, navigate]);
 
   return (
     <SocketContext.Provider

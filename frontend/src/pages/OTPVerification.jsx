@@ -91,7 +91,6 @@ export default function OTPVerification() {
           id: toastId,
         });
         if (response?.forgotPassword) {
-          debugger
           navigate("/reset-password", {
             state: {
               email,

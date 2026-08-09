@@ -3,6 +3,7 @@ import socket from "../socket/socket";
 /* ---------------- Create Conversation ---------------- */
 
 export const onConversationCreated = (callback) => {
+  socket.off("conversation:created");
   socket.on("conversation:created", callback);
 };
 
@@ -17,27 +18,12 @@ export const getConversations = () => {
 };
 
 export const onConversationList = (callback) => {
-  socket.on("conversation:list", callback);
+  socket.off("conversation:list:response");
+  socket.on("conversation:list:response", callback);
 };
 
 export const removeConversationList = (callback) => {
-  socket.off("conversation:list", callback);
-};
-
-/* ---------------- Get Single Conversation ---------------- */
-
-export const getConversation = (conversationId) => {
-  socket.emit("conversation:get", {
-    conversationId,
-  });
-};
-
-export const onConversation = (callback) => {
-  socket.on("conversation", callback);
-};
-
-export const removeConversation = (callback) => {
-  socket.off("conversation", callback);
+  socket.off("conversation:list:response", callback);
 };
 
 /* ---------------- Rename Conversation ---------------- */
@@ -50,11 +36,12 @@ export const renameConversation = (conversationId, title) => {
 };
 
 export const onConversationRenamed = (callback) => {
+  socket.off("conversation:renamed:response");
   socket.on("conversation:renamed", callback);
 };
 
 export const removeConversationRenamed = (callback) => {
-  socket.off("conversation:renamed", callback);
+  socket.off("conversation:renamed:response", callback);
 };
 
 /* ---------------- Delete Conversation ---------------- */
@@ -66,15 +53,18 @@ export const deleteConversation = (conversationId) => {
 };
 
 export const onConversationDeleted = (callback) => {
-  socket.on("conversation:deleted", callback);
+  socket.off("conversation:deleted:response");
+  socket.on("conversation:deleted:response", callback);
 };
 
 export const removeConversationDeleted = (callback) => {
-  socket.off("conversation:deleted", callback);
+  socket.off("conversation:deleted:response", callback);
 };
 
+/* ---------------- Conversation Error ---------------- */
 
 export const onConversationError = (callback) => {
+   socket.off("conversation:error");
   socket.on("conversation:error", callback);
 };
 

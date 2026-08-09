@@ -1,8 +1,15 @@
 import { useEffect, useRef, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
-import { setActivePage } from "../redux/features/Chat/chatSlice";
-import { useNavigate, useParams } from "react-router-dom";
-import axios from "axios";
+import {
+  addErrorMessage,
+  addMessage,
+  appendAssistantChunk,
+  setActivePage,
+  setConversationLoading,
+  setMessages,
+  setNewMessageLoading,
+} from "../redux/features/Chat/chatSlice";
+import { useLocation, useNavigate, useParams } from "react-router-dom";
 import { useSocket } from "../context/SocketContext";
 import {
   onAIChunk,
@@ -17,13 +24,21 @@ import {
   stopAIMessage,
 } from "../service/socket.service";
 import toast from "react-hot-toast";
-import { onConversationCreated, removeConversationCreated } from "../service/conversation.services";
+import {
+  getConversationMessages,
+  onConversationMessages,
+  removeConversationMessages,
+} from "../service/message.services";
 
-export default function useSpeechRecognition() {
+export default function useSpeechRecognition({
+  enableSocketListeners = true,
+} = {}) {
   const dispatch = useDispatch();
   const navigate = useNavigate();
   const { socket, isConnected } = useSocket();
   const { conversationId } = useParams();
+  const location = useLocation();
+  const { isNewConversation } = location.state || {};
   const textareaRef = useRef(null);
   const recognitionRef = useRef(null);
   const finalTranscript = useRef("");
@@ -31,77 +46,89 @@ export default function useSpeechRecognition() {
   const fileInputRef = useRef(null);
   const [selectedFiles, setSelectedFiles] = useState([]);
   const [message, setMessage] = useState("");
-  const [newMessageLoading, setNewMessageLoading] = useState(false);
   const [isSendDisable, setIsSendDisable] = useState(false);
-  const [messages, setMessages] = useState([]);
   const [isListening, setIsListening] = useState(false);
-  const { activePage } = useSelector((store) => store.chatSlice);
+  const { messages, newMessageLoading } = useSelector(
+    (store) => store.chatSlice,
+  );
   const [copiedIndex, setCopiedIndex] = useState(null);
 
+  // useEffect(() => {
+  //   if (conversationId) getConversationMessages(conversationId);
+  //   else {
+  //     dispatch(setConversationLoading(false));
+  //   }
+  // }, [conversationId]);
+
   useEffect(() => {
+    if (!conversationId) {
+      dispatch(setConversationLoading(false));
+      return;
+    }
+
+    if (isNewConversation) {
+      console.log("🆕 New conversation - skipping messages fetch");
+      dispatch(setConversationLoading(false));
+      return;
+    }
+
+    console.log("📨 Fetching existing conversation:", conversationId);
+    dispatch(setConversationLoading(true));
+    dispatch(setActivePage("recentChat"));
+    getConversationMessages(conversationId);
+  }, [conversationId, dispatch]);
+
+  useEffect(() => {
+    if (!enableSocketListeners) return;
     const handleChunk = ({ text }) => {
-      setNewMessageLoading(false);
-      setMessages((prev) => {
-        const list = [...prev];
-        const last = list[list.length - 1];
-        if (last?.role === "assistant") {
-          last.text += text;
-        } else {
-          list.push({
-            role: "assistant",
-            text: text,
-          });
-        }
-        return [...list];
-      });
+      console.log("📥 ai:chunk", text);
+      dispatch(setNewMessageLoading(false));
+      dispatch(appendAssistantChunk(text));
     };
 
     const handleError = ({ message }) => {
-      setNewMessageLoading(false);
+      console.log("❌ ai:error", message);
+      dispatch(setNewMessageLoading(false));
       setIsSendDisable(false);
-      setMessages((prev) => {
-        const list = [...prev];
-        const last = list[list.length - 1];
-        if (last?.isError) {
-          last.text = message;
-        } else {
-          list.push({
-            role: "assistant",
-            text: message,
-            isError: true,
-          });
-        }
-        return list;
-      });
+      dispatch(addErrorMessage(message));
     };
     const handleEnd = (data) => {
+      console.log("✅ ai:end", data);
       setIsSendDisable(false);
     };
 
     const handleStopeGeneration = (message) => {
-      setNewMessageLoading(false);
+      console.log("🛑 ai:stopped", data);
+      dispatch(setNewMessageLoading(false));
       setIsSendDisable(false);
     };
 
-    const handleConversationCreate=({conversationId})=>{
-      navigate(`/c/${conversationId}`)
-    }
+    const handleMessageList = (data) => {
+      console.log("📨 conversation:messages", data);
+      dispatch(setConversationLoading(false));
+      dispatch(setMessages(data.messages));
+    };
 
-
+    console.log("Registering socket listeners");
     onAIChunk(handleChunk);
     onAIEnd(handleEnd);
     onAIError(handleError);
     onAIStopped(handleStopeGeneration);
-    onConversationCreated(handleConversationCreate);
+    onConversationMessages(handleMessageList);
 
     return () => {
+      console.log("🔴 Removing AI socket listeners");
       removeAIChunk(handleChunk);
       removeAIEnd(handleEnd);
       removeAIError(handleError);
       removeAIStopped(handleStopeGeneration);
-      removeConversationCreated(handleConversationCreate);
+      removeConversationMessages(handleMessageList);
     };
-  }, []);
+  }, [enableSocketListeners, dispatch]);
+
+  useEffect(() => {
+    textareaRef.current?.focus();
+  }, [conversationId]);
 
   const notificationSound = useRef(
     new Audio("/sounds/mixkit-unlock-game-notification-253.wav"),
@@ -208,22 +235,32 @@ export default function useSpeechRecognition() {
   };
 
   const handleSend = async () => {
+    // const lastMessage = messages?.[messages.length - 1];
+    // if (lastMessage?.isError === true) {
+    //   return;
+    // }
+
     if (!message.trim()) return;
-    if (activePage === "newChat") {
-      await dispatch(setActivePage("recentChat"));
-      navigate(`/c/${new Date().getTime()}`);
+    // if (activePage === "newChat") {
+    //       await dispatch(setActivePage("recentChat"));
+    //       navigate(`/c/${new Date().getTime()}`);
+    //     }
+    if (isSendDisable) {
+      console.log("⚠️ Send blocked - AI request already running");
+      return;
     }
     const messagePayload = {
-      id: new Date(),
+      id: Date.now().toString(),
       role: "user",
       text: message,
     };
-    const newMessages = [...messages, messagePayload];
-    setMessages(newMessages);
-    setMessage("");
-    setNewMessageLoading(true);
     setIsSendDisable(true);
-    sendAIMessage(conversationId,message);
+    dispatch(setNewMessageLoading(true));
+    dispatch(addMessage(messagePayload)); // message add in message list
+    // const newMessages = [...messages, messagePayload];
+    // setMessages(newMessages);
+    setMessage("");
+    sendAIMessage(conversationId, message.trim()); // send message in backend
     if (recognitionRef.current) {
       recognitionRef.current.stop();
       setIsListening(false);
@@ -232,7 +269,7 @@ export default function useSpeechRecognition() {
 
   const handleStopGenerating = () => {
     setIsSendDisable(false);
-    setNewMessageLoading(false);
+    dispatch(setNewMessageLoading(false));
     stopAIMessage();
     // baad me socket.emit("stop-generation") ya abort controller laga dena
   };
@@ -289,7 +326,6 @@ export default function useSpeechRecognition() {
   return {
     conversationId,
     newMessageLoading,
-    setNewMessageLoading,
     isSendDisable,
     messages,
     message,

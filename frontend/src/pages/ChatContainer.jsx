@@ -14,6 +14,7 @@ import {
 import { useEffect, useRef, useState } from "react";
 import useSpeechRecognition from "../hooks/useSpeechRecognition";
 import AIMessage from "../components/Chat/AIMessage";
+import { useSelector } from "react-redux";
 
 export default function ChatContainer() {
   const {
@@ -35,9 +36,12 @@ export default function ChatContainer() {
     copiedIndex,
     handleCopy,
     handleFeedback,
-  } = useSpeechRecognition();
+  } = useSpeechRecognition({
+    enableSocketListeners: true,
+  });
 
   const messagesEndRef = useRef(null);
+  const { conversationLoading } = useSelector((store) => store.chatSlice);
 
   useEffect(() => {
     messagesEndRef.current?.scrollIntoView({
@@ -49,37 +53,45 @@ export default function ChatContainer() {
     <div className="flex h-full w-full flex-col">
       {/* Chat Area */}
       <div className="flex-1 overflow-y-auto px-4">
-        <div className="mx-auto flex min-h-full max-w-5xl flex-col px-3 py-1 md:px-28 lg:px-40">
-          {messages.map((msg, index) => (
-            <div
-              key={index}
-              className={`group mb-4 flex ${
-                msg.role === "user" ? "justify-end" : "justify-start"
-              }`}
-            >
-              {/* Wrapper */}
-              <div className="relative inline-block max-w-full">
-                {/* Message Bubble */}
-                <div
-                  className={`rounded-2xl px-4 py-3 ${
-                    msg.role === "user"
-                      ? "border border-white/10 bg-[#161f2d]"
-                      : ""
-                  }`}
-                >
-                  {msg.role === "assistant" ? (
-                    <AIMessage content={msg.text} />
-                  ) : (
-                    <p className="whitespace-pre-wrap wrap-break-word text-sm leading-6">
-                      {msg.text}
-                    </p>
-                  )}
-                </div>
-
-                {/* Actions */}
-                {msg.role === "user" && (
+        <div className="mx-auto flex min-h-full max-w-5xl flex-col py-1 md:px-28 lg:px-22">
+          {conversationLoading ? (
+            <div className="absolute inset-0 flex items-center justify-center">
+              <div className="flex items-center gap-2 text-sm text-gray-400">
+                <div className="h-4 w-4 animate-spin rounded-full border-2 border-gray-600 border-t-cyan-400" />
+                <span>Loading conversation...</span>
+              </div>
+            </div>
+          ) : (
+            messages.map((msg, index) => (
+              <div
+                key={msg._id || `${msg.role}-${index}`}
+                className={`group mb-4 flex ${
+                  msg.role === "user" ? "justify-end" : "justify-start"
+                }`}
+              >
+                {/* Wrapper */}
+                <div className="relative inline-block max-w-full">
+                  {/* Message Bubble */}
                   <div
-                    className="
+                    className={`rounded-2xl px-4 py-3 ${
+                      msg.role === "user"
+                        ? "border border-white/10 bg-[#161f2d]"
+                        : ""
+                    }`}
+                  >
+                    {msg.role === "assistant" ? (
+                      <AIMessage content={msg.text} isError={msg.isError} />
+                    ) : (
+                      <p className="whitespace-pre-wrap wrap-break-word text-sm leading-6">
+                        {msg.text}
+                      </p>
+                    )}
+                  </div>
+
+                  {/* Actions */}
+                  {msg.role === "user" && (
+                    <div
+                      className="
                        absolute
                       -bottom-7
                       right-1
@@ -91,43 +103,43 @@ export default function ChatContainer() {
                       duration-200
                       group-hover:opacity-200
                     "
-                  >
-                    <button
-                      onClick={() => handleCopy(msg.text, index)}
-                      className="rounded-md p-1 text-gray-400 hover:bg-gray-800"
                     >
-                      {copiedIndex === index ? (
-                        <Check size={15} className="text-green-400" />
-                      ) : (
-                        <Copy size={15} />
-                      )}
-                    </button>
-                  </div>
-                )}
+                      <button
+                        onClick={() => handleCopy(msg.text, index)}
+                        className="rounded-md p-1 text-gray-400 hover:bg-gray-800"
+                      >
+                        {copiedIndex === index ? (
+                          <Check size={15} className="text-green-400" />
+                        ) : (
+                          <Copy size={15} />
+                        )}
+                      </button>
+                    </div>
+                  )}
 
-                {msg.role === "assistant" && !isSendDisable && (
-                  <div className="ms-3 -mt-4 flex items-center gap-1">
-                    {/* Copy */}
-                    <button
-                      onClick={() => handleCopy(msg.text, index)}
-                      className="rounded-md p-1 text-gray-400 transition hover:bg-gray-800"
-                    >
-                      {copiedIndex === index ? (
-                        <Check size={15} className="text-green-400" />
-                      ) : (
-                        <Copy size={15} />
-                      )}
-                    </button>
-
-                    {/* More */}
-                    <div className="relative group/more">
-                      <button className="rounded-md p-1 text-gray-400 transition hover:bg-gray-800">
-                        <MoreHorizontal size={15} />
+                  {msg.role === "assistant" && !isSendDisable && (
+                    <div className="ms-3 -mt-4 flex items-center gap-1">
+                      {/* Copy */}
+                      <button
+                        onClick={() => handleCopy(msg.text, index)}
+                        className="rounded-md p-1 text-gray-400 transition hover:bg-gray-800"
+                      >
+                        {copiedIndex === index ? (
+                          <Check size={15} className="text-green-400" />
+                        ) : (
+                          <Copy size={15} />
+                        )}
                       </button>
 
-                      {/* Dropdown */}
-                      <div
-                        className="
+                      {/* More */}
+                      <div className="relative group/more">
+                        <button className="rounded-md p-1 text-gray-400 transition hover:bg-gray-800">
+                          <MoreHorizontal size={15} />
+                        </button>
+
+                        {/* Dropdown */}
+                        <div
+                          className="
                           invisible
                           absolute
                           left-0
@@ -147,29 +159,30 @@ export default function ChatContainer() {
                           group-hover/more:visible
                           group-hover/more:opacity-100
                         "
-                      >
-                        <button
-                          onClick={() => handleFeedback("up")}
-                          className="flex w-full items-center gap-2 px-2.5 py-1.5 text-xs text-gray-300 hover:bg-white/10"
                         >
-                          <ThumbsUp size={13} />
-                          Good
-                        </button>
+                          <button
+                            onClick={() => handleFeedback("up")}
+                            className="flex w-full items-center gap-2 px-2.5 py-1.5 text-xs text-gray-300 hover:bg-white/10"
+                          >
+                            <ThumbsUp size={13} />
+                            Good
+                          </button>
 
-                        <button
-                          onClick={() => handleFeedback("down")}
-                          className="flex w-full items-center gap-2 px-2.5 py-1.5 text-xs text-gray-300 hover:bg-white/10"
-                        >
-                          <ThumbsDown size={13} />
-                          Bad
-                        </button>
+                          <button
+                            onClick={() => handleFeedback("down")}
+                            className="flex w-full items-center gap-2 px-2.5 py-1.5 text-xs text-gray-300 hover:bg-white/10"
+                          >
+                            <ThumbsDown size={13} />
+                            Bad
+                          </button>
+                        </div>
                       </div>
                     </div>
-                  </div>
-                )}
+                  )}
+                </div>
               </div>
-            </div>
-          ))}
+            ))
+          )}
           {newMessageLoading && (
             <p className="mb-3 text-sm font-medium text-gray-400">
               Thinking<span className="animate-pulse">...</span>
@@ -253,7 +266,7 @@ export default function ChatContainer() {
       </div>
 
       {/* Input */}
-      <div className="px-3 py-2 md:px-28 lg:px-50">
+      <div className="py-1 md:px-28 lg:px-50">
         <div className="mx-auto max-w-5xl">
           <div className="rounded-2xl border border-white/10 bg-[#161f2d] px-3 py-3">
             {/* Selected Files */}

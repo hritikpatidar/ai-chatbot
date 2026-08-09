@@ -12,6 +12,7 @@ import {
 import useSpeechRecognition from "../hooks/useSpeechRecognition";
 import { useSelector } from "react-redux";
 import { useNavigate } from "react-router-dom";
+import { getConversations } from "../service/conversation.services";
 
 export default function Welcome() {
   const navigate = useNavigate();
@@ -21,6 +22,7 @@ export default function Welcome() {
     setNewMessageLoading,
     isSendDisable,
     messages,
+    setMessages,
     message,
     setMessage,
     selectedFiles,
@@ -35,11 +37,17 @@ export default function Welcome() {
     fileInputRef,
     textareaRef,
     handleMessageChange,
-  } = useSpeechRecognition();
+  } = useSpeechRecognition({
+    enableSocketListeners: false,
+  });
   const [tags, setTags] = useState([]);
   const { profileDetails } = useSelector(
     (store) => store.authReducer.AuthSlice,
   );
+
+  useEffect(() => {
+    getConversations();
+  }, []);
 
   const getGreeting = () => {
     const hour = new Date().getHours();
@@ -204,9 +212,6 @@ export default function Welcome() {
             e.preventDefault();
             if (isSendDisable) return;
             handleSend();
-            if (!conversationId) {
-              navigate("/c/1");
-            }
           }}
           className="rounded-3xl border border-white/10 bg-[#171b23]/80 p-4 backdrop-blur-xl"
         >
@@ -269,6 +274,7 @@ export default function Welcome() {
             ))}
           </div>
           <textarea
+            ref={textareaRef}
             rows={1}
             value={message}
             onChange={handleMessageChange}

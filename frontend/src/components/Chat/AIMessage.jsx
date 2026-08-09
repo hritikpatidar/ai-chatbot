@@ -6,7 +6,7 @@ import rehypeSanitize from "rehype-sanitize";
 import CodeBlock from "./CodeBlock";
 import "./markdown.css";
 
-export default function AIMessage({ content = "" }) {
+export default function AIMessage({ content = "", isError = false }) {
   const normalizeMarkdown = (text = "") => {
     if (!text) return "";
 
@@ -65,7 +65,9 @@ export default function AIMessage({ content = "" }) {
           //--------------------------------------
 
           h1: ({ children }) => (
-            <h1 className="mt-7 mb-4 text-3xl font-bold text-white">
+            <h1
+              className={`mt-7 mb-4 text-3xl font-bold  ${isError ? "text-red-500" : "text-white"}`}
+            >
               {children}
             </h1>
           ),
@@ -93,7 +95,9 @@ export default function AIMessage({ content = "" }) {
           //--------------------------------------
 
           p: ({ children }) => (
-            <p className="mb-4 leading-7 text-[15px] text-gray-200">
+            <p
+              className={`mb-4 leading-7 text-[15px] ${isError ? "text-red-500" : "text-gray-200 "}`}
+            >
               {children}
             </p>
           ),

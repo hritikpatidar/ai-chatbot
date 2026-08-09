@@ -1,5 +1,5 @@
 import { ChevronDown, LogOut, Share2 } from "lucide-react";
-import  { useEffect, useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { useNavigate } from "react-router-dom";
 import useSpeechRecognition from "../../hooks/useSpeechRecognition";
@@ -105,19 +105,11 @@ const ChatHeader = () => {
                 className="h-7 w-7 rounded-full border border-white/20 object-cover"
               /> */}
             <div className="relative">
-              {profileDetails?.profileImage ? (
-                <img
-                  src={profileDetails.profileImage}
-                  alt="Profile"
-                  className="h-7 w-7 rounded-full border border-white/20 object-cover"
-                />
-              ) : (
-                <img
-                  src={profile}
-                  alt="Profile"
-                  className="h-7 w-7 rounded-full border border-white/20 object-cover"
-                />
-              )}
+              <img
+                src={profileDetails.profileImage || profile}
+                alt="Profile"
+                className="h-7 w-7 rounded-full border border-white/20 object-cover"
+              />
 
               {/* Online Indicator */}
               {isConnected && (

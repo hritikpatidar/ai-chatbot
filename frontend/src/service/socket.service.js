@@ -1,5 +1,6 @@
 import socket from "../socket/socket";
 
+// MESSAGE CONTAINER SOCKET SERVICES
 export const sendAIMessage = (conversationId, message) => {
   socket.emit("ai:message", {
     conversationId,
@@ -8,6 +9,7 @@ export const sendAIMessage = (conversationId, message) => {
 };
 
 export const onAIChunk = (callback) => {
+  socket.off("ai:chunk");
   socket.on("ai:chunk", callback);
 };
 
@@ -16,6 +18,7 @@ export const removeAIChunk = (callback) => {
 };
 
 export const onAIEnd = (callback) => {
+  socket.off("ai:end");
   socket.on("ai:end", callback);
 };
 
@@ -24,6 +27,7 @@ export const removeAIEnd = (callback) => {
 };
 
 export const onAIError = (callback) => {
+   socket.off("ai:error");
   socket.on("ai:error", callback);
 };
 
@@ -36,6 +40,7 @@ export const stopAIMessage = () => {
 };
 
 export const onAIStopped = (callback) => {
+   socket.off("ai:stopped");
   socket.on("ai:stopped", callback);
 };
 

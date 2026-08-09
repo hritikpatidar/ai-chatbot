@@ -70,3 +70,54 @@ export const resetPasswordSchema = z
     path: ["confirmPassword"],
     message: "Passwords do not match",
   });
+
+export const editProfileSchema = z.object({
+  fullName: z
+    .string()
+    .trim()
+    .min(2, "Name must be at least 2 characters")
+    .max(50, "Name must not exceed 50 characters")
+    .regex(/^[a-zA-Z\s]+$/, "Name can only contain letters and spaces"),
+
+  email: z.string().trim().email("Please enter a valid email address"),
+
+  profileImage: z
+    .any()
+    .optional()
+    .refine(
+      (file) => {
+        if (!file) return true;
+        return file instanceof File;
+      },
+      {
+        message: "Please select a valid image",
+      },
+    )
+    .refine(
+      (file) => {
+        if (!file) return true;
+
+        const allowedTypes = [
+          "image/jpeg",
+          "image/jpg",
+          "image/png",
+          "image/webp",
+        ];
+
+        return allowedTypes.includes(file.type);
+      },
+      {
+        message: "Only JPG, PNG or WEBP images are allowed",
+      },
+    )
+    .refine(
+      (file) => {
+        if (!file) return true;
+
+        return file.size <= 2 * 1024 * 1024;
+      },
+      {
+        message: "Image size must be less than 2MB",
+      },
+    ),
+});

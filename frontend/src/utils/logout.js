@@ -26,7 +26,9 @@ export const handleLogout = async ({
     navigate("/login");
   } catch (error) {
     console.error(error);
-    toast.error(error?.message || "Logout failed");
+    toast.error(error?.message || "Logout failed",{
+      id:"INVALID_TOKEN"
+    });
   } finally {
     socket.disconnect();
 

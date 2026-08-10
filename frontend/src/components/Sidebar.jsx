@@ -158,19 +158,78 @@ export default function Sidebar() {
     else navigate(`/${page}`);
   };
 
-  const getMenuClass = (page) =>
-    `group flex w-full items-center gap-2 rounded-lg px-2 py-1.5 text-xs transition-all duration-200 ${
-      activePage === page
-        ? "bg-blue-500/15 text-blue-400"
-        : "text-gray-300 hover:bg-white/10 hover:text-white"
-    }`;
+  const getMenuClass = (menu) => {
+    const isActive = activePage === menu;
 
-  const getIconClass = (page) =>
-    `flex h-7 w-7 items-center justify-center rounded-md transition-all ${
-      activePage === page
-        ? "bg-blue-500/20 text-blue-400"
-        : "bg-white/5 text-gray-400 group-hover:text-blue-400"
-    }`;
+    return `
+    group
+    flex
+    w-full
+    items-center
+    gap-3
+    rounded-lg
+    px-3
+    py-2.5
+    text-sm
+    font-medium
+    transition-all
+    duration-200
+
+    ${
+      isActive
+        ? `
+          bg-blue-500/10
+          text-blue-600
+          dark:bg-blue-500/15
+          dark:text-blue-400
+        `
+        : `
+          text-gray-600
+          hover:bg-gray-100
+          hover:text-gray-900
+          dark:text-gray-300
+          dark:hover:bg-white/5
+          dark:hover:text-white
+        `
+    }
+  `;
+  };
+
+  const getIconClass = (menu) => {
+    const isActive = activePage === menu;
+
+    return `
+    flex
+    h-8
+    w-8
+    shrink-0
+    items-center
+    justify-center
+    rounded-lg
+    transition-all
+    duration-200
+
+    ${
+      isActive
+        ? `
+          bg-blue-500/10
+          text-blue-600
+          dark:bg-blue-500/15
+          dark:text-blue-400
+        `
+        : `
+          bg-gray-100
+          text-gray-500
+          group-hover:bg-blue-500/10
+          group-hover:text-blue-600
+          dark:bg-white/5
+          dark:text-gray-400
+          dark:group-hover:bg-blue-500/10
+          dark:group-hover:text-blue-400
+        `
+    }
+  `;
+  };
 
   const handleConversationNavigate = async (chat) => {
     await dispatch(clearMessages([]));
@@ -185,7 +244,7 @@ export default function Sidebar() {
       {/* Mobile Menu Button */}
       <button
         onClick={() => setOpen(true)}
-        className="fixed top-5 left-5 z-50 flex h-8 w-8 items-center justify-center rounded-xl bg-[#171b23] text-white shadow-lg lg:hidden"
+        className="fixed top-5 left-5 z-50 flex h-8 w-8 items-center justify-center rounded-xl bg-gray-100 text-gray-700 shadow-lg dark:bg-[#171b23] dark:text-white lg:hidden"
       >
         <Menu size={22} />
       </button>
@@ -201,25 +260,28 @@ export default function Sidebar() {
       {/* Sidebar */}
       <aside
         className={`
-          fixed
-          lg:static
-          top-0
-          left-0
-          z-50
-          flex
-          h-screen
-          w-72
-          flex-col
-          border-r
-          border-white/10
-          bg-[#111827]
-          transition-transform
-          duration-300
-          ${open ? "translate-x-0" : "-translate-x-full lg:translate-x-0"}
-        `}
+  fixed
+  lg:static
+  top-0
+  left-0
+  z-50
+  flex
+  h-screen
+  w-72
+  flex-col
+  border-r
+  border-gray-200
+  bg-white
+  transition-transform
+  duration-300
+  dark:border-white/10
+  dark:bg-[#111827]
+  ${open ? "translate-x-0" : "-translate-x-full lg:translate-x-0"}
+`}
       >
         {/* Header */}
-        <div className="flex shrink-0 items-center justify-between border-b border-white/10 px-4 py-4">
+        <div className="flex shrink-0 items-center justify-between border-b border-gray-200 bg-white px-4 py-4 dark:border-white/10 dark:bg-[#111827]">
+          {" "}
           <div
             className="flex items-center gap-3 cursor-pointer"
             onClick={() => navigate("/")}
@@ -229,16 +291,18 @@ export default function Sidebar() {
             </div>
 
             <div>
-              <h2 className="text-[15px] font-semibold text-white">
+              <h2 className="text-[15px] font-semibold text-gray-900 dark:text-white">
                 Saviesa Infotech
               </h2>
-              <p className="text-xs text-gray-400">Smart Conversations</p>
+
+              <p className="text-xs text-gray-500 dark:text-gray-400">
+                Smart Conversations
+              </p>
             </div>
           </div>
-
           <button
             onClick={() => setOpen(false)}
-            className="rounded-lg p-2 text-gray-400 transition hover:bg-[#1f2937] lg:hidden"
+            className="rounded-lg p-2 text-gray-500 transition hover:bg-gray-100 hover:text-gray-900 dark:text-gray-400 dark:hover:bg-[#1f2937] dark:hover:text-white lg:hidden"
           >
             <X size={18} />
           </button>
@@ -248,13 +312,16 @@ export default function Sidebar() {
         <div className="flex min-h-0 flex-1 flex-col overflow-y-auto">
           {/* Search */}
           <div className="shrink-0 px-3 py-2">
-            <div className="flex h-10 items-center rounded-xl border border-white/10 bg-white/5 px-3 transition-all duration-200 hover:bg-white/8 focus-within:border-blue-500">
-              <Search size={16} className="mr-2 text-gray-400" />
+            <div className="flex h-10 items-center rounded-xl border border-gray-200 bg-gray-50 px-3 transition-all duration-200 hover:bg-gray-100 focus-within:border-blue-500 dark:border-white/10 dark:bg-white/5 dark:hover:bg-white/8">
+              <Search
+                size={16}
+                className="mr-2 text-gray-500 dark:text-gray-400"
+              />
 
               <input
                 type="text"
                 placeholder="Search"
-                className="flex-1 bg-transparent text-sm text-white outline-none placeholder:text-gray-400"
+                className="flex-1 bg-transparent text-sm text-gray-900 outline-none placeholder:text-gray-400 dark:text-white dark:placeholder:text-gray-400"
               />
             </div>
           </div>
@@ -316,6 +383,7 @@ export default function Sidebar() {
                   const isSelected = conversationId === chat._id;
                   return (
                     <div
+                      key={index}
                       className={`
                         group
                         relative
@@ -325,17 +393,15 @@ export default function Sidebar() {
                         items-center
                         rounded-lg
                         transition-colors
-                        hover:bg-blue-500/15
-                        ${isSelected ? "bg-blue-500/15" : ""}
+                        hover:bg-blue-500/10
+                        dark:hover:bg-blue-500/15
+                        ${isSelected ? "bg-blue-500/10 dark:bg-blue-500/15" : ""}
                       `}
                     >
                       {/* Chat Button */}
                       <button
                         type="button"
-                        onClick={() => {
-                          navigate(`/c/${chat._id}`);
-                          setMenuOpen(null);
-                        }}
+                        onClick={() => handleConversationNavigate(chat)}
                         className="
                           flex
                           min-w-0
@@ -353,26 +419,30 @@ export default function Sidebar() {
                         <MessageSquare
                           size={18}
                           className={`
-                            shrink-0
-                            transition-colors
-                            ${
-                              isSelected
-                                ? "text-blue-400"
-                                : "text-gray-500 group-hover:text-blue-400"
-                            }
-                          `}
+  shrink-0
+  transition-colors
+  ${
+    isSelected
+      ? "text-blue-600 dark:text-blue-400"
+      : "text-gray-400 group-hover:text-blue-600 dark:text-gray-500 dark:group-hover:text-blue-400"
+  }
+`}
                         />
 
                         {/* Title */}
                         <span
                           className={`
-                            min-w-0
-                            flex-1
-                            truncate
-                            text-sm
-                            transition-colors
-                            ${isSelected ? "text-blue-400" : "text-gray-300"}
-                          `}
+  min-w-0
+  flex-1
+  truncate
+  text-sm
+  transition-colors
+  ${
+    isSelected
+      ? "text-blue-600 dark:text-blue-400"
+      : "text-gray-700 dark:text-gray-300"
+  }
+`}
                         >
                           {chat.title || "New Conversation"}
                         </span>
@@ -381,24 +451,29 @@ export default function Sidebar() {
                       {/* Hover Actions */}
                       <div
                         className="
-                          absolute
-                          right-2
-                          top-1/2
-                          z-10
-                          flex
-                          -translate-y-1/2
-                          items-center
-                          gap-1
-                          rounded-md
-                          bg-[#1f1f1f]
-                          px-1
-                          pointer-events-none
-                          opacity-0
-                          transition-opacity
-                          duration-150
-                          group-hover:pointer-events-auto
-                          group-hover:opacity-100
-                        "
+    absolute
+    right-2
+    top-1/2
+    z-10
+    flex
+    -translate-y-1/2
+    items-center
+    gap-1
+    rounded-md
+    border
+    border-gray-200
+    bg-white
+    px-1
+    shadow-lg
+    pointer-events-none
+    opacity-0
+    transition-opacity
+    duration-150
+    group-hover:pointer-events-auto
+    group-hover:opacity-100
+    dark:border-white/10
+    dark:bg-[#1f1f1f]
+  "
                       >
                         {/* Pin */}
                         <button
@@ -409,17 +484,20 @@ export default function Sidebar() {
                             console.log("Pin conversation:", chat._id);
                           }}
                           className="
-                            flex
-                            h-7
-                            w-7
-                            items-center
-                            justify-center
-                            rounded-md
-                            text-gray-400
-                            transition
-                            hover:bg-white/10
-                            hover:text-blue-400
-                          "
+  flex
+  h-7
+  w-7
+  items-center
+  justify-center
+  rounded-md
+  text-gray-500
+  transition
+  hover:bg-gray-100
+  hover:text-blue-600
+  dark:text-gray-400
+  dark:hover:bg-white/10
+  dark:hover:text-blue-400
+"
                           title="Pin"
                         >
                           <Pin size={15} />
@@ -457,18 +535,20 @@ export default function Sidebar() {
                       {menuOpen === chat._id && (
                         <div
                           className={`
-                            absolute
-                            right-2
-                            z-50
-                            w-40
-                            rounded-xl
-                            border
-                            border-white/10
-                            bg-[#1a202c]
-                            py-1
-                            shadow-xl
-                            ${isLastItem ? "bottom-10" : "top-10"}
-                          `}
+  absolute
+  right-2
+  z-50
+  w-40
+  rounded-xl
+  border
+  border-gray-200
+  bg-white
+  py-1
+  shadow-xl
+  dark:border-white/10
+  dark:bg-[#1a202c]
+  ${isLastItem ? "bottom-10" : "top-10"}
+`}
                         >
                           {/* Share */}
                           <button
@@ -478,17 +558,19 @@ export default function Sidebar() {
                               handleShare(chat._id);
                             }}
                             className="
-                              flex
-                              w-full
-                              items-center
-                              gap-2
-                              px-3
-                              py-2
-                              text-sm
-                              text-white
-                              transition
-                              hover:bg-white/10
-                            "
+  flex
+  w-full
+  items-center
+  gap-2
+  px-3
+  py-2
+  text-sm
+  text-gray-700
+  transition
+  hover:bg-gray-100
+  dark:text-white
+  dark:hover:bg-white/10
+"
                           >
                             <Share2 size={16} />
                             Share
@@ -526,15 +608,18 @@ export default function Sidebar() {
             ) : (
               /* No Conversations */
               <div className="flex flex-col items-center justify-center px-4 py-10 text-center">
-                <div className="mb-3 flex h-10 w-10 items-center justify-center rounded-xl bg-white/5">
-                  <MessageSquare size={18} className="text-gray-500" />
+                <div className="mb-3 flex h-10 w-10 items-center justify-center rounded-xl bg-gray-100 dark:bg-white/5">
+                  <MessageSquare
+                    size={18}
+                    className="text-gray-400 dark:text-gray-500"
+                  />
                 </div>
 
-                <p className="text-sm font-medium text-gray-400">
+                <p className="text-sm font-medium text-gray-600 dark:text-gray-400">
                   No conversations
                 </p>
 
-                <p className="mt-1 text-xs leading-5 text-gray-600">
+                <p className="mt-1 text-xs leading-5 text-gray-500 dark:text-gray-600">
                   Start a new chat to see your conversations here.
                 </p>
               </div>
@@ -543,7 +628,7 @@ export default function Sidebar() {
         </div>
 
         {/* Settings - Always Bottom */}
-        <div className="shrink-0 border-t border-white/10 bg-[#111827] p-4">
+        <div className="shrink-0 border-t border-gray-200 bg-white p-4 dark:border-white/10 dark:bg-[#111827]">
           <button
             onClick={() => handleMenu("settings")}
             className={getMenuClass("settings")}
@@ -560,19 +645,19 @@ export default function Sidebar() {
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
-            className="fixed inset-0 z-100 flex items-center justify-center bg-black/60 p-4"
+            className="fixed inset-0 z-100 flex items-center justify-center bg-black/40 p-4 backdrop-blur-sm dark:bg-black/60"
           >
             <motion.div
               initial={{ scale: 0.9 }}
               animate={{ scale: 1 }}
               exit={{ scale: 0.9 }}
-              className="w-full max-w-sm rounded-2xl border border-white/10 bg-[#171b23] p-6"
+              className="w-full max-w-sm rounded-2xl border border-gray-200 bg-white p-6 shadow-2xl dark:border-white/10 dark:bg-[#171b23]"
             >
-              <h2 className="text-lg font-semibold text-white">
+              <h2 className="text-lg font-semibold text-gray-900 dark:text-white">
                 Delete Conversation?
               </h2>
 
-              <p className="mt-2 text-sm text-gray-400">
+              <p className="mt-2 text-sm text-gray-600 dark:text-gray-400">
                 Are you sure you want to delete this conversation? This action
                 cannot be undone.
               </p>
@@ -585,7 +670,7 @@ export default function Sidebar() {
                     setLoading(false);
                   }}
                   disabled={isLoading}
-                  className="rounded-lg border border-white/10 px-4 py-2 text-sm text-white hover:bg-white/10"
+                  className="rounded-lg border border-gray-200 px-4 py-2 text-sm text-gray-700 transition hover:bg-gray-100 dark:border-white/10 dark:text-white dark:hover:bg-white/10"
                 >
                   Cancel
                 </button>

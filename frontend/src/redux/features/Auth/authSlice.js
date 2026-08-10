@@ -11,6 +11,7 @@ const initialState = {
   refreshToken: "",
   profileDetails: {},
   notificationList: [],
+  isProfileModalOpen: false,
   error: "",
 };
 
@@ -42,12 +43,16 @@ const AuthSlice = createSlice({
   name: "auth",
   initialState,
   reducers: {
+    setIsProfileModalOpen: (state, action) => {
+      state.isProfileModalOpen = action?.payload;
+    },
     logoutSuccess: (state) => {
       state.loading = false;
       state.token = "";
       state.refreshToken = "";
       state.profileDetails = {};
       state.notificationList = [];
+      state.isProfileModalOpen = false;
       state.error = "";
     },
   },
@@ -89,5 +94,5 @@ const AuthSlice = createSlice({
   },
 });
 
-export const { logoutSuccess } = AuthSlice.actions;
+export const { setIsProfileModalOpen, logoutSuccess } = AuthSlice.actions;
 export default AuthSlice.reducer;

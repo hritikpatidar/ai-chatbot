@@ -43,7 +43,7 @@ const files = [
     favorite: true,
   },
   {
-    id: 2,
+    id: 5,
     name: "AI Chat UI.fig",
     type: "design",
     size: "4.8 MB",
@@ -51,7 +51,7 @@ const files = [
     favorite: false,
   },
   {
-    id: 3,
+    id: 6,
     name: "Backend API Docs.docx",
     type: "doc",
     size: "1.2 MB",
@@ -59,7 +59,7 @@ const files = [
     favorite: false,
   },
   {
-    id: 4,
+    id: 7,
     name: "chatSlice.js",
     type: "code",
     size: "12 KB",
@@ -73,25 +73,50 @@ export default function Library() {
     switch (type) {
       case "pdf":
       case "doc":
-        return <FileText size={22} />;
+        return <FileText size={20} />;
+
       case "design":
-        return <FileImage size={22} />;
+        return <FileImage size={20} />;
+
       case "code":
-        return <FileCode size={22} />;
+        return <FileCode size={20} />;
+
       default:
-        return <Folder size={22} />;
+        return <FileText size={20} />;
     }
   };
 
   return (
-    <div className="text-white z-50 pt-15">
-      <div className="mx-auto max-w-5xl px-4 ">
+    <div
+      className="
+       min-h-full w-full bg-transparent text-gray-900 dark:text-white
+      "
+    >
+      <div className="mx-auto w-full px-4 py-5 sm:px-6 sm:py-6">
+
         {/* Header */}
 
         <div className="flex flex-col gap-5 md:flex-row md:items-center md:justify-between">
           <div>
-            <h1 className="text-2xl font-semibold">Library</h1>
-            <p className="mt-1 text-xs text-gray-400">
+            <h1
+              className="
+                text-2xl
+                font-semibold
+                text-gray-900
+                dark:text-white
+              "
+            >
+              Library
+            </h1>
+
+            <p
+              className="
+                mt-1
+                text-xs
+                text-gray-500
+                dark:text-gray-400
+              "
+            >
               Organize and manage your AI resources.
             </p>
           </div>
@@ -99,12 +124,38 @@ export default function Library() {
           <div className="relative w-full md:w-80">
             <Search
               size={16}
-              className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-500"
+              className="
+                absolute
+                left-3
+                top-1/2
+                -translate-y-1/2
+                text-gray-500
+                dark:text-gray-500
+              "
             />
 
             <input
               placeholder="Search files..."
-              className="w-full rounded-lg border border-white/10 bg-[#171b23] py-2 pl-9 pr-3 text-xs outline-none focus:border-blue-500"
+              className="
+                w-full
+                rounded-lg
+                border
+                border-gray-200
+                bg-white
+                py-2
+                pl-9
+                pr-3
+                text-xs
+                text-gray-900
+                outline-none
+                transition-colors
+                placeholder:text-gray-400
+                focus:border-blue-500
+                dark:border-white/10
+                dark:bg-[#171b23]
+                dark:text-white
+                dark:placeholder:text-gray-500
+              "
             />
           </div>
         </div>
@@ -117,40 +168,134 @@ export default function Library() {
             ["Images", "15"],
             ["Projects", "8"],
             ["Favorites", "11"],
-          ].map(([title, count],index) => (
+          ].map(([title, count], index) => (
             <div
               key={index}
-              className="rounded-xl border border-white/10 bg-[#171b23] p-3 transition hover:border-blue-500"
+              className="
+                rounded-xl
+                border
+                border-gray-200
+                bg-white
+                p-3
+                transition
+                hover:border-blue-500
+                dark:border-white/10
+                dark:bg-[#171b23]
+              "
             >
-              <Folder className="mb-2 text-blue-400" />
+              <Folder
+                className="
+                  mb-2
+                  text-blue-500
+                  dark:text-blue-400
+                "
+              />
 
-              <h3 className="text-sm font-medium">{title}</h3>
+              <h3
+                className="
+                  text-sm
+                  font-medium
+                  text-gray-900
+                  dark:text-white
+                "
+              >
+                {title}
+              </h3>
 
-              <p className="mt-1 text-xs text-gray-400">{count} Items</p>
+              <p
+                className="
+                  mt-1
+                  text-xs
+                  text-gray-500
+                  dark:text-gray-400
+                "
+              >
+                {count} Items
+              </p>
             </div>
           ))}
         </div>
 
         {/* Recent Files */}
-        <div className="mt-6 flex-1 overflow-hidden">
-          <h2 className="mb-4 text-lg font-semibold">Recent Files</h2>
 
-          <div className="h-[calc(100vh-320px)] overflow-y-auto pr-2 space-y-4">
-            {files.map((item,index) => (
+        <div className="mt-6 flex-1 overflow-hidden">
+          <h2
+            className="
+              mb-4
+              text-lg
+              font-semibold
+              text-gray-900
+              dark:text-white
+            "
+          >
+            Recent Files
+          </h2>
+
+          <div className="h-[calc(100vh-320px)] space-y-4 overflow-y-auto pr-2">
+            {files.map((item, index) => (
               <div
                 key={index}
-                className="flex flex-col gap-3 rounded-xl border border-white/10 bg-[#171b23] p-3 transition hover:border-blue-500 sm:flex-row sm:items-center sm:justify-between"
+                className="
+                  flex
+                  flex-col
+                  gap-3
+                  rounded-xl
+                  border
+                  border-gray-200
+                  bg-white
+                  p-3
+                  transition
+                  hover:border-blue-500
+                  sm:flex-row
+                  sm:items-center
+                  sm:justify-between
+                  dark:border-white/10
+                  dark:bg-[#171b23]
+                "
               >
                 <div className="flex items-center gap-4">
-                  <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-blue-500/10 text-blue-400">
+                  <div
+                    className="
+                      flex
+                      h-10
+                      w-10
+                      items-center
+                      justify-center
+                      rounded-lg
+                      bg-blue-500/10
+                      text-blue-600
+                      dark:text-blue-400
+                    "
+                  >
                     {getIcon(item.type)}
                   </div>
 
                   <div>
-                    <h3 className="text-sm font-medium">{item.name}</h3>
+                    <h3
+                      className="
+                        text-sm
+                        font-medium
+                        text-gray-900
+                        dark:text-white
+                      "
+                    >
+                      {item.name}
+                    </h3>
 
-                    <div className="mt-1 flex flex-wrap items-center gap-3 text-[11px] text-gray-400">
+                    <div
+                      className="
+                        mt-1
+                        flex
+                        flex-wrap
+                        items-center
+                        gap-3
+                        text-[11px]
+                        text-gray-500
+                        dark:text-gray-400
+                      "
+                    >
                       <span>{item.size}</span>
+
                       <span className="flex items-center gap-1">
                         <Clock size={13} />
                         {item.updated}
@@ -167,7 +312,18 @@ export default function Library() {
                     />
                   )}
 
-                  <button className="rounded-md p-1.5 transition hover:bg-white/10">
+                  <button
+                    type="button"
+                    className="
+                      rounded-md
+                      p-1.5
+                      text-gray-600
+                      transition
+                      hover:bg-gray-100
+                      dark:text-gray-300
+                      dark:hover:bg-white/10
+                    "
+                  >
                     <MoreHorizontal size={16} />
                   </button>
                 </div>

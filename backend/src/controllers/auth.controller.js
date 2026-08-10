@@ -1,4 +1,5 @@
 import {
+  changePasswordSchema,
   forgotPasswordValidation,
   loginValidation,
   logoutValidation,
@@ -163,3 +164,4 @@ export const logout = async (req, res) => {
     });
   }
 };
+

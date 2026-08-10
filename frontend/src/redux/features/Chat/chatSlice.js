@@ -7,6 +7,7 @@ const initialState = {
   conversationLoading: false,
   messages: [],
   newMessageLoading: false,
+  isSendDisable: false,
 };
 
 // export const getUserList = createAsyncThunk(
@@ -73,6 +74,9 @@ const chatSlice = createSlice({
     setNewMessageLoading: (state, action) => {
       state.newMessageLoading = action.payload;
     },
+    setIsSendDisable: (state, action) => {
+      state.isSendDisable = action.payload;
+    },
     clearChatState: () => initialState,
   },
   extraReducers: (builder) => {
@@ -108,6 +112,7 @@ export const {
   addErrorMessage,
   clearMessages,
   setNewMessageLoading,
+  setIsSendDisable,
   clearChatState,
 } = chatSlice.actions;
 

@@ -10,6 +10,8 @@ import notFound from "./middlewares/notFound.js";
 import errorHandler from "./middlewares/errorHandler.js";
 import { redisClient } from "./config/redis.js";
 import env from "./config/env.js";
+import path from "path";
+
 const app = express();
 // Middlewares
 app.use(
@@ -28,6 +30,7 @@ app.use(morgan("dev"));
 // Routes
 app.use("/api/auth", authRoutes);
 app.use("/api/profile", profileRoutes);
+app.use("/uploads", express.static(path.join(process.cwd(), "src/uploads")));
 app.use(notFound);
 app.use(errorHandler);
 // Health Check
@@ -37,6 +40,5 @@ app.get("/", (req, res) => {
     message: "AI Chatbot API Running 🚀",
   });
 });
-
 
 export default app;

@@ -16,11 +16,17 @@ export const userCreate = async (payload) => {
   return await User.create(payload);
 };
 
-export const userUpdate = async (id, payload) => {
-  return await User.findByIdAndUpdate(id, payload, {
-    new: true,
-    runValidators: true,
-  });
+export const updateUserProfile = async (userId, data) => {
+  return await User.findByIdAndUpdate(
+    userId,
+    {
+      $set: data,
+    },
+    {
+      new: true,
+      runValidators: true,
+    },
+  ).select("-password");
 };
 
 export const userDelete = async (id) => {

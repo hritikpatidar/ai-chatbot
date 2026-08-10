@@ -17,6 +17,8 @@ import OTPVerification from "../pages/OTPVerification";
 import PrivacyPolicy from "../pages/PrivacyPolicy";
 import ResetPassword from "../pages/ResetPassword";
 import { SocketProvider } from "../context/SocketContext";
+import Profile from "../pages/Profile";
+import Security from "../pages/Security";
 
 export default function AppRoutes() {
   return (
@@ -43,6 +45,8 @@ export default function AppRoutes() {
             {/* <Route path="/scheduled" element={<Scheduled />} />
           <Route path="/plugins" element={<Plugins />} /> */}
             <Route path="/settings" element={<Settings />} />
+            <Route path="/profile" element={<Profile />} />
+            <Route path="/security" element={<Security />} />
           </Route>
         </Route>
       </Routes>

@@ -1,5 +1,5 @@
 import { Navigate, Outlet } from "react-router-dom";
-import { isLogin } from "../Utils/Auth";
+import { isLogin } from "../utils/Auth";
 
 export const PublicRoute = () => {
   const isToken = isLogin();

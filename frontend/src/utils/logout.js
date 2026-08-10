@@ -1,7 +1,11 @@
 import toast from "react-hot-toast";
 import { logoutUser } from "../redux/features/Auth/authSlice";
 import socket from "../socket/socket";
-import { clearLocalStorage, getItemLocalStorage, setItemLocalStorage } from "./browserServices";
+import {
+  clearLocalStorage,
+  getItemLocalStorage,
+  setItemLocalStorage,
+} from "./browserServices";
 
 export const handleLogout = async ({
   dispatch,
@@ -20,14 +24,10 @@ export const handleLogout = async ({
         refreshToken,
       }),
     ).unwrap();
-
-    setProfileOpen?.(false);
-
-    navigate("/login");
   } catch (error) {
     console.error(error);
-    toast.error(error?.message || "Logout failed",{
-      id:"INVALID_TOKEN"
+    toast.error(error?.message || "Logout failed", {
+      id: "INVALID_TOKEN",
     });
   } finally {
     socket.disconnect();
@@ -41,7 +41,7 @@ export const handleLogout = async ({
     if (fcmToken) {
       setItemLocalStorage("fcm_token", fcmToken);
     }
-
-    setIsLogoutLoading?.(false);
+    navigate("/login");
+    // setIsLogoutLoading?.(false);
   }
 };

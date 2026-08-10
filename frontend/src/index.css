@@ -1,17 +1,56 @@
 @import "tailwindcss";
 
-/* Chrome, Edge, Safari Autofill Fix */
+@custom-variant dark (&:where(.dark, .dark *));
+
+/* ==========================================
+   Global
+========================================== */
+
+html {
+  color-scheme: light;
+}
+
+html.dark {
+  color-scheme: dark;
+}
+
+/* ==========================================
+   Chrome / Edge / Safari Autofill
+========================================== */
+
+/* Light Theme */
 
 input:-webkit-autofill,
 input:-webkit-autofill:hover,
 input:-webkit-autofill:focus,
 input:-webkit-autofill:active {
+  -webkit-box-shadow: 0 0 0 1000px #f3f4f6 inset !important;
+  -webkit-text-fill-color: #111827 !important;
+  caret-color: #111827 !important;
+
+  transition:
+    background-color 9999s ease-in-out 0s,
+    color 9999s ease-in-out 0s;
+}
+
+/* Dark Theme */
+
+.dark input:-webkit-autofill,
+.dark input:-webkit-autofill:hover,
+.dark input:-webkit-autofill:focus,
+.dark input:-webkit-autofill:active {
   -webkit-box-shadow: 0 0 0 1000px #222938 inset !important;
   -webkit-text-fill-color: #ffffff !important;
   caret-color: #ffffff !important;
-  /* border-radius: inherit; */
-  transition: background-color 9999s ease-in-out 0s;
+
+  transition:
+    background-color 9999s ease-in-out 0s,
+    color 9999s ease-in-out 0s;
 }
+
+/* ==========================================
+   Cursor
+========================================== */
 
 button,
 a,
@@ -21,19 +60,33 @@ summary {
   cursor: pointer !important;
 }
 
-
+/* ==========================================
+   Scrollbar
+========================================== */
 
 ::-webkit-scrollbar {
   width: 5px !important;
   height: 6px !important;
 }
 
+/* Light Scrollbar */
+
 ::-webkit-scrollbar-thumb {
   background-color: rgba(0, 0, 0, 0.2);
+  border-radius: 20px;
 }
 
 ::-webkit-scrollbar-track {
-  background: rgba(255, 255, 255, 0.1);
+  background: rgba(0, 0, 0, 0.05);
 }
 
+/* Dark Scrollbar */
+
+.dark ::-webkit-scrollbar-thumb {
+  background-color: rgba(255, 255, 255, 0.2);
+}
+
+.dark ::-webkit-scrollbar-track {
+  background: rgba(255, 255, 255, 0.05);
+}
 

@@ -60,8 +60,6 @@ export const SocketProvider = ({ children }) => {
           navigate,
           refreshToken,
         });
-
-        navigate("/login");
       }
     };
 

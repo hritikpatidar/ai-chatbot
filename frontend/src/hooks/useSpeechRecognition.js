@@ -6,6 +6,7 @@ import {
   appendAssistantChunk,
   setActivePage,
   setConversationLoading,
+  setIsSendDisable,
   setMessages,
   setNewMessageLoading,
 } from "../redux/features/Chat/chatSlice";
@@ -46,9 +47,8 @@ export default function useSpeechRecognition({
   const fileInputRef = useRef(null);
   const [selectedFiles, setSelectedFiles] = useState([]);
   const [message, setMessage] = useState("");
-  const [isSendDisable, setIsSendDisable] = useState(false);
   const [isListening, setIsListening] = useState(false);
-  const { messages, newMessageLoading } = useSelector(
+  const { messages, newMessageLoading, isSendDisable } = useSelector(
     (store) => store.chatSlice,
   );
   const [copiedIndex, setCopiedIndex] = useState(null);
@@ -89,18 +89,18 @@ export default function useSpeechRecognition({
     const handleError = ({ message }) => {
       console.log("❌ ai:error", message);
       dispatch(setNewMessageLoading(false));
-      setIsSendDisable(false);
+      dispatch(setIsSendDisable(false));
       dispatch(addErrorMessage(message));
     };
     const handleEnd = (data) => {
       console.log("✅ ai:end", data);
-      setIsSendDisable(false);
+      dispatch(setIsSendDisable(false));
     };
 
     const handleStopeGeneration = (message) => {
       console.log("🛑 ai:stopped", data);
       dispatch(setNewMessageLoading(false));
-      setIsSendDisable(false);
+      dispatch(setIsSendDisable(false));
     };
 
     const handleMessageList = (data) => {
@@ -254,7 +254,7 @@ export default function useSpeechRecognition({
       role: "user",
       text: message,
     };
-    setIsSendDisable(true);
+    dispatch(setIsSendDisable(true));
     dispatch(setNewMessageLoading(true));
     dispatch(addMessage(messagePayload)); // message add in message list
     // const newMessages = [...messages, messagePayload];
@@ -268,7 +268,7 @@ export default function useSpeechRecognition({
   };
 
   const handleStopGenerating = () => {
-    setIsSendDisable(false);
+    dispatch(setIsSendDisable(false));
     dispatch(setNewMessageLoading(false));
     stopAIMessage();
     // baad me socket.emit("stop-generation") ya abort controller laga dena

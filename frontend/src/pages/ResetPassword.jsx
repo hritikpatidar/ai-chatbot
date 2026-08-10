@@ -12,7 +12,7 @@ import toast from "react-hot-toast";
 export default function ResetPassword() {
   const navigate = useNavigate();
   const { state } = useLocation();
-  const { email, purpose, resetToken } = state;
+  const { email = "", purpose = "", resetToken = "" } = state || {};
 
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
@@ -50,7 +50,7 @@ export default function ResetPassword() {
       <AnimatedBackground />
 
       <motion.div
-       initial={{ opacity: 0, y: 40 }}
+        initial={{ opacity: 0, y: 40 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.7 }}
         className="relative z-10 w-full max-w-md rounded-3xl border border-white/10 bg-[#171b23]/80 p-7 backdrop-blur-xl shadow-2xl"

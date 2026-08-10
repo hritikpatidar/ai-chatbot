@@ -1,5 +1,12 @@
 import { useState } from "react";
-import { Eye, EyeOff, Mail, Lock, Sparkles, Check } from "lucide-react";
+import {
+  Eye,
+  EyeOff,
+  Mail,
+  Lock,
+  Sparkles,
+  Check,
+} from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { motion } from "framer-motion";
 import { setItemLocalStorage } from "../utils/browserServices";
@@ -14,7 +21,9 @@ import { loginSchema } from "../utils/validation";
 export default function Login() {
   const navigate = useNavigate();
   const dispatch = useDispatch();
+
   const [showPassword, setShowPassword] = useState(false);
+
   const {
     register,
     handleSubmit,
@@ -27,16 +36,29 @@ export default function Login() {
   const onSubmit = async (data) => {
     try {
       const response = await dispatch(loginUser(data)).unwrap();
+
       if (response?.success) {
         toast.success(response?.message);
-        setItemLocalStorage("token", response?.accessToken);
-        setItemLocalStorage("refreshToken", response?.refreshToken);
-        setItemLocalStorage("userRole", response?.user?.role);
+
+        setItemLocalStorage(
+          "token",
+          response?.accessToken,
+        );
+
+        setItemLocalStorage(
+          "refreshToken",
+          response?.refreshToken,
+        );
+
+        setItemLocalStorage(
+          "userRole",
+          response?.user?.role,
+        );
+
         navigate("/");
-      }else{
+      } else {
         toast.error(response?.message);
       }
-
     } catch (error) {
       console.error("Login Error:", error);
       toast.error("An error occurred while logging in.");
@@ -44,7 +66,19 @@ export default function Login() {
   };
 
   return (
-    <div className="relative min-h-screen overflow-hidden bg-[#0b0f17]">
+    <div
+      className="
+        relative
+        min-h-screen
+        overflow-hidden
+        bg-gray-50
+        text-gray-900
+        transition-colors
+        duration-500
+        dark:bg-[#0b0f17]
+        dark:text-white
+      "
+    >
       {/* Background */}
       <AnimatedBackground />
 
@@ -52,9 +86,19 @@ export default function Login() {
         initial={{ opacity: 0 }}
         animate={{ opacity: 1 }}
         transition={{ duration: 0.8 }}
-        className="relative z-10 mx-auto flex min-h-screen max-w-7xl"
+        className="
+          relative
+          z-10
+          mx-auto
+          flex
+          min-h-screen
+          max-w-7xl
+        "
       >
-        {/* Left Side */}
+        {/* =========================
+            Left Side
+        ========================== */}
+
         <motion.div
           initial={{ x: -80, opacity: 0 }}
           animate={{ x: 0, opacity: 1 }}
@@ -62,7 +106,14 @@ export default function Login() {
             duration: 0.8,
             ease: "easeOut",
           }}
-          className="hidden flex-1 lg:flex items-center justify-center px-8"
+          className="
+            hidden
+            flex-1
+            items-center
+            justify-center
+            px-8
+            lg:flex
+          "
         >
           <div className="max-w-xl text-center">
             <div className="relative flex justify-center">
@@ -78,7 +129,17 @@ export default function Login() {
                   repeat: Infinity,
                   ease: "easeInOut",
                 }}
-                className="absolute h-28 w-28 rounded-full bg-linear-to-r from-blue-500 via-cyan-400 to-purple-600 blur-3xl"
+                className="
+                  absolute
+                  h-28
+                  w-28
+                  rounded-full
+                  bg-linear-to-r
+                  from-blue-500
+                  via-cyan-400
+                  to-purple-600
+                  blur-3xl
+                "
               />
 
               {/* Orbit Particles */}
@@ -95,7 +156,14 @@ export default function Login() {
                   className="absolute h-40 w-40"
                 >
                   <div
-                    className="absolute h-2 w-2 rounded-full bg-cyan-400 shadow-[0_0_12px_#22d3ee]"
+                    className="
+                      absolute
+                      h-2
+                      w-2
+                      rounded-full
+                      bg-cyan-400
+                      shadow-[0_0_12px_#22d3ee]
+                    "
                     style={{
                       top: "0%",
                       left: "50%",
@@ -142,7 +210,20 @@ export default function Login() {
                 whileHover={{
                   scale: 1.12,
                 }}
-                className="relative flex h-28 w-28 items-center justify-center rounded-full bg-linear-to-br from-cyan-400 via-blue-500 to-purple-600 shadow-[0_0_80px_rgba(59,130,246,.8)]"
+                className="
+                  relative
+                  flex
+                  h-28
+                  w-28
+                  items-center
+                  justify-center
+                  rounded-full
+                  bg-linear-to-br
+                  from-cyan-400
+                  via-blue-500
+                  to-purple-600
+                  shadow-[0_0_80px_rgba(59,130,246,.8)]
+                "
               >
                 {/* Inner Glow */}
 
@@ -155,7 +236,13 @@ export default function Login() {
                     duration: 2,
                     repeat: Infinity,
                   }}
-                  className="absolute inset-5 rounded-full bg-white/20 blur-xl"
+                  className="
+                    absolute
+                    inset-5
+                    rounded-full
+                    bg-white/20
+                    blur-xl
+                  "
                 />
 
                 {/* Sparkles */}
@@ -171,7 +258,10 @@ export default function Login() {
                     ease: "easeInOut",
                   }}
                 >
-                  <Sparkles size={34} className="relative z-10 text-white" />
+                  <Sparkles
+                    size={34}
+                    className="relative z-10 text-white"
+                  />
                 </motion.div>
               </motion.div>
             </div>
@@ -185,7 +275,13 @@ export default function Login() {
                 repeat: Infinity,
                 ease: "easeInOut",
               }}
-              className="mt-8 text-3xl font-bold text-white"
+              className="
+                mt-8
+                text-3xl
+                font-bold
+                text-gray-900
+                dark:text-white
+              "
             >
               AI Assistant
             </motion.h1>
@@ -199,17 +295,36 @@ export default function Login() {
                 repeat: Infinity,
                 ease: "easeInOut",
               }}
-              className="mt-3 text-sm leading-6 text-gray-400"
+              className="
+                mt-3
+                text-sm
+                leading-6
+                text-gray-600
+                dark:text-gray-400
+              "
             >
-              Experience next-generation AI conversations with a clean, fast and
-              intelligent assistant.
+              Experience next-generation AI conversations
+              with a clean, fast and intelligent assistant.
             </motion.p>
           </div>
         </motion.div>
 
-        {/* Right Side */}
+        {/* =========================
+            Right Side
+        ========================== */}
 
-        <div className="flex w-full items-center justify-center px-5 py-6 lg:w-120 xl:w-175">
+        <div
+          className="
+            flex
+            w-full
+            items-center
+            justify-center
+            px-5
+            py-6
+            lg:w-120
+            xl:w-175
+          "
+        >
           <motion.div
             initial={{
               x: 120,
@@ -225,7 +340,20 @@ export default function Login() {
               duration: 0.8,
               ease: "easeOut",
             }}
-            className="w-full rounded-2xl border border-white/10 bg-[#171b23]/80 p-8 backdrop-blur-xl shadow-2xl"
+            className="
+              w-full
+              rounded-2xl
+              border
+              border-gray-200
+              bg-white/85
+              p-8
+              shadow-2xl
+              backdrop-blur-xl
+              transition-colors
+              duration-300
+              dark:border-white/10
+              dark:bg-[#171b23]/80
+            "
           >
             <motion.h2
               initial={{ y: 20, opacity: 0 }}
@@ -234,12 +362,26 @@ export default function Login() {
                 delay: 0.4,
                 duration: 0.6,
               }}
-              className="text-2xl font-bold text-white"
+              className="
+                text-2xl
+                font-bold
+                text-gray-900
+                dark:text-white
+              "
             >
               Welcome Back 👋
             </motion.h2>
 
-            <p className="mt-1 text-sm text-gray-400">Sign in to continue</p>
+            <p
+              className="
+                mt-1
+                text-sm
+                text-gray-500
+                dark:text-gray-400
+              "
+            >
+              Sign in to continue
+            </p>
 
             <motion.form
               initial={{ opacity: 0 }}
@@ -252,27 +394,68 @@ export default function Login() {
               autoComplete="off"
               onSubmit={handleSubmit(onSubmit)}
             >
-              {/* Email */}
+              {/* =========================
+                  Email
+              ========================== */}
 
               <motion.div
                 initial={{ y: 25, opacity: 0 }}
                 animate={{ y: 0, opacity: 1 }}
                 transition={{ duration: 0.45 }}
               >
-                <label className="mb-2 block text-sm text-gray-300">
-                  Email <span className={"text-red-400"}>*</span>
+                <label
+                  className="
+                    mb-2
+                    block
+                    text-sm
+                    text-gray-700
+                    dark:text-gray-300
+                  "
+                >
+                  Email{" "}
+                  <span className="text-red-500 dark:text-red-400">
+                    *
+                  </span>
                 </label>
 
-                <div className="flex items-center rounded-xl border border-white/10 bg-[#222938] px-4 transition focus-within:border-blue-500">
-                  <Mail size={16} className="text-gray-400" />
+                <div
+                  className="
+                    flex
+                    items-center
+                    rounded-xl
+                    border
+                    border-gray-200
+                    bg-gray-100
+                    px-4
+                    transition
+                    focus-within:border-blue-500
+                    dark:border-white/10
+                    dark:bg-[#222938]
+                  "
+                >
+                  <Mail
+                    size={16}
+                    className="text-gray-400"
+                  />
 
                   <input
                     type="email"
                     placeholder="Enter your email"
-                    className="w-full bg-transparent px-3 py-3 text-white outline-none placeholder:text-gray-500"
+                    className="
+                      w-full
+                      bg-transparent
+                      px-3
+                      py-3
+                      text-gray-900
+                      outline-none
+                      placeholder:text-gray-400
+                      dark:text-white
+                      dark:placeholder:text-gray-500
+                    "
                     {...register("email")}
                   />
                 </div>
+
                 {errors.email && (
                   <p className="mt-1 text-xs text-red-500">
                     {errors.email.message}
@@ -280,38 +463,92 @@ export default function Login() {
                 )}
               </motion.div>
 
-              {/* Password */}
+              {/* =========================
+                  Password
+              ========================== */}
 
               <motion.div
                 initial={{ y: 25, opacity: 0 }}
                 animate={{ y: 0, opacity: 1 }}
                 transition={{ duration: 0.45 }}
               >
-                <label className="mb-2 block text-sm text-gray-300">
-                  Password <span className={"text-red-400"}>*</span>
+                <label
+                  className="
+                    mb-2
+                    block
+                    text-sm
+                    text-gray-700
+                    dark:text-gray-300
+                  "
+                >
+                  Password{" "}
+                  <span className="text-red-500 dark:text-red-400">
+                    *
+                  </span>
                 </label>
 
-                <div className="flex items-center rounded-xl border border-white/10 bg-[#222938] px-4 transition focus-within:border-blue-500">
-                  <Lock size={18} className="text-gray-400" />
+                <div
+                  className="
+                    flex
+                    items-center
+                    rounded-xl
+                    border
+                    border-gray-200
+                    bg-gray-100
+                    px-4
+                    transition
+                    focus-within:border-blue-500
+                    dark:border-white/10
+                    dark:bg-[#222938]
+                  "
+                >
+                  <Lock
+                    size={18}
+                    className="text-gray-400"
+                  />
 
                   <input
-                    type={showPassword ? "text" : "password"}
+                    type={
+                      showPassword
+                        ? "text"
+                        : "password"
+                    }
                     placeholder="Enter your password"
-                    className="w-full bg-transparent px-3 py-3 text-white outline-none placeholder:text-gray-500"
+                    className="
+                      w-full
+                      bg-transparent
+                      px-3
+                      py-3
+                      text-gray-900
+                      outline-none
+                      placeholder:text-gray-400
+                      dark:text-white
+                      dark:placeholder:text-gray-500
+                    "
                     {...register("password")}
                   />
 
                   <button
                     type="button"
-                    onClick={() => setShowPassword(!showPassword)}
+                    onClick={() =>
+                      setShowPassword(!showPassword)
+                    }
+                    className="shrink-0"
                   >
                     {showPassword ? (
-                      <EyeOff size={16} className="text-gray-400" />
+                      <EyeOff
+                        size={16}
+                        className="text-gray-500 dark:text-gray-400"
+                      />
                     ) : (
-                      <Eye size={16} className="text-gray-400" />
+                      <Eye
+                        size={16}
+                        className="text-gray-500 dark:text-gray-400"
+                      />
                     )}
                   </button>
                 </div>
+
                 {errors.password && (
                   <p className="mt-1 text-xs text-red-500">
                     {errors.password.message}
@@ -319,39 +556,64 @@ export default function Login() {
                 )}
               </motion.div>
 
-              {/* Remember */}
+              {/* =========================
+                  Remember
+              ========================== */}
 
               <motion.div
                 initial={{ y: 25, opacity: 0 }}
                 animate={{ y: 0, opacity: 1 }}
                 transition={{ duration: 0.45 }}
-                className="flex items-center justify-between text-sm"
+                className="
+                  flex
+                  items-center
+                  justify-between
+                  text-sm
+                "
               >
-                <label className="flex items-center gap-3 cursor-pointer">
+                <label className="flex cursor-pointer items-center gap-3">
                   <input
                     type="checkbox"
                     className="
-                        h-4 w-4
-                        rounded
-                        accent-gray-600
-                        cursor-pointer
+                      h-4
+                      w-4
+                      cursor-pointer
+                      rounded
+                      accent-blue-600
                     "
                     {...register("remember")}
                   />
 
-                  <span className="text-sm text-gray-400">Remember me</span>
+                  <span
+                    className="
+                      text-sm
+                      text-gray-600
+                      dark:text-gray-400
+                    "
+                  >
+                    Remember me
+                  </span>
                 </label>
 
                 <button
                   type="button"
-                  className="text-blue-400 hover:text-blue-300"
-                  onClick={() => navigate("/forgot-password")}
+                  className="
+                    text-blue-600
+                    hover:text-blue-700
+                    dark:text-blue-400
+                    dark:hover:text-blue-300
+                  "
+                  onClick={() =>
+                    navigate("/forgot-password")
+                  }
                 >
                   Forgot Password?
                 </button>
               </motion.div>
 
-              {/* Login */}
+              {/* =========================
+                  Login
+              ========================== */}
 
               <motion.button
                 type="submit"
@@ -362,41 +624,109 @@ export default function Login() {
                 whileTap={{
                   scale: 0.97,
                 }}
-                className="w-full rounded-xl bg-linear-to-r from-blue-500 to-purple-600 py-2.5 text-sm font-semibold text-white"
+                className="
+                  w-full
+                  rounded-xl
+                  bg-linear-to-r
+                  from-blue-500
+                  to-purple-600
+                  py-2.5
+                  text-sm
+                  font-semibold
+                  text-white
+                "
               >
-                {isSubmitting ? "Logging in..." : "Login"}
+                {isSubmitting
+                  ? "Logging in..."
+                  : "Login"}
               </motion.button>
 
-              {/* Divider */}
+              {/* =========================
+                  Divider
+              ========================== */}
 
               <div className="flex items-center gap-3">
-                <div className="h-px flex-1 bg-white/10" />
+                <div
+                  className="
+                    h-px
+                    flex-1
+                    bg-gray-200
+                    dark:bg-white/10
+                  "
+                />
 
-                <span className="text-sm text-gray-500">OR</span>
+                <span className="text-sm text-gray-500">
+                  OR
+                </span>
 
-                <div className="h-px flex-1 bg-white/10" />
+                <div
+                  className="
+                    h-px
+                    flex-1
+                    bg-gray-200
+                    dark:bg-white/10
+                  "
+                />
               </div>
 
-              {/* Google */}
+              {/* =========================
+                  Google
+              ========================== */}
 
               <button
                 type="button"
-                className="flex w-full items-center justify-center gap-3 rounded-xl border border-white/10 bg-[#222938] py-2.5 text-sm text-white transition hover:bg-[#2c3547]"
+                className="
+                  flex
+                  w-full
+                  items-center
+                  justify-center
+                  gap-3
+                  rounded-xl
+                  border
+                  border-gray-200
+                  bg-gray-100
+                  py-2.5
+                  text-sm
+                  text-gray-800
+                  transition
+                  hover:bg-gray-200
+                  dark:border-white/10
+                  dark:bg-[#222938]
+                  dark:text-white
+                  dark:hover:bg-[#2c3547]
+                "
               >
                 <img
                   src="https://www.svgrepo.com/show/475656/google-color.svg"
                   alt="Google"
                   className="h-5 w-5"
                 />
+
                 Continue with Google
               </button>
             </motion.form>
 
-            <p className="mt-6 text-center text-sm text-gray-400">
+            <p
+              className="
+                mt-6
+                text-center
+                text-sm
+                text-gray-500
+                dark:text-gray-400
+              "
+            >
               Don't have an account?
+
               <button
                 onClick={() => navigate("/signup")}
-                className="ml-2 font-semibold text-blue-400 hover:text-blue-300"
+                className="
+                  ml-2
+                  font-semibold
+                  text-blue-600
+                  hover:text-blue-700
+                  dark:text-blue-400
+                  dark:hover:text-blue-300
+                "
               >
                 Sign Up
               </button>

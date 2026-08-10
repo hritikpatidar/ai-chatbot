@@ -11,7 +11,7 @@ import {
   MessageSquarePlus,
   MoreHorizontal,
 } from "lucide-react";
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useRef } from "react";
 import useSpeechRecognition from "../hooks/useSpeechRecognition";
 import AIMessage from "../components/Chat/AIMessage";
 import { useSelector } from "react-redux";
@@ -50,14 +50,15 @@ export default function ChatContainer() {
   }, [messages]);
 
   return (
-    <div className="flex h-full w-full flex-col">
-      {/* Chat Area */}
+    // <div className="flex h-full w-full flex-col bg-gray-50 text-gray-900 transition-colors duration-300 dark:bg-[#0b0f17] dark:text-white">
+    <div className="flex h-full w-full flex-col bg-transparent text-gray-900 transition-colors duration-300 dark:text-white">
       <div className="flex-1 overflow-y-auto px-4">
         <div className="mx-auto flex min-h-full max-w-5xl flex-col py-1 md:px-28 lg:px-22">
           {conversationLoading ? (
             <div className="absolute inset-0 flex items-center justify-center">
-              <div className="flex items-center gap-2 text-sm text-gray-400">
-                <div className="h-4 w-4 animate-spin rounded-full border-2 border-gray-600 border-t-cyan-400" />
+              <div className="flex items-center gap-2 text-sm text-gray-500 dark:text-gray-400">
+                <div className="h-4 w-4 animate-spin rounded-full border-2 border-gray-300 border-t-cyan-500 dark:border-gray-600 dark:border-t-cyan-400" />
+
                 <span>Loading conversation...</span>
               </div>
             </div>
@@ -65,17 +66,17 @@ export default function ChatContainer() {
             messages.map((msg, index) => (
               <div
                 key={msg._id || `${msg.role}-${index}`}
-                className={`group mb-4 flex ${
+                className={`group mb-4 flex bg-transparent ${
                   msg.role === "user" ? "justify-end" : "justify-start"
                 }`}
               >
                 {/* Wrapper */}
-                <div className="relative inline-block max-w-full">
+                <div className="relative  inline-block max-w-full">
                   {/* Message Bubble */}
                   <div
                     className={`rounded-2xl px-4 py-3 ${
                       msg.role === "user"
-                        ? "border border-white/10 bg-[#161f2d]"
+                        ? "border border-gray-200 bg-white text-gray-900 shadow-sm dark:border-white/10 dark:bg-[#161f2d] dark:text-white"
                         : ""
                     }`}
                   >
@@ -88,28 +89,40 @@ export default function ChatContainer() {
                     )}
                   </div>
 
-                  {/* Actions */}
                   {msg.role === "user" && (
                     <div
                       className="
-                       absolute
-                      -bottom-7
-                      right-1
-                      flex
-                      items-center
-                      gap-2
-                      opacity-0
-                      transition
-                      duration-200
-                      group-hover:opacity-200
-                    "
+                        absolute
+                        -bottom-7
+                        right-1
+                        flex
+                        items-center
+                        gap-2
+                        opacity-0
+                        transition
+                        duration-200
+                        group-hover:opacity-100
+                      "
                     >
                       <button
                         onClick={() => handleCopy(msg.text, index)}
-                        className="rounded-md p-1 text-gray-400 hover:bg-gray-800"
+                        className="
+                          rounded-md
+                          p-1
+                          text-gray-500
+                          transition
+                          hover:bg-gray-200
+                          hover:text-gray-800
+                          dark:text-gray-400
+                          dark:hover:bg-gray-800
+                          dark:hover:text-white
+                        "
                       >
                         {copiedIndex === index ? (
-                          <Check size={15} className="text-green-400" />
+                          <Check
+                            size={15}
+                            className="text-green-500 dark:text-green-400"
+                          />
                         ) : (
                           <Copy size={15} />
                         )}
@@ -122,10 +135,23 @@ export default function ChatContainer() {
                       {/* Copy */}
                       <button
                         onClick={() => handleCopy(msg.text, index)}
-                        className="rounded-md p-1 text-gray-400 transition hover:bg-gray-800"
+                        className="
+                          rounded-md
+                          p-1
+                          text-gray-500
+                          transition
+                          hover:bg-gray-200
+                          hover:text-gray-800
+                          dark:text-gray-400
+                          dark:hover:bg-gray-800
+                          dark:hover:text-white
+                        "
                       >
                         {copiedIndex === index ? (
-                          <Check size={15} className="text-green-400" />
+                          <Check
+                            size={15}
+                            className="text-green-500 dark:text-green-400"
+                          />
                         ) : (
                           <Copy size={15} />
                         )}
@@ -133,36 +159,63 @@ export default function ChatContainer() {
 
                       {/* More */}
                       <div className="relative group/more">
-                        <button className="rounded-md p-1 text-gray-400 transition hover:bg-gray-800">
+                        <button
+                          className="
+                            rounded-md
+                            p-1
+                            text-gray-500
+                            transition
+                            hover:bg-gray-200
+                            hover:text-gray-800
+                            dark:text-gray-400
+                            dark:hover:bg-gray-800
+                            dark:hover:text-white
+                          "
+                        >
                           <MoreHorizontal size={15} />
                         </button>
 
                         {/* Dropdown */}
                         <div
                           className="
-                          invisible
-                          absolute
-                          left-0
-                          top-7
-                          z-50
-                          w-32
-                          overflow-hidden
-                          rounded-lg
-                          border
-                          border-white/10
-                          bg-[#1b2232]
-                          py-1
-                          opacity-0
-                          shadow-xl
-                          transition-all
-                          duration-150
-                          group-hover/more:visible
-                          group-hover/more:opacity-100
-                        "
+                            invisible
+                            absolute
+                            left-0
+                            top-7
+                            z-50
+                            w-32
+                            overflow-hidden
+                            rounded-lg
+                            border
+                            border-gray-200
+                            bg-white
+                            py-1
+                            opacity-0
+                            shadow-xl
+                            transition-all
+                            duration-150
+                            group-hover/more:visible
+                            group-hover/more:opacity-100
+                            dark:border-white/10
+                            dark:bg-[#1b2232]
+                          "
                         >
                           <button
                             onClick={() => handleFeedback("up")}
-                            className="flex w-full items-center gap-2 px-2.5 py-1.5 text-xs text-gray-300 hover:bg-white/10"
+                            className="
+                              flex
+                              w-full
+                              items-center
+                              gap-2
+                              px-2.5
+                              py-1.5
+                              text-xs
+                              text-gray-700
+                              transition
+                              hover:bg-gray-100
+                              dark:text-gray-300
+                              dark:hover:bg-white/10
+                            "
                           >
                             <ThumbsUp size={13} />
                             Good
@@ -170,7 +223,20 @@ export default function ChatContainer() {
 
                           <button
                             onClick={() => handleFeedback("down")}
-                            className="flex w-full items-center gap-2 px-2.5 py-1.5 text-xs text-gray-300 hover:bg-white/10"
+                            className="
+                              flex
+                              w-full
+                              items-center
+                              gap-2
+                              px-2.5
+                              py-1.5
+                              text-xs
+                              text-gray-700
+                              transition
+                              hover:bg-gray-100
+                              dark:text-gray-300
+                              dark:hover:bg-white/10
+                            "
                           >
                             <ThumbsDown size={13} />
                             Bad
@@ -183,14 +249,18 @@ export default function ChatContainer() {
               </div>
             ))
           )}
+
+          {/* Thinking */}
           {newMessageLoading && (
-            <p className="mb-3 text-sm font-medium text-gray-400">
-              Thinking<span className="animate-pulse">...</span>
+            <p className="mb-3 text-sm font-medium text-gray-500 dark:text-gray-400">
+              Thinking
+              <span className="animate-pulse">...</span>
             </p>
           )}
+
           {/* Spacer */}
           <div className="mt-auto" />
-          {/* Mini Voice Orb */}
+
           <AnimatePresence mode="wait">
             {isListening && (
               <motion.div
@@ -199,7 +269,7 @@ export default function ChatContainer() {
                 animate={{ opacity: 1, scale: 1 }}
                 exit={{ opacity: 0, scale: 0.5 }}
                 transition={{ duration: 0.3 }}
-                className="relative mt-3 flex items-center justify-center mb-3"
+                className="relative mb-3 mt-3 flex items-center justify-center"
               >
                 {/* Outer Ring 1 */}
                 <motion.div
@@ -258,37 +328,74 @@ export default function ChatContainer() {
               </motion.div>
             )}
           </AnimatePresence>
-          <p className="pb-2 text-center text-[11px] text-gray-500">
+
+          <p className="pb-2 text-center text-[11px] text-gray-500 dark:text-gray-500">
             AI can make mistakes. Verify important information.
           </p>
+
           <div ref={messagesEndRef} />
         </div>
       </div>
-
-      {/* Input */}
       <div className="py-1 md:px-28 lg:px-50">
         <div className="mx-auto max-w-5xl">
-          <div className="rounded-2xl border border-white/10 bg-[#161f2d] px-3 py-3">
-            {/* Selected Files */}
+          <div
+            className="
+              rounded-2xl
+              border
+              border-gray-200
+              bg-white
+              px-3
+              py-3
+              shadow-sm
+              transition-colors
+              duration-300
+              dark:border-white/10
+              dark:bg-[#161f2d]
+            "
+          >
             {selectedFiles.length > 0 && (
               <div className="mb-3 flex gap-3 overflow-x-auto pb-1">
                 {selectedFiles.map((file, index) => {
                   const isImage = file.type.startsWith("image/");
 
                   return (
-                    <div key={index} className="relative shrink-0 ms-2 mt-2">
+                    <div key={index} className="relative ms-2 mt-2 shrink-0">
                       {isImage ? (
                         <img
                           src={URL.createObjectURL(file)}
                           alt=""
-                          className="h-16 w-16 rounded-xl border border-white/10 object-cover"
+                          className="
+                            h-16
+                            w-16
+                            rounded-xl
+                            border
+                            border-gray-200
+                            object-cover
+                            dark:border-white/10
+                          "
                         />
                       ) : (
-                        <div className="flex h-16 w-28 flex-col justify-center rounded-xl border border-white/10 bg-[#232936] px-3">
-                          <span className="truncate text-xs text-white">
+                        <div
+                          className="
+                            flex
+                            h-16
+                            w-28
+                            flex-col
+                            justify-center
+                            rounded-xl
+                            border
+                            border-gray-200
+                            bg-gray-100
+                            px-3
+                            dark:border-white/10
+                            dark:bg-[#232936]
+                          "
+                        >
+                          <span className="truncate text-xs text-gray-800 dark:text-white">
                             {file.name}
                           </span>
-                          <span className="text-[10px] text-gray-400">
+
+                          <span className="text-[10px] text-gray-500 dark:text-gray-400">
                             {(file.size / 1024 / 1024).toFixed(2)} MB
                           </span>
                         </div>
@@ -296,7 +403,22 @@ export default function ChatContainer() {
 
                       <button
                         onClick={() => removeFile(index)}
-                        className="absolute -right-1 -top-1 flex h-5 w-5 items-center justify-center rounded-full bg-black/70 text-xs text-white hover:bg-red-500"
+                        className="
+                          absolute
+                          -right-1
+                          -top-1
+                          flex
+                          h-5
+                          w-5
+                          items-center
+                          justify-center
+                          rounded-full
+                          bg-black/70
+                          text-xs
+                          text-white
+                          transition
+                          hover:bg-red-500
+                        "
                       >
                         ✕
                       </button>
@@ -305,12 +427,12 @@ export default function ChatContainer() {
                 })}
               </div>
             )}
-
-            {/* Input Row */}
             <form
               onSubmit={(e) => {
                 e.preventDefault();
+
                 if (isSendDisable) return;
+
                 handleSend();
               }}
               className="flex flex-col gap-2"
@@ -335,12 +457,15 @@ export default function ChatContainer() {
                   overflow-y-auto
                   bg-transparent
                   text-[13px]
-                  text-white
-                  outline-none
-                  placeholder:text-gray-500
                   leading-6
+                  text-gray-900
+                  outline-none
+                  placeholder:text-gray-400
+                  dark:text-white
+                  dark:placeholder:text-gray-500
                 "
               />
+
               <input
                 ref={fileInputRef}
                 type="file"
@@ -349,44 +474,94 @@ export default function ChatContainer() {
                 className="hidden"
                 onChange={handleFileSelect}
               />
-
-              {/* Bottom Icons */}
               <div className="flex items-center justify-between">
+                {/* Attachment */}
                 <button
                   type="button"
                   onClick={() => fileInputRef.current.click()}
-                  className="flex h-9 w-9 items-center justify-center rounded-lg text-gray-400 transition hover:scale-110 shadow-[0_0_15px_rgba(99,102,241,0.4)]"
+                  className="
+                    flex
+                    h-9
+                    w-9
+                    items-center
+                    justify-center
+                    rounded-lg
+                    text-gray-500
+                    shadow-[0_0_15px_rgba(99,102,241,0.2)]
+                    transition
+                    hover:scale-110
+                    hover:bg-gray-100
+                    hover:text-gray-800
+                    dark:text-gray-400
+                    dark:hover:bg-white/5
+                    dark:hover:text-white
+                  "
                 >
                   <Paperclip size={18} />
                 </button>
 
                 <div className="flex items-center gap-2">
+                  {/* Mic */}
                   {!isSendDisable && (
                     <button
                       type="button"
                       onClick={toggleListening}
                       className={`flex h-9 w-9 items-center justify-center rounded-lg transition-all duration-300 ${
                         isListening
-                          ? "bg-red-500 animate-pulse"
-                          : "hover:scale-110 shadow-[0_0_15px_rgba(99,102,241,0.4)]"
+                          ? "animate-pulse bg-red-500"
+                          : "text-gray-600 hover:scale-110 hover:bg-gray-100 hover:text-gray-900 dark:text-gray-300 dark:hover:bg-white/5 dark:hover:text-white"
                       }`}
                     >
-                      <Mic size={17} className="text-white" />
+                      <Mic
+                        size={17}
+                        className={isListening ? "text-white" : "text-current"}
+                      />
                     </button>
                   )}
+
+                  {/* Stop */}
                   {isSendDisable ? (
                     <button
                       type="button"
-                      onClick={handleStopGenerating} // stop api/socket emit
-                      className="flex h-9 w-9 items-center justify-center rounded-lg bg-red-500/10 text-red-400 transition hover:bg-red-500/20 hover:scale-110 shadow-[0_0_15px_rgba(239,68,68,0.4)]"
+                      onClick={handleStopGenerating}
+                      className="
+                        flex
+                        h-9
+                        w-9
+                        items-center
+                        justify-center
+                        rounded-lg
+                        bg-red-500/10
+                        text-red-500
+                        shadow-[0_0_15px_rgba(239,68,68,0.25)]
+                        transition
+                        hover:scale-110
+                        hover:bg-red-500/20
+                        dark:text-red-400
+                      "
                     >
                       <Square size={15} fill="currentColor" />
                     </button>
                   ) : (
+                    /* Send */
                     <button
                       type="submit"
                       disabled={isSendDisable}
-                      className="flex h-9 w-9 items-center justify-center rounded-lg hover:scale-110 shadow-[0_0_15px_rgba(99,102,241,0.4)]"
+                      className="
+                        flex
+                        h-9
+                        w-9
+                        items-center
+                        justify-center
+                        rounded-lg
+                        text-gray-700
+                        shadow-[0_0_15px_rgba(99,102,241,0.25)]
+                        transition
+                        hover:scale-110
+                        hover:bg-gray-100
+                        dark:text-white
+                        dark:hover:bg-white/5
+                      "
                     >
                       <SendHorizonal size={17} />
                     </button>

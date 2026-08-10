@@ -55,3 +55,21 @@ export const resetPasswordValidation = Joi.object({
 export const logoutValidation = Joi.object({
   refreshToken: Joi.string().required(),
 });
+
+export const changePasswordSchema = Joi.object({
+  currentPassword: Joi.string()
+    .required()
+    .messages({
+      "any.required": "Current password is required",
+      "string.empty": "Current password is required",
+    }),
+
+  newPassword: Joi.string()
+    .min(8)
+    .required()
+    .messages({
+      "any.required": "New password is required",
+      "string.empty": "New password is required",
+      "string.min": "New password must be at least 8 characters",
+    })
+});

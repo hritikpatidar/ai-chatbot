@@ -7,7 +7,12 @@ import profile from "../assets/profile1.jpg";
 import { useDispatch, useSelector } from "react-redux";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { editProfileSchema } from "../utils/validation";
-import { setIsProfileModalOpen } from "../redux/features/Auth/authSlice";
+import {
+  profileUpdate,
+  setIsProfileModalOpen,
+} from "../redux/features/Auth/authSlice";
+import { getImageUrl } from "../utils/imageUrl";
+import toast from "react-hot-toast";
 
 export default function EditProfileModal() {
   const dispatch = useDispatch();
@@ -39,6 +44,7 @@ export default function EditProfileModal() {
       reset({
         fullName: profileDetails?.fullName || "",
         email: profileDetails?.email || "",
+        profileImage: undefined,
       });
 
       setImagePreview(profileDetails?.profileImage || profile);
@@ -51,11 +57,19 @@ export default function EditProfileModal() {
     if (!file) return;
 
     setValue("profileImage", file, {
-      shouldValidate: false,
+      shouldValidate: true,
       shouldDirty: true,
     });
 
-    setImagePreview(URL.createObjectURL(file));
+    const previewUrl = URL.createObjectURL(file);
+
+    setImagePreview((oldPreview) => {
+      if (oldPreview?.startsWith("blob:")) {
+        URL.revokeObjectURL(oldPreview);
+      }
+
+      return previewUrl;
+    });
   };
 
   const handleCancel = () => {
@@ -79,23 +93,33 @@ export default function EditProfileModal() {
       if (data.profileImage) {
         formData.append("profileImage", data.profileImage);
       }
-      console.log("data.profileImage", data.profileImage);
 
-      await new Promise((resolve) => setTimeout(resolve, 2000));
-      console.log("Profile Data:", data);
-
-      // API yaha call karo
-      //
-      // data.fullName
-      // data.email
-      // data.profileImage -> File
-
-      // await updateProfileService(data);
-
-      dispatch(setIsProfileModalOpen(false));
+      const response = await dispatch(profileUpdate(formData)).unwrap();
+      if (response?.success) {
+        toast.success(response?.message || "Somthing went wrong");
+        dispatch(setIsProfileModalOpen(false));
+      }else{
+        toast.error(response?.message || "Somthing went wrong");
+      }
     } catch (error) {
       console.error("Update Profile Error:", error);
     }
+  };
+  const getPreviewUrl = (image) => {
+    if (!image) return profile;
+
+    // Selected local image
+    if (image.startsWith("blob:")) {
+      return image;
+    }
+
+    // Already absolute URL
+    if (image.startsWith("http://") || image.startsWith("https://")) {
+      return image;
+    }
+
+    // Backend uploaded image
+    return getImageUrl(image, profile);
   };
 
   return (
@@ -322,8 +346,12 @@ export default function EditProfileModal() {
                       transition={{
                         duration: 0.3,
                       }}
-                      src={imagePreview}
-                      alt="Profile Preview"
+                      src={getPreviewUrl(imagePreview)}
+                      alt="Profile"
+                      onError={(e) => {
+                        e.currentTarget.onerror = null;
+                        e.currentTarget.src = profile;
+                      }}
                       className="
                         relative
                         h-24

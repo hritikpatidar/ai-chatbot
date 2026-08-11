@@ -19,6 +19,7 @@ import EditProfileModal from "../components/EditProfileModal";
 import { setIsProfileModalOpen } from "../redux/features/Auth/authSlice";
 import ChangePasswordModal from "../components/ChangePasswordModal";
 import { useNavigate } from "react-router-dom";
+import { getImageUrl } from "../utils/imageUrl";
 
 export default function Profile() {
   const navigate = useNavigate();
@@ -26,9 +27,6 @@ export default function Profile() {
   const { profileDetails, isProfileModalOpen } = useSelector(
     (store) => store.authReducer.AuthSlice,
   );
-
-  const user = profileDetails || {};
-  const profileImage = user?.profileImage || profile;
 
   const [openChangePasswordModal, setOpenChangePasswordModal] = useState(false);
 
@@ -230,8 +228,12 @@ export default function Profile() {
                   "
                 >
                   <img
-                    src={profileImage}
+                    src={getImageUrl(profileDetails?.profileImage, profile)}
                     alt="Profile"
+                    onError={(e) => {
+                      e.currentTarget.onerror = null;
+                      e.currentTarget.src = profile;
+                    }}
                     className="h-full w-full object-cover"
                   />
                 </div>
@@ -265,7 +267,7 @@ export default function Profile() {
 
                 {/* Camera */}
 
-                <button
+                {/* <button
                   type="button"
                   className="
                     absolute
@@ -296,7 +298,7 @@ export default function Profile() {
                   title="Change profile image"
                 >
                   <Camera size={13} />
-                </button>
+                </button> */}
               </div>
 
               {/* Name */}
@@ -313,9 +315,9 @@ export default function Profile() {
                   sm:mt-5
                   sm:text-xl
                 "
-                title={user?.fullName || "User"}
+                title={profileDetails?.fullName || "User"}
               >
-                {user?.fullName || "User"}
+                {profileDetails?.fullName || "User"}
               </h2>
 
               {/* Email */}
@@ -332,9 +334,9 @@ export default function Profile() {
                   dark:text-gray-400
                   sm:text-sm
                 "
-                title={user?.email || "No email available"}
+                title={profileDetails?.email || "No email available"}
               >
-                {user?.email || "No email available"}
+                {profileDetails?.email || "No email available"}
               </p>
 
               {/* Status */}
@@ -521,9 +523,9 @@ export default function Profile() {
 
                     <p
                       className="mt-1 truncate text-xs font-medium sm:text-sm"
-                      title={user?.fullName}
+                      title={profileDetails?.fullName}
                     >
-                      {user?.fullName || "Not available"}
+                      {profileDetails?.fullName || "Not available"}
                     </p>
                   </div>
                 </div>
@@ -568,9 +570,9 @@ export default function Profile() {
 
                     <p
                       className="mt-1 truncate text-xs font-medium sm:text-sm"
-                      title={user?.email}
+                      title={profileDetails?.email}
                     >
-                      {user?.email || "Not available"}
+                      {profileDetails?.email || "Not available"}
                     </p>
                   </div>
                 </div>
@@ -658,8 +660,8 @@ export default function Profile() {
                     </p>
 
                     <p className="mt-1 text-xs font-medium sm:text-sm">
-                      {user?.createdAt
-                        ? new Date(user.createdAt).toLocaleDateString("en-IN", {
+                      {profileDetails?.createdAt
+                        ? new Date(profileDetails.createdAt).toLocaleDateString("en-IN", {
                             day: "2-digit",
                             month: "short",
                             year: "numeric",

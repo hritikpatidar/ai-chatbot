@@ -10,6 +10,7 @@ import { useSocket } from "../../context/SocketContext";
 import { handleLogout } from "../../utils/logout";
 import { useTheme } from "../../context/ThemeContext";
 import { motion, AnimatePresence } from "framer-motion";
+import { getImageUrl } from "../../utils/imageUrl";
 
 const ChatHeader = () => {
   const dispatch = useDispatch();
@@ -143,31 +144,31 @@ const ChatHeader = () => {
           }
           title={isDarkMode ? "Switch to Light Mode" : "Switch to Dark Mode"}
           className="
-    group
-    flex
-    h-9
-    w-9
-    items-center
-    justify-center
-    rounded-xl
-    border
-    border-gray-200
-    bg-white
-    text-gray-600
-    shadow-sm
-    transition-all
-    duration-200
-    hover:border-blue-400
-    hover:bg-blue-50
-    hover:text-blue-600
-    hover:shadow-md
-    dark:border-white/10
-    dark:bg-[#171b23]
-    dark:text-gray-300
-    dark:hover:border-blue-500/60
-    dark:hover:bg-[#1d2432]
-    dark:hover:text-blue-400
-  "
+            group
+            flex
+            h-9
+            w-9
+            items-center
+            justify-center
+            rounded-xl
+            border
+            border-gray-200
+            bg-white
+            text-gray-600
+            shadow-sm
+            transition-all
+            duration-200
+            hover:border-blue-400
+            hover:bg-blue-50
+            hover:text-blue-600
+            hover:shadow-md
+            dark:border-white/10
+            dark:bg-[#171b23]
+            dark:text-gray-300
+            dark:hover:border-blue-500/60
+            dark:hover:bg-[#1d2432]
+            dark:hover:text-blue-400
+          "
         >
           <AnimatePresence mode="wait" initial={false}>
             {isDarkMode ? (
@@ -299,8 +300,12 @@ const ChatHeader = () => {
           >
             <div className="relative shrink-0">
               <img
-                src={profileDetails?.profileImage || profile}
+                src={getImageUrl(profileDetails?.profileImage, profile)}
                 alt="Profile"
+                onError={(e) => {
+                  e.currentTarget.onerror = null;
+                  e.currentTarget.src = profile;
+                }}
                 className="
                   h-7
                   w-7
@@ -390,8 +395,12 @@ const ChatHeader = () => {
                 <div className="flex items-center gap-3">
                   <div className="relative shrink-0">
                     <img
-                      src={profileDetails?.profileImage || profile}
+                      src={getImageUrl(profileDetails?.profileImage, profile)}
                       alt="Profile"
+                      onError={(e) => {
+                        e.currentTarget.onerror = null;
+                        e.currentTarget.src = profile;
+                      }}
                       className="
                         h-9
                         w-9
@@ -430,6 +439,7 @@ const ChatHeader = () => {
                         text-gray-900
                         dark:text-white
                       "
+                      title={profileDetails?.fullName}
                     >
                       {profileDetails?.fullName || "User"}
                     </p>
@@ -442,6 +452,7 @@ const ChatHeader = () => {
                         text-gray-500
                         dark:text-gray-400
                       "
+                      title={profileDetails?.email}
                     >
                       {profileDetails?.email || "No email available"}
                     </p>

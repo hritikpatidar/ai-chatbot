@@ -29,6 +29,7 @@ import { useNavigate } from "react-router-dom";
 import { useTheme } from "../context/ThemeContext";
 import EditProfileModal from "../components/EditProfileModal";
 import { setIsProfileModalOpen } from "../redux/features/Auth/authSlice";
+import { getImageUrl } from "../utils/imageUrl";
 
 const settingsSections = [
   {
@@ -158,8 +159,12 @@ export default function Settings() {
             <div className="flex min-w-0 items-center gap-4">
               <div className="relative h-12 w-12 shrink-0">
                 <img
-                  src={profileDetails?.profileImage || profile}
-                  alt="User"
+                  src={getImageUrl(profileDetails?.profileImage, profile)}
+                  alt="Profile"
+                  onError={(e) => {
+                    e.currentTarget.onerror = null;
+                    e.currentTarget.src = profile;
+                  }}
                   className="h-12 w-12 rounded-full object-cover"
                 />
 

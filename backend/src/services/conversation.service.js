@@ -1,35 +1,69 @@
 import {
-    deleteConversation,
+  deleteConversation,
   findConversationById,
+  findConversationByIdAndClient,
+  getClientConversations,
   getUserConversations,
 } from "../repositories/conversation.repository.js";
+
 import {
-    deleteConversationMessages,
+  deleteConversationMessages,
   getAllConversationMessages,
 } from "../repositories/message.repository.js";
 
-export const getConversationListService = async (userId) => {
-  const conversations = await getUserConversations(userId);
+// Get Conversation List
+export const getConversationListService = async ({
+  userId = null,
+  clientId = null,
+}) => {
+  if (clientId) {
+    return await getClientConversations(clientId);
+  }
 
-  return conversations;
+  if (userId) {
+    return await getUserConversations(userId);
+  }
+
+  throw new Error("User or client is required");
 };
 
-export const getConversationMessagesService = async (
-  userId,
+// Get Conversation Messages
+export const getConversationMessagesService = async ({
+  userId = null,
+  clientId = null,
   conversationId,
-) => {
-  const conversation = await findConversationById(conversationId);
+}) => {
+  let conversation;
+
+  if (clientId) {
+    conversation =
+      await findConversationByIdAndClient(
+        conversationId,
+        clientId,
+      );
+  } else if (userId) {
+    conversation =
+      await findConversationById(conversationId);
+
+    if (
+      conversation &&
+      conversation.userId?.toString() !==
+        userId.toString()
+    ) {
+      throw new Error(
+        "Unauthorized access to conversation",
+      );
+    }
+  } else {
+    throw new Error("User or client is required");
+  }
 
   if (!conversation) {
     throw new Error("Conversation not found");
   }
 
-  // Make sure conversation belongs to logged-in user
-  if (conversation.userId.toString() !== userId.toString()) {
-    throw new Error("Unauthorized access to conversation");
-  }
-
-  const messages = await getAllConversationMessages(conversationId);
+  const messages =
+    await getAllConversationMessages(conversationId);
 
   return {
     conversation,
@@ -37,25 +71,39 @@ export const getConversationMessagesService = async (
   };
 };
 
-export const deleteConversationService = async (
-  userId,
+// Delete Conversation
+export const deleteConversationService = async ({
+  userId = null,
+  clientId = null,
   conversationId,
-) => {
-  const conversation =
-    await findConversationById(conversationId);
+}) => {
+  let conversation;
+
+  if (clientId) {
+    conversation =
+      await findConversationByIdAndClient(
+        conversationId,
+        clientId,
+      );
+  } else if (userId) {
+    conversation =
+      await findConversationById(conversationId);
+
+    if (
+      conversation &&
+      conversation.userId?.toString() !==
+        userId.toString()
+    ) {
+      throw new Error(
+        "Unauthorized access to conversation",
+      );
+    }
+  } else {
+    throw new Error("User or client is required");
+  }
 
   if (!conversation) {
     throw new Error("Conversation not found");
-  }
-
-  // Check conversation ownership
-  if (
-    conversation.userId.toString() !==
-    userId.toString()
-  ) {
-    throw new Error(
-      "Unauthorized access to conversation",
-    );
   }
 
   // Delete all messages

@@ -1,13 +1,22 @@
 import { createAsyncThunk, createSlice } from "@reduxjs/toolkit";
+import { getClientConfig } from "../../../service/Client/clientServices";
 
 // Initial state
 const initialState = {
   activePage: "newChat", //newChat, library, projects, scheduled, plugins, settings
+
   conversationList: [],
   conversationLoading: false,
+
   messages: [],
+
   newMessageLoading: false,
   isSendDisable: false,
+
+  // Client chatbot configuration
+  clientConfig: null,
+  clientConfigLoading: false,
+  clientConfigError: null,
 };
 
 // export const getUserList = createAsyncThunk(
@@ -17,6 +26,28 @@ const initialState = {
 //     return response.data || [];
 //   }
 // );
+
+export const fetchClientConfig = createAsyncThunk(
+  "chat/fetchClientConfig",
+  async (clientKey, { rejectWithValue }) => {
+    try {
+      const response = await getClientConfig(clientKey);
+
+      if (!response?.data?.success) {
+        return rejectWithValue(
+          response?.data?.message || "Failed to fetch client configuration",
+        );
+      }
+
+      return response.data.config;
+    } catch (error) {
+      return rejectWithValue(
+        error?.response?.data?.message ||
+          "Failed to fetch client configuration",
+      );
+    }
+  },
+);
 
 // Create chat slice using createSlice
 const chatSlice = createSlice({
@@ -77,24 +108,32 @@ const chatSlice = createSlice({
     setIsSendDisable: (state, action) => {
       state.isSendDisable = action.payload;
     },
+    clearClientConfig: (state) => {
+      state.clientConfig = null;
+      state.clientConfigLoading = false;
+      state.clientConfigError = null;
+    },
     clearChatState: () => initialState,
   },
   extraReducers: (builder) => {
-    builder;
-    // .addCase(getUserList.pending, (state) => {
-    //   state.loading = true;
-    //   state.error = null;
-    // })
-    // .addCase(getUserList.fulfilled, (state, action) => {
-    //   state.loading = false;
-    //   state.userList = action.payload.data || [];
-    //   state.error = "";
-    // })
-    // .addCase(getUserList.rejected, (state, action) => {
-    //   state.loading = false;
-    //   state.userList = [];
-    //   state.error = action.error.message;
-    // })
+    builder
+      .addCase(fetchClientConfig.pending, (state) => {
+        state.clientConfigLoading = true;
+        state.clientConfigError = null;
+      })
+
+      .addCase(fetchClientConfig.fulfilled, (state, action) => {
+        state.clientConfigLoading = false;
+        state.clientConfig = action.payload;
+        state.clientConfigError = null;
+      })
+
+      .addCase(fetchClientConfig.rejected, (state, action) => {
+        state.clientConfigLoading = false;
+        state.clientConfig = null;
+        state.clientConfigError =
+          action.payload || "Failed to fetch client configuration";
+      });
     //-----------------------------------------------------------
   },
 });
@@ -113,6 +152,7 @@ export const {
   clearMessages,
   setNewMessageLoading,
   setIsSendDisable,
+  clearClientConfig,
   clearChatState,
 } = chatSlice.actions;
 

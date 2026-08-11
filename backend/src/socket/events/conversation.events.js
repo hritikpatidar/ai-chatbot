@@ -1,4 +1,5 @@
 import mongoose from "mongoose";
+
 import {
   deleteConversationService,
   getConversationListService,
@@ -6,11 +7,30 @@ import {
 } from "../../services/conversation.service.js";
 
 export const registerConversationEvents = (io, socket) => {
-  // Get Conversation
+  /*
+   * ----------------------------------------------
+   * Get Conversation List
+   * ----------------------------------------------
+   */
+
   socket.on("conversation:list", async () => {
     try {
-      const userId = socket.user.id;
-      const conversations = await getConversationListService(userId);
+      const userId = socket.user?.id || null;
+      const clientId = socket.clientId || null;
+
+      if (!userId && !clientId) {
+        socket.emit("conversation:error", {
+          success: false,
+          message: "User or client is required",
+        });
+
+        return;
+      }
+
+      const conversations = await getConversationListService({
+        userId,
+        clientId,
+      });
 
       socket.emit("conversation:list:response", {
         success: true,
@@ -26,7 +46,12 @@ export const registerConversationEvents = (io, socket) => {
     }
   });
 
-  // Get Conversation Messages
+  /*
+   * ----------------------------------------------
+   * Get Conversation Messages
+   * ----------------------------------------------
+   */
+
   socket.on("conversation:messages", async (data) => {
     try {
       const { conversationId } = data;
@@ -39,6 +64,7 @@ export const registerConversationEvents = (io, socket) => {
 
         return;
       }
+
       if (!mongoose.Types.ObjectId.isValid(conversationId)) {
         socket.emit("conversation:error", {
           success: false,
@@ -48,12 +74,24 @@ export const registerConversationEvents = (io, socket) => {
         return;
       }
 
-      const userId = socket.user.id;
+      const userId = socket.user?.id || null;
 
-      const result = await getConversationMessagesService(
+      const clientId = socket.clientId || null;
+
+      if (!userId && !clientId) {
+        socket.emit("conversation:error", {
+          success: false,
+          message: "User or client is required",
+        });
+
+        return;
+      }
+
+      const result = await getConversationMessagesService({
         userId,
+        clientId,
         conversationId,
-      );
+      });
 
       socket.emit("conversation:messages:response", {
         success: true,
@@ -70,7 +108,12 @@ export const registerConversationEvents = (io, socket) => {
     }
   });
 
-  //  Delete Conversation
+  /*
+   * ----------------------------------------------
+   * Delete Conversation
+   * ----------------------------------------------
+   */
+
   socket.on("conversation:delete", async (data) => {
     try {
       const { conversationId } = data;
@@ -84,9 +127,34 @@ export const registerConversationEvents = (io, socket) => {
         return;
       }
 
-      const userId = socket.user.id;
+      if (!mongoose.Types.ObjectId.isValid(conversationId)) {
+        socket.emit("conversation:error", {
+          success: false,
+          message: "Invalid conversation ID",
+        });
 
-      const result = await deleteConversationService(userId, conversationId);
+        return;
+      }
+
+      const userId = socket.user?.id || null;
+
+      const clientId = socket.clientId || null;
+
+      if (!userId && !clientId) {
+        socket.emit("conversation:error", {
+          success: false,
+          message: "User or client is required",
+        });
+
+        return;
+      }
+
+      const result = await deleteConversationService({
+        userId,
+        clientId,
+        conversationId,
+      });
+
       socket.emit("conversation:deleted:response", {
         success: true,
         conversationId: result.conversationId,

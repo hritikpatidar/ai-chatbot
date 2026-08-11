@@ -6,6 +6,9 @@ import cookieParser from "cookie-parser";
 import morgan from "morgan";
 import authRoutes from "./routes/auth.routes.js";
 import profileRoutes from "./routes/profile.routes.js";
+import clientRoutes from "./routes/client.routes.js";
+import productRoutes from "./routes/product.routes.js";
+import faqRoutes from "./routes/faq.routes.js";
 import notFound from "./middlewares/notFound.js";
 import errorHandler from "./middlewares/errorHandler.js";
 import { redisClient } from "./config/redis.js";
@@ -30,11 +33,15 @@ app.use(
       policy: "cross-origin",
     },
   }),
-);app.use(compression());
+);
+app.use(compression());
 app.use(morgan("dev"));
 // Routes
 app.use("/api/auth", authRoutes);
 app.use("/api/profile", profileRoutes);
+app.use("/api/client", clientRoutes);
+app.use("/api/products", productRoutes);
+app.use("/api/faqs", faqRoutes);
 app.use("/uploads", express.static(path.join(process.cwd(), "src/uploads")));
 app.use(notFound);
 app.use(errorHandler);

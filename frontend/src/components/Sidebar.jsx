@@ -14,6 +14,7 @@ import {
   Trash2,
   MoreHorizontal,
   Pin,
+  Bot,
 } from "lucide-react";
 import { useEffect, useRef, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
@@ -155,6 +156,7 @@ export default function Sidebar() {
     dispatch(clearMessages([]));
     if (page === "newChat") navigate(`/`);
     else if (page === "recentChat") navigate(`/c/${new Date().getTime()}`);
+    else if(page === "bussinessAssistant") navigate(`?clientKey=abc-books`);
     else navigate(`/${page}`);
   };
 
@@ -330,6 +332,16 @@ export default function Sidebar() {
           <div className="shrink-0 px-2 py-2">
             <nav className="space-y-0.5">
               {/* New Chat */}
+              <button
+                onClick={() => handleMenu("bussinessAssistant")}
+                className={getMenuClass("bussinessAssistant")}
+              >
+                <div className={getIconClass("bussinessAssistant")}>
+                  <Bot size={16} />
+                </div>
+
+                <span>Your Bussiness Assistant</span>
+              </button>
               <button
                 onClick={() => handleMenu("newChat")}
                 className={getMenuClass("newChat")}

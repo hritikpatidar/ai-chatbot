@@ -21,25 +21,37 @@ export default function ChatContainer() {
     newMessageLoading,
     isSendDisable,
     messages,
+
     message,
     selectedFiles,
+
     isListening,
+
     toggleListening,
     handlePaste,
     handleSend,
+
     handleStopGenerating,
     handleFileSelect,
     removeFile,
+
     fileInputRef,
     textareaRef,
+
     handleMessageChange,
+
     copiedIndex,
     handleCopy,
     handleFeedback,
+
+    clientConfig,
+    clientConfigLoading,
+    isClientChatbot,
   } = useSpeechRecognition({
     enableSocketListeners: true,
   });
 
+  debugger
   const messagesEndRef = useRef(null);
   const { conversationLoading } = useSelector((store) => store.chatSlice);
 
@@ -63,35 +75,102 @@ export default function ChatContainer() {
               </div>
             </div>
           ) : (
-            messages.map((msg, index) => (
-              <div
-                key={msg._id || `${msg.role}-${index}`}
-                className={`group mb-4 flex bg-transparent ${
-                  msg.role === "user" ? "justify-end" : "justify-start"
-                }`}
-              >
-                {/* Wrapper */}
-                <div className="relative  inline-block max-w-full">
-                  {/* Message Bubble */}
-                  <div
-                    className={`rounded-2xl px-4 py-3 ${
-                      msg.role === "user"
-                        ? "border border-gray-200 bg-white text-gray-900 shadow-sm dark:border-white/10 dark:bg-[#161f2d] dark:text-white"
-                        : ""
-                    }`}
-                  >
-                    {msg.role === "assistant" ? (
-                      <AIMessage content={msg.text} isError={msg.isError} />
-                    ) : (
-                      <p className="whitespace-pre-wrap wrap-break-word text-sm leading-6">
-                        {msg.text}
-                      </p>
-                    )}
+            <>
+              {isClientChatbot && clientConfig && messages.length === 0 && (
+                <div className="mb-6 flex flex-col items-start">
+                  {/* Welcome Message */}
+
+                  <div className="max-w-2xl">
+                    <AIMessage
+                      content={
+                        clientConfig.chatbot?.welcomeMessage ||
+                        `Hi 👋 Welcome to ${
+                          clientConfig.businessName || "our business"
+                        }! How can I help you today?`
+                      }
+                    />
                   </div>
 
-                  {msg.role === "user" && (
+                  {/* Predefined Questions */}
+
+                  {clientConfig.chatbot?.predefinedQuestions
+                    ?.filter((item) => item.enabled)
+                    ?.sort((a, b) => a.sortOrder - b.sortOrder)?.length > 0 && (
+                    <div className="mt-4 flex max-w-2xl flex-wrap gap-2">
+                      {clientConfig.chatbot.predefinedQuestions
+                        .filter((item) => item.enabled)
+                        .sort((a, b) => a.sortOrder - b.sortOrder)
+                        .map((item) => (
+                          <button
+                            key={item._id}
+                            type="button"
+                            disabled={isSendDisable}
+                            onClick={() => handleSend(item.question)}
+                            className="
+                  rounded-xl
+                  border
+                  border-gray-200
+                  bg-white
+                  px-3
+                  py-2
+                  text-left
+                  text-xs
+                  text-gray-700
+                  shadow-sm
+                  transition
+                  hover:border-cyan-400
+                  hover:bg-cyan-50
+                  disabled:cursor-not-allowed
+                  disabled:opacity-50
+                  dark:border-white/10
+                  dark:bg-[#161f2d]
+                  dark:text-gray-300
+                  dark:hover:border-cyan-400
+                  dark:hover:bg-cyan-400/10
+                "
+                          >
+                            {item.question}
+                          </button>
+                        ))}
+                    </div>
+                  )}
+                </div>
+              )}
+              {isClientChatbot && clientConfigLoading && (
+                <div className="flex items-center gap-2 py-4 text-sm text-gray-500">
+                  <div className="h-4 w-4 animate-spin rounded-full border-2 border-gray-300 border-t-cyan-500" />
+                  <span>Loading chatbot...</span>
+                </div>
+              )}
+              {messages.map((msg, index) => (
+                <div
+                  key={msg._id || `${msg.role}-${index}`}
+                  className={`group mb-4 flex bg-transparent ${
+                    msg.role === "user" ? "justify-end" : "justify-start"
+                  }`}
+                >
+                  {/* Wrapper */}
+                  <div className="relative  inline-block max-w-full">
+                    {/* Message Bubble */}
                     <div
-                      className="
+                      className={`rounded-2xl px-4 py-3 ${
+                        msg.role === "user"
+                          ? "border border-gray-200 bg-white text-gray-900 shadow-sm dark:border-white/10 dark:bg-[#161f2d] dark:text-white"
+                          : ""
+                      }`}
+                    >
+                      {msg.role === "assistant" ? (
+                        <AIMessage content={msg.text} isError={msg.isError} />
+                      ) : (
+                        <p className="whitespace-pre-wrap wrap-break-word text-sm leading-6">
+                          {msg.text}
+                        </p>
+                      )}
+                    </div>
+
+                    {msg.role === "user" && (
+                      <div
+                        className="
                         absolute
                         -bottom-7
                         right-1
@@ -103,64 +182,64 @@ export default function ChatContainer() {
                         duration-200
                         group-hover:opacity-100
                       "
-                    >
-                      <button
-                        onClick={() => handleCopy(msg.text, index)}
-                        className="
-                          rounded-md
-                          p-1
-                          text-gray-500
-                          transition
-                          hover:bg-gray-200
-                          hover:text-gray-800
-                          dark:text-gray-400
-                          dark:hover:bg-gray-800
-                          dark:hover:text-white
-                        "
                       >
-                        {copiedIndex === index ? (
-                          <Check
-                            size={15}
-                            className="text-green-500 dark:text-green-400"
-                          />
-                        ) : (
-                          <Copy size={15} />
-                        )}
-                      </button>
-                    </div>
-                  )}
-
-                  {msg.role === "assistant" && !isSendDisable && (
-                    <div className="ms-3 -mt-4 flex items-center gap-1">
-                      {/* Copy */}
-                      <button
-                        onClick={() => handleCopy(msg.text, index)}
-                        className="
-                          rounded-md
-                          p-1
-                          text-gray-500
-                          transition
-                          hover:bg-gray-200
-                          hover:text-gray-800
-                          dark:text-gray-400
-                          dark:hover:bg-gray-800
-                          dark:hover:text-white
-                        "
-                      >
-                        {copiedIndex === index ? (
-                          <Check
-                            size={15}
-                            className="text-green-500 dark:text-green-400"
-                          />
-                        ) : (
-                          <Copy size={15} />
-                        )}
-                      </button>
-
-                      {/* More */}
-                      <div className="relative group/more">
                         <button
+                          onClick={() => handleCopy(msg.text, index)}
                           className="
+                          rounded-md
+                          p-1
+                          text-gray-500
+                          transition
+                          hover:bg-gray-200
+                          hover:text-gray-800
+                          dark:text-gray-400
+                          dark:hover:bg-gray-800
+                          dark:hover:text-white
+                        "
+                        >
+                          {copiedIndex === index ? (
+                            <Check
+                              size={15}
+                              className="text-green-500 dark:text-green-400"
+                            />
+                          ) : (
+                            <Copy size={15} />
+                          )}
+                        </button>
+                      </div>
+                    )}
+
+                    {msg.role === "assistant" && !isSendDisable && (
+                      <div className="ms-3 -mt-4 flex items-center gap-1">
+                        {/* Copy */}
+                        <button
+                          onClick={() => handleCopy(msg.text, index)}
+                          className="
+                          rounded-md
+                          p-1
+                          text-gray-500
+                          transition
+                          hover:bg-gray-200
+                          hover:text-gray-800
+                          dark:text-gray-400
+                          dark:hover:bg-gray-800
+                          dark:hover:text-white
+                        "
+                        >
+                          {copiedIndex === index ? (
+                            <Check
+                              size={15}
+                              className="text-green-500 dark:text-green-400"
+                            />
+                          ) : (
+                            <Copy size={15} />
+                          )}
+                        </button>
+
+                        {/* More */}
+                        <div className="relative group/more">
+                          <button
+                            className="
                             rounded-md
                             p-1
                             text-gray-500
@@ -171,13 +250,13 @@ export default function ChatContainer() {
                             dark:hover:bg-gray-800
                             dark:hover:text-white
                           "
-                        >
-                          <MoreHorizontal size={15} />
-                        </button>
+                          >
+                            <MoreHorizontal size={15} />
+                          </button>
 
-                        {/* Dropdown */}
-                        <div
-                          className="
+                          {/* Dropdown */}
+                          <div
+                            className="
                             invisible
                             absolute
                             left-0
@@ -199,10 +278,10 @@ export default function ChatContainer() {
                             dark:border-white/10
                             dark:bg-[#1b2232]
                           "
-                        >
-                          <button
-                            onClick={() => handleFeedback("up")}
-                            className="
+                          >
+                            <button
+                              onClick={() => handleFeedback("up")}
+                              className="
                               flex
                               w-full
                               items-center
@@ -216,14 +295,14 @@ export default function ChatContainer() {
                               dark:text-gray-300
                               dark:hover:bg-white/10
                             "
-                          >
-                            <ThumbsUp size={13} />
-                            Good
-                          </button>
+                            >
+                              <ThumbsUp size={13} />
+                              Good
+                            </button>
 
-                          <button
-                            onClick={() => handleFeedback("down")}
-                            className="
+                            <button
+                              onClick={() => handleFeedback("down")}
+                              className="
                               flex
                               w-full
                               items-center
@@ -237,17 +316,18 @@ export default function ChatContainer() {
                               dark:text-gray-300
                               dark:hover:bg-white/10
                             "
-                          >
-                            <ThumbsDown size={13} />
-                            Bad
-                          </button>
+                            >
+                              <ThumbsDown size={13} />
+                              Bad
+                            </button>
+                          </div>
                         </div>
                       </div>
-                    </div>
-                  )}
+                    )}
+                  </div>
                 </div>
-              </div>
-            ))
+              ))}
+            </>
           )}
 
           {/* Thinking */}
@@ -444,7 +524,11 @@ export default function ChatContainer() {
                 value={message}
                 onChange={handleMessageChange}
                 onPaste={handlePaste}
-                placeholder="Ask anything..."
+                placeholder={
+                  isClientChatbot
+                    ? `Ask ${clientConfig?.businessName || "us"} anything...`
+                    : "Ask anything..."
+                }
                 onKeyDown={(e) => {
                   if (e.key === "Enter" && !e.shiftKey) {
                     e.preventDefault();

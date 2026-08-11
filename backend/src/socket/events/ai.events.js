@@ -1,38 +1,158 @@
 import ai from "../../config/gemini.js";
-import Conversation from "../../models/Conversation.js";
+
+import {
+  buildClientSystemInstruction,
+  buildConversationContents,
+} from "../../services/ai.service.js";
+
+import { findClientById } from "../../repositories/client.repository.js";
+
 import {
   createConversation,
   findConversationById,
+  findConversationByIdAndClient,
   updateConversation,
 } from "../../repositories/conversation.repository.js";
+
 import {
   createMessage,
   getRecentConversationMessages,
 } from "../../repositories/message.repository.js";
 
+import {
+  getRelevantClientKnowledge,
+  buildKnowledgeContext,
+} from "../../services/knowledge.service.js";
+
 const activeStreams = new Map();
 
 export const registerAIEvents = (io, socket) => {
-  // SEND MESSAGE
+  /*
+   * ----------------------------------------------
+   * SEND MESSAGE
+   * ----------------------------------------------
+   */
+
   socket.on("ai:message", async (data) => {
     try {
       const { conversationId, message } = data;
+
       console.log("🔥 ai:message received", {
         socketId: socket.id,
+
+        userId: socket.user?.id || null,
+
+        clientId: socket.clientId || null,
+
         conversationId,
+
         message,
       });
-      if (!message) {
+
+      /*
+       * ------------------------------------------
+       * Validate Message
+       * ------------------------------------------
+       */
+
+      if (!message || !message.trim()) {
         socket.emit("ai:error", {
           success: false,
           message: "Message is required",
         });
+
         return;
       }
+
+      const userId = socket.user?.id || null;
+
+      const clientId = socket.clientId || null;
+
+      /*
+       * ------------------------------------------
+       * Validate User / Client
+       * ------------------------------------------
+       */
+
+      if (!userId && !clientId) {
+        socket.emit("ai:error", {
+          success: false,
+          message: "User or client is required",
+        });
+
+        return;
+      }
+
+      /*
+       * ------------------------------------------
+       * Get Client Information
+       * ------------------------------------------
+       */
+
+      let client = null;
+
+      if (clientId) {
+        client = await findClientById(clientId);
+
+        if (!client) {
+          socket.emit("ai:error", {
+            success: false,
+            message: "Client not found",
+          });
+
+          return;
+        }
+
+        if (client.status !== "active") {
+          socket.emit("ai:error", {
+            success: false,
+            message: "Client is inactive",
+          });
+
+          return;
+        }
+      }
+
+      /*
+       * ------------------------------------------
+       * Conversation
+       * ------------------------------------------
+       */
+
       let conversation;
 
+      /*
+       * Existing conversation
+       */
+
       if (conversationId) {
-        conversation = await findConversationById(conversationId);
+        /*
+         * Client chatbot
+         */
+
+        if (clientId) {
+          conversation = await findConversationByIdAndClient(
+            conversationId,
+            clientId,
+          );
+        } else if (userId) {
+          /*
+           * Existing authenticated app
+           */
+          conversation = await findConversationById(conversationId);
+
+          if (
+            !conversation ||
+            conversation.userId?.toString() !== userId.toString()
+          ) {
+            socket.emit("ai:error", {
+              success: false,
+              message: "Unauthorized access to conversation",
+            });
+
+            return;
+          }
+        }
 
         if (!conversation) {
           socket.emit("ai:error", {
@@ -43,41 +163,155 @@ export const registerAIEvents = (io, socket) => {
           return;
         }
       } else {
-        conversation = await createConversation({
-          userId: socket.user.id,
+        /*
+         * New conversation
+         */
+        const conversationData = {
           title: message.substring(0, 40),
+
           lastMessage: message,
+
           lastMessageAt: new Date(),
-        });
+        };
+
+        /*
+         * Logged-in user
+         */
+
+        if (userId) {
+          conversationData.userId = userId;
+        }
+
+        /*
+         * Client
+         */
+
+        if (clientId) {
+          conversationData.clientId = clientId;
+        }
+
+        conversation = await createConversation(conversationData);
 
         socket.emit("conversation:created", {
-          conversation: conversation,
+          conversation,
         });
       }
 
+      /*
+       * ------------------------------------------
+       * Save User Message
+       * ------------------------------------------
+       */
+
       await createMessage({
         conversationId: conversation._id,
+
         role: "user",
+
         text: message,
       });
 
+      /*
+       * ------------------------------------------
+       * Get Recent Conversation History
+       * ------------------------------------------
+       */
+
       const history = await getRecentConversationMessages(conversation._id, 20);
 
+      console.log("📚 Conversation History:", history.length);
+
+      let knowledgeContext = "";
+
+      if (clientId) {
+        const knowledge = await getRelevantClientKnowledge(clientId, message);
+
+        knowledgeContext = buildKnowledgeContext(knowledge);
+
+        console.log("📚 Client Knowledge:", {
+          products: knowledge.products.length,
+
+          faqs: knowledge.faqs.length,
+        });
+      }
+      /*
+       * ------------------------------------------
+       * Build Gemini Context
+       * ------------------------------------------
+       */
+
+      let systemInstruction = "";
+
+      /*
+       * Client chatbot gets
+       * business-specific instructions.
+       */
+
+      if (client) {
+        systemInstruction = buildClientSystemInstruction(
+          client,
+          knowledgeContext,
+        );
+      }
+
+      /*
+       * Convert MongoDB messages
+       * into Gemini conversation format.
+       */
+
+      const contents = buildConversationContents(history, message);
+
+      console.log("🧠 Gemini Context:", {
+        hasClient: !!client,
+
+        historyCount: contents.length,
+
+        clientId: clientId || null,
+      });
+
+      /*
+       * ------------------------------------------
+       * Start Gemini Stream
+       * ------------------------------------------
+       */
+
       activeStreams.set(socket.id, false);
+
       const stream = await ai.models.generateContentStream({
         model: "gemini-3.6-flash",
-        contents: message,
+
+        contents,
+
+        config: client
+          ? {
+              systemInstruction,
+            }
+          : undefined,
       });
+
+      /*
+       * ------------------------------------------
+       * Stream Response
+       * ------------------------------------------
+       */
 
       let fullResponse = "";
 
       for await (const chunk of stream) {
         const text = chunk.text || "";
+
+        /*
+         * Stop generation
+         */
+
         if (activeStreams.get(socket.id)) {
           console.log("⛔ Stream Stopped");
+
           break;
         }
+
         fullResponse += text;
+
         socket.emit("ai:chunk", {
           text,
         });
@@ -85,53 +319,85 @@ export const registerAIEvents = (io, socket) => {
 
       activeStreams.delete(socket.id);
 
-      await createMessage({
-        conversationId: conversation._id,
-        role: "assistant",
-        text: fullResponse,
-      });
+      /*
+       * ------------------------------------------
+       * Save Assistant Message
+       * ------------------------------------------
+       */
 
-      await updateConversation(conversation._id, {
-        lastMessage: fullResponse,
-        lastMessageAt: new Date(),
-      });
+      if (fullResponse) {
+        await createMessage({
+          conversationId: conversation._id,
+
+          role: "assistant",
+
+          text: fullResponse,
+        });
+
+        await updateConversation(conversation._id, {
+          lastMessage: fullResponse,
+
+          lastMessageAt: new Date(),
+        });
+      }
+
+      /*
+       * ------------------------------------------
+       * AI END
+       * ------------------------------------------
+       */
 
       socket.emit("ai:end", {
         success: true,
+
         message: "Response completed",
+
+        conversationId: conversation._id,
+
         response: fullResponse,
       });
     } catch (error) {
-      console.error("ai message error", error);
+      console.error("❌ AI Message Error:", error);
+
       activeStreams.delete(socket.id);
-      let message = "Something went wrong. Please try again.";
+
+      let errorMessage = "Something went wrong. Please try again.";
+
       if (error.status === 429) {
-        message =
+        errorMessage =
           "AI request limit exceeded. Please wait a few seconds and try again.";
       } else if (error.status === 401) {
-        message = "Invalid Gemini API Key.";
+        errorMessage = "Invalid Gemini API Key.";
       } else if (error.status === 403) {
-        message = "Access denied. Please check your API permissions.";
+        errorMessage = "Access denied. Please check your API permissions.";
       } else if (error.status === 400) {
-        message = "Invalid request.";
+        errorMessage = "Invalid request.";
       }
 
       socket.emit("ai:error", {
         success: false,
+
         status: error.status || 500,
-        message,
+
+        message: errorMessage,
       });
     }
   });
 
-  // STOP GENERATION
+  /*
+   * ----------------------------------------------
+   * STOP GENERATION
+   * ----------------------------------------------
+   */
+
   socket.on("ai:stop", () => {
-    console.log("🛑 Stop Requested");
+    console.log("🛑 Stop Requested", socket.id);
 
     activeStreams.set(socket.id, true);
 
     socket.emit("ai:stopped", {
       success: true,
+
       message: "Generation stopped",
     });
   });

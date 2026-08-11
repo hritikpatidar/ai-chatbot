@@ -4,6 +4,7 @@ import {
   addErrorMessage,
   addMessage,
   appendAssistantChunk,
+  fetchClientConfig,
   setActivePage,
   setConversationLoading,
   setIsSendDisable,
@@ -36,7 +37,7 @@ export default function useSpeechRecognition({
 } = {}) {
   const dispatch = useDispatch();
   const navigate = useNavigate();
-  const { socket, isConnected } = useSocket();
+  const { socket, isConnected, clientKey, isClientChatbot } = useSocket();
   const { conversationId } = useParams();
   const location = useLocation();
   const { isNewConversation } = location.state || {};
@@ -48,9 +49,14 @@ export default function useSpeechRecognition({
   const [selectedFiles, setSelectedFiles] = useState([]);
   const [message, setMessage] = useState("");
   const [isListening, setIsListening] = useState(false);
-  const { messages, newMessageLoading, isSendDisable } = useSelector(
-    (store) => store.chatSlice,
-  );
+  const {
+    messages,
+    newMessageLoading,
+    isSendDisable,
+    clientConfig,
+    clientConfigLoading,
+    clientConfigError,
+  } = useSelector((store) => store.chatSlice);
   const [copiedIndex, setCopiedIndex] = useState(null);
 
   // useEffect(() => {
@@ -77,6 +83,17 @@ export default function useSpeechRecognition({
     dispatch(setActivePage("recentChat"));
     getConversationMessages(conversationId);
   }, [conversationId, dispatch]);
+
+  useEffect(() => {
+    if (!isClientChatbot) {
+      return;
+    }
+    if (!clientKey) {
+      return;
+    }
+    console.log("🏪 Fetching client config:", clientKey);
+    dispatch(fetchClientConfig(clientKey));
+  }, [clientKey, isClientChatbot, dispatch]);
 
   useEffect(() => {
     if (!enableSocketListeners) return;
@@ -234,35 +251,95 @@ export default function useSpeechRecognition({
     setSelectedFiles((prev) => [...prev, ...pastedFiles]);
   };
 
-  const handleSend = async () => {
-    // const lastMessage = messages?.[messages.length - 1];
-    // if (lastMessage?.isError === true) {
-    //   return;
-    // }
+  // const handleSend = async () => {
+  //   // const lastMessage = messages?.[messages.length - 1];
+  //   // if (lastMessage?.isError === true) {
+  //   //   return;
+  //   // }
 
-    if (!message.trim()) return;
-    // if (activePage === "newChat") {
-    //       await dispatch(setActivePage("recentChat"));
-    //       navigate(`/c/${new Date().getTime()}`);
-    //     }
-    if (isSendDisable) {
-      console.log("⚠️ Send blocked - AI request already running");
+  //   if (!message.trim()) return;
+  //   // if (activePage === "newChat") {
+  //   //       await dispatch(setActivePage("recentChat"));
+  //   //       navigate(`/c/${new Date().getTime()}`);
+  //   //     }
+  //   if (isSendDisable) {
+  //     console.log("⚠️ Send blocked - AI request already running");
+  //     return;
+  //   }
+  //   const messagePayload = {
+  //     id: Date.now().toString(),
+  //     role: "user",
+  //     text: message,
+  //   };
+  //   dispatch(setIsSendDisable(true));
+  //   dispatch(setNewMessageLoading(true));
+  //   dispatch(addMessage(messagePayload)); // message add in message list
+  //   // const newMessages = [...messages, messagePayload];
+  //   // setMessages(newMessages);
+  //   setMessage("");
+  //   sendAIMessage(conversationId, message.trim()); // send message in backend
+  //   if (recognitionRef.current) {
+  //     recognitionRef.current.stop();
+  //     setIsListening(false);
+  //   }
+  // };
+
+  const handleSend = async (predefinedMessage = null) => {
+    /*
+     * If predefined question was passed,
+     * use that.
+     *
+     * Otherwise use textarea message.
+     */
+
+    const textToSend =
+      typeof predefinedMessage === "string" ? predefinedMessage : message;
+
+    if (!textToSend.trim()) {
       return;
     }
+
+    if (isSendDisable) {
+      console.log("⚠️ Send blocked - AI request already running");
+
+      return;
+    }
+
+    const trimmedMessage = textToSend.trim();
+
     const messagePayload = {
       id: Date.now().toString(),
+
       role: "user",
-      text: message,
+
+      text: trimmedMessage,
     };
+
     dispatch(setIsSendDisable(true));
+
     dispatch(setNewMessageLoading(true));
-    dispatch(addMessage(messagePayload)); // message add in message list
-    // const newMessages = [...messages, messagePayload];
-    // setMessages(newMessages);
+
+    dispatch(addMessage(messagePayload));
+
+    /*
+     * Clear textarea only when
+     * message was typed manually.
+     */
+
     setMessage("");
-    sendAIMessage(conversationId, message.trim()); // send message in backend
+
+    /*
+     * Existing socket flow.
+     *
+     * Predefined question also comes
+     * through exactly the same flow.
+     */
+
+    sendAIMessage(conversationId, trimmedMessage);
+
     if (recognitionRef.current) {
       recognitionRef.current.stop();
+
       setIsListening(false);
     }
   };
@@ -325,25 +402,41 @@ export default function useSpeechRecognition({
 
   return {
     conversationId,
+
     newMessageLoading,
     isSendDisable,
+
     messages,
     message,
     setMessage,
+
     selectedFiles,
     setSelectedFiles,
+
     isListening,
+
     toggleListening,
     handlePaste,
     handleSend,
     handleStopGenerating,
+
     handleFileSelect,
     removeFile,
+
     fileInputRef,
     textareaRef,
+
     handleMessageChange,
+
     copiedIndex,
     handleCopy,
     handleFeedback,
+
+    // Client chatbot
+    clientKey,
+    isClientChatbot,
+    clientConfig,
+    clientConfigLoading,
+    clientConfigError,
   };
 }

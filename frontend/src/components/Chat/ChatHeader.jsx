@@ -16,7 +16,7 @@ const ChatHeader = () => {
   const dispatch = useDispatch();
   const navigate = useNavigate();
 
-  const { activePage } = useSelector((store) => store.chatSlice);
+  const { activePage, clientConfig } = useSelector((store) => store.chatSlice);
 
   const [profileOpen, setProfileOpen] = useState(false);
   const [isLogoutLoading, setIsLogoutLoading] = useState(false);
@@ -31,7 +31,7 @@ const ChatHeader = () => {
     (store) => store.authReducer.AuthSlice,
   );
 
-  const { isConnected } = useSocket();
+  const { isConnected, isClientChatbot } = useSocket();
   const { isDarkMode, toggleTheme } = useTheme();
 
   useEffect(() => {
@@ -87,10 +87,10 @@ const ChatHeader = () => {
   return (
     <div className="flex h-full p-4 w-full items-center justify-between gap-3">
       <div className="flex min-w-0 items-center">
-        {activePage === "newChat" && (
-          <button
-            type="button"
-            className="
+        {/* {activePage === "newChat" && ( */}
+        <button
+          type="button"
+          className="
               group
               flex
               h-9
@@ -116,12 +116,14 @@ const ChatHeader = () => {
               dark:hover:border-blue-500/60
               dark:hover:bg-[#1d2432]
             "
-          >
-            <span className="truncate">SI Assistant</span>
+        >
+          <span className="truncate">
+            {isClientChatbot ? clientConfig?.chatbot?.name : "SI Assistant"}
+          </span>
 
-            <ChevronDown
-              size={14}
-              className="
+          <ChevronDown
+            size={14}
+            className="
                 shrink-0
                 text-gray-500
                 transition-transform
@@ -130,9 +132,9 @@ const ChatHeader = () => {
                 dark:text-gray-400
                 dark:group-hover:text-blue-400
               "
-            />
-          </button>
-        )}
+          />
+        </button>
+        {/* )} */}
       </div>
 
       <div className="flex shrink-0 items-center gap-2">

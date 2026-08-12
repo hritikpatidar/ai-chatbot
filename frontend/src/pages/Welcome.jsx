@@ -18,41 +18,24 @@ import { getConversations } from "../service/conversation.services";
 export default function Welcome() {
   const {
     isSendDisable,
-
     message,
-
     selectedFiles,
-
     isListening,
-
     toggleListening,
-
     handlePaste,
-
     handleSend,
-
     handleStopGenerating,
-
     handleFileSelect,
-
     removeFile,
-
     fileInputRef,
-
     textareaRef,
-
     handleMessageChange,
-
     clientConfig,
-
     clientConfigLoading,
-
     isClientChatbot,
   } = useSpeechRecognition({
     enableSocketListeners: false,
   });
-
-  debugger
 
   const [tags, setTags] = useState([]);
 

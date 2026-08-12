@@ -165,3 +165,28 @@ export const logout = async (req, res) => {
   }
 };
 
+export const changePassword = async (req, res) => {
+  try {
+    const { error } = changePasswordSchema.validate(req.body);
+
+    if (error) {
+      return res.status(400).json({
+        success: false,
+        message: error.details[0].message,
+      });
+    }
+
+    const response = await authService.changePasswordService({
+      userId: req.user.id,
+      ...req.body,
+    });
+
+    return res.status(200).json(response);
+  } catch (error) {
+    return res.status(error.statusCode || 400).json({
+      success: false,
+      message: error.message,
+    });
+  }
+};
+

@@ -6,6 +6,12 @@ import {
 } from "../repositories/client.repository.js";
 
 export const createClientService = async (clientData) => {
+   const existingClient = await findClientByKey(clientData.clientKey);
+
+  if (existingClient) {
+    throw new Error("Client with this clientKey already exists");
+  }
+
   const client = await createClient(clientData);
 
   return client;

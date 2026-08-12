@@ -42,14 +42,14 @@ export const resendOTPValidation = Joi.object({
   purpose: Joi.string().valid("register", "forgot_password").required(),
 });
 
-export const forgotPasswordValidation  = Joi.object({
+export const forgotPasswordValidation = Joi.object({
   email: Joi.string().email().required(),
   purpose: Joi.string().valid("register", "forgot_password").required(),
 });
 
 export const resetPasswordValidation = Joi.object({
   resetToken: Joi.string().required(),
-  password: Joi.string().min(8).max(20).required()
+  password: Joi.string().min(8).max(20).required(),
 });
 
 export const logoutValidation = Joi.object({
@@ -57,19 +57,15 @@ export const logoutValidation = Joi.object({
 });
 
 export const changePasswordSchema = Joi.object({
-  currentPassword: Joi.string()
-    .required()
-    .messages({
-      "any.required": "Current password is required",
-      "string.empty": "Current password is required",
-    }),
+  currentPassword: Joi.string().required().messages({
+    "any.required": "Current password is required",
+    "string.empty": "Current password is required",
+  }),
 
-  newPassword: Joi.string()
-    .min(8)
-    .required()
-    .messages({
-      "any.required": "New password is required",
-      "string.empty": "New password is required",
-      "string.min": "New password must be at least 8 characters",
-    })
+  newPassword: Joi.string().min(8).max(20).required().messages({
+    "any.required": "New password is required",
+    "string.empty": "New password is required",
+    "string.min": "New password must be at least 8 characters",
+    "string.max": "New password cannot exceed 20 characters",
+  }),
 });

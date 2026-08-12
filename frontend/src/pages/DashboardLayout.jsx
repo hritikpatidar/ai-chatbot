@@ -3,14 +3,14 @@ import Sidebar from "../components/Sidebar";
 import ChatHeader from "../components/Chat/ChatHeader";
 import { motion } from "framer-motion";
 import AnimatedBackground from "../components/AnimatedBackground";
+import ClientHeader from "../components/Admin/ClientHeader";
 
 export default function DashboardLayout() {
   const location = useLocation();
 
   const showHeader =
-    location.pathname === "/" ||
-    location.pathname.startsWith("/c/");
-
+    location.pathname === "/" || location.pathname.startsWith("/c/");
+  const isBusinessPage = location.pathname.startsWith("/business");
   return (
     <div
       className="
@@ -53,9 +53,9 @@ export default function DashboardLayout() {
         "
       >
         {/* Header */}
-          <div className="relative z-30 shrink-0">
-            <ChatHeader />
-          </div>
+        <div className="relative z-30 shrink-0">
+          {isBusinessPage ? <ClientHeader /> : <ChatHeader />}
+        </div>
 
         {/* Page Content */}
         <div
@@ -66,11 +66,7 @@ export default function DashboardLayout() {
             bg-transparent
             transition-colors
             duration-300
-            ${
-              location.pathname.startsWith("/c/")
-                ? ""
-                : "px-15"
-            }
+            ${location.pathname.startsWith("/c/") ? "" : "px-15"}
           `}
         >
           <Outlet />

@@ -12,6 +12,10 @@ export const userFindByEmailWithPassword = async (email) => {
   return await User.findOne({ email }).select("+password");
 };
 
+export const userFindByIdWithPassword = async (userId) => {
+  return await User.findById(userId).select("+password");
+};
+
 export const userCreate = async (payload) => {
   return await User.create(payload);
 };
@@ -41,7 +45,7 @@ export const verifyUserEmail = async (email) => {
     },
     {
       new: true,
-    }
+    },
   );
 };
 
@@ -65,6 +69,6 @@ export const userUpdatePassword = async (id, password) => {
     },
     {
       new: true,
-    }
+    },
   );
 };

@@ -115,7 +115,7 @@ export default function useSpeechRecognition({
     };
 
     const handleStopeGeneration = (message) => {
-      console.log("🛑 ai:stopped", data);
+      console.log("🛑 ai:stopped", message);
       dispatch(setNewMessageLoading(false));
       dispatch(setIsSendDisable(false));
     };

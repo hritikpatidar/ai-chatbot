@@ -156,7 +156,7 @@ export default function Sidebar() {
     dispatch(clearMessages([]));
     if (page === "newChat") navigate(`/`);
     else if (page === "recentChat") navigate(`/c/${new Date().getTime()}`);
-    else if(page === "bussinessAssistant") navigate(`?clientKey=abc-books`);
+    else if(page === "bussinessAssistant") navigate(`/business`);
     else navigate(`/${page}`);
   };
 

@@ -1,14 +1,16 @@
 import { useState } from "react";
 import { motion } from "framer-motion";
 import { ArrowLeft, Eye, EyeOff, Lock, ShieldCheck } from "lucide-react";
-import { useSelector } from "react-redux";
+import { useDispatch, useSelector } from "react-redux";
 import toast from "react-hot-toast";
 
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 
 import { changePasswordSchema } from "../utils/validation";
-import { ChangePasswordService } from "../service/Profile/ProfileServices";
+import { ChangePasswordService } from "../service/Auth/AuthServices";
+import { useNavigate } from "react-router-dom";
+import { handleLogout } from "../utils/logout";
 
 const PasswordInput = ({
   label,
@@ -70,10 +72,7 @@ const PasswordInput = ({
           }
         `}
       >
-        <Lock
-          size={15}
-          className="shrink-0 text-gray-400"
-        />
+        <Lock size={15} className="shrink-0 text-gray-400" />
 
         <input
           type={showPassword ? "text" : "password"}
@@ -105,17 +104,9 @@ const PasswordInput = ({
             dark:text-gray-400
             dark:hover:text-white
           "
-          aria-label={
-            showPassword
-              ? `Hide ${label}`
-              : `Show ${label}`
-          }
+          aria-label={showPassword ? `Hide ${label}` : `Show ${label}`}
         >
-          {showPassword ? (
-            <EyeOff size={16} />
-          ) : (
-            <Eye size={16} />
-          )}
+          {showPassword ? <EyeOff size={16} /> : <Eye size={16} />}
         </button>
       </div>
 
@@ -137,28 +128,19 @@ const PasswordInput = ({
   );
 };
 
+const ChangePasswordModal = ({ setOpenChangePasswordModal }) => {
+  const dispatch = useDispatch();
+  const navigate = useNavigate();
 
-const ChangePasswordModal = ({
-  setOpenChangePasswordModal,
-}) => {
-  const { showPassword } = {};
-
-  const [showCurrentPassword, setShowCurrentPassword] =
-    useState(false);
-
-  const [showNewPassword, setShowNewPassword] =
-    useState(false);
-
-  const [showConfirmPassword, setShowConfirmPassword] =
-    useState(false);
+  const [showCurrentPassword, setShowCurrentPassword] = useState(false);
+  const [showNewPassword, setShowNewPassword] = useState(false);
+  const [showConfirmPassword, setShowConfirmPassword] = useState(false);
+  const { refreshToken } = useSelector((store) => store.authReducer.AuthSlice);
 
   const {
     register,
     handleSubmit,
-    formState: {
-      errors,
-      isSubmitting,
-    },
+    formState: { errors, isSubmitting },
     reset,
   } = useForm({
     resolver: zodResolver(changePasswordSchema),
@@ -188,37 +170,27 @@ const ChangePasswordModal = ({
         newPassword: data.password,
       };
 
-      const response =
-        await ChangePasswordService(payload);
+      const response = await ChangePasswordService(payload);
 
       if (response?.data?.success) {
         toast.success(
-          response?.data?.message ||
-            "Password changed successfully.",
+          response?.data?.message || "Password changed successfully.",
         );
 
         reset();
-
-        setShowCurrentPassword(false);
-        setShowNewPassword(false);
-        setShowConfirmPassword(false);
-
-        setOpenChangePasswordModal(false);
+        await handleLogout({
+          dispatch,
+          navigate,
+          refreshToken,
+        });
       } else {
-        toast.error(
-          response?.data?.message ||
-            "Unable to change password.",
-        );
+        toast.error(response?.data?.message || "Unable to change password.");
       }
     } catch (error) {
-      console.error(
-        "Change Password Error:",
-        error,
-      );
+      console.error("Change Password Error:", error);
 
       toast.error(
-        error?.response?.data?.message ||
-          "Current password is incorrect.",
+        error?.response?.data?.message || "Current password is incorrect.",
       );
     }
   };
@@ -283,7 +255,6 @@ const ChangePasswordModal = ({
           sm:p-6
         "
       >
-
         <motion.div
           animate={{
             scale: [1, 1.06, 1],
@@ -311,12 +282,8 @@ const ChangePasswordModal = ({
             sm:w-17
           "
         >
-          <ShieldCheck
-            size={30}
-            className="text-white sm:size-8"
-          />
+          <ShieldCheck size={30} className="text-white sm:size-8" />
         </motion.div>
-
 
         <h2
           className="
@@ -356,14 +323,10 @@ const ChangePasswordModal = ({
           <PasswordInput
             label="Current Password"
             placeholder="Enter current password"
-            registerName={register(
-              "currentPassword",
-            )}
+            registerName={register("currentPassword")}
             error={errors.currentPassword}
             showPassword={showCurrentPassword}
-            setShowPassword={
-              setShowCurrentPassword
-            }
+            setShowPassword={setShowCurrentPassword}
           />
 
           {/* New Password */}
@@ -382,14 +345,10 @@ const ChangePasswordModal = ({
           <PasswordInput
             label="Confirm Password"
             placeholder="Confirm new password"
-            registerName={register(
-              "confirmPassword",
-            )}
+            registerName={register("confirmPassword")}
             error={errors.confirmPassword}
             showPassword={showConfirmPassword}
-            setShowPassword={
-              setShowConfirmPassword
-            }
+            setShowPassword={setShowConfirmPassword}
           />
           <div
             className="
@@ -409,9 +368,8 @@ const ChangePasswordModal = ({
                 dark:text-blue-300
               "
             >
-              Your current password is required to
-              verify your identity before changing
-              your password.
+              Your current password is required to verify your identity before
+              changing your password.
             </p>
           </div>
 
@@ -440,9 +398,7 @@ const ChangePasswordModal = ({
               disabled:opacity-60
             "
           >
-            {isSubmitting
-              ? "Changing Password..."
-              : "Change Password"}
+            {isSubmitting ? "Changing Password..." : "Change Password"}
           </motion.button>
         </form>
 

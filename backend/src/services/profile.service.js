@@ -23,45 +23,6 @@ export const getProfileService = async (userId) => {
   };
 };
 
-export const changePasswordService = async (email, body) => {
-  const { currentPassword, newPassword } = body;
-
-  if (!currentPassword) {
-    throw new Error("Current password is required");
-  }
-
-  if (!newPassword) {
-    throw new Error("New password is required");
-  }
-
-  const user = await userFindByEmailWithPassword(email);
-
-  if (!user) {
-    throw new Error("User not found");
-  }
-
-  const isPasswordValid = await comparePassword(currentPassword, user.password);
-
-  if (!isPasswordValid) {
-    throw new Error("Current password is incorrect");
-  }
-
-  const isSamePassword = await comparePassword(newPassword, user.password);
-
-  if (isSamePassword) {
-    throw new Error("New password must be different from current password");
-  }
-
-  const hashedPassword = await hashPassword(newPassword);
-
-  await userUpdatePassword(user?._id, hashedPassword);
-
-  return {
-    success: true,
-    message: "Password changed successfully",
-  };
-};
-
 export const updateProfileService = async (userId, body, file) => {
   const { fullName } = body;
   const user = await UserFindById(userId);

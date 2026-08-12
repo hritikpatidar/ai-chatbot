@@ -1,7 +1,15 @@
 import { Navigate, Outlet } from "react-router-dom";
-import { isLogin } from "../utils/Auth";
+
+import { useSelector } from "react-redux";
 
 export const PublicRoute = () => {
-  const isToken = isLogin();
-  return isToken ? <Navigate to="/" replace /> : <Outlet />;
+  const { token, profileDetails } = useSelector(
+    (state) => state?.authReducer?.AuthSlice,
+  );
+  const isAuthenticated = Boolean(token) && Boolean(profileDetails?._id);
+  if (isAuthenticated) {
+    return <Navigate to="/" replace />;
+  }
+
+  return <Outlet />;
 };

@@ -1,12 +1,5 @@
 import { useState } from "react";
-import {
-  Eye,
-  EyeOff,
-  Mail,
-  Lock,
-  Sparkles,
-  Check,
-} from "lucide-react";
+import { Eye, EyeOff, Mail, Lock, Sparkles, Check } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { motion } from "framer-motion";
 import { setItemLocalStorage } from "../utils/browserServices";
@@ -39,23 +32,14 @@ export default function Login() {
 
       if (response?.success) {
         toast.success(response?.message);
-
-        setItemLocalStorage(
-          "token",
-          response?.accessToken,
-        );
-
-        setItemLocalStorage(
-          "refreshToken",
-          response?.refreshToken,
-        );
-
-        setItemLocalStorage(
-          "userRole",
-          response?.user?.role,
-        );
-
-        navigate("/");
+        setItemLocalStorage("token", response?.accessToken);
+        setItemLocalStorage("refreshToken", response?.refreshToken);
+        setItemLocalStorage("userRole", response?.user?.role);
+        if (response?.user?.role === "client") {
+          navigate("/admin");
+        } else {
+          navigate("/");
+        }
       } else {
         toast.error(response?.message);
       }
@@ -258,10 +242,7 @@ export default function Login() {
                     ease: "easeInOut",
                   }}
                 >
-                  <Sparkles
-                    size={34}
-                    className="relative z-10 text-white"
-                  />
+                  <Sparkles size={34} className="relative z-10 text-white" />
                 </motion.div>
               </motion.div>
             </div>
@@ -303,8 +284,8 @@ export default function Login() {
                 dark:text-gray-400
               "
             >
-              Experience next-generation AI conversations
-              with a clean, fast and intelligent assistant.
+              Experience next-generation AI conversations with a clean, fast and
+              intelligent assistant.
             </motion.p>
           </div>
         </motion.div>
@@ -413,9 +394,7 @@ export default function Login() {
                   "
                 >
                   Email{" "}
-                  <span className="text-red-500 dark:text-red-400">
-                    *
-                  </span>
+                  <span className="text-red-500 dark:text-red-400">*</span>
                 </label>
 
                 <div
@@ -433,10 +412,7 @@ export default function Login() {
                     dark:bg-[#222938]
                   "
                 >
-                  <Mail
-                    size={16}
-                    className="text-gray-400"
-                  />
+                  <Mail size={16} className="text-gray-400" />
 
                   <input
                     type="email"
@@ -482,9 +458,7 @@ export default function Login() {
                   "
                 >
                   Password{" "}
-                  <span className="text-red-500 dark:text-red-400">
-                    *
-                  </span>
+                  <span className="text-red-500 dark:text-red-400">*</span>
                 </label>
 
                 <div
@@ -502,17 +476,10 @@ export default function Login() {
                     dark:bg-[#222938]
                   "
                 >
-                  <Lock
-                    size={18}
-                    className="text-gray-400"
-                  />
+                  <Lock size={18} className="text-gray-400" />
 
                   <input
-                    type={
-                      showPassword
-                        ? "text"
-                        : "password"
-                    }
+                    type={showPassword ? "text" : "password"}
                     placeholder="Enter your password"
                     className="
                       w-full
@@ -530,9 +497,7 @@ export default function Login() {
 
                   <button
                     type="button"
-                    onClick={() =>
-                      setShowPassword(!showPassword)
-                    }
+                    onClick={() => setShowPassword(!showPassword)}
                     className="shrink-0"
                   >
                     {showPassword ? (
@@ -603,9 +568,7 @@ export default function Login() {
                     dark:text-blue-400
                     dark:hover:text-blue-300
                   "
-                  onClick={() =>
-                    navigate("/forgot-password")
-                  }
+                  onClick={() => navigate("/forgot-password")}
                 >
                   Forgot Password?
                 </button>
@@ -636,9 +599,7 @@ export default function Login() {
                   text-white
                 "
               >
-                {isSubmitting
-                  ? "Logging in..."
-                  : "Login"}
+                {isSubmitting ? "Logging in..." : "Login"}
               </motion.button>
 
               {/* =========================
@@ -655,9 +616,7 @@ export default function Login() {
                   "
                 />
 
-                <span className="text-sm text-gray-500">
-                  OR
-                </span>
+                <span className="text-sm text-gray-500">OR</span>
 
                 <div
                   className="
@@ -701,7 +660,6 @@ export default function Login() {
                   alt="Google"
                   className="h-5 w-5"
                 />
-
                 Continue with Google
               </button>
             </motion.form>
@@ -716,7 +674,6 @@ export default function Login() {
               "
             >
               Don't have an account?
-
               <button
                 onClick={() => navigate("/signup")}
                 className="

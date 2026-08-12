@@ -51,7 +51,6 @@ export default function ChatContainer() {
     enableSocketListeners: true,
   });
 
-  debugger
   const messagesEndRef = useRef(null);
   const { conversationLoading } = useSelector((store) => store.chatSlice);
 

@@ -6,6 +6,7 @@ import {
   userFindByEmailWithPassword,
   updateLastLogin,
   userUpdatePassword,
+  userFindByIdWithPassword,
 } from "../repositories/user.repository.js";
 
 import { comparePassword, hashPassword } from "../helpers/bcrypt.js";
@@ -61,7 +62,7 @@ export const signupService = async (body) => {
     throw new Error("Email already registered");
   }
   const hashedPassword = await hashPassword(password);
-  
+
   const user = await userCreate({
     fullName,
     email,
@@ -254,3 +255,36 @@ export const logoutService = async (body) => {
   };
 };
 
+export const changePasswordService = async (body) => {
+  const { userId, currentPassword, newPassword } = body;
+
+  const user = await userFindByIdWithPassword(userId);
+
+  if (!user) {
+    throw new Error("User not found");
+  }
+
+  const isCurrentPasswordValid = await comparePassword(
+    currentPassword,
+    user.password,
+  );
+
+  if (!isCurrentPasswordValid) {
+    throw new Error("Current password is incorrect");
+  }
+
+  const isSamePassword = await comparePassword(newPassword, user.password);
+
+  if (isSamePassword) {
+    throw new Error("New password cannot be the same as current password");
+  }
+
+  const hashedPassword = await hashPassword(newPassword);
+
+  await userUpdatePassword(user._id, hashedPassword);
+  await deleteRefreshToken(userId);
+  return {
+    success: true,
+    message: "Password changed successfully",
+  };
+};

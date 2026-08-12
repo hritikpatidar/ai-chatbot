@@ -13,22 +13,22 @@ import {
 import { combineReducers } from "@reduxjs/toolkit";
 import AuthSlice from "../features/Auth/authSlice";
 import chatSlice from '../features/Chat/chatSlice';
-// import AdminDashboardSlice from '../features/Auth/authSlice'
-import { thunk } from "redux-thunk";
+import clientSlice from "../features/Client/clientSlice"
+
 const storage = Storage.default ?? Storage;
 
 const authReducer = combineReducers({
   AuthSlice,
 });
 
-const AdminReducer = combineReducers({
-  // AuthSlice,
+const ClientReducer = combineReducers({
+  clientSlice,
 });
 
 const appReducer = combineReducers({
   authReducer,
-  // AdminReducer,
   chatSlice,
+  ClientReducer,
 
   // writer: writerReducer,
   // assistant: assistantReducer,

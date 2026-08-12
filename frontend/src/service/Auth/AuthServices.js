@@ -26,6 +26,10 @@ export const resetPasswordService = (data) => {
   return httpServices.post(`/auth/reset-password`, data);
 };
 
+export const ChangePasswordService = (data) => {
+  return httpServices.post("/auth/change-password", data);
+};
+
 export const logoutService = (data) => {
   return httpServices.post("/auth/logout", data);
 };

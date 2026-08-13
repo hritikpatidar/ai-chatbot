@@ -17,16 +17,11 @@ const ChatHeader = () => {
   const navigate = useNavigate();
 
   const { activePage, clientConfig } = useSelector((store) => store.chatSlice);
-
   const [profileOpen, setProfileOpen] = useState(false);
   const [isLogoutLoading, setIsLogoutLoading] = useState(false);
-
   const dropdownRef = useRef(null);
-
   const token = isLogin();
-
   const { conversationId } = useSpeechRecognition();
-
   const { profileDetails, refreshToken } = useSelector(
     (store) => store.authReducer.AuthSlice,
   );
@@ -40,9 +35,7 @@ const ChatHeader = () => {
         setProfileOpen(false);
       }
     };
-
     document.addEventListener("mousedown", handleClickOutside);
-
     return () => {
       document.removeEventListener("mousedown", handleClickOutside);
     };
@@ -87,7 +80,6 @@ const ChatHeader = () => {
   return (
     <div className="flex h-full p-4 w-full items-center justify-between gap-3">
       <div className="flex min-w-0 items-center">
-        {/* {activePage === "newChat" && ( */}
         <button
           type="button"
           className="
@@ -134,7 +126,6 @@ const ChatHeader = () => {
               "
           />
         </button>
-        {/* )} */}
       </div>
 
       <div className="flex shrink-0 items-center gap-2">
@@ -267,7 +258,6 @@ const ChatHeader = () => {
                 dark:text-gray-400
               "
             />
-
             <span className="hidden sm:block">Share</span>
           </button>
         )}

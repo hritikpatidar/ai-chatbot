@@ -54,7 +54,6 @@ export default function AnimatedBackground() {
         backgroundColor: isDark ? "#0b0f17" : "#f8fafc",
       }}
     >
-
       <motion.div
         className="
           absolute
@@ -70,9 +69,7 @@ export default function AnimatedBackground() {
           y: [0, 30, 0],
           scale: [1, 1.15, 1],
 
-          opacity: isDark
-            ? [0.25, 0.45, 0.25]
-            : [0.3, 0.55, 0.3],
+          opacity: isDark ? [0.25, 0.45, 0.25] : [0.3, 0.55, 0.3],
         }}
         transition={{
           duration: 7,
@@ -101,9 +98,7 @@ export default function AnimatedBackground() {
           y: [0, -30, 0],
           scale: [1, 1.18, 1],
 
-          opacity: isDark
-            ? [0.2, 0.4, 0.2]
-            : [0.25, 0.45, 0.25],
+          opacity: isDark ? [0.2, 0.4, 0.2] : [0.25, 0.45, 0.25],
         }}
         transition={{
           duration: 8,
@@ -132,9 +127,7 @@ export default function AnimatedBackground() {
         animate={{
           scale: [1, 1.2, 1],
 
-          opacity: isDark
-            ? [0.08, 0.2, 0.08]
-            : [0.12, 0.25, 0.12],
+          opacity: isDark ? [0.08, 0.2, 0.08] : [0.12, 0.25, 0.12],
         }}
         transition={{
           duration: 9,
@@ -171,9 +164,7 @@ export default function AnimatedBackground() {
               y: [0, -particle.move, 0],
               x: [0, particle.move / 2, 0],
 
-              opacity: isDark
-                ? [0.25, 0.9, 0.25]
-                : [0.35, 1, 0.35],
+              opacity: isDark ? [0.25, 0.9, 0.25] : [0.35, 1, 0.35],
 
               scale: [1, 1.5, 1],
             }}

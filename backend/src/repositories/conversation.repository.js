@@ -22,10 +22,7 @@ export const findConversationByIdAndClient = async (
 };
 
 // Get User Conversations
-export const getUserConversations = async (
-  userId,
-  clientId = null,
-) => {
+export const getUserConversations = async (userId, clientId = null) => {
   const query = {
     userId,
     isArchived: false,
@@ -51,22 +48,13 @@ export const getClientConversations = async (clientId) => {
 };
 
 // Update Conversation
-export const updateConversation = async (
-  conversationId,
-  data,
-) => {
-  return await Conversation.findByIdAndUpdate(
-    conversationId,
-    data,
-    {
-      new: true,
-    },
-  );
+export const updateConversation = async (conversationId, data) => {
+  return await Conversation.findByIdAndUpdate(conversationId, data, {
+    new: true,
+  });
 };
 
 // Delete Conversation
 export const deleteConversation = async (conversationId) => {
-  return await Conversation.findByIdAndDelete(
-    conversationId,
-  );
+  return await Conversation.findByIdAndDelete(conversationId);
 };

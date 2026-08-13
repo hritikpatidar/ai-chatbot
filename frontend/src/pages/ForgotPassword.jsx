@@ -1,10 +1,5 @@
 import { motion } from "framer-motion";
-import {
-  Mail,
-  ChevronLeft,
-  Sparkles,
-  Send,
-} from "lucide-react";
+import { Mail, ChevronLeft, Sparkles, Send } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { forgotPasswordSchema } from "../utils/validation";
 import { useForm } from "react-hook-form";
@@ -44,14 +39,9 @@ export default function ForgotPassword() {
         toast.error(response?.data?.message);
       }
     } catch (error) {
-      console.error(
-        "Forgot Password Error:",
-        error,
-      );
+      console.error("Forgot Password Error:", error);
 
-      toast.error(
-        "An error occurred while processing your request.",
-      );
+      toast.error("An error occurred while processing your request.");
     }
   };
 
@@ -69,13 +59,8 @@ export default function ForgotPassword() {
         dark:text-white
       "
     >
-      {/* =========================
-          Background
-      ========================== */}
 
       <div className="pointer-events-none absolute inset-0 overflow-hidden">
-        {/* Purple Glow */}
-
         <motion.div
           animate={{
             y: [-20, 20, -20],
@@ -98,9 +83,6 @@ export default function ForgotPassword() {
             dark:bg-purple-500/10
           "
         />
-
-        {/* Cyan Glow */}
-
         <motion.div
           animate={{
             y: [20, -20, 20],
@@ -124,8 +106,6 @@ export default function ForgotPassword() {
           "
         />
 
-        {/* Center Glow */}
-
         <div
           className="
             absolute
@@ -141,8 +121,6 @@ export default function ForgotPassword() {
             dark:bg-blue-500/10
           "
         />
-
-        {/* Floating Particles */}
 
         {[...Array(58)].map((_, i) => (
           <motion.div
@@ -174,10 +152,6 @@ export default function ForgotPassword() {
         ))}
       </div>
 
-      {/* =========================
-          Main Content
-      ========================== */}
-
       <motion.div
         initial={{ opacity: 0 }}
         animate={{ opacity: 1 }}
@@ -193,10 +167,6 @@ export default function ForgotPassword() {
           py-10
         "
       >
-        {/* =========================
-            Card
-        ========================== */}
-
         <motion.div
           initial={{
             opacity: 0,
@@ -227,10 +197,6 @@ export default function ForgotPassword() {
             dark:bg-[#171b23]/80
           "
         >
-          {/* =========================
-              Back
-          ========================== */}
-
           <button
             type="button"
             onClick={() => navigate(-1)}
@@ -250,10 +216,6 @@ export default function ForgotPassword() {
             <ChevronLeft size={18} />
             Back
           </button>
-
-          {/* =========================
-              Icon
-          ========================== */}
 
           <motion.div
             animate={{
@@ -281,10 +243,6 @@ export default function ForgotPassword() {
             <Sparkles size={34} />
           </motion.div>
 
-          {/* =========================
-              Heading
-          ========================== */}
-
           <h1
             className="
               mt-6
@@ -307,18 +265,11 @@ export default function ForgotPassword() {
               dark:text-gray-400
             "
           >
-            Enter your registered email address and we'll
-            send you a password reset link.
+            Enter your registered email address and we'll send you a password
+            reset link.
           </p>
 
-          {/* =========================
-              Form
-          ========================== */}
-
-          <form
-            className="mt-8 space-y-6"
-            onSubmit={handleSubmit(onSubmit)}
-          >
+          <form className="mt-8 space-y-6" onSubmit={handleSubmit(onSubmit)}>
             {/* Email */}
 
             <div>
@@ -332,9 +283,7 @@ export default function ForgotPassword() {
                 "
               >
                 Email Address{" "}
-                <span className="text-red-500 dark:text-red-400">
-                  *
-                </span>
+                <span className="text-red-500 dark:text-red-400">*</span>
               </label>
 
               <div
@@ -352,10 +301,7 @@ export default function ForgotPassword() {
                   dark:bg-[#222938]
                 "
               >
-                <Mail
-                  size={18}
-                  className="text-gray-400"
-                />
+                <Mail size={18} className="text-gray-400" />
 
                 <input
                   type="email"
@@ -389,10 +335,6 @@ export default function ForgotPassword() {
               )}
             </div>
 
-            {/* =========================
-                Submit
-            ========================== */}
-
             <motion.button
               type="submit"
               whileHover={{
@@ -422,15 +364,9 @@ export default function ForgotPassword() {
             >
               <Send size={18} />
 
-              {isSubmitting
-                ? "Sending..."
-                : "Send OTP"}
+              {isSubmitting ? "Sending..." : "Send OTP"}
             </motion.button>
           </form>
-
-          {/* =========================
-              Login
-          ========================== */}
 
           <p
             className="
@@ -442,7 +378,6 @@ export default function ForgotPassword() {
             "
           >
             Remember your password?
-
             <button
               type="button"
               onClick={() => navigate("/login")}

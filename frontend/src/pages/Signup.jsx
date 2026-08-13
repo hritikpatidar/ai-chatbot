@@ -1,12 +1,5 @@
 import { useState } from "react";
-import {
-  User,
-  Mail,
-  Lock,
-  Eye,
-  EyeOff,
-  Sparkles,
-} from "lucide-react";
+import { User, Mail, Lock, Eye, EyeOff, Sparkles } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { motion } from "framer-motion";
 import AnimatedBackground from "../components/AnimatedBackground";
@@ -22,8 +15,7 @@ export default function Signup() {
   const dispatch = useDispatch();
 
   const [showPassword, setShowPassword] = useState(false);
-  const [showConfirmPassword, setShowConfirmPassword] =
-    useState(false);
+  const [showConfirmPassword, setShowConfirmPassword] = useState(false);
 
   const {
     register,
@@ -52,10 +44,7 @@ export default function Signup() {
       });
 
       if (response.data.success) {
-        toast.success(
-          response.data.message ||
-            "Account created successfully.",
-        );
+        toast.success(response.data.message || "Account created successfully.");
 
         navigate("/otp-verification", {
           state: {
@@ -64,18 +53,12 @@ export default function Signup() {
           },
         });
       } else {
-        toast.error(
-          response.data.message ||
-            "Failed to create account.",
-        );
+        toast.error(response.data.message || "Failed to create account.");
       }
     } catch (error) {
       console.error(error);
 
-      toast.error(
-        error.response?.data?.message ||
-          "Failed to create account.",
-      );
+      toast.error(error.response?.data?.message || "Failed to create account.");
     }
   };
 
@@ -107,10 +90,6 @@ export default function Signup() {
           min-h-screen
         "
       >
-        {/* =========================
-            Left Side
-        ========================== */}
-
         <motion.div
           initial={{ x: -80, opacity: 0 }}
           animate={{ x: 0, opacity: 1 }}
@@ -187,8 +166,7 @@ export default function Signup() {
                     style={{
                       top: "0%",
                       left: "50%",
-                      transform:
-                        "translateX(-50%)",
+                      transform: "translateX(-50%)",
                     }}
                   />
                 </motion.div>
@@ -332,16 +310,11 @@ export default function Signup() {
                 dark:text-gray-400
               "
             >
-              Create your account and unlock powerful AI
-              tools, conversations, image generation and
-              much more.
+              Create your account and unlock powerful AI tools, conversations,
+              image generation and much more.
             </motion.p>
           </div>
         </motion.div>
-
-        {/* =========================
-            Right Side
-        ========================== */}
 
         <div
           className="
@@ -429,10 +402,6 @@ export default function Signup() {
               className="mt-5 space-y-3.5"
               onSubmit={handleSubmit(onSubmit)}
             >
-              {/* =========================
-                  Full Name
-              ========================== */}
-
               <motion.div
                 initial={{
                   opacity: 0,
@@ -457,9 +426,7 @@ export default function Signup() {
                   "
                 >
                   Full Name{" "}
-                  <span className="text-red-500 dark:text-red-400">
-                    *
-                  </span>
+                  <span className="text-red-500 dark:text-red-400">*</span>
                 </label>
 
                 <div
@@ -477,10 +444,7 @@ export default function Signup() {
                     dark:bg-[#222938]
                   "
                 >
-                  <User
-                    size={16}
-                    className="text-gray-400"
-                  />
+                  <User size={16} className="text-gray-400" />
 
                   <input
                     type="text"
@@ -508,10 +472,6 @@ export default function Signup() {
                 )}
               </motion.div>
 
-              {/* =========================
-                  Email
-              ========================== */}
-
               <motion.div
                 initial={{
                   opacity: 0,
@@ -536,9 +496,7 @@ export default function Signup() {
                   "
                 >
                   Email Address{" "}
-                  <span className="text-red-500 dark:text-red-400">
-                    *
-                  </span>
+                  <span className="text-red-500 dark:text-red-400">*</span>
                 </label>
 
                 <div
@@ -556,10 +514,7 @@ export default function Signup() {
                     dark:bg-[#222938]
                   "
                 >
-                  <Mail
-                    size={16}
-                    className="text-gray-400"
-                  />
+                  <Mail size={16} className="text-gray-400" />
 
                   <input
                     type="email"
@@ -587,10 +542,6 @@ export default function Signup() {
                 )}
               </motion.div>
 
-              {/* =========================
-                  Password
-              ========================== */}
-
               <motion.div
                 initial={{
                   opacity: 0,
@@ -615,9 +566,7 @@ export default function Signup() {
                   "
                 >
                   Password{" "}
-                  <span className="text-red-500 dark:text-red-400">
-                    *
-                  </span>
+                  <span className="text-red-500 dark:text-red-400">*</span>
                 </label>
 
                 <div
@@ -635,17 +584,10 @@ export default function Signup() {
                     dark:bg-[#222938]
                   "
                 >
-                  <Lock
-                    size={16}
-                    className="text-gray-400"
-                  />
+                  <Lock size={16} className="text-gray-400" />
 
                   <input
-                    type={
-                      showPassword
-                        ? "text"
-                        : "password"
-                    }
+                    type={showPassword ? "text" : "password"}
                     placeholder="Create password"
                     {...register("password")}
                     className="
@@ -664,9 +606,7 @@ export default function Signup() {
 
                   <button
                     type="button"
-                    onClick={() =>
-                      setShowPassword(!showPassword)
-                    }
+                    onClick={() => setShowPassword(!showPassword)}
                     className="shrink-0"
                   >
                     {showPassword ? (
@@ -689,10 +629,6 @@ export default function Signup() {
                   </p>
                 )}
               </motion.div>
-
-              {/* =========================
-                  Confirm Password
-              ========================== */}
 
               <motion.div
                 initial={{
@@ -718,9 +654,7 @@ export default function Signup() {
                   "
                 >
                   Confirm Password{" "}
-                  <span className="text-red-500 dark:text-red-400">
-                    *
-                  </span>
+                  <span className="text-red-500 dark:text-red-400">*</span>
                 </label>
 
                 <div
@@ -738,17 +672,10 @@ export default function Signup() {
                     dark:bg-[#222938]
                   "
                 >
-                  <Lock
-                    size={16}
-                    className="text-gray-400"
-                  />
+                  <Lock size={16} className="text-gray-400" />
 
                   <input
-                    type={
-                      showConfirmPassword
-                        ? "text"
-                        : "password"
-                    }
+                    type={showConfirmPassword ? "text" : "password"}
                     placeholder="Confirm password"
                     {...register("confirmPassword")}
                     className="
@@ -767,11 +694,7 @@ export default function Signup() {
 
                   <button
                     type="button"
-                    onClick={() =>
-                      setShowConfirmPassword(
-                        !showConfirmPassword,
-                      )
-                    }
+                    onClick={() => setShowConfirmPassword(!showConfirmPassword)}
                     className="shrink-0"
                   >
                     {showConfirmPassword ? (
@@ -794,10 +717,6 @@ export default function Signup() {
                   </p>
                 )}
               </motion.div>
-
-              {/* =========================
-                  Terms
-              ========================== */}
 
               <label className="group flex cursor-pointer items-start gap-3">
                 <input
@@ -842,9 +761,7 @@ export default function Signup() {
                       dark:text-blue-400
                       dark:hover:text-blue-300
                     "
-                    onClick={() =>
-                      navigate("/terms-and-conditions")
-                    }
+                    onClick={() => navigate("/terms-and-conditions")}
                   >
                     Terms & Conditions
                   </button>{" "}
@@ -859,9 +776,7 @@ export default function Signup() {
                       dark:text-blue-400
                       dark:hover:text-blue-300
                     "
-                    onClick={() =>
-                      navigate("/privacy-policy")
-                    }
+                    onClick={() => navigate("/privacy-policy")}
                   >
                     Privacy Policy
                   </button>
@@ -875,17 +790,12 @@ export default function Signup() {
                 </p>
               )}
 
-              {/* =========================
-                  Signup Button
-              ========================== */}
-
               <motion.button
                 type="submit"
                 disabled={isSubmitting}
                 whileHover={{
                   scale: 1.03,
-                  boxShadow:
-                    "0 0 30px rgba(59,130,246,.35)",
+                  boxShadow: "0 0 30px rgba(59,130,246,.35)",
                 }}
                 whileTap={{
                   scale: 0.97,
@@ -906,14 +816,8 @@ export default function Signup() {
                   disabled:opacity-60
                 "
               >
-                {isSubmitting
-                  ? "Creating Account..."
-                  : "Create Account"}
+                {isSubmitting ? "Creating Account..." : "Create Account"}
               </motion.button>
-
-              {/* =========================
-                  Divider
-              ========================== */}
 
               <div className="flex items-center gap-3">
                 <div
@@ -925,9 +829,7 @@ export default function Signup() {
                   "
                 />
 
-                <span className="text-sm text-gray-500">
-                  OR
-                </span>
+                <span className="text-sm text-gray-500">OR</span>
 
                 <div
                   className="
@@ -938,10 +840,6 @@ export default function Signup() {
                   "
                 />
               </div>
-
-              {/* =========================
-                  Google
-              ========================== */}
 
               <button
                 type="button"
@@ -971,7 +869,6 @@ export default function Signup() {
                   alt="Google"
                   className="h-5 w-5"
                 />
-
                 Continue with Google
               </button>
             </motion.form>
@@ -988,7 +885,6 @@ export default function Signup() {
               "
             >
               Already have an account?
-
               <button
                 onClick={(e) => {
                   e.preventDefault();
@@ -1012,4 +908,3 @@ export default function Signup() {
     </div>
   );
 }
-

@@ -1,40 +1,30 @@
 import { useEffect, useState } from "react";
 import { Copy, Check } from "lucide-react";
 import { CopyToClipboard } from "react-copy-to-clipboard";
-import {
-  Prism as SyntaxHighlighter,
-} from "react-syntax-highlighter";
+import { Prism as SyntaxHighlighter } from "react-syntax-highlighter";
 import {
   oneDark,
   oneLight,
 } from "react-syntax-highlighter/dist/esm/styles/prism";
 
-export default function CodeBlock({
-  language = "text",
-  code = "",
-}) {
+export default function CodeBlock({ language = "text", code = "" }) {
   const [copied, setCopied] = useState(false);
   const [isDark, setIsDark] = useState(() =>
-    document.documentElement.classList.contains("dark")
+    document.documentElement.classList.contains("dark"),
   );
 
   // Detect theme changes
   useEffect(() => {
     const html = document.documentElement;
-
     const updateTheme = () => {
       setIsDark(html.classList.contains("dark"));
     };
-
     updateTheme();
-
     const observer = new MutationObserver(updateTheme);
-
     observer.observe(html, {
       attributes: true,
       attributeFilter: ["class"],
     });
-
     return () => {
       observer.disconnect();
     };
@@ -90,10 +80,7 @@ export default function CodeBlock({
           {language}
         </span>
 
-        <CopyToClipboard
-          text={code}
-          onCopy={handleCopy}
-        >
+        <CopyToClipboard text={code} onCopy={handleCopy}>
           <button
             type="button"
             className="
@@ -119,13 +106,11 @@ export default function CodeBlock({
                   size={14}
                   className="text-green-600 dark:text-green-400"
                 />
-
                 Copied
               </>
             ) : (
               <>
                 <Copy size={14} />
-
                 Copy
               </>
             )}
@@ -152,8 +137,7 @@ export default function CodeBlock({
         }}
         codeTagProps={{
           style: {
-            fontFamily:
-              "JetBrains Mono, Fira Code, Consolas, monospace",
+            fontFamily: "JetBrains Mono, Fira Code, Consolas, monospace",
           },
         }}
       >
@@ -162,4 +146,3 @@ export default function CodeBlock({
     </div>
   );
 }
-

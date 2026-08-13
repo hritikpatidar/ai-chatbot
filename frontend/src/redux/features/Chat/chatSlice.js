@@ -19,14 +19,6 @@ const initialState = {
   clientConfigError: null,
 };
 
-// export const getUserList = createAsyncThunk(
-//   "chat/getUserList",
-//   async (role) => {
-//     const response = await getUserListService(role);
-//     return response.data || [];
-//   }
-// );
-
 export const fetchClientConfig = createAsyncThunk(
   "chat/fetchClientConfig",
   async (clientKey, { rejectWithValue }) => {

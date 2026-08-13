@@ -149,7 +149,6 @@
 //   );
 // };
 
-
 import { createContext, useContext, useEffect, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { useLocation, useNavigate } from "react-router-dom";
@@ -177,11 +176,8 @@ export const SocketProvider = ({ children }) => {
 
   const [isConnected, setIsConnected] = useState(false);
 
-  const isAuthenticated =
-    Boolean(token) && Boolean(profileDetails?._id);
-
-  const isClientChatbot =
-    Boolean(clientKey) && !isAuthenticated;
+  const isAuthenticated = Boolean(token) && Boolean(profileDetails?._id);
+  const isClientChatbot = Boolean(clientKey) && !isAuthenticated;
 
   /*
    * ==========================================
@@ -202,12 +198,7 @@ export const SocketProvider = ({ children }) => {
    */
 
   useEffect(() => {
-    /*
-     * ==========================================
-     * SOCKET AUTH CONFIG
-     * ==========================================
-     */
-
+    //  SOCKET AUTH CONFIG
     if (isClientChatbot) {
       if (!clientKey) {
         return;
@@ -217,10 +208,7 @@ export const SocketProvider = ({ children }) => {
         clientKey,
       };
 
-      console.log(
-        "🔌 Client Chatbot Socket Auth:",
-        clientKey,
-      );
+      console.log("🔌 Client Chatbot Socket Auth:", clientKey);
     } else if (isAuthenticated) {
       socket.auth = {
         token,
@@ -228,82 +216,44 @@ export const SocketProvider = ({ children }) => {
 
       console.log("🔐 User Socket Auth");
     } else {
-      /*
-       * No user + no clientKey
-       */
-
+      //  No user + no clientKey
       if (socket.connected) {
         socket.disconnect();
       }
-
       setIsConnected(false);
-
-      console.log(
-        "🔌 Socket disconnected - no auth/clientKey",
-      );
-
+      console.log("🔌 Socket disconnected - no auth/clientKey");
       return;
     }
 
-    /*
-     * ==========================================
-     * SOCKET EVENTS
-     * ==========================================
-     */
+    // SOCKET EVENTS
 
     const onConnect = () => {
       console.log("✅ Socket connected:", socket.id);
-
       setIsConnected(true);
     };
 
     const onDisconnect = (reason) => {
-      console.log(
-        "❌ Socket disconnected:",
-        reason,
-      );
-
+      console.log("❌ Socket disconnected:", reason);
       setIsConnected(false);
     };
 
     const handleConnectError = async (err) => {
-      console.log(
-        "❌ connect_error:",
-        err.message,
-      );
+      console.log("❌ connect_error:", err.message);
 
-      /*
-       * ========================================
-       * CLIENT CHATBOT ERROR
-       * ========================================
-       */
+      //  CLIENT CHATBOT ERROR
 
       if (isClientChatbot) {
         if (err.message === "INVALID_CLIENT") {
-          toast.error(
-            "Invalid or inactive client.",
-          );
-        } else if (
-          err.message === "AUTH_OR_CLIENT_REQUIRED"
-        ) {
-          toast.error(
-            "Client configuration is missing.",
-          );
+          toast.error("Invalid or inactive client.");
+        } else if (err.message === "AUTH_OR_CLIENT_REQUIRED") {
+          toast.error("Client configuration is missing.");
         } else {
-          toast.error(
-            err.message ||
-              "Client chatbot connection failed.",
-          );
+          toast.error(err.message || "Client chatbot connection failed.");
         }
-
         return;
       }
 
-      /*
-       * ========================================
-       * NORMAL USER SOCKET ERROR
-       * ========================================
-       */
+      //  NORMAL USER SOCKET ERROR
 
       if (
         err.message === "TOKEN_EXPIRED" ||
@@ -322,61 +272,33 @@ export const SocketProvider = ({ children }) => {
       }
     };
 
-    /*
-     * ==========================================
-     * REGISTER EVENTS
-     * ==========================================
-     */
+    //  REGISTER EVENTS
 
     socket.on("connect", onConnect);
     socket.on("disconnect", onDisconnect);
-    socket.on(
-      "connect_error",
-      handleConnectError,
-    );
+    socket.on("connect_error", handleConnectError);
 
-    /*
-     * ==========================================
-     * CONNECT ONLY IF NOT CONNECTED
-     * ==========================================
-     */
+    //  CONNECT ONLY IF NOT CONNECTED
 
     if (!socket.connected) {
       console.log("🚀 Connecting socket...");
-
       socket.connect();
     } else {
-      console.log(
-        "♻️ Socket already connected:",
-        socket.id,
-      );
-
+      console.log("♻️ Socket already connected:", socket.id);
       setIsConnected(true);
     }
 
-    /*
-     * ==========================================
-     * CLEANUP
-     * ==========================================
-     *
-     * IMPORTANT:
-     *
-     * Yaha socket.disconnect() nahi karna.
-     *
-     * Sirf listeners remove karne hain.
-     */
+    // CLEANUP
+    // ==========================================
+    // IMPORTANT:
+    // Yaha socket.disconnect() nahi karna.
+    // Sirf listeners remove karne hain.
 
     return () => {
-      console.log(
-        "🧹 Removing socket listeners",
-      );
-
+      console.log("🧹 Removing socket listeners");
       socket.off("connect", onConnect);
       socket.off("disconnect", onDisconnect);
-      socket.off(
-        "connect_error",
-        handleConnectError,
-      );
+      socket.off("connect_error", handleConnectError);
     };
   }, [
     clientKey,

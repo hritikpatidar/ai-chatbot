@@ -54,9 +54,7 @@ export default function Projects() {
   const [openModal, setOpenModal] = useState(false);
   const [projectName, setProjectName] = useState("");
 
-  const [projects, setProjects] = useState(
-    projectsData,
-  );
+  const [projects, setProjects] = useState(projectsData);
 
   const createProject = () => {
     if (!projectName.trim()) return;
@@ -71,11 +69,7 @@ export default function Projects() {
       favorite: false,
     };
 
-    setProjects([
-      newProject,
-      ...projects,
-    ]);
-
+    setProjects([newProject, ...projects]);
     setProjectName("");
     setOpenModal(false);
   };
@@ -93,7 +87,6 @@ export default function Projects() {
       "
     >
       <div className="p-4 sm:p-6">
-
         {/* Header */}
 
         <div className="flex flex-col gap-5 md:flex-row md:items-center md:justify-between">
@@ -350,9 +343,7 @@ export default function Projects() {
         </div>
       </div>
 
-      {/* ==========================================
-          Create Project Modal
-      =========================================== */}
+      {/* Create Project Modal */}
 
       <AnimatePresence>
         {openModal && (
@@ -430,11 +421,7 @@ export default function Projects() {
                 <input
                   autoFocus
                   value={projectName}
-                  onChange={(e) =>
-                    setProjectName(
-                      e.target.value,
-                    )
-                  }
+                  onChange={(e) => setProjectName(e.target.value)}
                   placeholder="Enter project name..."
                   className="
                     w-full
@@ -482,12 +469,9 @@ export default function Projects() {
                     dark:text-emerald-300
                   "
                 >
-                  ✨ Projects help you organize AI
-                  conversations, uploaded files,
-                  prompts and generated content in one
-                  workspace. Give your project a clear,
-                  memorable name to find it quickly
-                  later.
+                  ✨ Projects help you organize AI conversations, uploaded
+                  files, prompts and generated content in one workspace. Give
+                  your project a clear, memorable name to find it quickly later.
                 </p>
               </div>
 

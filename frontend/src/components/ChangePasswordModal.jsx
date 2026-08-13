@@ -147,10 +147,6 @@ const ChangePasswordModal = ({ setOpenChangePasswordModal }) => {
     mode: "onChange",
   });
 
-  /* =========================================================
-     Close Modal
-  ========================================================= */
-
   const handleClose = () => {
     if (isSubmitting) return;
 

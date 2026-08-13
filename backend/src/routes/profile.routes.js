@@ -10,6 +10,11 @@ import uploadProfileImage from "../middlewares/upload.js";
 const router = express.Router();
 
 router.get("/", authMiddleware, getProfile);
-router.put("/update-profile", authMiddleware, uploadProfileImage.single("profileImage"), updateProfile);
+router.put(
+  "/update-profile",
+  authMiddleware,
+  uploadProfileImage.single("profileImage"),
+  updateProfile,
+);
 
 export default router;

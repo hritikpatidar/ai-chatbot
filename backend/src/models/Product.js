@@ -72,12 +72,6 @@ const productSchema = new mongoose.Schema(
   },
 );
 
-/*
- * Text search index.
- *
- * This allows us to search product
- * names/descriptions/categories.
- */
 productSchema.index({
   name: "text",
   description: "text",

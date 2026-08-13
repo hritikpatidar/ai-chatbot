@@ -1,4 +1,3 @@
-// import { t } from "i18next"
 
 import { getItemLocalStorage } from "../utils/browserServices";
 

@@ -103,21 +103,10 @@ export default function Welcome() {
       removeConversationError(handleConversationError);
     };
   }, []);
-  /*
-   * ----------------------------------------------------
-   * Load conversation list
-   * ----------------------------------------------------
-   */
 
   useEffect(() => {
     getConversations();
   }, []);
-
-  /*
-   * ----------------------------------------------------
-   * Get normal user greeting
-   * ----------------------------------------------------
-   */
 
   const getGreeting = () => {
     const hour = new Date().getHours();
@@ -137,17 +126,9 @@ export default function Welcome() {
     return "Good Night";
   };
 
-  /*
-   * ----------------------------------------------------
-   * Client chatbot config
-   * ----------------------------------------------------
-   */
-
   const chatbot = clientConfig?.chatbot;
-
   const chatbotName =
     chatbot?.name || `${clientConfig?.businessName || "Business"} Assistant`;
-
   const welcomeMessage =
     chatbot?.welcomeMessage ||
     `Hi 👋 Welcome to ${
@@ -159,17 +140,9 @@ export default function Welcome() {
       ?.filter((item) => item.enabled)
       ?.sort((a, b) => (a.sortOrder || 0) - (b.sortOrder || 0)) || [];
 
-  /*
-   * ----------------------------------------------------
-   * Send predefined question
-   * ----------------------------------------------------
-   */
-
   const handlePredefinedQuestion = (question) => {
     if (!question) return;
-
     if (isSendDisable) return;
-
     handleSend(question);
   };
 
@@ -187,10 +160,6 @@ export default function Welcome() {
         overflow-y-auto
       "
     >
-      {/* =================================================
-          CLIENT CHATBOT
-         ================================================= */}
-
       {isClientChatbot ? (
         <>
           {/* Client Heading */}
@@ -525,8 +494,6 @@ export default function Welcome() {
                   </button>
                 </div>
 
-                {/* Send / Stop / Mic */}
-
                 <div className="flex items-center">
                   {isSendDisable ? (
                     <button
@@ -588,10 +555,6 @@ export default function Welcome() {
               </div>
             </form>
           </div>
-
-          {/* =================================================
-              PREDEFINED QUESTIONS
-             ================================================= */}
 
           <div className="mt-6 w-full max-w-4xl px-4">
             {clientConfigLoading ? (
@@ -658,10 +621,6 @@ export default function Welcome() {
             ) : null}
           </div>
 
-          {/* =================================================
-              CLIENT WELCOME MESSAGE
-             ================================================= */}
-
           {!clientConfigLoading && welcomeMessage && (
             <div className="mt-6 w-full max-w-3xl px-4 text-center">
               <p className="text-sm leading-6 text-gray-500 dark:text-gray-400">
@@ -672,10 +631,6 @@ export default function Welcome() {
         </>
       ) : (
         <>
-          {/* =================================================
-              NORMAL AI CHATBOT
-             ================================================= */}
-
           {/* Heading */}
 
           <div className="mt-8 px-4 text-center sm:mt-10 lg:mt-12">

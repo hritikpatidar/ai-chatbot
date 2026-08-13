@@ -98,7 +98,7 @@ export default function EditProfileModal() {
       if (response?.success) {
         toast.success(response?.message || "Somthing went wrong");
         dispatch(setIsProfileModalOpen(false));
-      }else{
+      } else {
         toast.error(response?.message || "Somthing went wrong");
       }
     } catch (error) {
@@ -144,10 +144,6 @@ export default function EditProfileModal() {
           transition={{ duration: 0.25 }}
           onClick={handleCancel}
         >
-          {/* ==========================================
-              Modal
-          =========================================== */}
-
           <motion.div
             initial={{
               opacity: 0,
@@ -184,10 +180,6 @@ export default function EditProfileModal() {
               dark:bg-[#171b23]
             "
           >
-            {/* ==========================================
-                Top Glow
-            =========================================== */}
-
             <motion.div
               initial={{
                 opacity: 0,
@@ -214,10 +206,6 @@ export default function EditProfileModal() {
                 to-transparent
               "
             />
-
-            {/* ==========================================
-                Header
-            =========================================== */}
 
             <div
               className="
@@ -291,20 +279,8 @@ export default function EditProfileModal() {
               </div>
             </div>
 
-            {/* ==========================================
-                Form
-            =========================================== */}
-
             <form onSubmit={handleSubmit(submitProfile)}>
-              {/* ==========================================
-                  Body
-              =========================================== */}
-
               <div className="px-5 py-6">
-                {/* ==========================================
-                    Profile Image
-                =========================================== */}
-
                 <div className="flex flex-col items-center">
                   <div className="relative">
                     {/* Animated Glow */}
@@ -433,10 +409,6 @@ export default function EditProfileModal() {
                   )}
                 </div>
 
-                {/* ==========================================
-                    Form Fields
-                =========================================== */}
-
                 <div className="mt-6 space-y-4">
                   {/* Full Name */}
 
@@ -548,6 +520,7 @@ export default function EditProfileModal() {
                         {...register("email", {
                           required: "Email is required.",
                         })}
+                        disabled={true}
                         placeholder="Enter your email"
                         className="
                           w-full
@@ -579,10 +552,6 @@ export default function EditProfileModal() {
                   </div>
                 </div>
               </div>
-
-              {/* ==========================================
-                  Footer
-              =========================================== */}
 
               <div
                 className="

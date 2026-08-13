@@ -87,15 +87,9 @@ export default function Library() {
   };
 
   return (
-    <div
-      className="
-       min-h-full w-full bg-transparent text-gray-900 dark:text-white
-      "
-    >
+    <div className=" min-h-full w-full bg-transparent text-gray-900 dark:text-white">
       <div className="mx-auto w-full px-4 py-5 sm:px-6 sm:py-6">
-
         {/* Header */}
-
         <div className="flex flex-col gap-5 md:flex-row md:items-center md:justify-between">
           <div>
             <h1

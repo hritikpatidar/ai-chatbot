@@ -106,10 +106,7 @@ export const deleteConversationService = async ({
     throw new Error("Conversation not found");
   }
 
-  // Delete all messages
   await deleteConversationMessages(conversationId);
-
-  // Delete conversation
   await deleteConversation(conversationId);
 
   return {

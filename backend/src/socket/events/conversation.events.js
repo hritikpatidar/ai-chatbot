@@ -7,12 +7,6 @@ import {
 } from "../../services/conversation.service.js";
 
 export const registerConversationEvents = (io, socket) => {
-  /*
-   * ----------------------------------------------
-   * Get Conversation List
-   * ----------------------------------------------
-   */
-
   socket.on("conversation:list", async () => {
     try {
       const userId = socket.user?.id || null;
@@ -23,7 +17,6 @@ export const registerConversationEvents = (io, socket) => {
           success: false,
           message: "User or client is required",
         });
-
         return;
       }
 
@@ -38,7 +31,6 @@ export const registerConversationEvents = (io, socket) => {
       });
     } catch (error) {
       console.error("Conversation List Error:", error);
-
       socket.emit("conversation:error", {
         success: false,
         message: "Failed to fetch conversations",
@@ -46,22 +38,14 @@ export const registerConversationEvents = (io, socket) => {
     }
   });
 
-  /*
-   * ----------------------------------------------
-   * Get Conversation Messages
-   * ----------------------------------------------
-   */
-
   socket.on("conversation:messages", async (data) => {
     try {
       const { conversationId } = data;
-
       if (!conversationId) {
         socket.emit("conversation:error", {
           success: false,
           message: "Conversation ID is required",
         });
-
         return;
       }
 
@@ -70,20 +54,16 @@ export const registerConversationEvents = (io, socket) => {
           success: false,
           message: "Invalid conversation ID",
         });
-
         return;
       }
 
       const userId = socket.user?.id || null;
-
       const clientId = socket.clientId || null;
-
       if (!userId && !clientId) {
         socket.emit("conversation:error", {
           success: false,
           message: "User or client is required",
         });
-
         return;
       }
 
@@ -108,22 +88,14 @@ export const registerConversationEvents = (io, socket) => {
     }
   });
 
-  /*
-   * ----------------------------------------------
-   * Delete Conversation
-   * ----------------------------------------------
-   */
-
   socket.on("conversation:delete", async (data) => {
     try {
       const { conversationId } = data;
-
       if (!conversationId) {
         socket.emit("conversation:error", {
           success: false,
           message: "Conversation ID is required",
         });
-
         return;
       }
 
@@ -132,20 +104,16 @@ export const registerConversationEvents = (io, socket) => {
           success: false,
           message: "Invalid conversation ID",
         });
-
         return;
       }
 
       const userId = socket.user?.id || null;
-
       const clientId = socket.clientId || null;
-
       if (!userId && !clientId) {
         socket.emit("conversation:error", {
           success: false,
           message: "User or client is required",
         });
-
         return;
       }
 
@@ -162,7 +130,6 @@ export const registerConversationEvents = (io, socket) => {
       });
     } catch (error) {
       console.error("Conversation Delete Error:", error);
-
       socket.emit("conversation:error", {
         success: false,
         message: error.message,

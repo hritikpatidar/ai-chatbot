@@ -8,36 +8,25 @@ import {
   X,
   BookOpen,
   FolderKanban,
-  CalendarClock,
-  Puzzle,
   Share2,
   Trash2,
   MoreHorizontal,
   Pin,
-  Bot,
 } from "lucide-react";
 import { useEffect, useRef, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { useLocation, useNavigate, useParams } from "react-router-dom";
 import { motion, AnimatePresence } from "framer-motion";
 import {
-  addConversation,
   clearMessages,
   removeConversation,
   setActivePage,
-  setConversationList,
   setConversationLoading,
 } from "../redux/features/Chat/chatSlice";
 import {
   deleteConversation,
-  onConversationCreated,
   onConversationDeleted,
-  onConversationError,
-  onConversationList,
-  removeConversationCreated,
   removeConversationDeleted,
-  removeConversationError,
-  removeConversationList,
 } from "../service/conversation.services";
 import toast from "react-hot-toast";
 
@@ -232,24 +221,24 @@ export default function Sidebar() {
       {/* Sidebar */}
       <aside
         className={`
-  fixed
-  lg:static
-  top-0
-  left-0
-  z-50
-  flex
-  h-screen
-  w-72
-  flex-col
-  border-r
-  border-gray-200
-  bg-white
-  transition-transform
-  duration-300
-  dark:border-white/10
-  dark:bg-[#111827]
-  ${open ? "translate-x-0" : "-translate-x-full lg:translate-x-0"}
-`}
+          fixed
+          lg:static
+          top-0
+          left-0
+          z-50
+          flex
+          h-screen
+          w-72
+          flex-col
+          border-r
+          border-gray-200
+          bg-white
+          transition-transform
+          duration-300
+          dark:border-white/10
+          dark:bg-[#111827]
+          ${open ? "translate-x-0" : "-translate-x-full lg:translate-x-0"}
+        `}
       >
         {/* Header */}
         <div className="flex shrink-0 items-center justify-between border-b border-gray-200 bg-white px-4 py-4 dark:border-white/10 dark:bg-[#111827]">
@@ -391,30 +380,30 @@ export default function Sidebar() {
                         <MessageSquare
                           size={18}
                           className={`
-  shrink-0
-  transition-colors
-  ${
-    isSelected
-      ? "text-blue-600 dark:text-blue-400"
-      : "text-gray-400 group-hover:text-blue-600 dark:text-gray-500 dark:group-hover:text-blue-400"
-  }
-`}
+                            shrink-0
+                            transition-colors
+                            ${
+                              isSelected
+                                ? "text-blue-600 dark:text-blue-400"
+                                : "text-gray-400 group-hover:text-blue-600 dark:text-gray-500 dark:group-hover:text-blue-400"
+                            }
+                          `}
                         />
 
                         {/* Title */}
                         <span
                           className={`
-  min-w-0
-  flex-1
-  truncate
-  text-sm
-  transition-colors
-  ${
-    isSelected
-      ? "text-blue-600 dark:text-blue-400"
-      : "text-gray-700 dark:text-gray-300"
-  }
-`}
+                            min-w-0
+                            flex-1
+                            truncate
+                            text-sm
+                            transition-colors
+                            ${
+                              isSelected
+                                ? "text-blue-600 dark:text-blue-400"
+                                : "text-gray-700 dark:text-gray-300"
+                            }
+                          `}
                         >
                           {chat.title || "New Conversation"}
                         </span>
@@ -423,29 +412,29 @@ export default function Sidebar() {
                       {/* Hover Actions */}
                       <div
                         className="
-    absolute
-    right-2
-    top-1/2
-    z-10
-    flex
-    -translate-y-1/2
-    items-center
-    gap-1
-    rounded-md
-    border
-    border-gray-200
-    bg-white
-    px-1
-    shadow-lg
-    pointer-events-none
-    opacity-0
-    transition-opacity
-    duration-150
-    group-hover:pointer-events-auto
-    group-hover:opacity-100
-    dark:border-white/10
-    dark:bg-[#1f1f1f]
-  "
+                          absolute
+                          right-2
+                          top-1/2
+                          z-10
+                          flex
+                          -translate-y-1/2
+                          items-center
+                          gap-1
+                          rounded-md
+                          border
+                          border-gray-200
+                          bg-white
+                          px-1
+                          shadow-lg
+                          pointer-events-none
+                          opacity-0
+                          transition-opacity
+                          duration-150
+                          group-hover:pointer-events-auto
+                          group-hover:opacity-100
+                          dark:border-white/10
+                          dark:bg-[#1f1f1f]
+                        "
                       >
                         {/* Pin */}
                         <button
@@ -456,20 +445,20 @@ export default function Sidebar() {
                             console.log("Pin conversation:", chat._id);
                           }}
                           className="
-  flex
-  h-7
-  w-7
-  items-center
-  justify-center
-  rounded-md
-  text-gray-500
-  transition
-  hover:bg-gray-100
-  hover:text-blue-600
-  dark:text-gray-400
-  dark:hover:bg-white/10
-  dark:hover:text-blue-400
-"
+                            flex
+                            h-7
+                            w-7
+                            items-center
+                            justify-center
+                            rounded-md
+                            text-gray-500
+                            transition
+                            hover:bg-gray-100
+                            hover:text-blue-600
+                            dark:text-gray-400
+                            dark:hover:bg-white/10
+                            dark:hover:text-blue-400
+                          "
                           title="Pin"
                         >
                           <Pin size={15} />
@@ -507,20 +496,20 @@ export default function Sidebar() {
                       {menuOpen === chat._id && (
                         <div
                           className={`
-  absolute
-  right-2
-  z-50
-  w-40
-  rounded-xl
-  border
-  border-gray-200
-  bg-white
-  py-1
-  shadow-xl
-  dark:border-white/10
-  dark:bg-[#1a202c]
-  ${isLastItem ? "bottom-10" : "top-10"}
-`}
+                            absolute
+                            right-2
+                            z-50
+                            w-40
+                            rounded-xl
+                            border
+                            border-gray-200
+                            bg-white
+                            py-1
+                            shadow-xl
+                            dark:border-white/10
+                            dark:bg-[#1a202c]
+                            ${isLastItem ? "bottom-10" : "top-10"}
+                          `}
                         >
                           {/* Share */}
                           <button
@@ -530,19 +519,19 @@ export default function Sidebar() {
                               handleShare(chat._id);
                             }}
                             className="
-  flex
-  w-full
-  items-center
-  gap-2
-  px-3
-  py-2
-  text-sm
-  text-gray-700
-  transition
-  hover:bg-gray-100
-  dark:text-white
-  dark:hover:bg-white/10
-"
+                              flex
+                              w-full
+                              items-center
+                              gap-2
+                              px-3
+                              py-2
+                              text-sm
+                              text-gray-700
+                              transition
+                              hover:bg-gray-100
+                              dark:text-white
+                              dark:hover:bg-white/10
+                            "
                           >
                             <Share2 size={16} />
                             Share

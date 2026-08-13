@@ -1,8 +1,6 @@
-import getUrl from "../../config";
 import httpServices from "../httpServices";
 
 export const signupService = (userData) => {
-  // return httpServices.post(`/${getUrl()}/signup`, userData);
   return httpServices.post(`/auth/signup`, userData);
 };
 

@@ -15,14 +15,7 @@ export default function OTPVerification() {
   const { state } = useLocation();
   const { email, purpose } = state || {};
 
-  const [otp, setOtp] = useState([
-    "",
-    "",
-    "",
-    "",
-    "",
-    "",
-  ]);
+  const [otp, setOtp] = useState(["", "", "", "", "", ""]);
 
   const [loading, setLoading] = useState(false);
   const [resending, setResending] = useState(false);
@@ -30,9 +23,7 @@ export default function OTPVerification() {
 
   const inputRefs = useRef([]);
 
-  // ==========================================
   // Timer
-  // ==========================================
 
   useEffect(() => {
     if (timer === 0) return;
@@ -44,22 +35,16 @@ export default function OTPVerification() {
     return () => clearInterval(interval);
   }, [timer]);
 
-  // ==========================================
   // Format Timer
-  // ==========================================
 
   const formatTime = (seconds) => {
     const min = Math.floor(seconds / 60);
     const sec = seconds % 60;
 
-    return `${String(min).padStart(2, "0")}:${String(
-      sec,
-    ).padStart(2, "0")}`;
+    return `${String(min).padStart(2, "0")}:${String(sec).padStart(2, "0")}`;
   };
 
-  // ==========================================
   // OTP Change
-  // ==========================================
 
   const handleOTPChange = (value, index) => {
     if (!/^\d?$/.test(value)) return;
@@ -75,31 +60,20 @@ export default function OTPVerification() {
     }
   };
 
-  // ==========================================
   // Backspace
-  // ==========================================
 
   const handleKeyDown = (e, index) => {
-    if (
-      e.key === "Backspace" &&
-      otp[index] === "" &&
-      index > 0
-    ) {
+    if (e.key === "Backspace" && otp[index] === "" && index > 0) {
       inputRefs.current[index - 1]?.focus();
     }
   };
 
-  // ==========================================
   // Paste OTP
-  // ==========================================
 
   const handlePaste = (e) => {
     e.preventDefault();
 
-    const pasted = e.clipboardData
-      .getData("text")
-      .trim()
-      .slice(0, 6);
+    const pasted = e.clipboardData.getData("text").trim().slice(0, 6);
 
     if (!/^\d+$/.test(pasted)) return;
 
@@ -118,9 +92,7 @@ export default function OTPVerification() {
     inputRefs.current[nextIndex]?.focus();
   };
 
-  // ==========================================
   // Validate OTP
-  // ==========================================
 
   const validate = () => {
     const code = otp.join("");
@@ -133,32 +105,20 @@ export default function OTPVerification() {
     return true;
   };
 
-  // ==========================================
   // Verify OTP
-  // ==========================================
 
   const handleSubmit = async () => {
     if (!validate()) return;
-
     const code = otp.join("");
-
-    const toastId = toast.loading(
-      "Verifying OTP...",
-    );
-
+    const toastId = toast.loading("Verifying OTP...");
     try {
       setLoading(true);
-
       const payload = {
         otp: code,
         email,
         purpose: purpose || "register",
       };
-
-      const response = await dispatch(
-        verifyOtp(payload),
-      ).unwrap();
-
+      const response = await dispatch(verifyOtp(payload)).unwrap();
       if (response?.success) {
         toast.success(response.message, {
           id: toastId,
@@ -173,102 +133,52 @@ export default function OTPVerification() {
             },
           });
         } else {
-          setItemLocalStorage(
-            "token",
-            response?.accessToken,
-          );
-
-          setItemLocalStorage(
-            "refreshToken",
-            response?.refreshToken,
-          );
-
-          setItemLocalStorage(
-            "userRole",
-            response?.user?.role,
-          );
-
+          setItemLocalStorage("token", response?.accessToken);
+          setItemLocalStorage("refreshToken", response?.refreshToken);
+          setItemLocalStorage("userRole", response?.user?.role);
           navigate("/");
         }
       } else {
-        toast.error(
-          response?.message || "Invalid OTP",
-          {
-            id: toastId,
-          },
-        );
+        toast.error(response?.message || "Invalid OTP", {
+          id: toastId,
+        });
       }
     } catch (error) {
-      console.error(
-        "OTP Verification Error:",
-        error,
-      );
-
-      toast.error(
-        error?.response?.message ||
-          "Something went wrong",
-        {
-          id: toastId,
-        },
-      );
+      console.error("OTP Verification Error:", error);
+      toast.error(error?.response?.message || "Something went wrong", {
+        id: toastId,
+      });
     } finally {
       setLoading(false);
     }
   };
 
-  // ==========================================
   // Resend OTP
-  // ==========================================
 
   const handleResendOTP = async () => {
     if (timer > 0) return;
-
     try {
       setResending(true);
-
-      const toastId = toast.loading(
-        "Sending OTP...",
-      );
-
+      const toastId = toast.loading("Sending OTP...");
       const response = await resendOtpService({
         email,
         purpose: purpose || "register",
       });
-
       if (response?.data?.success) {
-        toast.success(
-          response.data.message,
-          {
-            id: toastId,
-          },
-        );
+        toast.success(response.data.message, {
+          id: toastId,
+        });
       } else {
-        toast.error(
-          response?.data?.message ||
-            "Failed to resend OTP.",
-          {
-            id: toastId,
-          },
-        );
+        toast.error(response?.data?.message || "Failed to resend OTP.", {
+          id: toastId,
+        });
       }
 
       setTimer(59);
-
-      setOtp([
-        "",
-        "",
-        "",
-        "",
-        "",
-        "",
-      ]);
-
+      setOtp(["", "", "", "", "", ""]);
       inputRefs.current[0]?.focus();
     } catch (error) {
-      toast.error(
-        error?.response?.data?.message ||
-          "Failed to resend OTP.",
-      );
+      toast.error(error?.response?.data?.message || "Failed to resend OTP.");
     } finally {
       setResending(false);
     }
@@ -288,9 +198,7 @@ export default function OTPVerification() {
         dark:text-white
       "
     >
-      {/* ==========================================
-          Background Glow
-      =========================================== */}
+      {/* Background Glow */}
 
       <div className="pointer-events-none absolute inset-0 overflow-hidden">
         {/* Top Left Glow */}
@@ -402,9 +310,7 @@ export default function OTPVerification() {
         ))}
       </div>
 
-      {/* ==========================================
-          Main Content
-      =========================================== */}
+      {/* Main Content */}
 
       <motion.div
         initial={{
@@ -427,9 +333,7 @@ export default function OTPVerification() {
           py-10
         "
       >
-        {/* ==========================================
-            OTP Card
-        =========================================== */}
+        {/* OTP Card */}
 
         <motion.div
           initial={{
@@ -461,9 +365,7 @@ export default function OTPVerification() {
             dark:bg-[#171b23]/80
           "
         >
-          {/* ==========================================
-              Icon
-          =========================================== */}
+          {/* Icon */}
 
           <motion.div
             animate={{
@@ -492,9 +394,7 @@ export default function OTPVerification() {
             <ShieldCheck size={34} />
           </motion.div>
 
-          {/* ==========================================
-              Heading
-          =========================================== */}
+          {/* Heading */}
 
           <h1
             className="
@@ -535,31 +435,20 @@ export default function OTPVerification() {
             {email}
           </p>
 
-          {/* ==========================================
-              OTP Inputs
-          =========================================== */}
+          {/* OTP Inputs */}
 
           <div className="mt-8 flex justify-center gap-2 sm:gap-3">
             {otp.map((digit, index) => (
               <motion.input
                 key={index}
-                ref={(el) =>
-                  (inputRefs.current[index] = el)
-                }
+                ref={(el) => (inputRefs.current[index] = el)}
                 type="text"
                 inputMode="numeric"
                 autoComplete="one-time-code"
                 maxLength={1}
                 value={digit}
-                onChange={(e) =>
-                  handleOTPChange(
-                    e.target.value,
-                    index,
-                  )
-                }
-                onKeyDown={(e) =>
-                  handleKeyDown(e, index)
-                }
+                onChange={(e) => handleOTPChange(e.target.value, index)}
+                onKeyDown={(e) => handleKeyDown(e, index)}
                 onPaste={handlePaste}
                 whileFocus={{
                   scale: 1.05,
@@ -593,9 +482,7 @@ export default function OTPVerification() {
             ))}
           </div>
 
-          {/* ==========================================
-              Timer
-          =========================================== */}
+          {/* Timer */}
 
           <p
             className="
@@ -632,9 +519,7 @@ export default function OTPVerification() {
             )}
           </p>
 
-          {/* ==========================================
-              Verify Button
-          =========================================== */}
+          {/* Verify Button */}
 
           <motion.button
             type="button"
@@ -661,20 +546,14 @@ export default function OTPVerification() {
               disabled:opacity-60
             "
           >
-            {loading
-              ? "Verifying..."
-              : "Verify OTP"}
+            {loading ? "Verifying..." : "Verify OTP"}
           </motion.button>
 
-          {/* ==========================================
-              Resend
-          =========================================== */}
+          {/* Resend */}
 
           <button
             type="button"
-            disabled={
-              timer > 0 || resending
-            }
+            disabled={timer > 0 || resending}
             onClick={handleResendOTP}
             className={`
               mt-5
@@ -689,9 +568,7 @@ export default function OTPVerification() {
               }
             `}
           >
-            {resending
-              ? "Sending..."
-              : "Resend OTP"}
+            {resending ? "Sending..." : "Resend OTP"}
           </button>
         </motion.div>
       </motion.div>

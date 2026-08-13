@@ -78,7 +78,6 @@ export default function PrivacyPolicy() {
       {/* Main Content */}
 
       <div className="relative z-10 mx-auto max-w-5xl px-5 py-10">
-
         {/* Header */}
 
         <button
@@ -108,10 +107,7 @@ export default function PrivacyPolicy() {
               dark:text-white
             "
           >
-            Privacy{" "}
-            <span className="text-cyan-500">
-              Policy
-            </span>
+            Privacy <span className="text-cyan-500">Policy</span>
           </h1>
 
           <p
@@ -123,9 +119,9 @@ export default function PrivacyPolicy() {
               dark:text-gray-400
             "
           >
-            Your privacy is important to us. This Privacy Policy explains how
-            we collect, use, store, and protect your personal information
-            while using our platform.
+            Your privacy is important to us. This Privacy Policy explains how we
+            collect, use, store, and protect your personal information while
+            using our platform.
           </p>
 
           <div
@@ -136,9 +132,7 @@ export default function PrivacyPolicy() {
               dark:text-gray-500
             "
           >
-            <span className="font-medium">
-              Last Updated
-            </span>
+            <span className="font-medium">Last Updated</span>
             <br />
             July 27, 2026
           </div>
@@ -170,7 +164,6 @@ export default function PrivacyPolicy() {
                 "
               >
                 <div className="flex items-start gap-5">
-
                   <div
                     className="
                       flex
@@ -218,7 +211,6 @@ export default function PrivacyPolicy() {
                       {section.content}
                     </p>
                   </div>
-
                 </div>
               </div>
             );
@@ -272,8 +264,8 @@ export default function PrivacyPolicy() {
               dark:text-gray-400
             "
           >
-            We are committed to maintaining the confidentiality and security
-            of your personal information. Our policies are regularly updated to
+            We are committed to maintaining the confidentiality and security of
+            your personal information. Our policies are regularly updated to
             ensure transparency and compliance with privacy standards.
           </p>
 

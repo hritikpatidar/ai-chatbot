@@ -28,7 +28,6 @@ export default function EmptyState({
         dark:bg-[#171b23]
       "
     >
-
       <div
         className="
           flex

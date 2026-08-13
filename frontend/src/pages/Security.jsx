@@ -20,8 +20,7 @@ import ChangePasswordModal from "../components/ChangePasswordModal";
 export default function Security() {
   const navigate = useNavigate();
 
-  const [openChangePasswordModal, setOpenChangePasswordModal] =
-    useState(false);
+  const [openChangePasswordModal, setOpenChangePasswordModal] = useState(false);
 
   const handleCloseChangePassword = () => {
     setOpenChangePasswordModal(false);
@@ -49,10 +48,7 @@ export default function Security() {
       "
     >
       <div className="mx-auto w-full max-w-6xl min-w-0">
-
-        {/* =====================================================
-            Header
-        ====================================================== */}
+        {/* Header */}
 
         <motion.div
           initial={{ opacity: 0, y: -15 }}
@@ -147,9 +143,7 @@ export default function Security() {
           </div>
         </motion.div>
 
-        {/* =====================================================
-            Security Overview
-        ====================================================== */}
+        {/* Security Overview */}
 
         <motion.div
           initial={{ opacity: 0, y: 15 }}
@@ -246,15 +240,10 @@ export default function Security() {
           </div>
         </motion.div>
 
-        {/* =====================================================
-            Main Grid
-        ====================================================== */}
+        {/* Main Grid */}
 
         <div className="grid min-w-0 gap-5 lg:grid-cols-2">
-
-          {/* ===================================================
-              Password
-          ==================================================== */}
+          {/* Password */}
 
           <motion.div
             initial={{ opacity: 0, x: -20 }}
@@ -319,10 +308,7 @@ export default function Security() {
               "
             >
               <div className="flex items-start gap-3">
-                <KeyRound
-                  size={18}
-                  className="mt-0.5 shrink-0 text-blue-500"
-                />
+                <KeyRound size={18} className="mt-0.5 shrink-0 text-blue-500" />
 
                 <div className="min-w-0">
                   <p className="text-sm font-medium">
@@ -377,9 +363,7 @@ export default function Security() {
             </button>
           </motion.div>
 
-          {/* ===================================================
-              Two Factor Authentication
-          ==================================================== */}
+          {/* Two Factor Authentication */}
 
           <motion.div
             initial={{ opacity: 0, x: 20 }}
@@ -491,9 +475,7 @@ export default function Security() {
             </button>
           </motion.div>
 
-          {/* ===================================================
-              Active Sessions
-          ==================================================== */}
+          {/* Active Sessions */}
 
           <motion.div
             initial={{ opacity: 0, y: 20 }}
@@ -591,9 +573,7 @@ export default function Security() {
 
                 <div className="min-w-0 flex-1">
                   <div className="flex flex-wrap items-center gap-2">
-                    <p className="text-sm font-medium">
-                      Current Device
-                    </p>
+                    <p className="text-sm font-medium">Current Device</p>
 
                     <span
                       className="
@@ -656,9 +636,7 @@ export default function Security() {
             </button>
           </motion.div>
 
-          {/* ===================================================
-              Security Recommendations
-          ==================================================== */}
+          {/* Security Recommendations */}
 
           <motion.div
             initial={{ opacity: 0, y: 20 }}
@@ -709,7 +687,6 @@ export default function Security() {
             </div>
 
             <div className="mt-5 space-y-3">
-
               <div
                 className="
                   flex
@@ -730,13 +707,10 @@ export default function Security() {
                 />
 
                 <div>
-                  <p className="text-sm font-medium">
-                    Use a strong password
-                  </p>
+                  <p className="text-sm font-medium">Use a strong password</p>
 
                   <p className="mt-1 text-xs leading-5 text-gray-500 dark:text-gray-400">
-                    Avoid common passwords and reuse across multiple
-                    services.
+                    Avoid common passwords and reuse across multiple services.
                   </p>
                 </div>
               </div>
@@ -800,15 +774,12 @@ export default function Security() {
                   </p>
                 </div>
               </div>
-
             </div>
           </motion.div>
         </div>
       </div>
 
-      {/* =====================================================
-          Change Password Modal
-      ====================================================== */}
+      {/* Change Password Modal */}
 
       <AnimatePresence>
         {openChangePasswordModal && (
@@ -820,7 +791,7 @@ export default function Security() {
             className="
               fixed
               inset-0
-              z-[9999]
+              z-9999
               flex
               items-center
               justify-center
@@ -862,9 +833,7 @@ export default function Security() {
               "
             >
               <ChangePasswordModal
-                setOpenChangePasswordModal={
-                  setOpenChangePasswordModal
-                }
+                setOpenChangePasswordModal={setOpenChangePasswordModal}
               />
             </motion.div>
           </motion.div>

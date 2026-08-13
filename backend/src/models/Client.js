@@ -37,14 +37,6 @@ const clientSchema = new mongoose.Schema(
       trim: true,
     },
 
-    /*
-     * Short description of the business.
-     *
-     * Example:
-     * "ABC Books is an online and offline
-     * bookstore selling educational and
-     * general books."
-     */
     businessDescription: {
       type: String,
       default: "",
@@ -92,14 +84,6 @@ const clientSchema = new mongoose.Schema(
         trim: true,
       },
 
-      /*
-       * Additional instructions for Gemini.
-       *
-       * Example:
-       * "Always be polite. Help users with
-       * books, availability, pricing and
-       * delivery related questions."
-       */
       aiInstructions: {
         type: String,
         default: "",

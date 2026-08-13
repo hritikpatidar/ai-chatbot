@@ -7,7 +7,6 @@ import {
   Lock,
   Edit3,
   CheckCircle2,
-  Camera,
   ArrowLeft,
 } from "lucide-react";
 
@@ -30,17 +29,13 @@ export default function Profile() {
 
   const [openChangePasswordModal, setOpenChangePasswordModal] = useState(false);
 
-  // ==========================================
   // Open Edit Profile
-  // ==========================================
 
   const handleOpenProfileModal = () => {
     dispatch(setIsProfileModalOpen(true));
   };
 
-  // ==========================================
   // Close Change Password Modal
-  // ==========================================
 
   const handleCloseChangePassword = () => {
     setOpenChangePasswordModal(false);
@@ -68,22 +63,20 @@ export default function Profile() {
       "
     >
       <div className="mx-auto w-full max-w-6xl min-w-0">
-        {/* ==========================================
-            Page Header
-        ========================================== */}
+        {/* Page Header */}
 
         <motion.div
           initial={{ opacity: 0, y: -15 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.4 }}
           className="
-    mb-5
-    flex
-    min-w-0
-    items-center
-    gap-3
-    sm:mb-6
-  "
+            mb-5
+            flex
+            min-w-0
+            items-center
+            gap-3
+            sm:mb-6
+          "
         >
           {/* Back Button */}
 
@@ -93,44 +86,44 @@ export default function Profile() {
             aria-label="Go back"
             title="Go Back"
             className="
-      group
-      flex
-      h-9
-      w-9
-      shrink-0
-      items-center
-      justify-center
-      rounded-xl
-      border
-      border-gray-200
-      bg-white
-      text-gray-600
-      shadow-sm
-      transition-all
-      duration-200
-      hover:border-blue-400
-      hover:bg-blue-50
-      hover:text-blue-600
-      hover:shadow-md
+              group
+              flex
+              h-9
+              w-9
+              shrink-0
+              items-center
+              justify-center
+              rounded-xl
+              border
+              border-gray-200
+              bg-white
+              text-gray-600
+              shadow-sm
+              transition-all
+              duration-200
+              hover:border-blue-400
+              hover:bg-blue-50
+              hover:text-blue-600
+              hover:shadow-md
 
-      dark:border-white/10
-      dark:bg-[#171b23]
-      dark:text-gray-300
-      dark:hover:border-blue-500/60
-      dark:hover:bg-[#1d2432]
-      dark:hover:text-blue-400
+              dark:border-white/10
+              dark:bg-[#171b23]
+              dark:text-gray-300
+              dark:hover:border-blue-500/60
+              dark:hover:bg-[#1d2432]
+              dark:hover:text-blue-400
 
-      sm:h-10
-      sm:w-10
-    "
+              sm:h-10
+              sm:w-10
+            "
           >
             <ArrowLeft
               size={18}
               className="
-        transition-transform
-        duration-200
-        group-hover:-translate-x-0.5
-      "
+                transition-transform
+                duration-200
+                group-hover:-translate-x-0.5
+              "
             />
           </button>
 
@@ -139,37 +132,35 @@ export default function Profile() {
           <div className="min-w-0">
             <h1
               className="
-        truncate
-        text-xl
-        font-semibold
-        text-gray-900
-        dark:text-white
-        sm:text-2xl
-        md:text-3xl
-      "
+                truncate
+                text-xl
+                font-semibold
+                text-gray-900
+                dark:text-white
+                sm:text-2xl
+                md:text-3xl
+              "
             >
               Profile
             </h1>
 
             <p
               className="
-        mt-1
-        max-w-xl
-        text-xs
-        leading-5
-        text-gray-500
-        dark:text-gray-400
-        sm:text-sm
-      "
+                mt-1
+                max-w-xl
+                text-xs
+                leading-5
+                text-gray-500
+                dark:text-gray-400
+                sm:text-sm
+              "
             >
               Manage your personal information and account.
             </p>
           </div>
         </motion.div>
 
-        {/* ==========================================
-            Main Grid
-        ========================================== */}
+        {/* Main Grid */}
 
         <div
           className="
@@ -182,9 +173,7 @@ export default function Profile() {
             xl:grid-cols-[320px_minmax(0,1fr)]
           "
         >
-          {/* ==========================================
-              Profile Card
-          ========================================== */}
+          {/* Profile Card */}
 
           <motion.div
             initial={{ opacity: 0, x: -20 }}
@@ -264,45 +253,9 @@ export default function Profile() {
                     className="text-white sm:h-3.25 sm:w-3.25"
                   />
                 </span>
-
-                {/* Camera */}
-
-                {/* <button
-                  type="button"
-                  className="
-                    absolute
-                    bottom-0
-                    left-0
-                    flex
-                    h-7
-                    w-7
-                    items-center
-                    justify-center
-                    rounded-full
-                    border
-                    border-gray-200
-                    bg-white
-                    text-gray-600
-                    shadow-md
-                    transition
-                    hover:border-blue-400
-                    hover:text-blue-500
-                    dark:border-white/10
-                    dark:bg-[#222938]
-                    dark:text-gray-300
-                    dark:hover:border-blue-500
-                    dark:hover:text-blue-400
-                    sm:h-8
-                    sm:w-8
-                  "
-                  title="Change profile image"
-                >
-                  <Camera size={13} />
-                </button> */}
               </div>
 
               {/* Name */}
-
               <h2
                 className="
                   mt-4
@@ -405,9 +358,7 @@ export default function Profile() {
             </button>
           </motion.div>
 
-          {/* ==========================================
-              Account Information
-          ========================================== */}
+          {/* Account Information */}
 
           <motion.div
             initial={{ opacity: 0, x: 20 }}
@@ -661,11 +612,14 @@ export default function Profile() {
 
                     <p className="mt-1 text-xs font-medium sm:text-sm">
                       {profileDetails?.createdAt
-                        ? new Date(profileDetails.createdAt).toLocaleDateString("en-IN", {
-                            day: "2-digit",
-                            month: "short",
-                            year: "numeric",
-                          })
+                        ? new Date(profileDetails.createdAt).toLocaleDateString(
+                            "en-IN",
+                            {
+                              day: "2-digit",
+                              month: "short",
+                              year: "numeric",
+                            },
+                          )
                         : "Not available"}
                     </p>
                   </div>
@@ -673,9 +627,7 @@ export default function Profile() {
               </div>
             </div>
 
-            {/* ==========================================
-                Security
-            ========================================== */}
+            {/* Security */}
 
             <div className="mt-6 sm:mt-8">
               <h3 className="text-sm font-semibold sm:text-base">Security</h3>

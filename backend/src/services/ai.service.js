@@ -87,7 +87,6 @@ export const buildConversationContents = (history = [], currentMessage) => {
 
     contents.push({
       role: message.role === "assistant" ? "model" : "user",
-
       parts: [
         {
           text: message.text,
@@ -95,17 +94,6 @@ export const buildConversationContents = (history = [], currentMessage) => {
       ],
     });
   }
-
-  /*
-   * Current message is already saved
-   * in database before this function
-   * is called.
-   *
-   * Therefore history may already contain
-   * the current message.
-   *
-   * We don't want to duplicate it.
-   */
 
   const lastMessage = history[history.length - 1];
 
@@ -115,7 +103,6 @@ export const buildConversationContents = (history = [], currentMessage) => {
   if (!isCurrentMessageAlreadyIncluded) {
     contents.push({
       role: "user",
-
       parts: [
         {
           text: currentMessage,

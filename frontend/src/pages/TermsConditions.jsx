@@ -76,7 +76,6 @@ export default function TermsConditions() {
       />
 
       <div className="relative z-10 mx-auto max-w-5xl px-5 py-10">
-
         {/* Header */}
 
         <button
@@ -133,8 +132,8 @@ export default function TermsConditions() {
               dark:text-gray-400
             "
           >
-            Please read these Terms & Conditions carefully
-            before using our platform.
+            Please read these Terms & Conditions carefully before using our
+            platform.
           </p>
         </div>
 
@@ -201,7 +200,6 @@ export default function TermsConditions() {
                 "
               >
                 <div className="flex items-start gap-5">
-
                   {/* Icon */}
 
                   <div
@@ -253,7 +251,6 @@ export default function TermsConditions() {
                       {item.content}
                     </p>
                   </div>
-
                 </div>
               </div>
             );
@@ -296,8 +293,8 @@ export default function TermsConditions() {
               dark:text-gray-400
             "
           >
-            If you have any questions about our Terms &
-            Conditions, please contact our support team.
+            If you have any questions about our Terms & Conditions, please
+            contact our support team.
           </p>
 
           <button

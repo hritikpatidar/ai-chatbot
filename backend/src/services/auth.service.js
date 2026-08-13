@@ -144,7 +144,6 @@ export const loginService = async (body) => {
       success: true,
       message: "Resend OTP on your registered email",
     };
-    // throw new Error("Please verify your email first");
   }
 
   if (user.accountStatus !== "active") {

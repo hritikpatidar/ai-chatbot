@@ -76,14 +76,6 @@ export const updateProfileService = async (userId, body, file) => {
 
   if (file && oldImagePath) {
     try {
-      /*
-       * DB me path:
-       * /uploads/profile/profile-userid-123.jpg
-       *
-       * Actual path:
-       * E:/AI CHATBOT/BACKEND/SRC/uploads/profile/profile-userid-123.jpg
-       */
-
       const oldFilePath = path.join(
         process.cwd(),
         "src",
@@ -94,7 +86,6 @@ export const updateProfileService = async (userId, body, file) => {
 
       console.log("✅ Old profile image deleted:", oldFilePath);
     } catch (error) {
-      // File already deleted/not found
       if (error.code !== "ENOENT") {
         console.error("❌ Old profile image delete failed:", error);
       }

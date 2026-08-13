@@ -79,9 +79,6 @@ export default function Login() {
           max-w-7xl
         "
       >
-        {/* =========================
-            Left Side
-        ========================== */}
 
         <motion.div
           initial={{ x: -80, opacity: 0 }}
@@ -102,7 +99,6 @@ export default function Login() {
           <div className="max-w-xl text-center">
             <div className="relative flex justify-center">
               {/* Animated Glow */}
-
               <motion.div
                 animate={{
                   scale: [1, 1.3, 1],
@@ -127,7 +123,6 @@ export default function Login() {
               />
 
               {/* Orbit Particles */}
-
               {[...Array(8)].map((_, index) => (
                 <motion.div
                   key={index}
@@ -156,8 +151,6 @@ export default function Login() {
                   />
                 </motion.div>
               ))}
-
-              {/* Main Orb */}
 
               <motion.div
                 initial={{
@@ -210,7 +203,6 @@ export default function Login() {
                 "
               >
                 {/* Inner Glow */}
-
                 <motion.div
                   animate={{
                     scale: [1, 1.25, 1],
@@ -289,10 +281,6 @@ export default function Login() {
             </motion.p>
           </div>
         </motion.div>
-
-        {/* =========================
-            Right Side
-        ========================== */}
 
         <div
           className="
@@ -375,9 +363,6 @@ export default function Login() {
               autoComplete="off"
               onSubmit={handleSubmit(onSubmit)}
             >
-              {/* =========================
-                  Email
-              ========================== */}
 
               <motion.div
                 initial={{ y: 25, opacity: 0 }}
@@ -438,10 +423,6 @@ export default function Login() {
                   </p>
                 )}
               </motion.div>
-
-              {/* =========================
-                  Password
-              ========================== */}
 
               <motion.div
                 initial={{ y: 25, opacity: 0 }}
@@ -521,10 +502,6 @@ export default function Login() {
                 )}
               </motion.div>
 
-              {/* =========================
-                  Remember
-              ========================== */}
-
               <motion.div
                 initial={{ y: 25, opacity: 0 }}
                 animate={{ y: 0, opacity: 1 }}
@@ -574,10 +551,6 @@ export default function Login() {
                 </button>
               </motion.div>
 
-              {/* =========================
-                  Login
-              ========================== */}
-
               <motion.button
                 type="submit"
                 disabled={isSubmitting}
@@ -602,10 +575,6 @@ export default function Login() {
                 {isSubmitting ? "Logging in..." : "Login"}
               </motion.button>
 
-              {/* =========================
-                  Divider
-              ========================== */}
-
               <div className="flex items-center gap-3">
                 <div
                   className="
@@ -627,10 +596,6 @@ export default function Login() {
                   "
                 />
               </div>
-
-              {/* =========================
-                  Google
-              ========================== */}
 
               <button
                 type="button"

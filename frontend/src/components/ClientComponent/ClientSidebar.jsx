@@ -12,8 +12,6 @@ import {
   Menu,
 } from "lucide-react";
 
-import { logoutUser, logoutSuccess } from "../../redux/features/Auth/authSlice";
-import { removeItemLocalStorage } from "../../utils/browserServices";
 import { handleLogout } from "../../utils/logout";
 import { useState } from "react";
 

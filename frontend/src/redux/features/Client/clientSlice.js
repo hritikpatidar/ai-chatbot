@@ -17,10 +17,6 @@ import {
   updateFAQService,
 } from "../../../service/Client/faqServices";
 
-/* =========================================================
-   INITIAL STATE
-========================================================= */
-
 const initialState = {
   client: null,
   products: [],
@@ -34,10 +30,6 @@ const initialState = {
   productError: "",
   faqError: "",
 };
-
-/* =========================================================
-   CLIENT THUNKS
-========================================================= */
 
 // Create Client
 export const createClient = createAsyncThunk(
@@ -92,10 +84,6 @@ export const updateClient = createAsyncThunk(
     }
   },
 );
-
-/* =========================================================
-   PRODUCT THUNKS
-========================================================= */
 
 // Create Product
 export const createProduct = createAsyncThunk(
@@ -172,10 +160,6 @@ export const deleteProduct = createAsyncThunk(
   },
 );
 
-/* =========================================================
-   FAQ THUNKS
-========================================================= */
-
 // Create FAQ
 export const createFAQ = createAsyncThunk(
   "admin/createFAQ",
@@ -251,15 +235,9 @@ export const deleteFAQ = createAsyncThunk(
   },
 );
 
-/* =========================================================
-   SLICE
-========================================================= */
-
 const clientSlice = createSlice({
   name: "admin",
-
   initialState,
-
   reducers: {
     clearAdminError: (state) => {
       state.error = "";
@@ -280,80 +258,54 @@ const clientSlice = createSlice({
   },
 
   extraReducers: (builder) => {
-    /* =====================================================
-       CLIENT
-    ===================================================== */
-
     builder
       .addCase(createClient.pending, (state) => {
         state.clientLoading = true;
         state.clientError = "";
       })
-
       .addCase(createClient.fulfilled, (state, action) => {
         state.clientLoading = false;
-
         state.client = action.payload?.client || null;
-
         state.clientError = "";
       })
-
       .addCase(createClient.rejected, (state, action) => {
         state.clientLoading = false;
-
         state.clientError =
           action.payload?.message || "Failed to create client";
       });
-
-    /* ----------------------------------------------------- */
-
+    // -----------------------------------------------------
     builder
       .addCase(getClientById.pending, (state) => {
         state.clientLoading = true;
         state.clientError = "";
       })
-
       .addCase(getClientById.fulfilled, (state, action) => {
         state.clientLoading = false;
-
         state.client = action.payload?.client || null;
-
         state.clientError = "";
       })
-
       .addCase(getClientById.rejected, (state, action) => {
         state.clientLoading = false;
 
         state.clientError = action.payload?.message || "Failed to fetch client";
       });
-
-    /* ----------------------------------------------------- */
-
+    // -----------------------------------------------------
     builder
       .addCase(updateClient.pending, (state) => {
         state.clientLoading = true;
         state.clientError = "";
       })
-
       .addCase(updateClient.fulfilled, (state, action) => {
         state.clientLoading = false;
-
         state.client = action.payload?.client || state.client;
-
         state.clientError = "";
       })
-
       .addCase(updateClient.rejected, (state, action) => {
         state.clientLoading = false;
-
         state.clientError =
           action.payload?.message || "Failed to update client";
       });
-
-    /* =====================================================
-       PRODUCTS
-    ===================================================== */
-
+    // -----------------------------------------------------
     builder
       .addCase(createProduct.pending, (state) => {
         state.productLoading = true;
@@ -362,207 +314,148 @@ const clientSlice = createSlice({
 
       .addCase(createProduct.fulfilled, (state, action) => {
         state.productLoading = false;
-
         const product = action.payload?.product;
-
         if (product) {
           state.products.unshift(product);
         }
-
         state.productError = "";
       })
-
       .addCase(createProduct.rejected, (state, action) => {
         state.productLoading = false;
-
         state.productError =
           action.payload?.message || "Failed to create product";
       });
 
-    /* ----------------------------------------------------- */
-
+    // -----------------------------------------------------
     builder
       .addCase(getProducts.pending, (state) => {
         state.productLoading = true;
         state.productError = "";
       })
-
       .addCase(getProducts.fulfilled, (state, action) => {
         state.productLoading = false;
-
         state.products = action.payload?.products || [];
-
         state.productError = "";
       })
-
       .addCase(getProducts.rejected, (state, action) => {
         state.productLoading = false;
-
         state.products = [];
-
         state.productError =
           action.payload?.message || "Failed to fetch products";
       });
 
-    /* ----------------------------------------------------- */
-
+    // -----------------------------------------------------
     builder
       .addCase(updateProduct.pending, (state) => {
         state.productLoading = true;
         state.productError = "";
       })
-
       .addCase(updateProduct.fulfilled, (state, action) => {
         state.productLoading = false;
-
         const updatedProduct = action.payload?.product;
-
         if (updatedProduct) {
           state.products = state.products.map((product) =>
             product._id === updatedProduct._id ? updatedProduct : product,
           );
         }
-
         state.productError = "";
       })
-
       .addCase(updateProduct.rejected, (state, action) => {
         state.productLoading = false;
-
         state.productError =
           action.payload?.message || "Failed to update product";
       });
 
-    /* ----------------------------------------------------- */
-
+    // -----------------------------------------------------
     builder
       .addCase(deleteProduct.pending, (state) => {
         state.productLoading = true;
         state.productError = "";
       })
-
       .addCase(deleteProduct.fulfilled, (state, action) => {
         state.productLoading = false;
-
         const productId = action.payload?.productId;
-
         state.products = state.products.filter(
           (product) => product._id !== productId,
         );
-
         state.productError = "";
       })
-
       .addCase(deleteProduct.rejected, (state, action) => {
         state.productLoading = false;
-
         state.productError =
           action.payload?.message || "Failed to delete product";
       });
-
-    /* =====================================================
-       FAQ
-    ===================================================== */
-
+    // -----------------------------------------------------
     builder
       .addCase(createFAQ.pending, (state) => {
         state.faqLoading = true;
         state.faqError = "";
       })
-
       .addCase(createFAQ.fulfilled, (state, action) => {
         state.faqLoading = false;
-
         const faq = action.payload?.faq;
-
         if (faq) {
           state.faqs.unshift(faq);
         }
-
         state.faqError = "";
       })
-
       .addCase(createFAQ.rejected, (state, action) => {
         state.faqLoading = false;
-
         state.faqError = action.payload?.message || "Failed to create FAQ";
       });
-
-    /* ----------------------------------------------------- */
-
+    // -----------------------------------------------------
     builder
       .addCase(getFAQs.pending, (state) => {
         state.faqLoading = true;
         state.faqError = "";
       })
-
       .addCase(getFAQs.fulfilled, (state, action) => {
         state.faqLoading = false;
-
         state.faqs = action.payload?.faqs || [];
-
         state.faqError = "";
       })
-
       .addCase(getFAQs.rejected, (state, action) => {
         state.faqLoading = false;
-
         state.faqs = [];
-
         state.faqError = action.payload?.message || "Failed to fetch FAQs";
       });
-
-    /* ----------------------------------------------------- */
-
+    // -----------------------------------------------------
     builder
       .addCase(updateFAQ.pending, (state) => {
         state.faqLoading = true;
         state.faqError = "";
       })
-
       .addCase(updateFAQ.fulfilled, (state, action) => {
         state.faqLoading = false;
-
         const updatedFAQ = action.payload?.faq;
-
         if (updatedFAQ) {
           state.faqs = state.faqs.map((faq) =>
             faq._id === updatedFAQ._id ? updatedFAQ : faq,
           );
         }
-
         state.faqError = "";
       })
-
       .addCase(updateFAQ.rejected, (state, action) => {
         state.faqLoading = false;
-
         state.faqError = action.payload?.message || "Failed to update FAQ";
       });
-
-    /* ----------------------------------------------------- */
-
+    // -----------------------------------------------------
     builder
       .addCase(deleteFAQ.pending, (state) => {
         state.faqLoading = true;
         state.faqError = "";
       })
-
       .addCase(deleteFAQ.fulfilled, (state, action) => {
         state.faqLoading = false;
-
         const faqId = action.payload?.faqId;
-
         state.faqs = state.faqs.filter((faq) => faq._id !== faqId);
-
         state.faqError = "";
       })
-
       .addCase(deleteFAQ.rejected, (state, action) => {
         state.faqLoading = false;
-
         state.faqError = action.payload?.message || "Failed to delete FAQ";
       });
+    // -----------------------------------------------------
   },
 });
 

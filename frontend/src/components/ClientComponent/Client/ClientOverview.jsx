@@ -103,14 +103,14 @@ export default function ClientOverview() {
             <div
               key={item.title}
               className="
-    rounded-2xl
-    border border-gray-200
-    bg-white
-    p-5
-    shadow-sm
-    dark:border-white/10
-    dark:bg-[#171b23]
-  "
+                rounded-2xl
+                border border-gray-200
+                bg-white
+                p-5
+                shadow-sm
+                dark:border-white/10
+                dark:bg-[#171b23]
+              "
             >
               <div className="flex items-center justify-between gap-3">
                 <div className="min-w-0 flex-1">
@@ -120,14 +120,14 @@ export default function ClientOverview() {
 
                   <h3
                     className="
-          mt-2
-          truncate
-          text-lg
-          font-semibold
-          capitalize
-          text-gray-900
-          dark:text-white
-        "
+                      mt-2
+                      truncate
+                      text-lg
+                      font-semibold
+                      capitalize
+                      text-gray-900
+                      dark:text-white
+                    "
                     title={item.value}
                   >
                     {item.value}
@@ -136,17 +136,17 @@ export default function ClientOverview() {
 
                 <div
                   className="
-        flex
-        h-10
-        w-10
-        shrink-0
-        items-center
-        justify-center
-        rounded-xl
-        bg-blue-500/10
-        text-blue-600
-        dark:text-blue-400
-      "
+                    flex
+                    h-10
+                    w-10
+                    shrink-0
+                    items-center
+                    justify-center
+                    rounded-xl
+                    bg-blue-500/10
+                    text-blue-600
+                    dark:text-blue-400
+                  "
                 >
                   <Icon size={20} />
                 </div>

@@ -12,7 +12,6 @@ import { updateClient } from "../../../redux/features/Client/clientSlice";
 
 export default function AddClient() {
   const dispatch = useDispatch();
-
   const { clientDetails, loading } = useSelector(
     (state) => state?.clientReducer?.clientSlice || {},
   );

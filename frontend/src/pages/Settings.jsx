@@ -9,8 +9,6 @@ import {
   Moon,
   LogOut,
   Lock,
-  Camera,
-  Mail,
   Sun,
 } from "lucide-react";
 
@@ -18,11 +16,7 @@ import { useDispatch, useSelector } from "react-redux";
 import profile from "../assets/profile1.jpg";
 import { useState } from "react";
 
-import { useForm } from "react-hook-form";
-import { zodResolver } from "@hookform/resolvers/zod";
-import { editProfileSchema } from "../utils/validation";
-
-import { motion, AnimatePresence } from "framer-motion";
+import { motion } from "framer-motion";
 
 import { handleLogout } from "../utils/logout";
 import { useNavigate } from "react-router-dom";

@@ -13,7 +13,6 @@ import FAQModal from "../../components/ClientComponent/FAQ/FAQModal";
 
 export default function ClientFAQs() {
   const dispatch = useDispatch();
-
   const { client, faqs, loading, error } = useSelector(
     (state) => state?.ClientReducer?.clientSlice || {},
   );

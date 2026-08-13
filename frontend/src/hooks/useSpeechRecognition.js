@@ -15,7 +15,9 @@ import {
 } from "../redux/features/Chat/chatSlice";
 import { useLocation, useNavigate, useParams } from "react-router-dom";
 import { useSocket } from "../context/SocketContext";
+import toast from "react-hot-toast";
 import {
+  getConversationMessages,
   onAIChunk,
   onAIEnd,
   onAIError,
@@ -26,10 +28,6 @@ import {
   removeAIStopped,
   sendAIMessage,
   stopAIMessage,
-} from "../service/socket.service";
-import toast from "react-hot-toast";
-import {
-  getConversationMessages,
   onConversationMessages,
   removeConversationMessages,
 } from "../service/message.services";
@@ -68,13 +66,6 @@ export default function useSpeechRecognition({
     clientConfigError,
   } = useSelector((store) => store.chatSlice);
   const [copiedIndex, setCopiedIndex] = useState(null);
-
-  // useEffect(() => {
-  //   if (conversationId) getConversationMessages(conversationId);
-  //   else {
-  //     dispatch(setConversationLoading(false));
-  //   }
-  // }, [conversationId]);
 
   useEffect(() => {
     if (!conversationId) {
@@ -289,47 +280,7 @@ export default function useSpeechRecognition({
     setSelectedFiles((prev) => [...prev, ...pastedFiles]);
   };
 
-  // const handleSend = async () => {
-  //   // const lastMessage = messages?.[messages.length - 1];
-  //   // if (lastMessage?.isError === true) {
-  //   //   return;
-  //   // }
-
-  //   if (!message.trim()) return;
-  //   // if (activePage === "newChat") {
-  //   //       await dispatch(setActivePage("recentChat"));
-  //   //       navigate(`/c/${new Date().getTime()}`);
-  //   //     }
-  //   if (isSendDisable) {
-  //     console.log("⚠️ Send blocked - AI request already running");
-  //     return;
-  //   }
-  //   const messagePayload = {
-  //     id: Date.now().toString(),
-  //     role: "user",
-  //     text: message,
-  //   };
-  //   dispatch(setIsSendDisable(true));
-  //   dispatch(setNewMessageLoading(true));
-  //   dispatch(addMessage(messagePayload)); // message add in message list
-  //   // const newMessages = [...messages, messagePayload];
-  //   // setMessages(newMessages);
-  //   setMessage("");
-  //   sendAIMessage(conversationId, message.trim()); // send message in backend
-  //   if (recognitionRef.current) {
-  //     recognitionRef.current.stop();
-  //     setIsListening(false);
-  //   }
-  // };
-
   const handleSend = async (predefinedMessage = null) => {
-    /*
-     * If predefined question was passed,
-     * use that.
-     *
-     * Otherwise use textarea message.
-     */
-
     const textToSend =
       typeof predefinedMessage === "string" ? predefinedMessage : message;
 
@@ -344,40 +295,22 @@ export default function useSpeechRecognition({
     }
 
     const trimmedMessage = textToSend.trim();
-
     const messagePayload = {
       id: Date.now().toString(),
-
       role: "user",
-
       text: trimmedMessage,
     };
 
     dispatch(setIsSendDisable(true));
-
     dispatch(setNewMessageLoading(true));
-
     dispatch(addMessage(messagePayload));
 
-    /*
-     * Clear textarea only when
-     * message was typed manually.
-     */
-
     setMessage("");
-
-    /*
-     * Existing socket flow.
-     *
-     * Predefined question also comes
-     * through exactly the same flow.
-     */
 
     sendAIMessage(conversationId, trimmedMessage);
 
     if (recognitionRef.current) {
       recognitionRef.current.stop();
-
       setIsListening(false);
     }
   };

@@ -21,29 +21,21 @@ export default function ChatContainer() {
     newMessageLoading,
     isSendDisable,
     messages,
-
     message,
     selectedFiles,
-
     isListening,
-
     toggleListening,
     handlePaste,
     handleSend,
-
     handleStopGenerating,
     handleFileSelect,
     removeFile,
-
     fileInputRef,
     textareaRef,
-
     handleMessageChange,
-
     copiedIndex,
     handleCopy,
     handleFeedback,
-
     clientConfig,
     clientConfigLoading,
     isClientChatbot,
@@ -106,27 +98,27 @@ export default function ChatContainer() {
                             disabled={isSendDisable}
                             onClick={() => handleSend(item.question)}
                             className="
-                  rounded-xl
-                  border
-                  border-gray-200
-                  bg-white
-                  px-3
-                  py-2
-                  text-left
-                  text-xs
-                  text-gray-700
-                  shadow-sm
-                  transition
-                  hover:border-cyan-400
-                  hover:bg-cyan-50
-                  disabled:cursor-not-allowed
-                  disabled:opacity-50
-                  dark:border-white/10
-                  dark:bg-[#161f2d]
-                  dark:text-gray-300
-                  dark:hover:border-cyan-400
-                  dark:hover:bg-cyan-400/10
-                "
+                              rounded-xl
+                              border
+                              border-gray-200
+                              bg-white
+                              px-3
+                              py-2
+                              text-left
+                              text-xs
+                              text-gray-700
+                              shadow-sm
+                              transition
+                              hover:border-cyan-400
+                              hover:bg-cyan-50
+                              disabled:cursor-not-allowed
+                              disabled:opacity-50
+                              dark:border-white/10
+                              dark:bg-[#161f2d]
+                              dark:text-gray-300
+                              dark:hover:border-cyan-400
+                              dark:hover:bg-cyan-400/10
+                            "
                           >
                             {item.question}
                           </button>
@@ -170,31 +162,31 @@ export default function ChatContainer() {
                     {msg.role === "user" && (
                       <div
                         className="
-                        absolute
-                        -bottom-7
-                        right-1
-                        flex
-                        items-center
-                        gap-2
-                        opacity-0
-                        transition
-                        duration-200
-                        group-hover:opacity-100
-                      "
+                          absolute
+                          -bottom-7
+                          right-1
+                          flex
+                          items-center
+                          gap-2
+                          opacity-0
+                          transition
+                          duration-200
+                          group-hover:opacity-100
+                        "
                       >
                         <button
                           onClick={() => handleCopy(msg.text, index)}
                           className="
-                          rounded-md
-                          p-1
-                          text-gray-500
-                          transition
-                          hover:bg-gray-200
-                          hover:text-gray-800
-                          dark:text-gray-400
-                          dark:hover:bg-gray-800
-                          dark:hover:text-white
-                        "
+                            rounded-md
+                            p-1
+                            text-gray-500
+                            transition
+                            hover:bg-gray-200
+                            hover:text-gray-800
+                            dark:text-gray-400
+                            dark:hover:bg-gray-800
+                            dark:hover:text-white
+                          "
                         >
                           {copiedIndex === index ? (
                             <Check
@@ -214,16 +206,16 @@ export default function ChatContainer() {
                         <button
                           onClick={() => handleCopy(msg.text, index)}
                           className="
-                          rounded-md
-                          p-1
-                          text-gray-500
-                          transition
-                          hover:bg-gray-200
-                          hover:text-gray-800
-                          dark:text-gray-400
-                          dark:hover:bg-gray-800
-                          dark:hover:text-white
-                        "
+                            rounded-md
+                            p-1
+                            text-gray-500
+                            transition
+                            hover:bg-gray-200
+                            hover:text-gray-800
+                            dark:text-gray-400
+                            dark:hover:bg-gray-800
+                            dark:hover:text-white
+                          "
                         >
                           {copiedIndex === index ? (
                             <Check
@@ -239,16 +231,16 @@ export default function ChatContainer() {
                         <div className="relative group/more">
                           <button
                             className="
-                            rounded-md
-                            p-1
-                            text-gray-500
-                            transition
-                            hover:bg-gray-200
-                            hover:text-gray-800
-                            dark:text-gray-400
-                            dark:hover:bg-gray-800
-                            dark:hover:text-white
-                          "
+                              rounded-md
+                              p-1
+                              text-gray-500
+                              transition
+                              hover:bg-gray-200
+                              hover:text-gray-800
+                              dark:text-gray-400
+                              dark:hover:bg-gray-800
+                              dark:hover:text-white
+                            "
                           >
                             <MoreHorizontal size={15} />
                           </button>
@@ -256,44 +248,44 @@ export default function ChatContainer() {
                           {/* Dropdown */}
                           <div
                             className="
-                            invisible
-                            absolute
-                            left-0
-                            top-7
-                            z-50
-                            w-32
-                            overflow-hidden
-                            rounded-lg
-                            border
-                            border-gray-200
-                            bg-white
-                            py-1
-                            opacity-0
-                            shadow-xl
-                            transition-all
-                            duration-150
-                            group-hover/more:visible
-                            group-hover/more:opacity-100
-                            dark:border-white/10
-                            dark:bg-[#1b2232]
-                          "
+                              invisible
+                              absolute
+                              left-0
+                              top-7
+                              z-50
+                              w-32
+                              overflow-hidden
+                              rounded-lg
+                              border
+                              border-gray-200
+                              bg-white
+                              py-1
+                              opacity-0
+                              shadow-xl
+                              transition-all
+                              duration-150
+                              group-hover/more:visible
+                              group-hover/more:opacity-100
+                              dark:border-white/10
+                              dark:bg-[#1b2232]
+                            "
                           >
                             <button
                               onClick={() => handleFeedback("up")}
                               className="
-                              flex
-                              w-full
-                              items-center
-                              gap-2
-                              px-2.5
-                              py-1.5
-                              text-xs
-                              text-gray-700
-                              transition
-                              hover:bg-gray-100
-                              dark:text-gray-300
-                              dark:hover:bg-white/10
-                            "
+                                flex
+                                w-full
+                                items-center
+                                gap-2
+                                px-2.5
+                                py-1.5
+                                text-xs
+                                text-gray-700
+                                transition
+                                hover:bg-gray-100
+                                dark:text-gray-300
+                                dark:hover:bg-white/10
+                              "
                             >
                               <ThumbsUp size={13} />
                               Good
@@ -302,19 +294,19 @@ export default function ChatContainer() {
                             <button
                               onClick={() => handleFeedback("down")}
                               className="
-                              flex
-                              w-full
-                              items-center
-                              gap-2
-                              px-2.5
-                              py-1.5
-                              text-xs
-                              text-gray-700
-                              transition
-                              hover:bg-gray-100
-                              dark:text-gray-300
-                              dark:hover:bg-white/10
-                            "
+                                flex
+                                w-full
+                                items-center
+                                gap-2
+                                px-2.5
+                                py-1.5
+                                text-xs
+                                text-gray-700
+                                transition
+                                hover:bg-gray-100
+                                dark:text-gray-300
+                                dark:hover:bg-white/10
+                              "
                             >
                               <ThumbsDown size={13} />
                               Bad

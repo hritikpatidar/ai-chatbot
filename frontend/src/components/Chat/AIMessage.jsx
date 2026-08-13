@@ -5,10 +5,7 @@ import rehypeSanitize from "rehype-sanitize";
 import CodeBlock from "./CodeBlock";
 import "./markdown.css";
 
-export default function AIMessage({
-  content = "",
-  isError = false,
-}) {
+export default function AIMessage({ content = "", isError = false }) {
   const normalizeMarkdown = (text = "") => {
     if (!text) return "";
 
@@ -30,10 +27,7 @@ export default function AIMessage({
         .replace(/\n`{2,}(?=\n|$)/g, "\n```")
 
         // duplicate opening fences
-        .replace(
-          /(```[a-zA-Z0-9]+\n)(```[a-zA-Z0-9]+\n)+/g,
-          "$1",
-        )
+        .replace(/(```[a-zA-Z0-9]+\n)(```[a-zA-Z0-9]+\n)+/g, "$1")
 
         // duplicate empty fences
         .replace(/```\n```/g, "```")
@@ -141,9 +135,7 @@ export default function AIMessage({
             </h4>
           ),
 
-          //--------------------------------------
           // Paragraph
-          //--------------------------------------
 
           p: ({ children }) => (
             <p
@@ -162,9 +154,7 @@ export default function AIMessage({
             </p>
           ),
 
-          //--------------------------------------
           // Lists
-          //--------------------------------------
 
           ul: ({ children }) => (
             <ul
@@ -196,13 +186,9 @@ export default function AIMessage({
             </ol>
           ),
 
-          li: ({ children }) => (
-            <li className="leading-7">{children}</li>
-          ),
+          li: ({ children }) => <li className="leading-7">{children}</li>,
 
-          //--------------------------------------
           // Bold
-          //--------------------------------------
 
           strong: ({ children }) => (
             <strong
@@ -216,9 +202,7 @@ export default function AIMessage({
             </strong>
           ),
 
-          //--------------------------------------
           // Italic
-          //--------------------------------------
 
           em: ({ children }) => (
             <em
@@ -232,14 +216,10 @@ export default function AIMessage({
             </em>
           ),
 
-          //--------------------------------------
           // Inline Code
-          //--------------------------------------
 
           code({ inline, className, children }) {
-            const match = /language-(\w+)/.exec(
-              className || "",
-            );
+            const match = /language-(\w+)/.exec(className || "");
 
             if (!inline && match) {
               return (
@@ -272,9 +252,7 @@ export default function AIMessage({
             );
           },
 
-          //--------------------------------------
           // Blockquote
-          //--------------------------------------
 
           blockquote: ({ children }) => (
             <blockquote
@@ -295,9 +273,7 @@ export default function AIMessage({
             </blockquote>
           ),
 
-          //--------------------------------------
           // Link
-          //--------------------------------------
 
           a: ({ href, children }) => (
             <a
@@ -318,9 +294,7 @@ export default function AIMessage({
             </a>
           ),
 
-          //--------------------------------------
           // Horizontal Rule
-          //--------------------------------------
 
           hr: () => (
             <hr
@@ -332,9 +306,7 @@ export default function AIMessage({
             />
           ),
 
-          //--------------------------------------
           // Image
-          //--------------------------------------
 
           img: ({ src, alt }) => (
             <img
@@ -351,9 +323,7 @@ export default function AIMessage({
             />
           ),
 
-          //--------------------------------------
           // Table
-          //--------------------------------------
 
           table: ({ children }) => (
             <div
@@ -366,9 +336,7 @@ export default function AIMessage({
                 dark:border-white/10
               "
             >
-              <table className="w-full border-collapse">
-                {children}
-              </table>
+              <table className="w-full border-collapse">{children}</table>
             </div>
           ),
 
@@ -442,4 +410,3 @@ export default function AIMessage({
     </div>
   );
 }
-

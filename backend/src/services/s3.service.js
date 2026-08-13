@@ -19,7 +19,6 @@ export const uploadToS3 = async ({
   });
 
   await s3.send(command);
-
   return key;
 };
 

@@ -14,9 +14,7 @@ export default function PageLoader() {
           "
         />
 
-        <p className="text-sm text-gray-400">
-          Loading...
-        </p>
+        <p className="text-sm text-gray-400">Loading...</p>
       </div>
     </div>
   );

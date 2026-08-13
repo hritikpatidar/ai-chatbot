@@ -6,10 +6,7 @@ export const createMessage = async (data) => {
 };
 
 // Get Messages By Conversation
-export const getConversationMessages = async (
-  conversationId,
-  limit = 20
-) => {
+export const getConversationMessages = async (conversationId, limit = 20) => {
   return await Message.find({
     conversationId,
   })
@@ -18,9 +15,7 @@ export const getConversationMessages = async (
 };
 
 // Get All Messages
-export const getAllConversationMessages = async (
-  conversationId
-) => {
+export const getAllConversationMessages = async (conversationId) => {
   return await Message.find({
     conversationId,
   }).sort({
@@ -35,13 +30,9 @@ export const findMessageById = async (messageId) => {
 
 // Update Message
 export const updateMessage = async (messageId, data) => {
-  return await Message.findByIdAndUpdate(
-    messageId,
-    data,
-    {
-      new: true,
-    }
-  );
+  return await Message.findByIdAndUpdate(messageId, data, {
+    new: true,
+  });
 };
 
 // Delete Message
@@ -50,18 +41,16 @@ export const deleteMessage = async (messageId) => {
 };
 
 // Delete All Messages of Conversation
-export const deleteConversationMessages = async (
-  conversationId
-) => {
+export const deleteConversationMessages = async (conversationId) => {
   return await Message.deleteMany({
     conversationId,
   });
 };
 
-// GET LAST 20 MESSAGES ONLY 
+// GET LAST 20 MESSAGES ONLY
 export const getRecentConversationMessages = async (
   conversationId,
-  limit = 20
+  limit = 20,
 ) => {
   const messages = await Message.find({
     conversationId,

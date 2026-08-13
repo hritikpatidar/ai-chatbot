@@ -24,6 +24,7 @@ import {
 } from "../service/conversation.services";
 import {
   addConversation,
+  clearMessages,
   setActivePage,
   setConversationList,
 } from "../redux/features/Chat/chatSlice";
@@ -247,7 +248,8 @@ export default function Welcome() {
                 e.preventDefault();
 
                 if (isSendDisable) return;
-
+                debugger
+                dispatch(clearMessages([]));
                 handleSend();
               }}
               className="

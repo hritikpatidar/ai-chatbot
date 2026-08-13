@@ -1,14 +1,14 @@
 import { lazy, Suspense } from "react";
 import { Routes, Route } from "react-router-dom";
+
 import { PublicRoute } from "./PublicRoute";
 import { PrivateRoute } from "./PrivateRoute";
 import { SocketProvider } from "../context/SocketContext";
 import PageLoader from "../components/common/PageLoader";
-import AdminRoute from "./AdminRoute";
+import ClientRoute from "./ClientRoute";
+import ClientChatRoute from "./ClientChatRoute";
 
-// ==============================
 // Public Pages
-// ==============================
 
 const Login = lazy(() => import("../pages/Login"));
 const Signup = lazy(() => import("../pages/Signup"));
@@ -18,12 +18,14 @@ const ResetPassword = lazy(() => import("../pages/ResetPassword"));
 const TermsConditions = lazy(() => import("../pages/TermsConditions"));
 const PrivacyPolicy = lazy(() => import("../pages/PrivacyPolicy"));
 
-// ==============================
-// Private Pages
-// ==============================
+// Chat Pages
+// Public + Private
 
 const Welcome = lazy(() => import("../pages/Welcome"));
 const ChatContainer = lazy(() => import("../pages/ChatContainer"));
+
+// Private Pages
+
 const Library = lazy(() => import("../pages/Library"));
 const Projects = lazy(() => import("../pages/Projects"));
 const Settings = lazy(() => import("../pages/Settings"));
@@ -31,9 +33,7 @@ const Profile = lazy(() => import("../pages/Profile"));
 const Security = lazy(() => import("../pages/Security"));
 const DashboardLayout = lazy(() => import("../pages/DashboardLayout"));
 
-// ==============================
 // Admin Pages
-// ==============================
 
 const ClientDashboard = lazy(() => import("../pages/Client/ClientDashboard"));
 const ClientSettings = lazy(() => import("../pages/Client/ClientSettings"));
@@ -47,10 +47,7 @@ export default function AppRoutes() {
     <SocketProvider>
       <Suspense fallback={<PageLoader />}>
         <Routes>
-          {/* =========================
-              PUBLIC ROUTES
-          ========================= */}
-
+          {/* PUBLIC AUTH ROUTES */}
           <Route element={<PublicRoute />}>
             <Route path="/login" element={<Login />} />
             <Route path="/signup" element={<Signup />} />
@@ -61,22 +58,36 @@ export default function AppRoutes() {
             <Route path="/privacy-policy" element={<PrivacyPolicy />} />
           </Route>
 
-          {/* ================= USER PRIVATE ROUTES ================= */}
+          {/* =========================================
+              CHAT ROUTES
+              
+              IMPORTANT:
+              These are NOT inside PrivateRoute.
+              
+              Logged-in + Guest both can access.
 
-          <Route element={<PrivateRoute />}>
+              Guest user ko / route per jane se rokne ke liye ClientChatRoute add kiya hai ye login per redirect karega
+          ========================================== */}
+          <Route element={<ClientChatRoute />}>
             <Route element={<DashboardLayout />}>
               <Route path="/" element={<Welcome />} />
               <Route path="/c/:conversationId" element={<ChatContainer />} />
+            </Route>
+          </Route>
+
+          {/* PRIVATE ROUTES */}
+
+          <Route element={<PrivateRoute />}>
+            {/* PRIVATE USER ROUTES */}
+            <Route element={<DashboardLayout />}>
               <Route path="/library" element={<Library />} />
               <Route path="/projects" element={<Projects />} />
               <Route path="/profile" element={<Profile />} />
               <Route path="/settings" element={<Settings />} />
               <Route path="/security" element={<Security />} />
             </Route>
-
-            {/* ================= ADMIN ROUTES ================= */}
-
-            <Route element={<AdminRoute />}>
+            {/* PRIVATE Client ROUTES */}
+            <Route element={<ClientRoute />}>
               <Route path="/admin" element={<ClientLayout />}>
                 <Route index element={<ClientDashboard />} />
                 <Route path="products" element={<ClientProducts />} />

@@ -1,11 +1,13 @@
 import { useEffect, useRef, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import {
+  addConversation,
   addErrorMessage,
   addMessage,
   appendAssistantChunk,
   fetchClientConfig,
   setActivePage,
+  setConversationList,
   setConversationLoading,
   setIsSendDisable,
   setMessages,
@@ -31,6 +33,14 @@ import {
   onConversationMessages,
   removeConversationMessages,
 } from "../service/message.services";
+import {
+  onConversationCreated,
+  onConversationError,
+  onConversationList,
+  removeConversationCreated,
+  removeConversationError,
+  removeConversationList,
+} from "../service/conversation.services";
 
 export default function useSpeechRecognition({
   enableSocketListeners = true,
@@ -81,6 +91,7 @@ export default function useSpeechRecognition({
     console.log("📨 Fetching existing conversation:", conversationId);
     dispatch(setConversationLoading(true));
     dispatch(setActivePage("recentChat"));
+    debugger
     getConversationMessages(conversationId);
   }, [conversationId, dispatch]);
 
@@ -96,6 +107,30 @@ export default function useSpeechRecognition({
   }, [clientKey, isClientChatbot, dispatch]);
 
   useEffect(() => {
+    const handleConversationCreate = async ({ conversation }) => {
+      await dispatch(addConversation(conversation));
+      dispatch(setActivePage("recentChat"));
+      navigate(`/c/${conversation?._id}`, {
+        state: {
+          isNewConversation: true,
+        },
+      });
+    };
+
+    const handleConversation = async (data) => {
+      await dispatch(setConversationList(data.conversations));
+    };
+
+    const handleConversationError = async (data) => {
+      dispatch(setActivePage("newChat"));
+      navigate("/", {
+        replace: true,
+      });
+      toast.error(data?.message || "Somthing went wrong", {
+        id: "conversation-error",
+      });
+    };
+    debugger
     if (!enableSocketListeners) return;
     const handleChunk = ({ text }) => {
       console.log("📥 ai:chunk", text);
@@ -132,7 +167,9 @@ export default function useSpeechRecognition({
     onAIError(handleError);
     onAIStopped(handleStopeGeneration);
     onConversationMessages(handleMessageList);
-
+    onConversationCreated(handleConversationCreate);
+    onConversationList(handleConversation);
+    onConversationError(handleConversationError);
     return () => {
       console.log("🔴 Removing AI socket listeners");
       removeAIChunk(handleChunk);
@@ -140,6 +177,9 @@ export default function useSpeechRecognition({
       removeAIError(handleError);
       removeAIStopped(handleStopeGeneration);
       removeConversationMessages(handleMessageList);
+      removeConversationCreated(handleConversationCreate);
+      removeConversationList(handleConversation);
+      removeConversationError(handleConversationError);
     };
   }, [enableSocketListeners, dispatch]);
 

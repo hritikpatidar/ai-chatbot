@@ -9,7 +9,7 @@ export const getConversationMessages = (conversationId) => {
 };
 
 export const onConversationMessages = (callback) => {
-  socket.off("conversation:messages:response");
+  // socket.off("conversation:messages:response");
   socket.on("conversation:messages:response", callback);
 };
 

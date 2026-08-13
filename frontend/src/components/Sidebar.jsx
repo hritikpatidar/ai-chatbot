@@ -21,15 +21,23 @@ import { useDispatch, useSelector } from "react-redux";
 import { useLocation, useNavigate, useParams } from "react-router-dom";
 import { motion, AnimatePresence } from "framer-motion";
 import {
+  addConversation,
   clearMessages,
   removeConversation,
   setActivePage,
+  setConversationList,
   setConversationLoading,
 } from "../redux/features/Chat/chatSlice";
 import {
   deleteConversation,
+  onConversationCreated,
   onConversationDeleted,
+  onConversationError,
+  onConversationList,
+  removeConversationCreated,
   removeConversationDeleted,
+  removeConversationError,
+  removeConversationList,
 } from "../service/conversation.services";
 import toast from "react-hot-toast";
 
@@ -58,6 +66,30 @@ export default function Sidebar() {
   }, [activeChatId]);
 
   useEffect(() => {
+    // const handleConversationCreate = async ({ conversation }) => {
+    //   await dispatch(addConversation(conversation));
+    //   dispatch(setActivePage("recentChat"));
+    //   navigate(`/c/${conversation?._id}`, {
+    //     state: {
+    //       isNewConversation: true,
+    //     },
+    //   });
+    // };
+
+    // const handleConversation = async (data) => {
+    //   await dispatch(setConversationList(data.conversations));
+    // };
+
+    // const handleConversationError = async (data) => {
+    //   dispatch(setActivePage("newChat"));
+    //   navigate("/", {
+    //     replace: true,
+    //   });
+    //   toast.error(data?.message || "Somthing went wrong", {
+    //     id: "conversation-error",
+    //   });
+    // };
+
     const handleConversationDeleteRes = (data) => {
       const deletedId = data?.conversationId;
       const currentActiveId = activeChatIdRef.current;
@@ -66,6 +98,7 @@ export default function Sidebar() {
       dispatch(removeConversation(deletedId));
       if (currentActiveId === deletedId) {
         dispatch(setActivePage("newChat"));
+        dispatch(clearMessages([]));
         navigate("/", {
           replace: true,
         });
@@ -75,9 +108,14 @@ export default function Sidebar() {
         id: "conversation-delete",
       });
     };
-
+    // onConversationCreated(handleConversationCreate);
+    // onConversationList(handleConversation);
+    // onConversationError(handleConversationError);
     onConversationDeleted(handleConversationDeleteRes);
     return () => {
+      // removeConversationCreated(handleConversationCreate);
+      // removeConversationList(handleConversation);
+      // removeConversationError(handleConversationError);
       removeConversationDeleted(handleConversationDeleteRes);
     };
   }, []);
@@ -118,7 +156,6 @@ export default function Sidebar() {
     dispatch(clearMessages([]));
     if (page === "newChat") navigate(`/`);
     else if (page === "recentChat") navigate(`/c/${new Date().getTime()}`);
-    else if(page === "bussinessAssistant") navigate(`/business`);
     else navigate(`/${page}`);
   };
 
@@ -196,6 +233,7 @@ export default function Sidebar() {
   };
 
   const handleConversationNavigate = async (chat) => {
+    if (chat?._id === activeChatIdRef.current) return;
     await dispatch(clearMessages([]));
     await dispatch(setConversationLoading(true));
     await dispatch(setActivePage("recentChat"));
@@ -294,16 +332,6 @@ export default function Sidebar() {
           <div className="shrink-0 px-2 py-2">
             <nav className="space-y-0.5">
               {/* New Chat */}
-              <button
-                onClick={() => handleMenu("bussinessAssistant")}
-                className={getMenuClass("bussinessAssistant")}
-              >
-                <div className={getIconClass("bussinessAssistant")}>
-                  <Bot size={16} />
-                </div>
-
-                <span>Your Bussiness Assistant</span>
-              </button>
               <button
                 onClick={() => handleMenu("newChat")}
                 className={getMenuClass("newChat")}

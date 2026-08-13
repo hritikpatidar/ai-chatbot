@@ -1,8 +1,7 @@
 import { Navigate, Outlet, useLocation } from "react-router-dom";
-
 import { useSelector } from "react-redux";
 
-export default function AdminRoute() {
+export default function ClientChatRoute() {
   const location = useLocation();
 
   const { token, profileDetails } = useSelector(
@@ -11,9 +10,13 @@ export default function AdminRoute() {
 
   const isAuthenticated = Boolean(token) && Boolean(profileDetails?._id);
 
-  const isAdmin = profileDetails?.role === "client";
+  const searchParams = new URLSearchParams(location.search);
 
-  if (!isAuthenticated) {
+  const clientKey = searchParams.get("clientKey");
+
+  const isAllowed = isAuthenticated || Boolean(clientKey);
+
+  if (!isAllowed) {
     return (
       <Navigate
         to="/login"
@@ -23,10 +26,6 @@ export default function AdminRoute() {
         }}
       />
     );
-  }
-
-  if (!isAdmin) {
-    return <Navigate to="/" replace />;
   }
 
   return <Outlet />;

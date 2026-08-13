@@ -1,16 +1,18 @@
 import { Outlet, useLocation } from "react-router-dom";
+import { useSelector } from "react-redux";
 import Sidebar from "../components/Sidebar";
 import ChatHeader from "../components/Chat/ChatHeader";
-import { motion } from "framer-motion";
 import AnimatedBackground from "../components/AnimatedBackground";
-import ClientHeader from "../components/Admin/ClientHeader";
 
 export default function DashboardLayout() {
   const location = useLocation();
-
-  const showHeader =
+  const { token, profileDetails } = useSelector(
+    (state) => state?.authReducer?.AuthSlice,
+  );
+  const isAuthenticated = Boolean(token) && Boolean(profileDetails?._id);
+  const isChatPage =
     location.pathname === "/" || location.pathname.startsWith("/c/");
-  const isBusinessPage = location.pathname.startsWith("/business");
+
   return (
     <div
       className="
@@ -27,17 +29,15 @@ export default function DashboardLayout() {
         dark:text-white
       "
     >
-      {/* Animated Background */}
       <AnimatedBackground />
+      {isAuthenticated && (
+        <div className="relative z-40 shrink-0">
+          <Sidebar />
+        </div>
+      )}
 
-      {/* Sidebar */}
-      <div className="relative z-20 shrink-0">
-        <Sidebar />
-      </div>
-
-      {/* Main Area */}
       <main
-        className="
+        className={`
           relative
           z-10
           flex
@@ -50,23 +50,23 @@ export default function DashboardLayout() {
           transition-colors
           duration-300
           dark:bg-[#0b0f17]/80
-        "
+        `}
       >
-        {/* Header */}
-        <div className="relative z-30 shrink-0">
-          {isBusinessPage ? <ClientHeader /> : <ChatHeader />}
-        </div>
 
-        {/* Page Content */}
+        {isAuthenticated && (
+          <div className="relative z-50 shrink-0">
+            <ChatHeader />
+          </div>
+        )}
+
         <div
           className={`
-            h-full
+            min-h-0
+            flex-1
             w-full
             overflow-y-auto
             bg-transparent
-            transition-colors
-            duration-300
-            ${location.pathname.startsWith("/c/") ? "" : "px-15"}
+            ${isChatPage ? "" : "px-4 sm:px-6 lg:px-10 xl:px-15"}
           `}
         >
           <Outlet />

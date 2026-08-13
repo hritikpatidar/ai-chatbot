@@ -11,9 +11,23 @@ import {
 
 import useSpeechRecognition from "../hooks/useSpeechRecognition";
 
-import { useSelector } from "react-redux";
+import { useDispatch, useSelector } from "react-redux";
 
-import { getConversations } from "../service/conversation.services";
+import {
+  getConversations,
+  onConversationCreated,
+  onConversationError,
+  onConversationList,
+  removeConversationCreated,
+  removeConversationError,
+  removeConversationList,
+} from "../service/conversation.services";
+import {
+  addConversation,
+  setActivePage,
+  setConversationList,
+} from "../redux/features/Chat/chatSlice";
+import { useNavigate } from "react-router-dom";
 
 export default function Welcome() {
   const {
@@ -33,16 +47,61 @@ export default function Welcome() {
     clientConfig,
     clientConfigLoading,
     isClientChatbot,
+    clientKey,
   } = useSpeechRecognition({
     enableSocketListeners: false,
   });
 
   const [tags, setTags] = useState([]);
+  const dispatch = useDispatch();
+  const navigate = useNavigate();
 
   const { profileDetails } = useSelector(
     (store) => store.authReducer.AuthSlice,
   );
 
+  useEffect(() => {
+    const handleConversationCreate = async ({ conversation }) => {
+      await dispatch(addConversation(conversation));
+      dispatch(setActivePage("recentChat"));
+      if (clientKey) {
+        navigate(`/c/${conversation?._id}?clientKey=${clientKey}`, {
+          state: {
+            isNewConversation: true,
+          },
+        });
+      } else {
+        navigate(`/c/${conversation?._id}`, {
+          state: {
+            isNewConversation: true,
+          },
+        });
+      }
+    };
+
+    const handleConversation = async (data) => {
+      await dispatch(setConversationList(data.conversations));
+    };
+
+    const handleConversationError = async (data) => {
+      dispatch(setActivePage("newChat"));
+      navigate("/", {
+        replace: true,
+      });
+      toast.error(data?.message || "Somthing went wrong", {
+        id: "conversation-error",
+      });
+    };
+
+    onConversationCreated(handleConversationCreate);
+    onConversationList(handleConversation);
+    onConversationError(handleConversationError);
+    return () => {
+      removeConversationCreated(handleConversationCreate);
+      removeConversationList(handleConversation);
+      removeConversationError(handleConversationError);
+    };
+  }, []);
   /*
    * ----------------------------------------------------
    * Load conversation list
@@ -632,7 +691,6 @@ export default function Welcome() {
               "
             >
               {getGreeting()},
-
               <span
                 className="
                   bg-linear-to-r

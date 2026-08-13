@@ -21,23 +21,15 @@ import { useDispatch, useSelector } from "react-redux";
 import { useLocation, useNavigate, useParams } from "react-router-dom";
 import { motion, AnimatePresence } from "framer-motion";
 import {
-  addConversation,
   clearMessages,
   removeConversation,
   setActivePage,
-  setConversationList,
   setConversationLoading,
 } from "../redux/features/Chat/chatSlice";
 import {
   deleteConversation,
-  onConversationCreated,
   onConversationDeleted,
-  onConversationError,
-  onConversationList,
-  removeConversationCreated,
   removeConversationDeleted,
-  removeConversationError,
-  removeConversationList,
 } from "../service/conversation.services";
 import toast from "react-hot-toast";
 
@@ -66,30 +58,6 @@ export default function Sidebar() {
   }, [activeChatId]);
 
   useEffect(() => {
-    const handleConversationCreate = async ({ conversation }) => {
-      await dispatch(addConversation(conversation));
-      dispatch(setActivePage("recentChat"));
-      navigate(`/c/${conversation?._id}`, {
-        state: {
-          isNewConversation: true,
-        },
-      });
-    };
-
-    const handleConversation = async (data) => {
-      await dispatch(setConversationList(data.conversations));
-    };
-
-    const handleConversationError = async (data) => {
-      dispatch(setActivePage("newChat"));
-      navigate("/", {
-        replace: true,
-      });
-      toast.error(data?.message || "Somthing went wrong", {
-        id: "conversation-error",
-      });
-    };
-
     const handleConversationDeleteRes = (data) => {
       const deletedId = data?.conversationId;
       const currentActiveId = activeChatIdRef.current;
@@ -108,14 +76,8 @@ export default function Sidebar() {
       });
     };
 
-    onConversationCreated(handleConversationCreate);
-    onConversationList(handleConversation);
-    onConversationError(handleConversationError);
     onConversationDeleted(handleConversationDeleteRes);
     return () => {
-      removeConversationCreated(handleConversationCreate);
-      removeConversationList(handleConversation);
-      removeConversationError(handleConversationError);
       removeConversationDeleted(handleConversationDeleteRes);
     };
   }, []);

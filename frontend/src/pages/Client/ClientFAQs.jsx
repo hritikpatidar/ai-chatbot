@@ -2,14 +2,14 @@ import { useEffect, useMemo, useState } from "react";
 import { Plus, Search, RefreshCw } from "lucide-react";
 import { useDispatch, useSelector } from "react-redux";
 
-import FAQTable from "../../components/Admin/FAQ/FAQTable";
-import FAQModal from "../../components/Admin/FAQ/FAQModal";
 import {
   createFAQ,
   deleteFAQ,
   getFAQs,
   updateFAQ,
 } from "../../redux/features/Client/clientSlice";
+import FAQTable from "../../components/ClientComponent/FAQ/FAQTable";
+import FAQModal from "../../components/ClientComponent/FAQ/FAQModal";
 
 export default function ClientFAQs() {
   const dispatch = useDispatch();

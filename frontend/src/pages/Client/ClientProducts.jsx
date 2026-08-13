@@ -2,9 +2,9 @@ import { useEffect, useMemo, useState } from "react";
 import { Plus, Search, Package, RefreshCw } from "lucide-react";
 import { useDispatch, useSelector } from "react-redux";
 
-import ProductTable from "../../components/Admin/Product/ProductTable";
-import ProductModal from "../../components/Admin/Product/ProductModal";
-import ConfirmModal from "../../components/Admin/ConfirmModal";
+import ProductTable from "../../components/ClientComponent/Product/ProductTable";
+import ProductModal from "../../components/ClientComponent/Product/ProductModal";
+import ConfirmModal from "../../components/ClientComponent/ConfirmModal";
 import {
   createProduct,
   deleteProduct,

@@ -91,7 +91,6 @@ export default function useSpeechRecognition({
     console.log("📨 Fetching existing conversation:", conversationId);
     dispatch(setConversationLoading(true));
     dispatch(setActivePage("recentChat"));
-    debugger
     getConversationMessages(conversationId);
   }, [conversationId, dispatch]);
 
@@ -130,7 +129,6 @@ export default function useSpeechRecognition({
         id: "conversation-error",
       });
     };
-    debugger
     if (!enableSocketListeners) return;
     const handleChunk = ({ text }) => {
       console.log("📥 ai:chunk", text);

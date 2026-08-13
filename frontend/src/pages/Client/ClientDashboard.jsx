@@ -11,10 +11,10 @@ import {
 import { motion } from "framer-motion";
 import { useNavigate } from "react-router-dom";
 
-import StatCard from "../../components/Admin/StatCard";
-import ClientOverview from "../../components/Admin/Client/ClientOverview";
 import PageLoader from "../../components/common/PageLoader";
 import { getClientById } from "../../redux/features/Client/clientSlice";
+import StatCard from "../../components/ClientComponent/StatCard";
+import ClientOverview from "../../components/ClientComponent/Client/ClientOverview";
 
 export default function ClientDashboard() {
   const dispatch = useDispatch();

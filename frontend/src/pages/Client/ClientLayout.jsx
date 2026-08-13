@@ -2,8 +2,8 @@ import { useState } from "react";
 import { Outlet } from "react-router-dom";
 
 import AnimatedBackground from "../../components/AnimatedBackground";
-import ClientHeader from "../../components/Admin/ClientHeader";
-import ClientSidebar from "../../components/Admin/ClientSidebar";
+import ClientHeader from "../../components/ClientComponent/ClientHeader";
+import ClientSidebar from "../../components/ClientComponent/ClientSidebar";
 
 export default function ClientLayout() {
   const [mobileOpen, setMobileOpen] = useState(false);

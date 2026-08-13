@@ -248,7 +248,6 @@ export default function Welcome() {
                 e.preventDefault();
 
                 if (isSendDisable) return;
-                debugger
                 dispatch(clearMessages([]));
                 handleSend();
               }}

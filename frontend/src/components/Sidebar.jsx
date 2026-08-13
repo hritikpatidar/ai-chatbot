@@ -66,30 +66,6 @@ export default function Sidebar() {
   }, [activeChatId]);
 
   useEffect(() => {
-    // const handleConversationCreate = async ({ conversation }) => {
-    //   await dispatch(addConversation(conversation));
-    //   dispatch(setActivePage("recentChat"));
-    //   navigate(`/c/${conversation?._id}`, {
-    //     state: {
-    //       isNewConversation: true,
-    //     },
-    //   });
-    // };
-
-    // const handleConversation = async (data) => {
-    //   await dispatch(setConversationList(data.conversations));
-    // };
-
-    // const handleConversationError = async (data) => {
-    //   dispatch(setActivePage("newChat"));
-    //   navigate("/", {
-    //     replace: true,
-    //   });
-    //   toast.error(data?.message || "Somthing went wrong", {
-    //     id: "conversation-error",
-    //   });
-    // };
-
     const handleConversationDeleteRes = (data) => {
       const deletedId = data?.conversationId;
       const currentActiveId = activeChatIdRef.current;
@@ -108,14 +84,8 @@ export default function Sidebar() {
         id: "conversation-delete",
       });
     };
-    // onConversationCreated(handleConversationCreate);
-    // onConversationList(handleConversation);
-    // onConversationError(handleConversationError);
     onConversationDeleted(handleConversationDeleteRes);
     return () => {
-      // removeConversationCreated(handleConversationCreate);
-      // removeConversationList(handleConversation);
-      // removeConversationError(handleConversationError);
       removeConversationDeleted(handleConversationDeleteRes);
     };
   }, []);

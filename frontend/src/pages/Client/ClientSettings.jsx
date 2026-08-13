@@ -13,7 +13,7 @@ import { useSelector, useDispatch } from "react-redux";
 import { logoutSuccess } from "../../redux/features/Auth/authSlice";
 import { useNavigate } from "react-router-dom";
 import { useState } from "react";
-import ConfirmModal from "../../components/Admin/ConfirmModal";
+import ConfirmModal from "../../components/ClientComponent/ConfirmModal";
 
 export default function ClientSettings() {
   const dispatch = useDispatch();

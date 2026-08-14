@@ -1,11 +1,10 @@
-import {
-  Edit,
-  Eye,
-  Trash2,
-  Ticket,
-  Clock3,
-  AlertCircle,
-} from "lucide-react";
+import { Edit, Trash2, Ticket, Clock3, AlertCircle, Inbox, Edit2 } from "lucide-react";
+
+import ActionButton from "../../common/ActionButton";
+
+/* =========================================================
+   STATUS CONFIG
+========================================================= */
 
 const STATUS_CONFIG = {
   open: {
@@ -13,45 +12,56 @@ const STATUS_CONFIG = {
     className:
       "bg-blue-50 text-blue-700 dark:bg-blue-500/10 dark:text-blue-400",
   },
+
   in_progress: {
     label: "In Progress",
     className:
       "bg-yellow-50 text-yellow-700 dark:bg-yellow-500/10 dark:text-yellow-400",
   },
+
   resolved: {
     label: "Resolved",
     className:
       "bg-green-50 text-green-700 dark:bg-green-500/10 dark:text-green-400",
   },
+
   closed: {
     label: "Closed",
-    className:
-      "bg-gray-100 text-gray-700 dark:bg-white/10 dark:text-gray-400",
+    className: "bg-gray-100 text-gray-700 dark:bg-white/10 dark:text-gray-400",
   },
 };
+
+/* =========================================================
+   PRIORITY CONFIG
+========================================================= */
 
 const PRIORITY_CONFIG = {
   low: {
     label: "Low",
-    className:
-      "bg-gray-100 text-gray-700 dark:bg-white/10 dark:text-gray-400",
+    className: "bg-gray-100 text-gray-700 dark:bg-white/10 dark:text-gray-400",
   },
+
   medium: {
     label: "Medium",
     className:
       "bg-blue-50 text-blue-700 dark:bg-blue-500/10 dark:text-blue-400",
   },
+
   high: {
     label: "High",
     className:
       "bg-orange-50 text-orange-700 dark:bg-orange-500/10 dark:text-orange-400",
   },
+
   urgent: {
     label: "Urgent",
-    className:
-      "bg-red-50 text-red-700 dark:bg-red-500/10 dark:text-red-400",
+    className: "bg-red-50 text-red-700 dark:bg-red-500/10 dark:text-red-400",
   },
 };
+
+/* =========================================================
+   DATE FORMAT
+========================================================= */
 
 function formatDate(date) {
   if (!date) return "-";
@@ -62,6 +72,10 @@ function formatDate(date) {
     year: "numeric",
   });
 }
+
+/* =========================================================
+   STATUS BADGE
+========================================================= */
 
 function StatusBadge({ status }) {
   const config = STATUS_CONFIG[status] || STATUS_CONFIG.open;
@@ -84,8 +98,14 @@ function StatusBadge({ status }) {
   );
 }
 
+/* =========================================================
+   PRIORITY BADGE
+========================================================= */
+
 function PriorityBadge({ priority }) {
   const config = PRIORITY_CONFIG[priority] || PRIORITY_CONFIG.medium;
+
+  const showAlert = priority === "urgent" || priority === "high";
 
   return (
     <span
@@ -101,22 +121,27 @@ function PriorityBadge({ priority }) {
         ${config.className}
       `}
     >
-      {priority === "urgent" || priority === "high" ? (
-        <AlertCircle size={12} />
-      ) : null}
+      {showAlert && <AlertCircle size={12} />}
 
       {config.label}
     </span>
   );
 }
 
+/* =========================================================
+   TICKET TABLE
+========================================================= */
+
 export default function TicketTable({
   tickets = [],
   loading = false,
-  onView,
   onEdit,
   onDelete,
 }) {
+  /* =======================================================
+     LOADING
+  ======================================================= */
+
   if (loading) {
     return (
       <div
@@ -125,7 +150,6 @@ export default function TicketTable({
           rounded-2xl
           border border-gray-200
           bg-white
-          shadow-sm
           dark:border-white/10
           dark:bg-[#171b23]
         "
@@ -148,24 +172,94 @@ export default function TicketTable({
     );
   }
 
+  /* =======================================================
+     EMPTY STATE
+  ======================================================= */
+
   if (!tickets.length) {
-    return null;
+    return (
+      <div
+        className="
+          flex
+          min-h-75
+          flex-col
+          items-center
+          justify-center
+          rounded-2xl
+          border
+          border-gray-200
+          bg-white
+          px-6
+          py-10
+          text-center
+          dark:border-white/10
+          dark:bg-[#171b23]
+        "
+      >
+        <div
+          className="
+            mb-4
+            flex
+            h-14
+            w-14
+            items-center
+            justify-center
+            rounded-full
+            bg-blue-500/10
+            text-blue-500
+            dark:text-blue-400
+          "
+        >
+          <Inbox size={28} />
+        </div>
+
+        <h3
+          className="
+            text-base
+            font-semibold
+            text-gray-900
+            dark:text-white
+          "
+        >
+          No tickets found
+        </h3>
+
+        <p
+          className="
+            mt-1
+            max-w-sm
+            text-xs
+            text-gray-500
+            dark:text-gray-400
+          "
+        >
+          No tickets match your search or filters.
+        </p>
+      </div>
+    );
   }
+
+  /* =======================================================
+     DATA
+  ======================================================= */
 
   return (
     <div
       className="
         overflow-hidden
         rounded-2xl
-        border border-gray-200
+        border
+        border-gray-200
         bg-white
-        shadow-sm
         dark:border-white/10
         dark:bg-[#171b23]
       "
     >
-      {/* Desktop Table */}
-      <div className="hidden overflow-x-auto lg:block">
+      {/* ===================================================
+          DESKTOP TABLE
+      =================================================== */}
+
+      <div className="hidden overflow-x-auto md:block">
         <table className="w-full min-w-[900px]">
           <thead>
             <tr
@@ -174,96 +268,30 @@ export default function TicketTable({
                 border-gray-200
                 bg-gray-50
                 dark:border-white/10
-                dark:bg-[#0f131b]
+                dark:bg-white/[0.03]
               "
             >
-              <th
-                className="
-                  px-5 py-4
-                  text-left
-                  text-xs
-                  font-semibold
-                  uppercase
-                  tracking-wide
-                  text-gray-500
-                  dark:text-gray-400
-                "
-              >
+              <th className="px-5 py-4 text-left text-xs font-semibold text-gray-500 dark:text-gray-400">
                 Ticket
               </th>
 
-              <th
-                className="
-                  px-5 py-4
-                  text-left
-                  text-xs
-                  font-semibold
-                  uppercase
-                  tracking-wide
-                  text-gray-500
-                  dark:text-gray-400
-                "
-              >
+              <th className="px-5 py-4 text-left text-xs font-semibold text-gray-500 dark:text-gray-400">
                 Category
               </th>
 
-              <th
-                className="
-                  px-5 py-4
-                  text-left
-                  text-xs
-                  font-semibold
-                  uppercase
-                  tracking-wide
-                  text-gray-500
-                  dark:text-gray-400
-                "
-              >
+              <th className="px-5 py-4 text-left text-xs font-semibold text-gray-500 dark:text-gray-400">
                 Priority
               </th>
 
-              <th
-                className="
-                  px-5 py-4
-                  text-left
-                  text-xs
-                  font-semibold
-                  uppercase
-                  tracking-wide
-                  text-gray-500
-                  dark:text-gray-400
-                "
-              >
+              <th className="px-5 py-4 text-left text-xs font-semibold text-gray-500 dark:text-gray-400">
                 Status
               </th>
 
-              <th
-                className="
-                  px-5 py-4
-                  text-left
-                  text-xs
-                  font-semibold
-                  uppercase
-                  tracking-wide
-                  text-gray-500
-                  dark:text-gray-400
-                "
-              >
+              <th className="px-5 py-4 text-left text-xs font-semibold text-gray-500 dark:text-gray-400">
                 Created
               </th>
 
-              <th
-                className="
-                  px-5 py-4
-                  text-right
-                  text-xs
-                  font-semibold
-                  uppercase
-                  tracking-wide
-                  text-gray-500
-                  dark:text-gray-400
-                "
-              >
+              <th className="px-5 py-4 text-right text-xs font-semibold text-gray-500 dark:text-gray-400">
                 Actions
               </th>
             </tr>
@@ -276,16 +304,17 @@ export default function TicketTable({
                 className="
                   border-b
                   border-gray-100
-                  transition
+                  transition-colors
+                  last:border-0
                   hover:bg-gray-50
-                  last:border-b-0
                   dark:border-white/5
-                  dark:hover:bg-white/[0.02]
+                  dark:hover:bg-white/[0.03]
                 "
               >
                 {/* Ticket */}
+
                 <td className="px-5 py-4">
-                  <div className="flex min-w-0 items-center gap-3">
+                  <div className="flex items-center gap-3">
                     <div
                       className="
                         flex
@@ -321,8 +350,6 @@ export default function TicketTable({
                       <p
                         className="
                           mt-0.5
-                          max-w-[280px]
-                          truncate
                           text-xs
                           text-gray-500
                           dark:text-gray-400
@@ -335,47 +362,63 @@ export default function TicketTable({
                 </td>
 
                 {/* Category */}
+
                 <td className="px-5 py-4">
-                  <span className="text-sm capitalize text-gray-700 dark:text-gray-300">
+                  <span
+                    className="
+                      text-sm
+                      capitalize
+                      text-gray-700
+                      dark:text-gray-300
+                    "
+                  >
                     {ticket.category?.replaceAll("_", " ") || "General"}
                   </span>
                 </td>
 
                 {/* Priority */}
+
                 <td className="px-5 py-4">
                   <PriorityBadge priority={ticket.priority} />
                 </td>
 
                 {/* Status */}
+
                 <td className="px-5 py-4">
                   <StatusBadge status={ticket.status} />
                 </td>
 
                 {/* Created */}
+
                 <td className="px-5 py-4">
-                  <div className="flex items-center gap-1.5 text-sm text-gray-500 dark:text-gray-400">
+                  <div
+                    className="
+                      flex
+                      items-center
+                      gap-1.5
+                      text-sm
+                      text-gray-500
+                      dark:text-gray-400
+                    "
+                  >
                     <Clock3 size={14} />
+
                     {formatDate(ticket.createdAt)}
                   </div>
                 </td>
 
                 {/* Actions */}
-                <td className="px-5 py-4">
-                  <div className="flex items-center justify-end gap-1">
-                    <ActionButton
-                      icon={Eye}
-                      label="View"
-                      onClick={() => onView?.(ticket)}
-                    />
 
+                <td className="px-5 py-4">
+                  <div className="flex justify-end gap-2">
                     <ActionButton
-                      icon={Edit}
+                      icon={<Edit2 size={15} />}
                       label="Edit"
                       onClick={() => onEdit?.(ticket)}
                     />
 
                     <ActionButton
-                      icon={Trash2}
+                      icon={<Trash2 size={15} />}
                       label="Delete"
                       danger
                       onClick={() => onDelete?.(ticket)}
@@ -388,10 +431,26 @@ export default function TicketTable({
         </table>
       </div>
 
-      {/* Mobile / Tablet Cards */}
-      <div className="divide-y divide-gray-100 dark:divide-white/5 lg:hidden">
+      {/* ===================================================
+          MOBILE / TABLET CARDS
+      =================================================== */}
+
+      <div className="space-y-3 p-3 md:hidden">
         {tickets.map((ticket) => (
-          <div key={ticket._id} className="p-4 sm:p-5">
+          <div
+            key={ticket._id}
+            className="
+              rounded-xl
+              border
+              border-gray-200
+              bg-gray-50
+              p-4
+              dark:border-white/10
+              dark:bg-[#11151d]
+            "
+          >
+            {/* Header */}
+
             <div className="flex items-start gap-3">
               <div
                 className="
@@ -411,7 +470,14 @@ export default function TicketTable({
               </div>
 
               <div className="min-w-0 flex-1">
-                <div className="flex flex-col gap-2 sm:flex-row sm:items-start sm:justify-between">
+                <div
+                  className="
+                    flex
+                    items-start
+                    justify-between
+                    gap-3
+                  "
+                >
                   <div className="min-w-0">
                     <h3
                       className="
@@ -425,171 +491,108 @@ export default function TicketTable({
                       {ticket.subject || "Untitled Ticket"}
                     </h3>
 
-                    <p className="mt-1 text-xs text-gray-500 dark:text-gray-400">
+                    <p
+                      className="
+                        mt-1
+                        text-xs
+                        text-gray-500
+                        dark:text-gray-400
+                      "
+                    >
                       #{ticket._id?.slice(-8) || "--------"}
                     </p>
                   </div>
 
                   <StatusBadge status={ticket.status} />
                 </div>
-
-                <p className="mt-3 line-clamp-2 text-sm text-gray-500 dark:text-gray-400">
-                  {ticket.description || "No description provided."}
-                </p>
-
-                <div className="mt-4 flex flex-wrap items-center gap-2">
-                  <PriorityBadge priority={ticket.priority} />
-
-                  <span
-                    className="
-                      rounded-full
-                      bg-gray-100
-                      px-2.5
-                      py-1
-                      text-xs
-                      font-medium
-                      capitalize
-                      text-gray-600
-                      dark:bg-white/5
-                      dark:text-gray-400
-                    "
-                  >
-                    {ticket.category?.replaceAll("_", " ") || "General"}
-                  </span>
-
-                  <span className="text-xs text-gray-400">
-                    {formatDate(ticket.createdAt)}
-                  </span>
-                </div>
-
-                <div className="mt-4 flex items-center gap-2">
-                  <button
-                    type="button"
-                    onClick={() => onView?.(ticket)}
-                    className="
-                      inline-flex
-                      flex-1
-                      items-center
-                      justify-center
-                      gap-2
-                      rounded-lg
-                      border
-                      border-gray-200
-                      px-3
-                      py-2
-                      text-xs
-                      font-medium
-                      text-gray-700
-                      transition
-                      hover:bg-gray-50
-                      dark:border-white/10
-                      dark:text-gray-300
-                      dark:hover:bg-white/5
-                    "
-                  >
-                    <Eye size={14} />
-                    View
-                  </button>
-
-                  <button
-                    type="button"
-                    onClick={() => onEdit?.(ticket)}
-                    className="
-                      inline-flex
-                      items-center
-                      justify-center
-                      gap-2
-                      rounded-lg
-                      border
-                      border-gray-200
-                      px-3
-                      py-2
-                      text-xs
-                      font-medium
-                      text-gray-700
-                      transition
-                      hover:bg-gray-50
-                      dark:border-white/10
-                      dark:text-gray-300
-                      dark:hover:bg-white/5
-                    "
-                  >
-                    <Edit size={14} />
-                    Edit
-                  </button>
-
-                  <button
-                    type="button"
-                    onClick={() => onDelete?.(ticket)}
-                    className="
-                      inline-flex
-                      items-center
-                      justify-center
-                      rounded-lg
-                      border
-                      border-red-200
-                      px-3
-                      py-2
-                      text-red-600
-                      transition
-                      hover:bg-red-50
-                      dark:border-red-500/20
-                      dark:text-red-400
-                      dark:hover:bg-red-500/10
-                    "
-                    aria-label="Delete ticket"
-                  >
-                    <Trash2 size={14} />
-                  </button>
-                </div>
               </div>
+            </div>
+
+            {/* Description */}
+
+            <p
+              className="
+                mt-3
+                line-clamp-2
+                text-sm
+                leading-5
+                text-gray-500
+                dark:text-gray-400
+              "
+            >
+              {ticket.description || "No description provided."}
+            </p>
+
+            {/* Meta */}
+
+            <div
+              className="
+                mt-4
+                flex
+                flex-wrap
+                items-center
+                gap-2
+              "
+            >
+              <PriorityBadge priority={ticket.priority} />
+
+              <span
+                className="
+                  rounded-full
+                  bg-gray-100
+                  px-2.5
+                  py-1
+                  text-xs
+                  font-medium
+                  capitalize
+                  text-gray-600
+                  dark:bg-white/5
+                  dark:text-gray-400
+                "
+              >
+                {ticket.category?.replaceAll("_", " ") || "General"}
+              </span>
+
+              <span
+                className="
+                  text-xs
+                  text-gray-400
+                "
+              >
+                {formatDate(ticket.createdAt)}
+              </span>
+            </div>
+
+            {/* Actions */}
+
+            <div
+              className="
+                mt-4
+                flex
+                items-center
+                gap-2
+                border-t
+                border-gray-200
+                pt-3
+                dark:border-white/10
+              "
+            >
+              <ActionButton
+                      icon={<Edit2 size={15} />}
+                      label="Edit"
+                      onClick={() => onEdit?.(ticket)}
+                    />
+
+                    <ActionButton
+                      icon={<Trash2 size={15} />}
+                      label="Delete"
+                      danger
+                      onClick={() => onDelete?.(ticket)}
+                    />
             </div>
           </div>
         ))}
       </div>
     </div>
-  );
-}
-
-function ActionButton({
-  icon: Icon,
-  label,
-  onClick,
-  danger = false,
-}) {
-  return (
-    <button
-      type="button"
-      onClick={onClick}
-      title={label}
-      className={`
-        flex
-        h-8
-        w-8
-        items-center
-        justify-center
-        rounded-lg
-        transition
-        ${
-          danger
-            ? `
-              text-red-500
-              hover:bg-red-50
-              dark:text-red-400
-              dark:hover:bg-red-500/10
-            `
-            : `
-              text-gray-500
-              hover:bg-gray-100
-              hover:text-gray-900
-              dark:text-gray-400
-              dark:hover:bg-white/10
-              dark:hover:text-white
-            `
-        }
-      `}
-    >
-      <Icon size={16} />
-    </button>
   );
 }

@@ -1,19 +1,13 @@
 import { useState } from "react";
 import {
   RefreshCw,
-  ChevronLeft,
-  ChevronRight,
   Search,
-  Edit2,
-  Trash2,
   X,
   Loader2,
-  Inbox,
   AlertCircle,
 } from "lucide-react";
 
 import { useQueryClient } from "@tanstack/react-query";
-
 import useClientTickets from "../../hooks/Client/useClientTickets";
 
 import {
@@ -22,12 +16,13 @@ import {
 } from "../../service/Client/ticketServices";
 import ConfirmModal from "../../components/ClientComponent/ConfirmModal";
 import Pagination from "../../components/common/Pagination";
+import TicketTable from "../../components/ClientComponent/Ticket/TicketTable";
 
 export default function ClientTickets() {
   const queryClient = useQueryClient();
   const [page, setPage] = useState(1);
 
-  const limit = 10;
+  const limit = 5;
 
   const [status, setStatus] = useState("");
   const [priority, setPriority] = useState("");
@@ -448,186 +443,20 @@ export default function ClientTickets() {
             </div>
           </div>
 
-          <div
-            className="
-              overflow-hidden
-              rounded-2xl
-              border
-              border-gray-200
-              bg-white
-              dark:border-white/10
-              dark:bg-[#171b23]
-            "
-          >
-            {filteredTickets.length === 0 ? (
-              <div className="flex min-h-75 flex-col items-center justify-center px-5 text-center">
-                <Inbox size={40} className="text-gray-400" />
-
-                <h3 className="mt-4 text-base font-semibold">
-                  No tickets found
-                </h3>
-
-                <p className="mt-1 text-sm text-gray-500 dark:text-gray-400">
-                  No tickets match your search or filters.
-                </p>
-              </div>
-            ) : (
-              <div className="overflow-x-auto">
-                <table className="w-full min-w-200">
-                  <thead>
-                    <tr
-                      className="
-                        border-b
-                        border-gray-200
-                        bg-gray-50
-                        dark:border-white/10
-                        dark:bg-white/3
-                      "
-                    >
-                      <th className="px-5 py-4 text-left text-xs font-semibold text-gray-500 dark:text-gray-400">
-                        Ticket
-                      </th>
-
-                      <th className="px-5 py-4 text-left text-xs font-semibold text-gray-500 dark:text-gray-400">
-                        Status
-                      </th>
-
-                      <th className="px-5 py-4 text-left text-xs font-semibold text-gray-500 dark:text-gray-400">
-                        Priority
-                      </th>
-
-                      <th className="px-5 py-4 text-left text-xs font-semibold text-gray-500 dark:text-gray-400">
-                        Created
-                      </th>
-
-                      <th className="px-5 py-4 text-right text-xs font-semibold text-gray-500 dark:text-gray-400">
-                        Actions
-                      </th>
-                    </tr>
-                  </thead>
-
-                  <tbody>
-                    {filteredTickets.map((ticket) => (
-                      <tr
-                        key={ticket._id}
-                        className="
-                          border-b
-                          border-gray-100
-                          last:border-0
-                          hover:bg-gray-50
-                          dark:border-white/5
-                          dark:hover:bg-white/3
-                        "
-                      >
-                        {/* TICKET */}
-
-                        <td className="px-5 py-4">
-                          <div className="max-w-87.5">
-                            <p className="truncate text-sm font-medium">
-                              {ticket?.subject ||
-                                ticket?.title ||
-                                "Untitled Ticket"}
-                            </p>
-
-                            <p className="mt-1 truncate text-xs text-gray-500 dark:text-gray-400">
-                              {ticket?.description || "No description"}
-                            </p>
-                          </div>
-                        </td>
-
-                        {/* STATUS */}
-
-                        <td className="px-5 py-4">
-                          <StatusBadge status={ticket?.status} />
-                        </td>
-
-                        {/* PRIORITY */}
-
-                        <td className="px-5 py-4">
-                          <PriorityBadge priority={ticket?.priority} />
-                        </td>
-
-                        {/* CREATED */}
-
-                        <td className="px-5 py-4">
-                          <span className="text-xs text-gray-500 dark:text-gray-400">
-                            {ticket?.createdAt
-                              ? new Date(ticket.createdAt).toLocaleDateString()
-                              : "—"}
-                          </span>
-                        </td>
-
-                        {/* ACTIONS */}
-
-                        <td className="px-5 py-4">
-                          <div className="flex justify-end gap-2">
-                            {/* EDIT */}
-
-                            <button
-                              type="button"
-                              onClick={() => handleEdit(ticket)}
-                              disabled={actionLoading}
-                              title="Edit Ticket"
-                              className="
-                                flex
-                                h-8
-                                w-8
-                                items-center
-                                justify-center
-                                rounded-lg
-                                border
-                                border-gray-200
-                                text-gray-600
-                                hover:bg-gray-100
-                                hover:text-blue-600
-                                disabled:opacity-50
-                                dark:border-white/10
-                                dark:text-gray-300
-                                dark:hover:bg-white/10
-                              "
-                            >
-                              <Edit2 size={15} />
-                            </button>
-
-                            {/* DELETE */}
-
-                            <button
-                              type="button"
-                              onClick={() => handleDelete(ticket)}
-                              disabled={actionLoading}
-                              title="Delete Ticket"
-                              className="
-                                flex
-                                h-8
-                                w-8
-                                items-center
-                                justify-center
-                                rounded-lg
-                                border
-                                border-red-200
-                                text-red-500
-                                hover:bg-red-50
-                                disabled:opacity-50
-                                dark:border-red-500/20
-                                dark:hover:bg-red-500/10
-                              "
-                            >
-                              <Trash2 size={15} />
-                            </button>
-                          </div>
-                        </td>
-                      </tr>
-                    ))}
-                  </tbody>
-                </table>
-              </div>
-            )}
+          
+          <div className="mt-4">
+            <TicketTable
+              tickets={filteredTickets}
+              loading={isLoading}
+              onEdit={handleEdit}
+              onDelete={handleDelete}
+            />
           </div>
           <Pagination
             page={pagination.page}
             totalPages={pagination.totalPages}
             total={pagination.total}
-            currentItems={tickets.length}
+            currentCount={tickets.length}
             isFetching={isFetching}
             itemName="tickets"
             onPrevious={() => {

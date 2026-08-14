@@ -1,4 +1,5 @@
-import { Edit, MoreHorizontal, Package, Trash2 } from "lucide-react";
+import { Edit, Edit2, MoreHorizontal, Package, Trash2 } from "lucide-react";
+import ActionButton from "../../common/ActionButton";
 
 export default function ProductTable({
   products = [],
@@ -173,48 +174,21 @@ export default function ProductTable({
                 <td className="px-5 py-4">
                   <StatusBadge status={product.status} />
                 </td>
-
                 {/* Actions */}
                 <td className="px-5 py-4">
                   <div className="flex items-center justify-end gap-2">
-                    <button
-                      type="button"
+                    <ActionButton
+                      icon={<Edit2 size={15} />}
+                      title="Edit FAQ"
                       onClick={() => onEdit(product)}
-                      className="
-                        rounded-lg p-2 text-gray-500
-                        transition hover:bg-blue-500/10
-                        hover:text-blue-500
-                        dark:text-gray-400
-                      "
-                      title="Edit product"
-                    >
-                      <Edit size={16} />
-                    </button>
+                    />
 
-                    <button
-                      type="button"
+                    <ActionButton
+                      danger
+                      icon={<Trash2 size={15} />}
+                      title="Delete FAQ"
                       onClick={() => onDelete(product)}
-                      className="
-                        rounded-lg p-2 text-gray-500
-                        transition hover:bg-red-500/10
-                        hover:text-red-500
-                        dark:text-gray-400
-                      "
-                      title="Delete product"
-                    >
-                      <Trash2 size={16} />
-                    </button>
-
-                    <button
-                      type="button"
-                      className="
-                        rounded-lg p-2 text-gray-500
-                        transition hover:bg-gray-100
-                        dark:text-gray-400 dark:hover:bg-white/10
-                      "
-                    >
-                      <MoreHorizontal size={16} />
-                    </button>
+                    />
                   </div>
                 </td>
               </tr>
@@ -265,21 +239,18 @@ export default function ProductTable({
               </div>
 
               <div className="flex shrink-0 gap-1">
-                <button
-                  type="button"
+                <ActionButton
+                  icon={<Edit2 size={14} />}
+                  title="Edit"
                   onClick={() => onEdit(product)}
-                  className="rounded-lg p-2 text-gray-500 hover:bg-blue-500/10 hover:text-blue-500"
-                >
-                  <Edit size={15} />
-                </button>
+                />
 
-                <button
-                  type="button"
+                <ActionButton
+                  danger
+                  icon={<Trash2 size={14} />}
+                  title="Delete"
                   onClick={() => onDelete(product)}
-                  className="rounded-lg p-2 text-gray-500 hover:bg-red-500/10 hover:text-red-500"
-                >
-                  <Trash2 size={15} />
-                </button>
+                />
               </div>
             </div>
 

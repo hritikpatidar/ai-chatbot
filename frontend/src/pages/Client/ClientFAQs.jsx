@@ -1,348 +1,388 @@
-import { useEffect, useMemo, useState } from "react";
-import { Plus, Search, RefreshCw } from "lucide-react";
-import { useDispatch, useSelector } from "react-redux";
-
-import {
-  createFAQ,
-  deleteFAQ,
-  getFAQs,
-  updateFAQ,
-} from "../../redux/features/Client/clientSlice";
+import { useEffect, useState } from "react";
+import { Plus, Search, MessageCircleQuestion, RefreshCw } from "lucide-react";
 
 import FAQTable from "../../components/ClientComponent/FAQ/FAQTable";
 import FAQModal from "../../components/ClientComponent/FAQ/FAQModal";
 import ConfirmModal from "../../components/ClientComponent/ConfirmModal";
+import Pagination from "../../components/common/Pagination";
+
+import useFAQs from "../../hooks/Client/useFAQs";
+import { useSelector } from "react-redux";
 
 export default function ClientFAQs() {
-  const dispatch = useDispatch();
+  const [page, setPage] = useState(1);
 
-  const {
-    client,
-    faqs = [],
-    faqLoading = false,
-    faqError = null,
-  } = useSelector((state) => state?.ClientReducer?.clientSlice || {});
+  const [limit] = useState(5);
 
   const [search, setSearch] = useState("");
 
-  // IMPORTANT: default false
   const [isModalOpen, setIsModalOpen] = useState(false);
 
   const [selectedFAQ, setSelectedFAQ] = useState(null);
+
   const [deleteFAQDetails, setDeleteFAQDetails] = useState(null);
 
-  // ============================================
-  // Fetch FAQs
-  // ============================================
+  const { client } = useSelector(
+    (state) => state?.ClientReducer?.clientSlice || {},
+  );
+  const {
+    faqs,
+    pagination,
 
-  const fetchFAQs = () => {
-    if (!client?.businessId) return;
+    isLoading,
+    isFetching,
+    error,
 
-    dispatch(getFAQs(client.businessId));
+    refetch,
+
+    createFAQ,
+    updateFAQ,
+    deleteFAQ,
+
+    createLoading,
+    updateLoading,
+    deleteLoading,
+  } = useFAQs({
+    clientId: client?.businessId,
+    page,
+    limit,
+    search,
+  });
+
+  /* =========================================================
+     SEARCH
+  ========================================================= */
+
+  const handleSearch = (e) => {
+    setSearch(e.target.value);
+
+    // Search change hone par first page
+    setPage(1);
   };
 
-  useEffect(() => {
-    fetchFAQs();
-  }, [client?.businessId]);
-
-  // ============================================
-  // Search
-  // ============================================
-
-  const filteredFAQs = useMemo(() => {
-    if (!search.trim()) {
-      return faqs;
-    }
-
-    const searchText = search.toLowerCase();
-
-    return faqs.filter((faq) => {
-      return (
-        faq?.question?.toLowerCase().includes(searchText) ||
-        faq?.answer?.toLowerCase().includes(searchText) ||
-        faq?.category?.toLowerCase().includes(searchText) ||
-        faq?.keywords?.some((keyword) =>
-          keyword?.toLowerCase().includes(searchText),
-        )
-      );
-    });
-  }, [faqs, search]);
-
-  // ============================================
-  // ADD FAQ
-  // ============================================
+  /* =========================================================
+     ADD
+  ========================================================= */
 
   const handleAddFAQ = () => {
     setSelectedFAQ(null);
     setIsModalOpen(true);
   };
 
-  // ============================================
-  // EDIT FAQ
-  // ============================================
+  /* =========================================================
+     EDIT
+  ========================================================= */
 
   const handleEditFAQ = (faq) => {
     setSelectedFAQ(faq);
     setIsModalOpen(true);
   };
 
-  // ============================================
-  // CLOSE MODAL
-  // ============================================
+  /* =========================================================
+     CLOSE MODAL
+  ========================================================= */
 
   const handleCloseModal = () => {
+    if (createLoading || updateLoading) {
+      return;
+    }
+
     setIsModalOpen(false);
     setSelectedFAQ(null);
   };
 
-  // ============================================
-  // CREATE / UPDATE
-  // ============================================
+  /* =========================================================
+     CREATE / UPDATE
+  ========================================================= */
 
-  const handleSubmitFAQ = async (formData) => {
-    if (!client?.businessId) return;
-
+  const handleSubmit = async (payload) => {
     try {
-      if (selectedFAQ?._id) {
-        await dispatch(
-          updateFAQ({
-            faqId: selectedFAQ._id,
-            payload: formData,
-          }),
-        ).unwrap();
+      if (selectedFAQ) {
+        // UPDATE
+        await updateFAQ({
+          faqId: selectedFAQ._id,
+          payload,
+        });
       } else {
-        await dispatch(
-          createFAQ({
-            clientId: client.businessId,
-            payload: formData,
-          }),
-        ).unwrap();
+        // CREATE
+        await createFAQ({
+          clientId: client?.businessId,
+          payload,
+        });
       }
 
-      handleCloseModal();
+      setIsModalOpen(false);
+      setSelectedFAQ(null);
     } catch (error) {
-      console.error("FAQ save failed:", error);
+      console.error("FAQ save error:", error);
     }
   };
 
-  // ============================================
-  // DELETE
-  // ============================================
+  /* =========================================================
+     DELETE CLICK
+  ========================================================= */
 
-  const handleDeleteFAQ = async (faq) => {
+  const handleDelete = (faq) => {
     setDeleteFAQDetails(faq);
   };
 
+  /* =========================================================
+     DELETE CONFIRM
+  ========================================================= */
+
   const handleConfirmDelete = async () => {
-    if (!deleteFAQDetails?._id) return;
+    if (!deleteFAQDetails?._id) {
+      return;
+    }
 
     try {
-      await dispatch(deleteFAQ(deleteFAQDetails._id)).unwrap();
+      await deleteFAQ(deleteFAQDetails._id);
+
       setDeleteFAQDetails(null);
+
+      /*
+        Agar last item delete hua aur current page
+        empty ho gaya to previous page par jao.
+      */
+
+      if (faqs.length === 1 && page > 1) {
+        setPage((prev) => prev - 1);
+      }
     } catch (error) {
       console.error("FAQ delete error:", error);
     }
   };
 
-  // ============================================
-  // Stats
-  // ============================================
+  /* =========================================================
+     PREVIOUS
+  ========================================================= */
 
-  const totalFAQs = faqs.length;
+  const handlePreviousPage = () => {
+    if (page > 1 && !isFetching) {
+      setPage((prev) => prev - 1);
+    }
+  };
 
-  const activeFAQs = faqs.filter((faq) => faq?.status === "active").length;
+  /* =========================================================
+     NEXT
+  ========================================================= */
 
-  const categoryCount = new Set(
-    faqs.map((faq) => faq?.category).filter(Boolean),
-  ).size;
+  const handleNextPage = () => {
+    if (page < pagination.totalPages && !isFetching) {
+      setPage((prev) => prev + 1);
+    }
+  };
+
+  /* =========================================================
+     REFRESH
+  ========================================================= */
+
+  const handleRefresh = () => {
+    refetch();
+  };
 
   return (
-    <div className="min-h-full w-full bg-transparent px-4 py-5 text-gray-900 transition-colors duration-300 sm:px-6 sm:py-6 lg:px-8 dark:text-white">
-      <div className="mx-auto w-full max-w-7xl">
-        {/* HEADER */}
-        <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
+    <div className="min-h-full w-full">
+      <div className="mx-auto w-full max-w-[1600px] px-4 py-5 sm:px-6 lg:px-8">
+        {/* =================================================
+            HEADER
+        ================================================= */}
+
+        <div className="flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
           <div>
-            <h1 className="text-2xl font-semibold text-gray-900 dark:text-white">
-              FAQs
-            </h1>
+            <div className="flex items-center gap-3">
+              <div
+                className="
+                  flex h-10 w-10
+                  items-center justify-center
+                  rounded-xl
+                  bg-blue-500/10
+                  text-blue-500
+                "
+              >
+                <MessageCircleQuestion size={21} />
+              </div>
 
-            <p className="mt-1 text-sm text-gray-500 dark:text-gray-400">
-              Manage frequently asked questions for your client.
-            </p>
+              <div>
+                <h1
+                  className="
+                    text-xl font-semibold
+                    text-gray-900
+                    dark:text-white
+                  "
+                >
+                  FAQs
+                </h1>
+
+                <p className="text-xs text-gray-500 dark:text-gray-400">
+                  Manage frequently asked questions
+                </p>
+              </div>
+            </div>
           </div>
 
-          <div className="flex flex-col gap-2 sm:flex-row">
-            {/* REFRESH */}
-            <button
-              type="button"
-              onClick={fetchFAQs}
-              disabled={faqLoading || !client?.businessId}
-              className="
-                inline-flex
-                items-center
-                justify-center
-                gap-2
-                rounded-lg
-                border
-                border-gray-200
-                bg-white
-                px-4
-                py-2.5
-                text-sm
-                font-medium
-                text-gray-700
-                transition
-                hover:border-blue-500
-                hover:text-blue-600
-                disabled:cursor-not-allowed
-                disabled:opacity-50
-                dark:border-white/10
-                dark:bg-[#171b23]
-                dark:text-gray-200
-              "
-            >
-              <RefreshCw
-                size={16}
-                className={faqLoading ? "animate-spin" : ""}
-              />
-              Refresh
-            </button>
-
-            {/* ADD FAQ */}
-            <button
-              type="button"
-              onClick={handleAddFAQ}
-              disabled={!client?.businessId}
-              className="
-                inline-flex
-                items-center
-                justify-center
-                gap-2
-                rounded-lg
-                bg-blue-600
-                px-4
-                py-2.5
-                text-sm
-                font-medium
-                text-white
-                transition
-                hover:bg-blue-700
-                disabled:cursor-not-allowed
-                disabled:opacity-50
-              "
-            >
-              <Plus size={17} />
-              Add FAQ
-            </button>
-          </div>
+          <button
+            type="button"
+            onClick={handleAddFAQ}
+            disabled={!client}
+            className="
+              flex items-center justify-center gap-2
+              rounded-lg bg-blue-600
+              px-4 py-2.5
+              text-sm font-medium text-white
+              transition hover:bg-blue-700
+              disabled:cursor-not-allowed
+              disabled:opacity-50
+            "
+          >
+            <Plus size={17} />
+            Add FAQ
+          </button>
         </div>
 
-        {/* NO CLIENT */}
-        {!client?.businessId && (
-          <div className="mt-6 rounded-xl border border-yellow-200 bg-yellow-50 p-4 text-sm text-yellow-700 dark:border-yellow-500/20 dark:bg-yellow-500/10 dark:text-yellow-400">
-            Please select a client before managing FAQs.
-          </div>
-        )}
+        {/* =================================================
+            STATS
+        ================================================= */}
 
-        {/* ERROR */}
-        {faqError && (
-          <div className="mt-6 rounded-xl border border-red-200 bg-red-50 p-4 text-sm text-red-600 dark:border-red-500/20 dark:bg-red-500/10 dark:text-red-400">
-            {typeof faqError === "string"
-              ? faqError
-              : faqError?.message || "Something went wrong."}
-          </div>
-        )}
+        <div className="mt-6 grid grid-cols-2 gap-3 lg:grid-cols-4">
+          <StatBox title="Total FAQs" value={pagination.total} />
 
-        {/* STATS */}
-        <div className="mt-6 grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
-          <div className="rounded-xl border border-gray-200 bg-white p-4 dark:border-white/10 dark:bg-[#171b23]">
-            <p className="text-xs text-gray-500 dark:text-gray-400">
-              Total FAQs
-            </p>
+          <StatBox title="Current Page" value={pagination.page} />
 
-            <p className="mt-2 text-2xl font-semibold text-gray-900 dark:text-white">
-              {totalFAQs}
-            </p>
-          </div>
+          <StatBox title="Total Pages" value={pagination.totalPages} />
 
-          <div className="rounded-xl border border-gray-200 bg-white p-4 dark:border-white/10 dark:bg-[#171b23]">
-            <p className="text-xs text-gray-500 dark:text-gray-400">
-              Active FAQs
-            </p>
-
-            <p className="mt-2 text-2xl font-semibold text-green-600 dark:text-green-400">
-              {activeFAQs}
-            </p>
-          </div>
-
-          <div className="rounded-xl border border-gray-200 bg-white p-4 dark:border-white/10 dark:bg-[#171b23]">
-            <p className="text-xs text-gray-500 dark:text-gray-400">
-              Categories
-            </p>
-
-            <p className="mt-2 text-2xl font-semibold text-gray-900 dark:text-white">
-              {categoryCount}
-            </p>
-          </div>
+          <StatBox title="Showing" value={faqs.length} />
         </div>
 
-        {/* SEARCH */}
-        <div className="mt-6 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
-          <div className="relative w-full sm:max-w-md">
+        {/* =================================================
+            TOOLBAR
+        ================================================= */}
+
+        <div
+          className="
+            mt-6 flex flex-col gap-3
+            rounded-xl border border-gray-200
+            bg-white p-3
+            sm:flex-row sm:items-center
+            sm:justify-between
+            dark:border-white/10
+            dark:bg-[#171b23]
+          "
+        >
+          <div className="relative w-full sm:max-w-sm">
             <Search
-              size={17}
-              className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400"
+              size={16}
+              className="
+                absolute left-3 top-1/2
+                -translate-y-1/2
+                text-gray-400
+              "
             />
 
             <input
               type="text"
               value={search}
-              onChange={(e) => setSearch(e.target.value)}
+              onChange={handleSearch}
               placeholder="Search FAQs..."
               className="
-                w-full
-                rounded-lg
-                border
-                border-gray-200
-                bg-white
-                py-2.5
-                pl-10
-                pr-4
-                text-sm
-                text-gray-900
-                outline-none
+                w-full rounded-lg border
+                border-gray-200 bg-gray-50
+                py-2.5 pl-9 pr-3 text-sm
+                text-gray-900 outline-none
                 focus:border-blue-500
                 dark:border-white/10
-                dark:bg-[#171b23]
+                dark:bg-[#0f131a]
                 dark:text-white
+                dark:placeholder:text-gray-500
               "
             />
           </div>
 
-          <p className="text-xs text-gray-500 dark:text-gray-400">
-            Showing {filteredFAQs.length} of {faqs.length} FAQs
-          </p>
+          <button
+            type="button"
+            onClick={handleRefresh}
+            disabled={isFetching}
+            className="
+              flex items-center justify-center gap-2
+              rounded-lg border border-gray-200
+              px-3 py-2.5
+              text-xs font-medium
+              text-gray-600
+              hover:bg-gray-50
+              disabled:opacity-50
+              dark:border-white/10
+              dark:text-gray-300
+              dark:hover:bg-white/5
+            "
+          >
+            <RefreshCw size={15} className={isFetching ? "animate-spin" : ""} />
+            Refresh
+          </button>
         </div>
 
-        {/* TABLE */}
+        {/* =================================================
+            ERROR
+        ================================================= */}
+
+        {error && (
+          <div
+            className="
+              mt-4 rounded-lg border
+              border-red-200 bg-red-50
+              px-4 py-3 text-sm
+              text-red-600
+              dark:border-red-500/20
+              dark:bg-red-500/10
+              dark:text-red-400
+            "
+          >
+            {error?.message || "Something went wrong"}
+          </div>
+        )}
+
+        {/* =================================================
+            TABLE
+        ================================================= */}
+
         <div className="mt-4">
           <FAQTable
-            faqs={filteredFAQs}
-            loading={faqLoading}
+            faqs={faqs}
+            loading={isLoading}
             onEdit={handleEditFAQ}
-            onDelete={handleDeleteFAQ}
+            onDelete={handleDelete}
           />
         </div>
+
+        {/* =================================================
+            PAGINATION
+        ================================================= */}
+
+        <Pagination
+          page={pagination.page}
+          totalPages={pagination.totalPages}
+          total={pagination.total}
+          currentCount={faqs.length}
+          isFetching={isFetching}
+          onPrevious={handlePreviousPage}
+          onNext={handleNextPage}
+        />
       </div>
 
-      {/* MODAL */}
+      {/* =================================================
+          ADD / EDIT MODAL
+      ================================================= */}
+
       <FAQModal
         isOpen={isModalOpen}
         onClose={handleCloseModal}
+        onSubmit={handleSubmit}
         faq={selectedFAQ}
-        onSubmit={handleSubmitFAQ}
-        loading={faqLoading}
+        loading={createLoading || updateLoading}
       />
+
+      {/* =================================================
+          DELETE MODAL
+      ================================================= */}
 
       <ConfirmModal
         isOpen={Boolean(deleteFAQDetails)}
@@ -350,7 +390,7 @@ export default function ClientFAQs() {
         message={
           <>
             Are you sure you want to delete{" "}
-            <strong>{deleteFAQDetails?.name}</strong>
+            <strong>{deleteFAQDetails?.question}</strong>
             ?
             <br />
             <span className="text-xs">This action cannot be undone.</span>
@@ -358,10 +398,40 @@ export default function ClientFAQs() {
         }
         confirmText="Delete"
         cancelText="Cancel"
-        loading={faqLoading}
+        loading={deleteLoading}
         onCancel={() => setDeleteFAQDetails(null)}
         onConfirm={handleConfirmDelete}
       />
+    </div>
+  );
+}
+
+/* =========================================================
+   STAT BOX
+========================================================= */
+
+function StatBox({ title, value }) {
+  return (
+    <div
+      className="
+        rounded-xl border
+        border-gray-200
+        bg-white p-4
+        dark:border-white/10
+        dark:bg-[#171b23]
+      "
+    >
+      <p className="text-xs text-gray-500 dark:text-gray-400">{title}</p>
+
+      <p
+        className="
+          mt-2 text-xl font-semibold
+          text-gray-900
+          dark:text-white
+        "
+      >
+        {value}
+      </p>
     </div>
   );
 }

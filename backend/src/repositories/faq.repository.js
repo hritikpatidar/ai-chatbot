@@ -8,13 +8,59 @@ export const findFAQById = async (faqId) => {
   return await FAQ.findById(faqId);
 };
 
-export const getClientFAQs = async (clientId) => {
-  return await FAQ.find({
+export const getClientFAQs = async ({
+  clientId,
+  page = 1,
+  limit = 10,
+  search = "",
+}) => {
+  const filter = {
     clientId,
-    // status: "active",
-  }).sort({
-    createdAt: -1,
-  });
+  };
+
+  if (search?.trim()) {
+    filter.$or = [
+      {
+        question: {
+          $regex: search.trim(),
+          $options: "i",
+        },
+      },
+      {
+        answer: {
+          $regex: search.trim(),
+          $options: "i",
+        },
+      },
+      {
+        category: {
+          $regex: search.trim(),
+          $options: "i",
+        },
+      },
+    ];
+  }
+
+  const skip = (page - 1) * limit;
+
+  const [faqs, total] = await Promise.all([
+    FAQ.find(filter)
+      .sort({
+        createdAt: -1,
+      })
+      .skip(skip)
+      .limit(limit),
+
+    FAQ.countDocuments(filter),
+  ]);
+
+  return {
+    faqs,
+    total,
+    page,
+    limit,
+    totalPages: Math.ceil(total / limit),
+  };
 };
 
 export const searchClientFAQs = async (clientId, searchText, limit = 5) => {

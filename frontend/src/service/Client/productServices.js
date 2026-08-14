@@ -4,8 +4,20 @@ export const createProductService = async (clientId, data) => {
   return httpServices.post(`/products/client/${clientId}`, data);
 };
 
-export const getProductsService = async (clientId) => {
-  return httpServices.get(`/products/client/${clientId}`);
+export const getProductsService = async (
+  clientId,
+  { page = 1, limit = 10, status = "" } = {},
+) => {
+  const params = new URLSearchParams();
+
+  params.append("page", page);
+  params.append("limit", limit);
+
+  if (status) {
+    params.append("status", status);
+  }
+
+  return httpServices.get(`/products/client/${clientId}?${params.toString()}`);
 };
 
 export const updateProductService = async (productId, payload) => {

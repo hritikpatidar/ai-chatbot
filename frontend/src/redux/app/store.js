@@ -15,7 +15,6 @@ import AuthSlice from "../features/Auth/authSlice";
 import chatSlice from '../features/Chat/chatSlice';
 import clientSlice from "../features/Client/clientSlice"
 import { thunk } from "redux-thunk";
-import ticketSlice from "../features/Ticket/ticketSlice";
 
 const storage = Storage.default ?? Storage;
 
@@ -25,7 +24,6 @@ const authReducer = combineReducers({
 
 const ClientReducer = combineReducers({
   clientSlice,
-  ticketSlice
 });
 
 const appReducer = combineReducers({

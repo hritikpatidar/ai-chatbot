@@ -4,8 +4,20 @@ export const createFAQService = async (clientId, payload) => {
   return httpServices.post(`/faqs/client/${clientId}`, payload);
 };
 
-export const getFAQsService = async (clientId) => {
-  return httpServices.get(`/faqs/client/${clientId}`);
+export const getFAQsService = async (
+  clientId,
+  { page = 1, limit = 10, search = "" } = {},
+) => {
+  const params = new URLSearchParams();
+
+  params.append("page", page);
+  params.append("limit", limit);
+
+  if (search?.trim()) {
+    params.append("search", search.trim());
+  }
+
+  return httpServices.get(`/faqs/client/${clientId}?${params.toString()}`);
 };
 
 export const updateFAQService = async (faqId, payload) => {

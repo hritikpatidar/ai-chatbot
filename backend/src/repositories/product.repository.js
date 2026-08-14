@@ -8,14 +8,10 @@ export const findProductById = async (productId) => {
   return await Product.findById(productId);
 };
 
-export const getClientProducts = async ({
-  clientId,
-  page = 1,
-  limit = 10,
-}) => {
+export const getClientProducts = async ({ clientId, page = 1, limit = 10 }) => {
   const filter = {
     clientId,
-    status: "active",
+    // status: "active",
   };
 
   const skip = (page - 1) * limit;

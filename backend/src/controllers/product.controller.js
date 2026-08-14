@@ -28,11 +28,17 @@ export const getProductsController = async (req, res, next) => {
   try {
     const { clientId } = req.params;
 
-    const products = await getClientProducts(clientId);
+    const { page = 1, limit = 10 } = req.query;
+
+    const result = await getClientProducts({
+      clientId,
+      page: Number(page),
+      limit: Number(limit),
+    });
 
     return res.status(200).json({
       success: true,
-      products,
+      data: result,
     });
   } catch (error) {
     next(error);

@@ -17,14 +17,20 @@ export const createProduct = async (productData) => {
   return await createProductRepository(productData);
 };
 
-export const getClientProducts = async (clientId) => {
+export const getClientProducts = async ({ clientId, page = 1, limit = 10 }) => {
   const client = await findClientById(clientId);
 
   if (!client) {
-    throw new Error("Client not found");
+    const error = new Error("Client not found");
+    error.statusCode = 404;
+    throw error;
   }
 
-  return await getClientProductsRepository(clientId);
+  return await getClientProductsRepository({
+    clientId,
+    page,
+    limit,
+  });
 };
 
 export const updateProduct = async (productId, data) => {

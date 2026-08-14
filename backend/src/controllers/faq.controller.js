@@ -28,11 +28,18 @@ export const getFAQsController = async (req, res, next) => {
   try {
     const { clientId } = req.params;
 
-    const faqs = await getClientFAQs(clientId);
+    const { page = 1, limit = 10, search = "" } = req.query;
+
+    const result = await getClientFAQs({
+      clientId,
+      page: Number(page),
+      limit: Number(limit),
+      search,
+    });
 
     return res.status(200).json({
       success: true,
-      faqs,
+      data: result,
     });
   } catch (error) {
     next(error);

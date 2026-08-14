@@ -1,34 +1,46 @@
-import { useEffect, useMemo, useState } from "react";
+import { useMemo, useState } from "react";
 import { Plus, Search, Package, RefreshCw } from "lucide-react";
-import { useDispatch, useSelector } from "react-redux";
+import { useSelector } from "react-redux";
 
 import ProductTable from "../../components/ClientComponent/Product/ProductTable";
 import ProductModal from "../../components/ClientComponent/Product/ProductModal";
 import ConfirmModal from "../../components/ClientComponent/ConfirmModal";
-import {
-  createProduct,
-  deleteProduct,
-  getProducts,
-  updateProduct,
-} from "../../redux/features/Client/clientSlice";
+import Pagination from "../../components/common/Pagination";
+
+import useProducts from "../../hooks/Client/useProducts";
 
 export default function ClientProducts() {
-  const dispatch = useDispatch();
-  const {
-    products = [],
-    loading = false,
-    error = "",
-    client,
-  } = useSelector((state) => state?.ClientReducer?.clientSlice || {});
+  const { client } = useSelector(
+    (state) => state?.ClientReducer?.clientSlice || {},
+  );
+
+  const [page, setPage] = useState(1);
+  const limit = 5;
+  const [search, setSearch] = useState("");
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [selectedProduct, setSelectedProduct] = useState(null);
   const [deleteProductDetails, setDeleteProductDetails] = useState(null);
-  const [search, setSearch] = useState("");
-  useEffect(() => {
-    if (client) {
-      dispatch(getProducts(client?.businessId));
-    }
-  }, [dispatch, client]);
+  const {
+    products,
+    pagination,
+    isLoading,
+    isFetching,
+    error,
+
+    refetch,
+
+    createProduct,
+    updateProduct,
+    deleteProduct,
+
+    createLoading,
+    updateLoading,
+    deleteLoading,
+  } = useProducts({
+    clientId: client?.businessId,
+    page,
+    limit,
+  });
 
   const filteredProducts = useMemo(() => {
     if (!search.trim()) {
@@ -37,9 +49,9 @@ export default function ClientProducts() {
     const value = search.toLowerCase();
     return products.filter((product) => {
       return (
-        product.name?.toLowerCase().includes(value) ||
-        product.category?.toLowerCase().includes(value) ||
-        product.description?.toLowerCase().includes(value)
+        product?.name?.toLowerCase().includes(value) ||
+        product?.category?.toLowerCase().includes(value) ||
+        product?.description?.toLowerCase().includes(value)
       );
     });
   }, [products, search]);
@@ -55,30 +67,30 @@ export default function ClientProducts() {
   };
 
   const handleCloseModal = () => {
-    if (loading) return;
+    if (createLoading || updateLoading) {
+      return;
+    }
 
     setIsModalOpen(false);
     setSelectedProduct(null);
   };
 
   const handleSubmit = async (payload) => {
+    if (!client?.businessId) {
+      return;
+    }
     try {
-      if (selectedProduct) {
-        await dispatch(
-          updateProduct({
-            productId: selectedProduct._id,
-            data: payload,
-          }),
-        ).unwrap();
+      if (selectedProduct?._id) {
+        await updateProduct({
+          productId: selectedProduct._id,
+          data: payload,
+        });
       } else {
-        await dispatch(
-          createProduct({
-            clientId: client?.businessId,
-            data: payload,
-          }),
-        ).unwrap();
+        await createProduct({
+          clientId: client.businessId,
+          data: payload,
+        });
       }
-
       setIsModalOpen(false);
       setSelectedProduct(null);
     } catch (error) {
@@ -91,26 +103,35 @@ export default function ClientProducts() {
   };
 
   const handleConfirmDelete = async () => {
-    if (!deleteProductDetails?._id) return;
+    if (!deleteProductDetails?._id) {
+      return;
+    }
 
     try {
-      await dispatch(deleteProduct(deleteProductDetails._id)).unwrap();
+      await deleteProduct(deleteProductDetails._id);
       setDeleteProductDetails(null);
     } catch (error) {
       console.error("Product delete error:", error);
     }
   };
 
-  const handleRefresh = () => {
-    if (client) {
-      dispatch(getProducts(client?.businessId));
-    }
+  const handlePreviousPage = () => {
+    setPage((prev) => Math.max(1, prev - 1));
   };
+
+  const handleNextPage = () => {
+    setPage((prev) => Math.min(pagination.totalPages, prev + 1));
+  };
+
+  const handleRefresh = () => {
+    refetch();
+  };
+
+  const errorMessage = error?.response?.data?.message || error?.message || "";
 
   return (
     <div className="min-h-full w-full">
       <div className="mx-auto w-full max-w-[1600px] px-4 py-5 sm:px-6 lg:px-8">
-        {/* Header */}
         <div
           className="
             flex flex-col gap-4
@@ -122,9 +143,11 @@ export default function ClientProducts() {
             <div className="flex items-center gap-3">
               <div
                 className="
-                  flex h-10 w-10 items-center
-                  justify-center rounded-xl
-                  bg-blue-500/10 text-blue-500
+                  flex h-10 w-10
+                  items-center justify-center
+                  rounded-xl
+                  bg-blue-500/10
+                  text-blue-500
                 "
               >
                 <Package size={21} />
@@ -134,7 +157,8 @@ export default function ClientProducts() {
                 <h1
                   className="
                     text-xl font-semibold
-                    text-gray-900 dark:text-white
+                    text-gray-900
+                    dark:text-white
                   "
                 >
                   Products
@@ -165,12 +189,11 @@ export default function ClientProducts() {
           </button>
         </div>
 
-        {/* Stats */}
         <div className="mt-6 grid grid-cols-2 gap-3 lg:grid-cols-4">
-          <StatBox title="Total Products" value={products.length} />
+          <StatBox title="Total Products" value={pagination.total} />
 
           <StatBox
-            title="In Stock"
+            title="Current Page"
             value={
               products.filter((item) => item.availability === "in_stock").length
             }
@@ -190,7 +213,6 @@ export default function ClientProducts() {
           />
         </div>
 
-        {/* Toolbar */}
         <div
           className="
             mt-6 flex flex-col gap-3
@@ -235,7 +257,7 @@ export default function ClientProducts() {
           <button
             type="button"
             onClick={handleRefresh}
-            disabled={loading}
+            disabled={isFetching}
             className="
               flex items-center justify-center gap-2
               rounded-lg border border-gray-200
@@ -248,13 +270,12 @@ export default function ClientProducts() {
               dark:hover:bg-white/5
             "
           >
-            <RefreshCw size={15} className={loading ? "animate-spin" : ""} />
+            <RefreshCw size={15} className={isFetching ? "animate-spin" : ""} />
             Refresh
           </button>
         </div>
 
-        {/* Error */}
-        {error && (
+        {errorMessage && (
           <div
             className="
               mt-4 rounded-lg border
@@ -265,33 +286,38 @@ export default function ClientProducts() {
               dark:text-red-400
             "
           >
-            {typeof error === "string"
-              ? error
-              : error?.message || "Something went wrong"}
+            {errorMessage}
           </div>
         )}
 
-        {/* Product Table */}
         <div className="mt-4">
           <ProductTable
             products={filteredProducts}
-            loading={loading}
+            loading={isLoading}
             onEdit={handleEditProduct}
             onDelete={handleDelete}
           />
         </div>
+
+        <Pagination
+          page={pagination.page}
+          totalPages={pagination.totalPages}
+          total={pagination.total}
+          currentCount={products.length}
+          isFetching={isFetching}
+          onPrevious={handlePreviousPage}
+          onNext={handleNextPage}
+        />
       </div>
 
-      {/* Add/Edit Modal */}
       <ProductModal
         isOpen={isModalOpen}
         onClose={handleCloseModal}
         onSubmit={handleSubmit}
         product={selectedProduct}
-        loading={loading}
+        loading={createLoading || updateLoading}
       />
 
-      {/* Delete Confirmation */}
       <ConfirmModal
         isOpen={Boolean(deleteProductDetails)}
         title="Delete Product"
@@ -306,7 +332,7 @@ export default function ClientProducts() {
         }
         confirmText="Delete"
         cancelText="Cancel"
-        loading={loading}
+        loading={deleteLoading}
         onCancel={() => setDeleteProductDetails(null)}
         onConfirm={handleConfirmDelete}
       />
@@ -326,7 +352,12 @@ function StatBox({ title, value }) {
     >
       <p className="text-xs text-gray-500 dark:text-gray-400">{title}</p>
 
-      <p className="mt-2 text-xl font-semibold text-gray-900 dark:text-white">
+      <p
+        className="
+          mt-2 text-xl font-semibold
+          text-gray-900 dark:text-white
+        "
+      >
         {value}
       </p>
     </div>

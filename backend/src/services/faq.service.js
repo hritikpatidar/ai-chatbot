@@ -17,14 +17,19 @@ export const createFAQ = async (faqData) => {
   return await createFAQRepository(faqData);
 };
 
-export const getClientFAQs = async (clientId) => {
+export const getClientFAQs = async ({ clientId, page, limit, search }) => {
   const client = await findClientById(clientId);
 
   if (!client) {
     throw new Error("Client not found");
   }
 
-  return await getClientFAQsRepository(clientId);
+  return await getClientFAQsRepository({
+    clientId,
+    page,
+    limit,
+    search,
+  });
 };
 
 export const updateFAQ = async (faqId, data) => {

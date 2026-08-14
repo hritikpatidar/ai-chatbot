@@ -1,7 +1,6 @@
 import express from "express";
 
 import {
-  createClient,
   getClientConfig,
   getClientById,
   updateClient,
@@ -11,7 +10,6 @@ import authMiddleware from "../middlewares/auth.js";
 
 const router = express.Router();
 
-router.post("/", authMiddleware, createClient);
 router.get("/:clientId", authMiddleware, getClientById);
 router.patch("/:clientId", authMiddleware, updateClient);
 router.get("/config/:clientKey", getClientConfig);

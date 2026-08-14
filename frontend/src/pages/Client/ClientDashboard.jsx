@@ -23,9 +23,12 @@ export default function ClientDashboard() {
   const { client, loading } = useSelector(
     (state) => state?.ClientReducer?.clientSlice || {},
   );
+  const { profileDetails, refreshToken } = useSelector(
+    (store) => store.authReducer.AuthSlice,
+  );
 
   useEffect(() => {
-    dispatch(getClientById(client?._id));
+    dispatch(getClientById(profileDetails?.clientId));
   }, [dispatch]);
 
   if (loading && !client) {
@@ -51,7 +54,7 @@ export default function ClientDashboard() {
 
           <button
             type="button"
-            onClick={() => navigate("/admin/client-settings")}
+            onClick={() => navigate("/client/client-settings")}
             className="
               inline-flex items-center justify-center gap-2
               rounded-lg
@@ -89,7 +92,7 @@ export default function ClientDashboard() {
             value="Manage"
             icon={Package}
             description="Product catalogue"
-            onClick={() => navigate("/admin/products")}
+            onClick={() => navigate("/client/products")}
           />
 
           <StatCard
@@ -97,7 +100,7 @@ export default function ClientDashboard() {
             value="Manage"
             icon={HelpCircle}
             description="Frequently asked questions"
-            onClick={() => navigate("/admin/faqs")}
+            onClick={() => navigate("/client/faqs")}
           />
 
           <StatCard
@@ -138,28 +141,28 @@ export default function ClientDashboard() {
                 title="Manage Products"
                 description="Add or update products"
                 icon={Package}
-                onClick={() => navigate("/admin/products")}
+                onClick={() => navigate("/client/products")}
               />
 
               <QuickAction
                 title="Manage FAQs"
                 description="Add or update FAQs"
                 icon={HelpCircle}
-                onClick={() => navigate("/admin/faqs")}
+                onClick={() => navigate("/client/faqs")}
               />
 
               <QuickAction
                 title="Chatbot Settings"
                 description="Configure your AI chatbot"
                 icon={Bot}
-                onClick={() => navigate("/admin/chatbot-settings")}
+                onClick={() => navigate("/client/chatbot-settings")}
               />
 
               <QuickAction
                 title="Client Settings"
                 description="Update business information"
                 icon={Building2}
-                onClick={() => navigate("/admin/client-settings")}
+                onClick={() => navigate("/client/client-settings")}
               />
             </div>
           </div>
@@ -195,7 +198,7 @@ export default function ClientDashboard() {
 
             <button
               type="button"
-              onClick={() => navigate("/admin/chatbot-settings")}
+              onClick={() => navigate("/client/chatbot-settings")}
               className="
                 inline-flex
                 items-center

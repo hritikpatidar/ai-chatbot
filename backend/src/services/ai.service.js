@@ -1,3 +1,5 @@
+import ai from "../config/gemini.js";
+
 export const buildClientSystemInstruction = (client, knowledgeContext = "") => {
   const businessName = client.businessName || "the business";
 
@@ -112,4 +114,122 @@ export const buildConversationContents = (history = [], currentMessage) => {
   }
 
   return contents;
+};
+
+export const classifyUserMessage = async ({
+  message,
+  knowledgeContext,
+  client,
+}) => {
+  const classificationPrompt = `
+You are an intelligent classifier for a business customer-support chatbot.
+
+Your task is to classify the user's message into one of these categories:
+
+1. BUSINESS_RELATED
+2. NOT_BUSINESS_RELATED
+
+You must also determine whether the business has enough information
+to answer the user's question.
+
+Return ONLY valid JSON.
+
+Required JSON format:
+
+{
+  "businessRelated": true,
+  "canAnswer": true,
+  "reason": "short reason"
+}
+
+IMPORTANT RULES:
+
+- businessRelated = true when the user's question is related to
+  the business, company, products, services, pricing, features,
+  orders, policies, account, support, FAQs, or anything that a
+  customer may reasonably ask this business.
+
+- businessRelated = false when the question has nothing to do
+  with this business.
+
+- canAnswer = true when the available business information is
+  sufficient to answer the question.
+
+- canAnswer = false when the question is business-related but
+  the available information is not sufficient.
+
+- If businessRelated is false, canAnswer MUST be false.
+
+- Do NOT mark a question as unrelated just because the exact
+  answer is missing from the knowledge base.
+
+- First decide whether the question belongs to the business.
+  Then decide whether the business has enough information.
+
+BUSINESS INFORMATION:
+
+${client ? JSON.stringify(client) : "No client information available."}
+
+BUSINESS KNOWLEDGE:
+
+${knowledgeContext || "No additional knowledge available."}
+
+USER QUESTION:
+
+${message}
+`;
+
+  try {
+    const response = await ai.models.generateContent({
+      model: "gemini-3.6-flash",
+      contents: classificationPrompt,
+    });
+
+    const text = response.text?.trim();
+
+    console.log("🧠 Raw Classification:", text);
+
+    if (!text) {
+      throw new Error("Empty classification response");
+    }
+
+    const cleanedText = text
+      .replace(/^```json\s*/i, "")
+      .replace(/^```\s*/i, "")
+      .replace(/\s*```$/i, "")
+      .trim();
+
+    const classification = JSON.parse(cleanedText);
+
+    console.log("✅ Classification:", classification);
+
+    return {
+      businessRelated: Boolean(
+        classification.businessRelated,
+      ),
+
+      canAnswer: Boolean(
+        classification.canAnswer,
+      ),
+
+      reason: classification.reason || "",
+    };
+  } catch (error) {
+    console.error(
+      "❌ Classification Error:",
+      error,
+    );
+
+    /*
+      Classification fail hone par user ko unnecessarily
+      ticket nahi banana chahiye.
+      
+      Normal Gemini ko answer attempt karne do.
+    */
+    return {
+      businessRelated: true,
+      canAnswer: true,
+      reason: "Classification failed",
+    };
+  }
 };

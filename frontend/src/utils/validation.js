@@ -122,12 +122,9 @@ export const editProfileSchema = z.object({
     ),
 });
 
-
 export const changePasswordSchema = z
   .object({
-    currentPassword: z
-      .string()
-      .min(1, "Current password is required"),
+    currentPassword: z.string().min(1, "Current password is required"),
 
     password: z
       .string()
@@ -137,14 +134,27 @@ export const changePasswordSchema = z
         "Password must contain uppercase, lowercase and number",
       ),
 
-    confirmPassword: z
-      .string()
-      .min(1, "Confirm password is required"),
+    confirmPassword: z.string().min(1, "Confirm password is required"),
   })
-  .refine(
-    (data) => data.password === data.confirmPassword,
-    {
-      message: "Passwords do not match",
-      path: ["confirmPassword"],
-    },
-  );
+  .refine((data) => data.password === data.confirmPassword, {
+    message: "Passwords do not match",
+    path: ["confirmPassword"],
+  });
+
+export const ticketSchema = z.object({
+  subject: z
+    .string()
+    .trim()
+    .min(3, "Subject must be at least 3 characters")
+    .max(150, "Subject cannot exceed 150 characters"),
+
+  description: z
+    .string()
+    .trim()
+    .min(5, "Description must be at least 5 characters")
+    .max(2000, "Description cannot exceed 2000 characters"),
+
+  status: z.enum(["open", "in_progress", "resolved", "closed"]),
+
+  priority: z.enum(["low", "medium", "high"]),
+});

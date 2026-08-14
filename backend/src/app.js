@@ -9,6 +9,8 @@ import profileRoutes from "./routes/profile.routes.js";
 import clientRoutes from "./routes/client.routes.js";
 import productRoutes from "./routes/product.routes.js";
 import faqRoutes from "./routes/faq.routes.js";
+import ticketRoutes from "./routes/ticket.routes.js"
+import adminRoutes from "./routes/admin.route.js"
 import notFound from "./middlewares/notFound.js";
 import errorHandler from "./middlewares/errorHandler.js";
 import { redisClient } from "./config/redis.js";
@@ -42,6 +44,8 @@ app.use("/api/profile", profileRoutes);
 app.use("/api/client", clientRoutes);
 app.use("/api/products", productRoutes);
 app.use("/api/faqs", faqRoutes);
+app.use("/api/tickets", ticketRoutes);
+app.use("/api/admin", adminRoutes);
 app.use("/uploads", express.static(path.join(process.cwd(), "src/uploads")));
 app.use(notFound);
 app.use(errorHandler);

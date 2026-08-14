@@ -41,6 +41,7 @@ const ChatbotSettings = lazy(() => import("../pages/Client/ChatbotSettings"));
 const ClientProducts = lazy(() => import("../pages/Client/ClientProducts"));
 const ClientLayout = lazy(() => import("../pages/Client/ClientLayout"));
 const ClientFAQs = lazy(() => import("../pages/Client/ClientFAQs"));
+const ClientTickets = lazy(() => import("../pages/Client/ClientTickets"));
 
 export default function AppRoutes() {
   return (
@@ -88,12 +89,13 @@ export default function AppRoutes() {
             </Route>
             {/* PRIVATE Client ROUTES */}
             <Route element={<ClientRoute />}>
-              <Route path="/admin" element={<ClientLayout />}>
+              <Route path="/client" element={<ClientLayout />}>
                 <Route index element={<ClientDashboard />} />
                 <Route path="products" element={<ClientProducts />} />
                 <Route path="faqs" element={<ClientFAQs />} />
                 <Route path="chatbot-settings" element={<ChatbotSettings />} />
                 <Route path="client-settings" element={<ClientSettings />} />
+                <Route path="tickets" element={<ClientTickets />} />
               </Route>
             </Route>
           </Route>

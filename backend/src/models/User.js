@@ -40,10 +40,15 @@ const userSchema = new mongoose.Schema(
 
     role: {
       type: String,
-      enum: ["user", "admin"],
+      enum: ["user", "admin", "client"],
       default: "user",
     },
-
+    clientId: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "Client",
+      default: null,
+      index: true,
+    },
     terms: {
       type: Boolean,
       required: [true, "You must accept the terms and conditions"],

@@ -1,23 +1,9 @@
 import {
-  createClientService,
   getClientConfigService,
   getClientByIdService,
   updateClientService,
 } from "../services/client.service.js";
-
-export const createClient = async (req, res, next) => {
-  try {
-    const client = await createClientService(req.body);
-
-    return res.status(201).json({
-      success: true,
-      message: "Client created successfully",
-      client,
-    });
-  } catch (error) {
-    next(error);
-  }
-};
+import { createClientValidation } from "../validators/client.validation.js";
 
 export const getClientConfig = async (req, res, next) => {
   try {

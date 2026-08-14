@@ -36,7 +36,7 @@ export default function Login() {
         setItemLocalStorage("refreshToken", response?.refreshToken);
         setItemLocalStorage("userRole", response?.user?.role);
         if (response?.user?.role === "client") {
-          navigate("/admin");
+          navigate("/client");
         } else {
           navigate("/");
         }

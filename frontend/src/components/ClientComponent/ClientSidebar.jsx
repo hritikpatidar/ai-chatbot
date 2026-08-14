@@ -10,6 +10,7 @@ import {
   LogOut,
   X,
   Menu,
+  Ticket,
 } from "lucide-react";
 
 import { handleLogout } from "../../utils/logout";
@@ -27,27 +28,32 @@ export default function ClientSidebar({ mobileOpen, setMobileOpen }) {
   const menuItems = [
     {
       label: "Dashboard",
-      path: "/admin",
+      path: "/client",
       icon: LayoutDashboard,
     },
     {
       label: "Products",
-      path: "/admin/products",
+      path: "/client/products",
       icon: Package,
     },
     {
       label: "FAQs",
-      path: "/admin/faqs",
+      path: "/client/faqs",
       icon: HelpCircle,
     },
     {
+      label: "Tickets",
+      path: "/client/tickets",
+      icon: Ticket,
+    },
+    {
       label: "Chatbot Settings",
-      path: "/admin/chatbot-settings",
+      path: "/client/chatbot-settings",
       icon: Building2,
     },
     {
       label: "Settings",
-      path: "/admin/client-settings",
+      path: "/client/client-settings",
       icon: Building2,
     },
   ];
@@ -231,7 +237,7 @@ export default function ClientSidebar({ mobileOpen, setMobileOpen }) {
                 <NavLink
                   key={item.path}
                   to={item.path}
-                  end={item.path === "/admin"}
+                  end={item.path === "/client"}
                   onClick={() => setMobileOpen(false)}
                   className={({ isActive }) =>
                     `

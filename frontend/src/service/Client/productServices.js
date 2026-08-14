@@ -1,7 +1,7 @@
 import httpServices from "../httpServices";
 
-export const createProductService = async (clientId, payload) => {
-  return httpServices.post(`/products/client/${clientId}`, payload);
+export const createProductService = async (clientId, data) => {
+  return httpServices.post(`/products/client/${clientId}`, data);
 };
 
 export const getProductsService = async (clientId) => {

@@ -10,7 +10,7 @@ const initialForm = {
 };
 
 export default function FAQModal({
-  open,
+  isOpen,
   onClose,
   onSubmit,
   faq = null,
@@ -32,7 +32,7 @@ export default function FAQModal({
     } else {
       setForm(initialForm);
     }
-  }, [faq, open]);
+  }, [faq, isOpen]);
 
   const handleChange = (e) => {
     const { name, value } = e.target;
@@ -64,7 +64,7 @@ export default function FAQModal({
     await onSubmit(payload);
   };
 
-  if (!open) {
+  if (!isOpen) {
     return null;
   }
 
@@ -77,11 +77,6 @@ export default function FAQModal({
         px-4 py-6
         backdrop-blur-sm
       "
-      onMouseDown={(e) => {
-        if (e.target === e.currentTarget && !loading) {
-          onClose();
-        }
-      }}
     >
       <div
         className="

@@ -8,28 +8,46 @@ import {
   getFAQs,
   updateFAQ,
 } from "../../redux/features/Client/clientSlice";
+
 import FAQTable from "../../components/ClientComponent/FAQ/FAQTable";
 import FAQModal from "../../components/ClientComponent/FAQ/FAQModal";
+import ConfirmModal from "../../components/ClientComponent/ConfirmModal";
 
 export default function ClientFAQs() {
   const dispatch = useDispatch();
-  const { client, faqs, loading, error } = useSelector(
-    (state) => state?.ClientReducer?.clientSlice || {},
-  );
+
+  const {
+    client,
+    faqs = [],
+    faqLoading = false,
+    faqError = null,
+  } = useSelector((state) => state?.ClientReducer?.clientSlice || {});
 
   const [search, setSearch] = useState("");
+
+  // IMPORTANT: default false
   const [isModalOpen, setIsModalOpen] = useState(false);
+
   const [selectedFAQ, setSelectedFAQ] = useState(null);
+  const [deleteFAQDetails, setDeleteFAQDetails] = useState(null);
+
+  // ============================================
+  // Fetch FAQs
+  // ============================================
 
   const fetchFAQs = () => {
-    if (!client) return;
+    if (!client?.businessId) return;
 
-    dispatch(getFAQs(client?._id));
+    dispatch(getFAQs(client.businessId));
   };
 
   useEffect(() => {
     fetchFAQs();
-  }, [client]);
+  }, [client?.businessId]);
+
+  // ============================================
+  // Search
+  // ============================================
 
   const filteredFAQs = useMemo(() => {
     if (!search.trim()) {
@@ -37,6 +55,7 @@ export default function ClientFAQs() {
     }
 
     const searchText = search.toLowerCase();
+
     return faqs.filter((faq) => {
       return (
         faq?.question?.toLowerCase().includes(searchText) ||
@@ -49,78 +68,115 @@ export default function ClientFAQs() {
     });
   }, [faqs, search]);
 
+  // ============================================
+  // ADD FAQ
+  // ============================================
+
   const handleAddFAQ = () => {
     setSelectedFAQ(null);
     setIsModalOpen(true);
   };
+
+  // ============================================
+  // EDIT FAQ
+  // ============================================
 
   const handleEditFAQ = (faq) => {
     setSelectedFAQ(faq);
     setIsModalOpen(true);
   };
 
+  // ============================================
+  // CLOSE MODAL
+  // ============================================
+
+  const handleCloseModal = () => {
+    setIsModalOpen(false);
+    setSelectedFAQ(null);
+  };
+
+  // ============================================
+  // CREATE / UPDATE
+  // ============================================
+
   const handleSubmitFAQ = async (formData) => {
-    if (!client) {
-      return;
-    }
+    if (!client?.businessId) return;
 
     try {
       if (selectedFAQ?._id) {
         await dispatch(
           updateFAQ({
             faqId: selectedFAQ._id,
-            data: formData,
+            payload: formData,
           }),
         ).unwrap();
       } else {
         await dispatch(
           createFAQ({
-            client: client?._id,
-            data: formData,
+            clientId: client.businessId,
+            payload: formData,
           }),
         ).unwrap();
       }
 
-      setIsModalOpen(false);
-      setSelectedFAQ(null);
-      dispatch(getFAQs(client?._id));
+      handleCloseModal();
     } catch (error) {
       console.error("FAQ save failed:", error);
     }
   };
 
-  const handleDeleteFAQ = async (faq) => {
-    if (!faq?._id) return;
-    const confirmed = window.confirm(
-      `Are you sure you want to delete "${faq.question}"?`,
-    );
+  // ============================================
+  // DELETE
+  // ============================================
 
-    if (!confirmed) return;
+  const handleDeleteFAQ = async (faq) => {
+    setDeleteFAQDetails(faq);
+  };
+
+  const handleConfirmDelete = async () => {
+    if (!deleteFAQDetails?._id) return;
+
     try {
-      await dispatch(deleteFAQ(faq._id)).unwrap();
-      dispatch(getAdminFAQs(client?._id));
+      await dispatch(deleteFAQ(deleteFAQDetails._id)).unwrap();
+      setDeleteFAQDetails(null);
     } catch (error) {
-      console.error("FAQ delete failed:", error);
+      console.error("FAQ delete error:", error);
     }
   };
 
+  // ============================================
+  // Stats
+  // ============================================
+
+  const totalFAQs = faqs.length;
+
+  const activeFAQs = faqs.filter((faq) => faq?.status === "active").length;
+
+  const categoryCount = new Set(
+    faqs.map((faq) => faq?.category).filter(Boolean),
+  ).size;
+
   return (
-    <div className="min-h-full w-full bg-transparent px-4 py-5 sm:px-6 lg:px-8 text-gray-900 transition-colors duration-300 sm:py-6 dark:text-white">
+    <div className="min-h-full w-full bg-transparent px-4 py-5 text-gray-900 transition-colors duration-300 sm:px-6 sm:py-6 lg:px-8 dark:text-white">
       <div className="mx-auto w-full max-w-7xl">
+        {/* HEADER */}
         <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
           <div>
             <h1 className="text-2xl font-semibold text-gray-900 dark:text-white">
               FAQs
             </h1>
+
             <p className="mt-1 text-sm text-gray-500 dark:text-gray-400">
               Manage frequently asked questions for your client.
             </p>
           </div>
+
           <div className="flex flex-col gap-2 sm:flex-row">
+            {/* REFRESH */}
             <button
               type="button"
               onClick={fetchFAQs}
-              disabled={loading}
+              disabled={faqLoading || !client?.businessId}
               className="
                 inline-flex
                 items-center
@@ -143,18 +199,20 @@ export default function ClientFAQs() {
                 dark:border-white/10
                 dark:bg-[#171b23]
                 dark:text-gray-200
-                dark:hover:border-blue-500
-                dark:hover:text-blue-400
               "
             >
-              <RefreshCw size={16} className={loading ? "animate-spin" : ""} />
+              <RefreshCw
+                size={16}
+                className={faqLoading ? "animate-spin" : ""}
+              />
               Refresh
             </button>
 
+            {/* ADD FAQ */}
             <button
               type="button"
               onClick={handleAddFAQ}
-              disabled={!client?._id}
+              disabled={!client?.businessId}
               className="
                 inline-flex
                 items-center
@@ -171,8 +229,6 @@ export default function ClientFAQs() {
                 hover:bg-blue-700
                 disabled:cursor-not-allowed
                 disabled:opacity-50
-                dark:bg-blue-600
-                dark:hover:bg-blue-700
               "
             >
               <Plus size={17} />
@@ -181,94 +237,61 @@ export default function ClientFAQs() {
           </div>
         </div>
 
-        {!client && (
+        {/* NO CLIENT */}
+        {!client?.businessId && (
           <div className="mt-6 rounded-xl border border-yellow-200 bg-yellow-50 p-4 text-sm text-yellow-700 dark:border-yellow-500/20 dark:bg-yellow-500/10 dark:text-yellow-400">
             Please select a client before managing FAQs.
           </div>
         )}
 
-        {error && (
+        {/* ERROR */}
+        {faqError && (
           <div className="mt-6 rounded-xl border border-red-200 bg-red-50 p-4 text-sm text-red-600 dark:border-red-500/20 dark:bg-red-500/10 dark:text-red-400">
-            {typeof error === "string"
-              ? error
-              : error?.message || "Something went wrong."}
+            {typeof faqError === "string"
+              ? faqError
+              : faqError?.message || "Something went wrong."}
           </div>
         )}
 
+        {/* STATS */}
         <div className="mt-6 grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
-          <div
-            className="
-              rounded-xl
-              border
-              border-gray-200
-              bg-white
-              p-4
-              dark:border-white/10
-              dark:bg-[#171b23]
-            "
-          >
+          <div className="rounded-xl border border-gray-200 bg-white p-4 dark:border-white/10 dark:bg-[#171b23]">
             <p className="text-xs text-gray-500 dark:text-gray-400">
               Total FAQs
             </p>
 
             <p className="mt-2 text-2xl font-semibold text-gray-900 dark:text-white">
-              {faqs.length}
+              {totalFAQs}
             </p>
           </div>
 
-          <div
-            className="
-              rounded-xl
-              border
-              border-gray-200
-              bg-white
-              p-4
-              dark:border-white/10
-              dark:bg-[#171b23]
-            "
-          >
+          <div className="rounded-xl border border-gray-200 bg-white p-4 dark:border-white/10 dark:bg-[#171b23]">
             <p className="text-xs text-gray-500 dark:text-gray-400">
               Active FAQs
             </p>
 
             <p className="mt-2 text-2xl font-semibold text-green-600 dark:text-green-400">
-              {faqs.filter((faq) => faq?.status === "active").length}
+              {activeFAQs}
             </p>
           </div>
 
-          <div
-            className="
-              rounded-xl
-              border
-              border-gray-200
-              bg-white
-              p-4
-              dark:border-white/10
-              dark:bg-[#171b23]
-            "
-          >
+          <div className="rounded-xl border border-gray-200 bg-white p-4 dark:border-white/10 dark:bg-[#171b23]">
             <p className="text-xs text-gray-500 dark:text-gray-400">
               Categories
             </p>
 
             <p className="mt-2 text-2xl font-semibold text-gray-900 dark:text-white">
-              {new Set(faqs.map((faq) => faq?.category).filter(Boolean)).size}
+              {categoryCount}
             </p>
           </div>
         </div>
 
+        {/* SEARCH */}
         <div className="mt-6 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
           <div className="relative w-full sm:max-w-md">
             <Search
               size={17}
-              className="
-                absolute
-                left-3
-                top-1/2
-                -translate-y-1/2
-                text-gray-400
-                dark:text-gray-500
-              "
+              className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400"
             />
 
             <input
@@ -288,13 +311,10 @@ export default function ClientFAQs() {
                 text-sm
                 text-gray-900
                 outline-none
-                transition
-                placeholder:text-gray-400
                 focus:border-blue-500
                 dark:border-white/10
                 dark:bg-[#171b23]
                 dark:text-white
-                dark:placeholder:text-gray-500
               "
             />
           </div>
@@ -304,25 +324,43 @@ export default function ClientFAQs() {
           </p>
         </div>
 
+        {/* TABLE */}
         <div className="mt-4">
           <FAQTable
             faqs={filteredFAQs}
-            loading={loading}
+            loading={faqLoading}
             onEdit={handleEditFAQ}
             onDelete={handleDeleteFAQ}
           />
         </div>
       </div>
 
+      {/* MODAL */}
       <FAQModal
         isOpen={isModalOpen}
-        onClose={() => {
-          setIsModalOpen(false);
-          setSelectedFAQ(null);
-        }}
+        onClose={handleCloseModal}
         faq={selectedFAQ}
         onSubmit={handleSubmitFAQ}
-        loading={loading}
+        loading={faqLoading}
+      />
+
+      <ConfirmModal
+        isOpen={Boolean(deleteFAQDetails)}
+        title="Delete FAQ"
+        message={
+          <>
+            Are you sure you want to delete{" "}
+            <strong>{deleteFAQDetails?.name}</strong>
+            ?
+            <br />
+            <span className="text-xs">This action cannot be undone.</span>
+          </>
+        }
+        confirmText="Delete"
+        cancelText="Cancel"
+        loading={faqLoading}
+        onCancel={() => setDeleteFAQDetails(null)}
+        onConfirm={handleConfirmDelete}
       />
     </div>
   );

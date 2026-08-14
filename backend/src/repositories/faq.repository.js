@@ -11,7 +11,7 @@ export const findFAQById = async (faqId) => {
 export const getClientFAQs = async (clientId) => {
   return await FAQ.find({
     clientId,
-    status: "active",
+    // status: "active",
   }).sort({
     createdAt: -1,
   });
@@ -21,7 +21,7 @@ export const searchClientFAQs = async (clientId, searchText, limit = 5) => {
   return await FAQ.find(
     {
       clientId,
-      status: "active",
+      // status: "active",
       $text: {
         $search: searchText,
       },
@@ -49,4 +49,11 @@ export const updateFAQ = async (faqId, data) => {
 
 export const deleteFAQ = async (faqId) => {
   return await FAQ.findByIdAndDelete(faqId);
+};
+
+export const getFaqCountByClientId = async (clientId) => {
+  return await FAQ.countDocuments({
+    clientId,
+    // status: "active",
+  });
 };

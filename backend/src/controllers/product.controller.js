@@ -42,7 +42,6 @@ export const getProductsController = async (req, res, next) => {
 export const updateProductController = async (req, res, next) => {
   try {
     const { productId } = req.params;
-
     const product = await updateProduct(productId, req.body);
 
     return res.status(200).json({

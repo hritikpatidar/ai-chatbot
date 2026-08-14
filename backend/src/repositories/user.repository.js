@@ -72,3 +72,13 @@ export const userUpdatePassword = async (id, password) => {
     },
   );
 };
+
+export const findClientUserByClientId = async (clientId) => {
+  return await User.findOne({
+    clientId,
+    role: "client",
+    accountStatus: "active",
+  })
+    .select("-password")
+    .lean();
+};

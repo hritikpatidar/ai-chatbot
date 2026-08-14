@@ -28,32 +28,7 @@ import {
 
 import ConfirmModal from "../../components/ClientComponent/ConfirmModal";
 import EmptyState from "../../components/ClientComponent/EmptyState";
-
-/* =========================================================
-   VALIDATION
-========================================================= */
-
-const ticketSchema = z.object({
-  subject: z
-    .string()
-    .trim()
-    .min(3, "Subject must be at least 3 characters")
-    .max(150, "Subject cannot exceed 150 characters"),
-
-  description: z
-    .string()
-    .trim()
-    .min(5, "Description must be at least 5 characters")
-    .max(2000, "Description cannot exceed 2000 characters"),
-
-  status: z.enum(["open", "in_progress", "resolved", "closed"]),
-
-  priority: z.enum(["low", "medium", "high"]),
-});
-
-/* =========================================================
-   MAIN COMPONENT
-========================================================= */
+import { ticketSchema } from "../../utils/validation";
 
 export default function ClientTickets() {
   const dispatch = useDispatch();
@@ -740,9 +715,6 @@ function PriorityBadge({ priority }) {
   );
 }
 
-/* =========================================================
-   CREATED DATE
-========================================================= */
 
 function CreatedDate({ date }) {
   return (
@@ -752,9 +724,6 @@ function CreatedDate({ date }) {
   );
 }
 
-/* =========================================================
-   EDIT MODAL
-========================================================= */
 
 function TicketEditModal({ ticket, isOpen, onClose, loading, dispatch }) {
   const {
@@ -1027,9 +996,6 @@ function TicketEditModal({ ticket, isOpen, onClose, loading, dispatch }) {
   );
 }
 
-/* =========================================================
-   DATE FORMATTER
-========================================================= */
 
 function formatDate(date) {
   if (!date) return "-";

@@ -2,7 +2,6 @@ import {
   UserFindByEmail,
   userCreate,
   verifyUserEmail,
-  UserFindById,
   userFindByEmailWithPassword,
   updateLastLogin,
   userUpdatePassword,
@@ -157,7 +156,7 @@ export const loginService = async (body) => {
   }
 
   const payload = {
-    id: user._id,
+    id: user?.role === "client" ? user?.clientId :user._id,
     email: user.email,
     role: user.role,
   };

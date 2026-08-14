@@ -2,7 +2,7 @@ import { AlertTriangle, X } from "lucide-react";
 
 export default function ConfirmModal({
   isOpen,
-  onClose,
+  onCancel,
   onConfirm,
   title = "Confirm Action",
   message = "Are you sure you want to continue?",
@@ -24,7 +24,7 @@ export default function ConfirmModal({
       "
       onMouseDown={(e) => {
         if (e.target === e.currentTarget && !loading) {
-          onClose();
+          onCancel();
         }
       }}
     >
@@ -73,7 +73,7 @@ export default function ConfirmModal({
 
           <button
             type="button"
-            onClick={onClose}
+            onClick={onCancel}
             disabled={loading}
             className="
               rounded-lg
@@ -115,7 +115,7 @@ export default function ConfirmModal({
         >
           <button
             type="button"
-            onClick={onClose}
+            onClick={onCancel}
             disabled={loading}
             className="
               rounded-lg

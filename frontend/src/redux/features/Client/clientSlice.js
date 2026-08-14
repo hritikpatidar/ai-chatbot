@@ -88,9 +88,9 @@ export const updateClient = createAsyncThunk(
 // Create Product
 export const createProduct = createAsyncThunk(
   "admin/createProduct",
-  async ({ clientId, payload }, { rejectWithValue }) => {
+  async ({ clientId, data }, { rejectWithValue }) => {
     try {
-      const response = await createProductService(clientId, payload);
+      const response = await createProductService(clientId, data);
 
       return response.data;
     } catch (error) {
@@ -124,9 +124,9 @@ export const getProducts = createAsyncThunk(
 // Update Product
 export const updateProduct = createAsyncThunk(
   "admin/updateProduct",
-  async ({ productId, payload }, { rejectWithValue }) => {
+  async ({ productId, data }, { rejectWithValue }) => {
     try {
-      const response = await updateProductService(productId, payload);
+      const response = await updateProductService(productId, data);
 
       return response.data;
     } catch (error) {

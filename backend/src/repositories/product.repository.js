@@ -50,3 +50,10 @@ export const updateProduct = async (productId, data) => {
 export const deleteProduct = async (productId) => {
   return await Product.findByIdAndDelete(productId);
 };
+
+export const getProductCountByClientId = async (clientId) => {
+  return await Product.countDocuments({
+    clientId,
+    // status: "active",
+  });
+};

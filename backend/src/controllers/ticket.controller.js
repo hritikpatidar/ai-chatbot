@@ -112,10 +112,6 @@ export const getUserTickets = async (req, res, next) => {
   }
 };
 
-/* =========================================================
-   GET CLIENT TICKETS
-========================================================= */
-
 export const getClientTickets = async (req, res, next) => {
   try {
     const clientId = req.user?.id;

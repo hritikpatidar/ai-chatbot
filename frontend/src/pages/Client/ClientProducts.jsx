@@ -26,7 +26,7 @@ export default function ClientProducts() {
   const [search, setSearch] = useState("");
   useEffect(() => {
     if (client) {
-      dispatch(getProducts(client?._id));
+      dispatch(getProducts(client?.businessId));
     }
   }, [dispatch, client]);
 
@@ -73,7 +73,7 @@ export default function ClientProducts() {
       } else {
         await dispatch(
           createProduct({
-            clientId: client?._id,
+            clientId: client?.businessId,
             data: payload,
           }),
         ).unwrap();
@@ -103,7 +103,7 @@ export default function ClientProducts() {
 
   const handleRefresh = () => {
     if (client) {
-      dispatch(getProducts(client?._id));
+      dispatch(getProducts(client?.businessId));
     }
   };
 

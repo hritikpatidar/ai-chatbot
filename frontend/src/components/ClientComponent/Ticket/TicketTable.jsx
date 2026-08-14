@@ -1,4 +1,12 @@
-import { Edit, Trash2, Ticket, Clock3, AlertCircle, Inbox, Edit2 } from "lucide-react";
+import {
+  Edit,
+  Trash2,
+  Ticket,
+  Clock3,
+  AlertCircle,
+  Inbox,
+  Edit2,
+} from "lucide-react";
 
 import ActionButton from "../../common/ActionButton";
 
@@ -260,7 +268,7 @@ export default function TicketTable({
       =================================================== */}
 
       <div className="hidden overflow-x-auto md:block">
-        <table className="w-full min-w-[900px]">
+        <table className="w-full min-w-225">
           <thead>
             <tr
               className="
@@ -268,7 +276,7 @@ export default function TicketTable({
                 border-gray-200
                 bg-gray-50
                 dark:border-white/10
-                dark:bg-white/[0.03]
+                dark:bg-white/3
               "
             >
               <th className="px-5 py-4 text-left text-xs font-semibold text-gray-500 dark:text-gray-400">
@@ -308,7 +316,7 @@ export default function TicketTable({
                   last:border-0
                   hover:bg-gray-50
                   dark:border-white/5
-                  dark:hover:bg-white/[0.03]
+                  dark:hover:bg-white/3
                 "
               >
                 {/* Ticket */}
@@ -335,7 +343,7 @@ export default function TicketTable({
                     <div className="min-w-0">
                       <p
                         className="
-                          max-w-[280px]
+                          max-w-70
                           truncate
                           text-sm
                           font-semibold
@@ -578,17 +586,17 @@ export default function TicketTable({
               "
             >
               <ActionButton
-                      icon={<Edit2 size={15} />}
-                      label="Edit"
-                      onClick={() => onEdit?.(ticket)}
-                    />
+                icon={<Edit2 size={15} />}
+                label="Edit"
+                onClick={() => onEdit?.(ticket)}
+              />
 
-                    <ActionButton
-                      icon={<Trash2 size={15} />}
-                      label="Delete"
-                      danger
-                      onClick={() => onDelete?.(ticket)}
-                    />
+              <ActionButton
+                icon={<Trash2 size={15} />}
+                label="Delete"
+                danger
+                onClick={() => onDelete?.(ticket)}
+              />
             </div>
           </div>
         ))}

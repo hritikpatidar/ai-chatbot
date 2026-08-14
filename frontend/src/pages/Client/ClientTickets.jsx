@@ -1,663 +1,554 @@
-import { useState } from "react";
-import {
-  RefreshCw,
-  Search,
-  X,
-  Loader2,
-  AlertCircle,
-} from "lucide-react";
+import { useEffect, useState } from "react";
 
-import { useQueryClient } from "@tanstack/react-query";
-import useClientTickets from "../../hooks/Client/useClientTickets";
+import { Plus, RefreshCw, Search } from "lucide-react";
 
-import {
-  updateClientTicketService,
-  deleteClientTicketService,
-} from "../../service/Client/ticketServices";
+import TicketTable from "../../components/ClientComponent/Ticket/TicketTable";
+import TicketModal from "../../components/ClientComponent/Ticket/TicketModal";
 import ConfirmModal from "../../components/ClientComponent/ConfirmModal";
 import Pagination from "../../components/common/Pagination";
-import TicketTable from "../../components/ClientComponent/Ticket/TicketTable";
+
+import useClientTickets from "../../hooks/Client/useClientTickets";
 
 export default function ClientTickets() {
-  const queryClient = useQueryClient();
+  /* =========================================================
+     PAGINATION
+  ========================================================= */
+
   const [page, setPage] = useState(1);
 
-  const limit = 5;
+  const [limit] = useState(10);
+
+  /* =========================================================
+     FILTERS
+  ========================================================= */
 
   const [status, setStatus] = useState("");
+
   const [priority, setPriority] = useState("");
+
   const [search, setSearch] = useState("");
 
-  const [editingTicket, setEditingTicket] = useState(null);
+  /* =========================================================
+     MODALS
+  ========================================================= */
 
-  const [editStatus, setEditStatus] = useState("");
-  const [editPriority, setEditPriority] = useState("");
+  const [isModalOpen, setIsModalOpen] = useState(false);
 
-  const [deleteTicket, setDeleteTicket] = useState(null);
+  const [selectedTicket, setSelectedTicket] = useState(null);
 
-  const [actionLoading, setActionLoading] = useState(false);
+  const [deleteTicketDetails, setDeleteTicketDetails] = useState(null);
 
   /* =========================================================
      REACT QUERY
   ========================================================= */
 
-  const { data, isLoading, isFetching, isError, error, refetch } =
-    useClientTickets({
-      page,
-      limit,
-      status,
-      priority,
-    });
+  const {
+    tickets,
+    pagination,
 
-  const tickets = data?.data?.tickets || [];
-  const pagination = {
-    page: data?.data?.page || page,
-    limit: data?.data?.limit || limit,
-    total: data?.data?.total || 0,
-    totalPages: data?.data?.totalPages || 1,
-  };
+    isLoading,
+    isFetching,
+    error,
+
+    refetch,
+
+    updateTicket,
+    updateLoading,
+
+    deleteTicket,
+    deleteLoading,
+
+    mutationLoading,
+  } = useClientTickets({
+    page,
+    limit,
+    status,
+    priority,
+  });
+
+  /* =========================================================
+     RESET PAGE WHEN FILTER CHANGES
+  ========================================================= */
+
+  useEffect(() => {
+    setPage(1);
+  }, [status, priority]);
+
+  /* =========================================================
+     SEARCH
+  ========================================================= */
 
   const filteredTickets = tickets.filter((ticket) => {
-    const searchText = search.trim().toLowerCase();
-
-    if (!searchText) {
+    if (!search.trim()) {
       return true;
     }
 
+    const value = search.toLowerCase().trim();
+
     return (
-      ticket?.subject?.toLowerCase().includes(searchText) ||
-      ticket?.title?.toLowerCase().includes(searchText) ||
-      ticket?.description?.toLowerCase().includes(searchText) ||
-      ticket?.status?.toLowerCase().includes(searchText) ||
-      ticket?.priority?.toLowerCase().includes(searchText)
+      ticket.subject?.toLowerCase().includes(value) ||
+      ticket.description?.toLowerCase().includes(value) ||
+      ticket.category?.toLowerCase().includes(value) ||
+      ticket._id?.toLowerCase().includes(value)
     );
   });
 
   /* =========================================================
-     STATUS FILTER
+     ADD TICKET
   ========================================================= */
 
-  const handleStatusChange = (event) => {
-    setStatus(event.target.value);
-    setPage(1);
+  const handleAddTicket = () => {
+    setSelectedTicket(null);
+    setIsModalOpen(true);
   };
 
   /* =========================================================
-     PRIORITY FILTER
+     EDIT TICKET
   ========================================================= */
 
-  const handlePriorityChange = (event) => {
-    setPriority(event.target.value);
-    setPage(1);
+  const handleEditTicket = (ticket) => {
+    setSelectedTicket(ticket);
+    setIsModalOpen(true);
   };
 
   /* =========================================================
-     PAGINATION
+     CLOSE MODAL
   ========================================================= */
 
-  const handlePreviousPage = () => {
-    if (isFetching || page <= 1) {
+  const handleCloseModal = () => {
+    if (updateLoading) {
       return;
     }
 
-    setPage((prev) => prev - 1);
-  };
-
-  const handleNextPage = () => {
-    if (isFetching || page >= pagination.totalPages) {
-      return;
-    }
-
-    setPage((prev) => prev + 1);
-  };
-
-  /* =========================================================
-     REFRESH
-  ========================================================= */
-
-  const handleRefresh = () => {
-    refetch();
-  };
-
-  /* =========================================================
-     EDIT OPEN
-  ========================================================= */
-
-  const handleEdit = (ticket) => {
-    setEditingTicket(ticket);
-
-    setEditStatus(ticket?.status || "open");
-
-    setEditPriority(ticket?.priority || "medium");
-  };
-
-  /* =========================================================
-     CLOSE EDIT MODAL
-  ========================================================= */
-
-  const closeEditModal = () => {
-    if (actionLoading) {
-      return;
-    }
-
-    setEditingTicket(null);
-    setEditStatus("");
-    setEditPriority("");
+    setIsModalOpen(false);
+    setSelectedTicket(null);
   };
 
   /* =========================================================
      UPDATE TICKET
   ========================================================= */
 
-  const handleUpdate = async () => {
-    if (!editingTicket?._id) {
+  const handleSubmit = async (payload) => {
+    if (!selectedTicket?._id) {
       return;
     }
 
     try {
-      setActionLoading(true);
-
-      await updateClientTicketService(editingTicket._id, {
-        status: editStatus,
-        priority: editPriority,
+      await updateTicket({
+        ticketId: selectedTicket._id,
+        payload,
       });
 
-      setEditingTicket(null);
-
-      setEditStatus("");
-      setEditPriority("");
-
-      /*
-       * Current query + all clientTickets queries invalidate honge.
-       */
-      await queryClient.invalidateQueries({
-        queryKey: ["clientTickets"],
-      });
+      setIsModalOpen(false);
+      setSelectedTicket(null);
     } catch (error) {
-      console.error("Ticket update failed:", error);
-
-      alert(
-        error?.response?.data?.message ||
-          error?.message ||
-          "Failed to update ticket",
-      );
-    } finally {
-      setActionLoading(false);
+      console.error("Ticket update error:", error);
     }
   };
 
   /* =========================================================
-     DELETE MODAL OPEN
+     DELETE CLICK
   ========================================================= */
 
-  const handleDelete = (ticket) => {
-    if (!ticket?._id) {
-      return;
-    }
-
-    setDeleteTicket(ticket);
+  const handleDeleteTicket = (ticket) => {
+    setDeleteTicketDetails(ticket);
   };
 
   /* =========================================================
-     CLOSE DELETE MODAL
+     CONFIRM DELETE
   ========================================================= */
 
-  const closeDeleteModal = () => {
-    if (actionLoading) {
-      return;
-    }
-
-    setDeleteTicket(null);
-  };
-
-  /* =========================================================
-     DELETE TICKET
-  ========================================================= */
-
-  const confirmDelete = async () => {
-    if (!deleteTicket?._id) {
+  const handleConfirmDelete = async () => {
+    if (!deleteTicketDetails?._id) {
       return;
     }
 
     try {
-      setActionLoading(true);
+      await deleteTicket(deleteTicketDetails._id);
 
-      await deleteClientTicketService(deleteTicket._id);
-
-      setDeleteTicket(null);
+      setDeleteTicketDetails(null);
 
       /*
-       * Agar current page par sirf ek ticket tha
-       * aur page > 1 hai to previous page par chale jayenge.
+       * Agar current page ka last ticket delete ho gaya
+       * aur page empty hone wala hai to previous page par
+       * move karenge.
        */
+
       if (tickets.length === 1 && page > 1) {
-        setPage((prev) => prev - 1);
+        setPage((previousPage) => previousPage - 1);
       }
-
-      await queryClient.invalidateQueries({
-        queryKey: ["clientTickets"],
-      });
     } catch (error) {
-      console.error("Ticket delete failed:", error);
-
-      alert(
-        error?.response?.data?.message ||
-          error?.message ||
-          "Failed to delete ticket",
-      );
-    } finally {
-      setActionLoading(false);
+      console.error("Ticket delete error:", error);
     }
   };
 
-  if (isLoading) {
-    return (
-      <div className="flex min-h-100 items-center justify-center">
-        <div className="flex items-center gap-3">
-          <Loader2 size={22} className="animate-spin text-blue-600" />
+  /* =========================================================
+     PREVIOUS PAGE
+  ========================================================= */
 
-          <span className="text-sm text-gray-500 dark:text-gray-400">
-            Loading tickets...
-          </span>
-        </div>
-      </div>
-    );
-  }
+  const handlePreviousPage = () => {
+    if (page <= 1 || isFetching) {
+      return;
+    }
 
-  if (isError) {
-    return (
-      <div className="mx-auto mt-6 max-w-7xl px-4">
-        <div className="rounded-xl border border-red-200 bg-red-50 p-5 text-red-600 dark:border-red-500/20 dark:bg-red-500/10 dark:text-red-400">
-          <div className="flex items-center gap-2">
-            <AlertCircle size={18} />
+    setPage((previousPage) => previousPage - 1);
+  };
 
-            <p className="text-sm">
-              {error?.message || "Failed to fetch tickets."}
+  /* =========================================================
+     NEXT PAGE
+  ========================================================= */
+
+  const handleNextPage = () => {
+    if (page >= pagination.totalPages || isFetching) {
+      return;
+    }
+
+    setPage((previousPage) => previousPage + 1);
+  };
+
+  /* =========================================================
+     REFRESH
+  ========================================================= */
+
+  const handleRefresh = async () => {
+    await refetch();
+  };
+
+  /* =========================================================
+     STATUS FILTER
+  ========================================================= */
+
+  const handleStatusChange = (e) => {
+    setStatus(e.target.value);
+  };
+
+  /* =========================================================
+     PRIORITY FILTER
+  ========================================================= */
+
+  const handlePriorityChange = (e) => {
+    setPriority(e.target.value);
+  };
+
+  /* =========================================================
+     ERROR
+  ========================================================= */
+
+  const errorMessage =
+    error?.message || "Something went wrong while fetching tickets.";
+
+  /* =========================================================
+     RENDER
+  ========================================================= */
+
+  return (
+    <div className="min-h-full w-full">
+      <div
+        className="
+          mx-auto
+          w-full
+          max-w-[1600px]
+          px-4
+          py-5
+          sm:px-6
+          lg:px-8
+        "
+      >
+        {/* ===================================================
+            HEADER
+        =================================================== */}
+
+        <div
+          className="
+            flex
+            flex-col
+            gap-4
+            lg:flex-row
+            lg:items-center
+            lg:justify-between
+          "
+        >
+          <div>
+            <h1
+              className="
+                text-xl
+                font-semibold
+                text-gray-900
+                dark:text-white
+              "
+            >
+              Support Tickets
+            </h1>
+
+            <p
+              className="
+                mt-1
+                text-xs
+                text-gray-500
+                dark:text-gray-400
+              "
+            >
+              Manage your support tickets
             </p>
           </div>
 
           <button
             type="button"
-            onClick={handleRefresh}
-            className="mt-4 rounded-lg bg-red-600 px-4 py-2 text-sm font-medium text-white hover:bg-red-700"
+            onClick={handleAddTicket}
+            className="
+              inline-flex
+              items-center
+              justify-center
+              gap-2
+              rounded-lg
+              bg-blue-600
+              px-4
+              py-2.5
+              text-sm
+              font-medium
+              text-white
+              transition
+              hover:bg-blue-700
+            "
           >
-            Try Again
+            <Plus size={17} />
+            Create Ticket
           </button>
         </div>
-      </div>
-    );
-  }
 
-  return (
-    <>
-      <div className="min-h-full w-full bg-transparent text-gray-900 dark:text-white">
-        <div className="mx-auto w-full max-w-7xl px-4 py-5 sm:px-6 lg:px-8">
-          <div className="mb-6 flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
-            <div>
-              <h1 className="text-2xl font-semibold">Tickets</h1>
-              <p className="mt-1 text-sm text-gray-500 dark:text-gray-400">
-                Manage customer support tickets and requests.
-              </p>
-            </div>
+        {/* ===================================================
+            FILTER TOOLBAR
+        =================================================== */}
 
+        <div
+          className="
+            mt-6
+            flex flex-col gap-3
+            rounded-xl
+            border border-gray-200
+            bg-white p-3
+            sm:flex-row
+            sm:items-center
+            sm:justify-between
+            dark:border-white/10
+            dark:bg-[#171b23]
+          "
+        >
+          {/* Search */}
+          <div className="relative w-full sm:max-w-sm">
+            <Search
+              size={16}
+              className="
+                absolute left-3 top-1/2
+                -translate-y-1/2
+                text-gray-400
+              "
+            />
+
+            <input
+              type="text"
+              value={search}
+              onChange={(e) => setSearch(e.target.value)}
+              placeholder="Search tickets..."
+              className="
+                w-full
+                rounded-lg
+                border border-gray-200
+                bg-gray-50
+                py-2.5
+                pl-9
+                pr-3
+                text-sm
+                text-gray-900
+                outline-none
+                transition
+                focus:border-blue-500
+                dark:border-white/10
+                dark:bg-[#0f131a]
+                dark:text-white
+                dark:placeholder:text-gray-500
+              "
+            />
+          </div>
+
+          {/* Filters + Refresh */}
+          <div
+            className="
+              flex
+              w-full
+              flex-col
+              gap-2
+              sm:w-auto
+              sm:flex-row
+              sm:items-center
+            "
+          >
+            {/* Status */}
+            <select
+              value={status}
+              onChange={handleStatusChange}
+              className="
+                w-full
+                rounded-lg
+                border border-gray-200
+                bg-gray-50
+                px-3
+                py-2.5
+                text-sm
+                text-gray-700
+                outline-none
+                transition
+                focus:border-blue-500
+                sm:w-auto
+                dark:border-white/10
+                dark:bg-[#0f131a]
+                dark:text-gray-300
+              "
+            >
+              <option value="">All Status</option>
+              <option value="open">Open</option>
+              <option value="in_progress">In Progress</option>
+              <option value="resolved">Resolved</option>
+              <option value="closed">Closed</option>
+            </select>
+
+            {/* Priority */}
+            <select
+              value={priority}
+              onChange={handlePriorityChange}
+              className="
+                w-full
+                rounded-lg
+                border border-gray-200
+                bg-gray-50
+                px-3
+                py-2.5
+                text-sm
+                text-gray-700
+                outline-none
+                transition
+                focus:border-blue-500
+                sm:w-auto
+                dark:border-white/10
+                dark:bg-[#0f131a]
+                dark:text-gray-300
+              "
+            >
+              <option value="">All Priority</option>
+              <option value="low">Low</option>
+              <option value="medium">Medium</option>
+              <option value="high">High</option>
+            </select>
+
+            {/* Refresh */}
             <button
               type="button"
               onClick={handleRefresh}
               disabled={isFetching}
               className="
                 inline-flex
+                w-full
                 items-center
                 justify-center
                 gap-2
                 rounded-lg
-                border
-                border-gray-200
-                bg-white
-                px-4
+                border border-gray-200
+                px-3
                 py-2.5
-                text-sm
+                text-xs
                 font-medium
-                text-gray-700
-                hover:border-blue-500
-                hover:text-blue-600
+                text-gray-600
+                transition
+                hover:bg-gray-50
                 disabled:cursor-not-allowed
                 disabled:opacity-50
+                sm:w-auto
                 dark:border-white/10
-                dark:bg-[#171b23]
-                dark:text-gray-200
+                dark:text-gray-300
+                dark:hover:bg-white/5
               "
             >
               <RefreshCw
-                size={16}
+                size={15}
                 className={isFetching ? "animate-spin" : ""}
               />
               Refresh
             </button>
           </div>
+        </div>
 
+        {error && (
           <div
             className="
-              mb-5
-              rounded-2xl
+              mt-4
+              rounded-lg
               border
-              border-gray-200
-              bg-white
-              p-4
-              dark:border-white/10
-              dark:bg-[#171b23]
+              border-red-200
+              bg-red-50
+              px-4
+              py-3
+              text-sm
+              text-red-600
+              dark:border-red-500/20
+              dark:bg-red-500/10
+              dark:text-red-400
             "
           >
-            <div className="flex flex-col gap-3 lg:flex-row">
-              {/* SEARCH */}
-
-              <div className="relative flex-1">
-                <Search
-                  size={17}
-                  className="
-                    absolute
-                    left-3
-                    top-1/2
-                    -translate-y-1/2
-                    text-gray-400
-                  "
-                />
-
-                <input
-                  type="text"
-                  value={search}
-                  onChange={(event) => setSearch(event.target.value)}
-                  placeholder="Search tickets..."
-                  className="
-                    w-full
-                    rounded-xl
-                    border
-                    border-gray-200
-                    bg-gray-50
-                    py-2.5
-                    pl-10
-                    pr-4
-                    text-sm
-                    outline-none
-                    focus:border-blue-500
-                    dark:border-white/10
-                    dark:bg-[#0f131b]
-                    dark:text-white
-                  "
-                />
-              </div>
-
-              {/* STATUS */}
-
-              <select
-                value={status}
-                onChange={handleStatusChange}
-                className="
-                  rounded-xl
-                  border
-                  border-gray-200
-                  bg-gray-50
-                  px-3
-                  py-2.5
-                  text-sm
-                  outline-none
-                  focus:border-blue-500
-                  dark:border-white/10
-                  dark:bg-[#0f131b]
-                  dark:text-white
-                  sm:w-44
-                "
-              >
-                <option value="">All Status</option>
-                <option value="open">Open</option>
-                <option value="in_progress">In Progress</option>
-                <option value="resolved">Resolved</option>
-                <option value="closed">Closed</option>
-              </select>
-
-              {/* PRIORITY */}
-
-              <select
-                value={priority}
-                onChange={handlePriorityChange}
-                className="
-                  rounded-xl
-                  border
-                  border-gray-200
-                  bg-gray-50
-                  px-3
-                  py-2.5
-                  text-sm
-                  outline-none
-                  focus:border-blue-500
-                  dark:border-white/10
-                  dark:bg-[#0f131b]
-                  dark:text-white
-                  sm:w-44
-                "
-              >
-                <option value="">All Priority</option>
-                <option value="low">Low</option>
-                <option value="medium">Medium</option>
-                <option value="high">High</option>
-              </select>
-            </div>
+            {errorMessage}
           </div>
+        )}
 
-          
-          <div className="mt-4">
-            <TicketTable
-              tickets={filteredTickets}
-              loading={isLoading}
-              onEdit={handleEdit}
-              onDelete={handleDelete}
-            />
-          </div>
-          <Pagination
-            page={pagination.page}
-            totalPages={pagination.totalPages}
-            total={pagination.total}
-            currentCount={tickets.length}
-            isFetching={isFetching}
-            itemName="tickets"
-            onPrevious={() => {
-              setPage((prev) => Math.max(prev - 1, 1));
-            }}
-            onNext={() => {
-              setPage((prev) => Math.min(prev + 1, pagination.totalPages));
-            }}
+        {/* ===================================================
+            TABLE
+        =================================================== */}
+
+        <div className="mt-4">
+          <TicketTable
+            tickets={filteredTickets}
+            loading={isLoading && !tickets.length}
+            onEdit={handleEditTicket}
+            onDelete={handleDeleteTicket}
           />
         </div>
+
+        {/* ===================================================
+            PAGINATION
+        =================================================== */}
+
+        <Pagination
+          page={pagination.page}
+          totalPages={pagination.totalPages}
+          total={pagination.total}
+          currentCount={filteredTickets.length}
+          isFetching={isFetching}
+          onPrevious={handlePreviousPage}
+          onNext={handleNextPage}
+        />
       </div>
 
-      {editingTicket && (
-        <div
-          className="
-            fixed
-            inset-0
-            z-100
-            flex
-            items-center
-            justify-center
-            bg-black/50
-            px-4
-            backdrop-blur-sm
-          "
-          onMouseDown={(event) => {
-            if (event.target === event.currentTarget && !actionLoading) {
-              closeEditModal();
-            }
-          }}
-        >
-          <div
-            className="
-              w-full
-              max-w-md
-              rounded-2xl
-              border
-              border-gray-200
-              bg-white
-              p-6
-              shadow-2xl
-              dark:border-white/10
-              dark:bg-[#171b23]
-            "
-            onMouseDown={(event) => event.stopPropagation()}
-          >
-            {/* HEADER */}
+      {/* =====================================================
+          EDIT TICKET MODAL
+      ===================================================== */}
 
-            <div className="flex items-center justify-between">
-              <div>
-                <h2 className="text-lg font-semibold">Edit Ticket</h2>
+      <TicketModal
+        isOpen={isModalOpen}
+        onClose={handleCloseModal}
+        onSubmit={handleSubmit}
+        ticket={selectedTicket}
+        loading={updateLoading}
+      />
 
-                <p className="mt-1 text-sm text-gray-500 dark:text-gray-400">
-                  Update ticket status and priority.
-                </p>
-              </div>
-
-              <button
-                type="button"
-                onClick={closeEditModal}
-                disabled={actionLoading}
-                className="
-                  rounded-lg
-                  p-2
-                  text-gray-500
-                  hover:bg-gray-100
-                  dark:text-gray-400
-                  dark:hover:bg-white/10
-                "
-              >
-                <X size={18} />
-              </button>
-            </div>
-
-            {/* STATUS */}
-
-            <div className="mt-5">
-              <label className="mb-2 block text-sm font-medium">Status</label>
-
-              <select
-                value={editStatus}
-                onChange={(event) => setEditStatus(event.target.value)}
-                className="
-                  w-full
-                  rounded-xl
-                  border
-                  border-gray-200
-                  bg-white
-                  px-4
-                  py-3
-                  text-sm
-                  outline-none
-                  focus:border-blue-500
-                  dark:border-white/10
-                  dark:bg-[#0f131b]
-                  dark:text-white
-                "
-              >
-                <option value="open">Open</option>
-                <option value="in_progress">In Progress</option>
-                <option value="resolved">Resolved</option>
-                <option value="closed">Closed</option>
-              </select>
-            </div>
-
-            {/* PRIORITY */}
-
-            <div className="mt-4">
-              <label className="mb-2 block text-sm font-medium">Priority</label>
-
-              <select
-                value={editPriority}
-                onChange={(event) => setEditPriority(event.target.value)}
-                className="
-                  w-full
-                  rounded-xl
-                  border
-                  border-gray-200
-                  bg-white
-                  px-4
-                  py-3
-                  text-sm
-                  outline-none
-                  focus:border-blue-500
-                  dark:border-white/10
-                  dark:bg-[#0f131b]
-                  dark:text-white
-                "
-              >
-                <option value="low">Low</option>
-                <option value="medium">Medium</option>
-                <option value="high">High</option>
-              </select>
-            </div>
-
-            {/* BUTTONS */}
-
-            <div className="mt-6 flex justify-end gap-3">
-              <button
-                type="button"
-                onClick={closeEditModal}
-                disabled={actionLoading}
-                className="
-                  rounded-xl
-                  border
-                  border-gray-200
-                  px-5
-                  py-2.5
-                  text-sm
-                  font-medium
-                  text-gray-700
-                  hover:bg-gray-50
-                  disabled:opacity-50
-                  dark:border-white/10
-                  dark:text-gray-300
-                  dark:hover:bg-white/5
-                "
-              >
-                Cancel
-              </button>
-
-              <button
-                type="button"
-                onClick={handleUpdate}
-                disabled={actionLoading}
-                className="
-                  inline-flex
-                  items-center
-                  gap-2
-                  rounded-xl
-                  bg-blue-600
-                  px-5
-                  py-2.5
-                  text-sm
-                  font-medium
-                  text-white
-                  hover:bg-blue-700
-                  disabled:cursor-not-allowed
-                  disabled:opacity-60
-                "
-              >
-                {actionLoading && (
-                  <Loader2 size={16} className="animate-spin" />
-                )}
-
-                {actionLoading ? "Updating..." : "Update"}
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
+      {/* =====================================================
+          DELETE CONFIRMATION
+      ===================================================== */}
 
       <ConfirmModal
-        isOpen={Boolean(deleteTicket)}
+        isOpen={Boolean(deleteTicketDetails)}
         title="Delete Ticket"
         message={
           <>
             Are you sure you want to delete{" "}
-            <strong>
-              {deleteTicket?.subject || deleteTicket?.title || "this ticket"}
-            </strong>
+            <strong>{deleteTicketDetails?.subject || "this ticket"}</strong>
             ?
             <br />
             <span className="text-xs">This action cannot be undone.</span>
@@ -665,71 +556,14 @@ export default function ClientTickets() {
         }
         confirmText="Delete"
         cancelText="Cancel"
-        loading={actionLoading}
-        onCancel={closeDeleteModal}
-        onConfirm={confirmDelete}
+        loading={deleteLoading}
+        onCancel={() => {
+          if (!deleteLoading) {
+            setDeleteTicketDetails(null);
+          }
+        }}
+        onConfirm={handleConfirmDelete}
       />
-    </>
-  );
-}
-
-function StatusBadge({ status }) {
-  const normalizedStatus = status?.toLowerCase();
-  let classes = "bg-gray-500/10 text-gray-600 dark:text-gray-400";
-  if (normalizedStatus === "open") {
-    classes = "bg-blue-500/10 text-blue-600 dark:text-blue-400";
-  }
-  if (normalizedStatus === "in_progress" || normalizedStatus === "pending") {
-    classes = "bg-yellow-500/10 text-yellow-600 dark:text-yellow-400";
-  }
-  if (normalizedStatus === "resolved") {
-    classes = "bg-green-500/10 text-green-600 dark:text-green-400";
-  }
-  if (normalizedStatus === "closed") {
-    classes = "bg-red-500/10 text-red-600 dark:text-red-400";
-  }
-  return (
-    <span
-      className={`
-        inline-flex
-        rounded-full
-        px-2.5
-        py-1
-        text-[11px]
-        font-medium
-        ${classes}
-      `}
-    >
-      {status || "Unknown"}
-    </span>
-  );
-}
-
-function PriorityBadge({ priority }) {
-  const normalizedPriority = priority?.toLowerCase();
-  let classes = "bg-gray-500/10 text-gray-600 dark:text-gray-400";
-  if (normalizedPriority === "low") {
-    classes = "bg-green-500/10 text-green-600 dark:text-green-400";
-  }
-  if (normalizedPriority === "medium") {
-    classes = "bg-yellow-500/10 text-yellow-600 dark:text-yellow-400";
-  }
-  if (normalizedPriority === "high") {
-    classes = "bg-red-500/10 text-red-600 dark:text-red-400";
-  }
-  return (
-    <span
-      className={`
-        inline-flex
-        rounded-full
-        px-2.5
-        py-1
-        text-[11px]
-        font-medium
-        ${classes}
-      `}
-    >
-      {priority || "Unknown"}
-    </span>
+    </div>
   );
 }

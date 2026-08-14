@@ -27,22 +27,6 @@ const useFAQs = ({ clientId, page = 1, limit = 10, search = "" } = {}) => {
       if (response?.data?.success === false) {
         throw new Error(response?.data?.message || "Failed to fetch FAQs");
       }
-
-      /*
-        Expected backend response:
-
-        {
-          success: true,
-          data: {
-            faqs: [],
-            total: 20,
-            page: 1,
-            limit: 10,
-            totalPages: 2
-          }
-        }
-      */
-
       return response?.data?.data;
     },
 

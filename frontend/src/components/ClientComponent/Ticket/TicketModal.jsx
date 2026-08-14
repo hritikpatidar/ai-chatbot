@@ -47,11 +47,8 @@ export default function TicketModal({
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-
     if (!formData.subject.trim()) return;
-
     if (!formData.description.trim()) return;
-
     await onSubmit?.(formData);
   };
 
@@ -84,7 +81,7 @@ export default function TicketModal({
       className="
         fixed
         inset-0
-        z-[100]
+        z-100
         flex
         items-center
         justify-center
@@ -318,7 +315,6 @@ export default function TicketModal({
                   <option value="low">Low</option>
                   <option value="medium">Medium</option>
                   <option value="high">High</option>
-                  <option value="urgent">Urgent</option>
                 </select>
               </div>
             </div>
@@ -372,7 +368,7 @@ export default function TicketModal({
               sm:flex-row
               sm:justify-end
               dark:border-white/10
-              dark:bg-white/[0.02]
+              dark:bg-white/2
             "
           >
             <button

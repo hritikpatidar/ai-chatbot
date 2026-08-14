@@ -8,13 +8,36 @@ export const findProductById = async (productId) => {
   return await Product.findById(productId);
 };
 
-export const getClientProducts = async (clientId) => {
-  return await Product.find({
+export const getClientProducts = async ({
+  clientId,
+  page = 1,
+  limit = 10,
+}) => {
+  const filter = {
     clientId,
     status: "active",
-  }).sort({
-    createdAt: -1,
-  });
+  };
+
+  const skip = (page - 1) * limit;
+
+  const [products, total] = await Promise.all([
+    Product.find(filter)
+      .sort({
+        createdAt: -1,
+      })
+      .skip(skip)
+      .limit(limit),
+
+    Product.countDocuments(filter),
+  ]);
+
+  return {
+    products,
+    total,
+    page,
+    limit,
+    totalPages: Math.ceil(total / limit),
+  };
 };
 
 export const searchClientProducts = async (clientId, searchText, limit = 5) => {

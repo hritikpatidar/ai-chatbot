@@ -115,6 +115,7 @@ export const getUserTickets = async (req, res, next) => {
 export const getClientTickets = async (req, res, next) => {
   try {
     const clientId = req.user?.id;
+
     if (!clientId) {
       return res.status(400).json({
         success: false,
@@ -122,11 +123,16 @@ export const getClientTickets = async (req, res, next) => {
       });
     }
 
-    const { page = 1, limit = 10, status, priority } = req.query;
+    const page = Math.max(Number(req.query.page) || 1, 1);
+
+    const limit = Math.min(Math.max(Number(req.query.limit) || 10, 1), 100);
+
+    const { status, priority } = req.query;
+
     const result = await ticketService.getClientTicketsService({
       clientId,
-      page: Number(page),
-      limit: Number(limit),
+      page,
+      limit,
       status,
       priority,
     });

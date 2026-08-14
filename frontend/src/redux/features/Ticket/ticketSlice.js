@@ -6,10 +6,7 @@ import {
 } from "../../../service/Client/ticketServices";
 
 const initialState = {
-  tickets: [],
   selectedTicket: null,
-
-  loading: false,
   updateLoading: false,
   deleteLoading: false,
 
@@ -21,33 +18,6 @@ const initialState = {
 
   message: "",
 };
-
-/* =========================================================
-   GET CLIENT TICKETS
-========================================================= */
-
-export const getClientTickets = createAsyncThunk(
-  "ticket/getClientTickets",
-  async (_, { rejectWithValue }) => {
-    try {
-      const response = await getClientTicketsService();
-
-      if (response?.data?.success === false) {
-        return rejectWithValue(
-          response?.data?.message || "Failed to fetch tickets",
-        );
-      }
-
-      return response?.data;
-    } catch (error) {
-      return rejectWithValue(
-        error?.response?.data?.message ||
-          error?.message ||
-          "Failed to fetch tickets",
-      );
-    }
-  },
-);
 
 /* =========================================================
    UPDATE CLIENT TICKET
@@ -137,31 +107,6 @@ const ticketSlice = createSlice({
 
   extraReducers: (builder) => {
     builder
-
-      /* =====================================================
-         GET CLIENT TICKETS
-      ===================================================== */
-
-      .addCase(getClientTickets.pending, (state) => {
-        state.loading = true;
-        state.error = null;
-        state.success = false;
-      })
-
-      .addCase(getClientTickets.fulfilled, (state, action) => {
-        debugger;
-        state.loading = false;
-        state.success = true;
-        state.error = null;
-        state.tickets = action.payload?.data?.tickets || [];
-      })
-
-      .addCase(getClientTickets.rejected, (state, action) => {
-        state.loading = false;
-        state.success = false;
-        state.error = action.payload || "Failed to fetch tickets";
-      })
-
       /* =====================================================
          UPDATE CLIENT TICKET
       ===================================================== */

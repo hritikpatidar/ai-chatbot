@@ -38,7 +38,6 @@ export const createAITicketService = async ({
   return ticket;
 };
 
-
 export const getTicketService = async (ticketId) => {
   const ticket = await findTicketById(ticketId);
 
@@ -81,33 +80,25 @@ export const getClientTicketsService = async ({
   });
 };
 
-
 export const updateUserTicketService = async ({ ticketId, userId, data }) => {
   const ticket = await findTicketByIdAndUser(ticketId, userId);
 
   if (!ticket) {
     throw new Error("Ticket not found or unauthorized");
   }
-
   const allowedData = {};
-
   if (data.subject !== undefined) {
     allowedData.subject = data.subject;
   }
-
   if (data.description !== undefined) {
     allowedData.description = data.description;
   }
-
   if (data.priority !== undefined) {
     allowedData.priority = data.priority;
   }
-
   const updatedTicket = await updateTicketById(ticketId, allowedData);
-
   return updatedTicket;
 };
-
 
 export const updateClientTicketService = async ({
   ticketId,
@@ -140,7 +131,6 @@ export const updateClientTicketService = async ({
 
   return await updateTicketById(ticketId, allowedData);
 };
-
 
 export const deleteUserTicketService = async ({ ticketId, userId }) => {
   const ticket = await findTicketByIdAndUser(ticketId, userId);

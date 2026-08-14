@@ -109,14 +109,10 @@ export const findTicketsByClient = async ({
 };
 
 export const updateTicketById = async (ticketId, updateData) => {
-  return await Ticket.findByIdAndUpdate(
-    ticketId,
-    updateData,
-    {
-      returnDocument: "after",
-      runValidators: true,
-    },
-  )
+  return await Ticket.findByIdAndUpdate(ticketId, updateData, {
+    returnDocument: "after",
+    runValidators: true,
+  })
     .populate("userId", "fullName email")
     .populate("clientId", "businessName clientKey")
     .populate("conversationId")

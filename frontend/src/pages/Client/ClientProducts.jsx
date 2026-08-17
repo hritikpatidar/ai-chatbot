@@ -1,5 +1,12 @@
-import { useMemo, useState } from "react";
-import { Plus, Search, Package, RefreshCw } from "lucide-react";
+import { useEffect, useMemo, useState } from "react";
+import {
+  Plus,
+  Search,
+  Package,
+  RefreshCw,
+  AlertCircle,
+  CheckCircle2,
+} from "lucide-react";
 import { useSelector } from "react-redux";
 
 import ProductTable from "../../components/ClientComponent/Product/ProductTable";
@@ -19,6 +26,8 @@ export default function ClientProducts() {
   const [search, setSearch] = useState("");
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [selectedProduct, setSelectedProduct] = useState(null);
+  const [successMessage, setSuccessMessage] = useState("");
+
   const [deleteProductDetails, setDeleteProductDetails] = useState(null);
   const {
     products,
@@ -41,6 +50,16 @@ export default function ClientProducts() {
     page,
     limit,
   });
+
+  useEffect(() => {
+    if (!successMessage) return;
+
+    const timer = setTimeout(() => {
+      setSuccessMessage("");
+    }, 3000);
+
+    return () => clearTimeout(timer);
+  }, [successMessage]);
 
   const filteredProducts = useMemo(() => {
     if (!search.trim()) {
@@ -85,11 +104,13 @@ export default function ClientProducts() {
           productId: selectedProduct._id,
           data: payload,
         });
+        setSuccessMessage("Product updated successfully.");
       } else {
         await createProduct({
           clientId: client.businessId,
           data: payload,
         });
+        setSuccessMessage("Product added successfully.");
       }
       setIsModalOpen(false);
       setSelectedProduct(null);
@@ -110,6 +131,7 @@ export default function ClientProducts() {
     try {
       await deleteProduct(deleteProductDetails._id);
       setDeleteProductDetails(null);
+      setSuccessMessage("Product delete successfully.");
     } catch (error) {
       console.error("Product delete error:", error);
     }
@@ -132,6 +154,63 @@ export default function ClientProducts() {
   return (
     <div className="min-h-full w-full">
       <div className="mx-auto w-full max-w-[1600px] px-4 py-5 sm:px-6 lg:px-8">
+        {successMessage && (
+          <div
+            className="
+                      mb-5
+                      flex
+                      items-center
+                      gap-3
+                      rounded-xl
+                      border
+                      border-green-200
+                      bg-green-50
+                      px-4
+                      py-3
+                      text-sm
+                      text-green-700
+        
+                      dark:border-green-500/20
+                      dark:bg-green-500/10
+                      dark:text-green-400
+                    "
+          >
+            <CheckCircle2 size={18} className="shrink-0" />
+
+            <span>{successMessage}</span>
+          </div>
+        )}
+
+        {error && (
+          <div
+            className="
+                      mb-5
+                      flex
+                      items-center
+                      gap-3
+                      rounded-xl
+                      border
+                      border-red-200
+                      bg-red-50
+                      px-4
+                      py-3
+                      text-sm
+                      text-red-600
+        
+                      dark:border-red-500/20
+                      dark:bg-red-500/10
+                      dark:text-red-400
+                    "
+          >
+            <AlertCircle size={18} className="shrink-0" />
+
+            <span>
+              {typeof error === "string"
+                ? error
+                : error?.message || "Something went wrong."}
+            </span>
+          </div>
+        )}
         <div
           className="
             flex flex-col gap-4

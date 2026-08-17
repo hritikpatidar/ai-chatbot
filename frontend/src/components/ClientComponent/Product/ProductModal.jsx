@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
 import { X, Package } from "lucide-react";
+import CustomSelect from "../../common/CustomSelect";
 
 const initialForm = {
   name: "",
@@ -181,17 +182,33 @@ export default function ProductModal({
               </FormField>
 
               <FormField label="Currency">
-                <select
+                <CustomSelect
+                  size="sm"
+                  // label="Response Tone"
                   name="currency"
                   value={form.currency}
                   onChange={handleChange}
-                  className="input-style"
-                >
-                  <option value="INR">INR</option>
-                  <option value="USD">USD</option>
-                  <option value="GBP">GBP</option>
-                  <option value="EUR">EUR</option>
-                </select>
+                  options={[
+                    {
+                      value: "INR",
+                      label: "INR",
+                    },
+                    {
+                      value: "USD",
+                      label: "USD",
+                    },
+                    {
+                      value: "GBP",
+                      label: "GBP",
+                    },
+                    {
+                      value: "EUR",
+                      label: "EUR",
+                    },
+                  ]}
+                  rounded="rounded-lg"
+                  // className={}
+                />
               </FormField>
             </div>
 
@@ -227,32 +244,55 @@ export default function ProductModal({
             {/* Availability + Status */}
             <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
               <FormField label="Availability">
-                <select
+                <CustomSelect
+                  size="sm"
+                  // label="Response Tone"
                   name="availability"
                   value={form.availability}
                   onChange={handleChange}
-                  className="input-style"
-                >
-                  <option value="in_stock">In Stock</option>
-
-                  <option value="out_of_stock">Out of Stock</option>
-
-                  <option value="pre_order">Pre Order</option>
-
-                  <option value="unavailable">Unavailable</option>
-                </select>
+                  options={[
+                    {
+                      value: "in_stock",
+                      label: "In Stock",
+                    },
+                    {
+                      value: "out_of_stock",
+                      label: "Out of Stock",
+                    },
+                    {
+                      value: "pre_order",
+                      label: "Pre Order",
+                    },
+                    {
+                      value: "unavailable",
+                      label: "Unavailable",
+                    },
+                  ]}
+                  rounded="rounded-lg"
+                  // className={}
+                />
               </FormField>
 
               <FormField label="Status">
-                <select
+                <CustomSelect
+                  size="sm"
+                  // label="Response Tone"
                   name="status"
                   value={form.status}
                   onChange={handleChange}
-                  className="input-style"
-                >
-                  <option value="active">Active</option>
-                  <option value="inactive">Inactive</option>
-                </select>
+                  options={[
+                    {
+                      value: "active",
+                      label: "Active",
+                    },
+                    {
+                      value: "inactive",
+                      label: "Inactive",
+                    },
+                  ]}
+                  rounded="rounded-lg"
+                  // className={}
+                />
               </FormField>
             </div>
 

@@ -8,6 +8,7 @@ import ConfirmModal from "../../components/ClientComponent/ConfirmModal";
 import Pagination from "../../components/common/Pagination";
 
 import useClientTickets from "../../hooks/Client/useClientTickets";
+import CustomSelect from "../../components/common/CustomSelect";
 
 export default function ClientTickets() {
   /* =========================================================
@@ -383,37 +384,30 @@ export default function ClientTickets() {
               sm:items-center
             "
           >
-            {/* Status */}
-            <select
+            <CustomSelect
+              size="sm"
+              rounded="rounded-lg"
               value={status}
               onChange={handleStatusChange}
+              placeholder="All Status"
+              options={[
+                { value: "", label: "All Status" },
+                { value: "open", label: "Open" },
+                { value: "in_progress", label: "In Progress" },
+                { value: "resolved", label: "Resolved" },
+                { value: "closed", label: "Closed" },
+              ]}
               className="
                 w-full
-                rounded-lg
-                border border-gray-200
-                bg-gray-50
-                px-3
-                py-2.5
-                text-sm
-                text-gray-700
-                outline-none
-                transition
-                focus:border-blue-500
                 sm:w-auto
                 dark:border-white/10
                 dark:bg-[#0f131a]
                 dark:text-gray-300
               "
-            >
-              <option value="">All Status</option>
-              <option value="open">Open</option>
-              <option value="in_progress">In Progress</option>
-              <option value="resolved">Resolved</option>
-              <option value="closed">Closed</option>
-            </select>
+            />
 
             {/* Priority */}
-            <select
+            {/* <select
               value={priority}
               onChange={handlePriorityChange}
               className="
@@ -438,7 +432,28 @@ export default function ClientTickets() {
               <option value="low">Low</option>
               <option value="medium">Medium</option>
               <option value="high">High</option>
-            </select>
+            </select> */}
+            <CustomSelect
+              size="sm"
+              rounded="rounded-lg"
+              value={priority}
+              onChange={handlePriorityChange}
+              placeholder="All Priority"
+              options={[
+                { value: "", label: "All Priority" },
+                { value: "low", label: "Low" },
+                { value: "medium", label: "Medium" },
+                { value: "high", label: "High" },
+                { value: "urgent", label: "Urgent" },
+              ]}
+              className="
+                w-full
+                sm:w-auto
+                dark:border-white/10
+                dark:bg-[#0f131a]
+                dark:text-gray-300
+              "
+            />
 
             {/* Refresh */}
             <button

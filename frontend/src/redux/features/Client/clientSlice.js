@@ -52,9 +52,9 @@ export const getClientById = createAsyncThunk(
 // Update Client
 export const updateClient = createAsyncThunk(
   "admin/updateClient",
-  async ({ clientId, payload }, { rejectWithValue }) => {
+  async ({ clientId, data }, { rejectWithValue }) => {
     try {
-      const response = await updateClientService(clientId, payload);
+      const response = await updateClientService(clientId, data);
 
       return response.data;
     } catch (error) {

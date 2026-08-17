@@ -4,8 +4,8 @@ import app from "./app.js";
 import connectDB from "./config/db.js";
 import { connectRedis } from "./config/redis.js";
 import env from "./config/env.js";
-import { initializeSocket } from "./socket/index.js";
 import { socketHandler } from "./socket/socketHandler.js";
+import { initializeSocket } from "./config/socket.js";
 
 
 const PORT = env.PORT || 5000;

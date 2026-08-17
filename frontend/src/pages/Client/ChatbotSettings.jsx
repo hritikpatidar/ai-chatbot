@@ -2,10 +2,11 @@ import { useEffect, useState } from "react";
 import { Bot, Save, RotateCcw, CheckCircle2, AlertCircle } from "lucide-react";
 import { useDispatch, useSelector } from "react-redux";
 import { updateClient } from "../../redux/features/Client/clientSlice";
+import CustomSelect from "../../components/common/CustomSelect";
 
 export default function ChatbotSettings() {
   const dispatch = useDispatch();
-  const { client, loading, error } = useSelector(
+  const { client, clientLoading, error } = useSelector(
     (state) => state?.ClientReducer?.clientSlice || {},
   );
   const [formData, setFormData] = useState({
@@ -40,7 +41,6 @@ export default function ChatbotSettings() {
 
   const handleChange = (e) => {
     const { name, value } = e.target;
-
     setFormData((prev) => ({
       ...prev,
       [name]: value,
@@ -51,13 +51,13 @@ export default function ChatbotSettings() {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    if (!client?._id) {
+    if (!client?.businessId) {
       return;
     }
     try {
       const result = await dispatch(
         updateClient({
-          clientId: client._id,
+          clientId: client.businessId,
           data: {
             chatbot: formData,
           },
@@ -84,31 +84,7 @@ export default function ChatbotSettings() {
     setSuccessMessage("");
   };
 
-  const inputClass = `
-    w-full
-    rounded-xl
-    border
-    border-gray-200
-    bg-white
-    px-4
-    py-3
-    text-sm
-    text-gray-900
-    outline-none
-    transition-all
-    duration-200
-    placeholder:text-gray-400
-    focus:border-blue-500
-    focus:ring-2
-    focus:ring-blue-500/10
-
-    dark:border-white/10
-    dark:bg-[#171b23]
-    dark:text-white
-    dark:placeholder:text-gray-500
-  `;
-
-  if (!client?._id) {
+  if (!client?.businessId) {
     return (
       <div className="flex min-h-100 items-center justify-center px-4">
         <div className="text-center">
@@ -271,7 +247,7 @@ export default function ChatbotSettings() {
                     value={formData.name}
                     onChange={handleChange}
                     placeholder="AI Assistant"
-                    className={inputClass}
+                    className="input-style"
                   />
                 </div>
 
@@ -291,20 +267,29 @@ export default function ChatbotSettings() {
                   >
                     Language
                   </label>
-
-                  <select
-                    id="language"
+                  <CustomSelect
+                    size="sm"
+                    rounded="rounded-lg"
+                    // label="Language"
                     name="language"
                     value={formData.language}
                     onChange={handleChange}
-                    className={inputClass}
-                  >
-                    <option value="english">English</option>
-
-                    <option value="hindi">Hindi</option>
-
-                    <option value="hinglish">Hinglish</option>
-                  </select>
+                    required
+                    options={[
+                      {
+                        value: "english",
+                        label: "English",
+                      },
+                      {
+                        value: "hindi",
+                        label: "Hindi",
+                      },
+                      {
+                        value: "hinglish",
+                        label: "Hinglish",
+                      },
+                    ]}
+                  />
                 </div>
 
                 {/* Tone */}
@@ -324,21 +309,33 @@ export default function ChatbotSettings() {
                     Response Tone
                   </label>
 
-                  <select
-                    id="tone"
+                  <CustomSelect
+                    size="sm"
+                    rounded="rounded-lg"
+                    // label="Response Tone"
                     name="tone"
                     value={formData.tone}
                     onChange={handleChange}
-                    className={inputClass}
-                  >
-                    <option value="friendly">Friendly</option>
-
-                    <option value="professional">Professional</option>
-
-                    <option value="casual">Casual</option>
-
-                    <option value="formal">Formal</option>
-                  </select>
+                    options={[
+                      {
+                        value: "friendly",
+                        label: "Friendly",
+                      },
+                      {
+                        value: "professional",
+                        label: "Professional",
+                      },
+                      {
+                        value: "casual",
+                        label: "Casual",
+                      },
+                      {
+                        value: "formal",
+                        label: "Formal",
+                      },
+                    ]}
+                    // className={}
+                  />
                 </div>
               </div>
             </div>
@@ -360,7 +357,7 @@ export default function ChatbotSettings() {
                 onChange={handleChange}
                 rows={4}
                 placeholder="Hi 👋 Welcome! How can I help you today?"
-                className={inputClass}
+                className="input-style"
               />
 
               <div className="mt-2 flex justify-end">
@@ -388,7 +385,7 @@ export default function ChatbotSettings() {
                 onChange={handleChange}
                 rows={7}
                 placeholder="Always be polite. Help users with products, pricing, availability and delivery related questions..."
-                className={inputClass}
+                className="input-style"
               />
 
               <div className="mt-2 flex flex-col gap-1 text-[11px] text-gray-500 dark:text-gray-400 sm:flex-row sm:items-center sm:justify-between">
@@ -420,7 +417,7 @@ export default function ChatbotSettings() {
               <button
                 type="button"
                 onClick={handleReset}
-                disabled={loading}
+                disabled={clientLoading}
                 className="
                   inline-flex
                   items-center
@@ -452,7 +449,7 @@ export default function ChatbotSettings() {
 
               <button
                 type="submit"
-                disabled={loading}
+                disabled={clientLoading}
                 className="
                   inline-flex
                   items-center
@@ -477,7 +474,7 @@ export default function ChatbotSettings() {
               >
                 <Save size={16} />
 
-                {loading ? "Saving..." : "Save Changes"}
+                {clientLoading ? "Saving..." : "Save Changes"}
               </button>
             </div>
           </div>

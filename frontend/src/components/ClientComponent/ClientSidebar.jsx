@@ -4,17 +4,17 @@ import {
   LayoutDashboard,
   Package,
   HelpCircle,
-  Settings,
   Building2,
   Bot,
   LogOut,
   X,
-  Menu,
   Ticket,
 } from "lucide-react";
 
 import { handleLogout } from "../../utils/logout";
 import { useState } from "react";
+import { getImageUrl } from "../../utils/imageUrl";
+import profile from "../../assets/profile1.jpg";
 
 export default function ClientSidebar({ mobileOpen, setMobileOpen }) {
   const dispatch = useDispatch();
@@ -193,7 +193,7 @@ export default function ClientSidebar({ mobileOpen, setMobileOpen }) {
             >
               {profileDetails?.profileImage ? (
                 <img
-                  src={profileDetails.profileImage}
+                  src={getImageUrl(profileDetails?.profileImage, profile)}
                   alt="Profile"
                   className="h-full w-full object-cover"
                 />

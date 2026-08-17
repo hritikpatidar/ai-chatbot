@@ -1,5 +1,5 @@
 import { Server } from "socket.io";
-import env from "../config/env.js";
+import env from "./env.js";
 import { socketMiddleware } from "../middlewares/socketMiddleware.js";
 
 let io;

@@ -2,6 +2,8 @@ import { useSelector } from "react-redux";
 import { Menu, Bell, Sun, Moon, User } from "lucide-react";
 
 import { useTheme } from "../../context/ThemeContext";
+import profile from "../../assets/profile1.jpg";
+import { getImageUrl } from "../../utils/imageUrl";
 
 export default function ClientHeader({ onMenuClick }) {
   const { profileDetails } = useSelector(
@@ -166,7 +168,7 @@ export default function ClientHeader({ onMenuClick }) {
           >
             {profileDetails?.profileImage ? (
               <img
-                src={profileDetails.profileImage}
+                src={getImageUrl(profileDetails?.profileImage, profile)}
                 alt="Profile"
                 className="h-full w-full object-cover"
               />

@@ -152,6 +152,13 @@ export default function ClientDashboard() {
               />
 
               <QuickAction
+                title="Manage Tickets"
+                description="Resolve your tickets"
+                icon={HelpCircle}
+                onClick={() => navigate("/client/tickets")}
+              />
+
+              <QuickAction
                 title="Chatbot Settings"
                 description="Configure your AI chatbot"
                 icon={Bot}

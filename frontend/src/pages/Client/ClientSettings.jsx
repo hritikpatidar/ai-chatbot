@@ -14,6 +14,8 @@ import { logoutSuccess } from "../../redux/features/Auth/authSlice";
 import { useNavigate } from "react-router-dom";
 import { useState } from "react";
 import ConfirmModal from "../../components/ClientComponent/ConfirmModal";
+import { getImageUrl } from "../../utils/imageUrl";
+import profile from "../../assets/profile1.jpg";
 
 export default function ClientSettings() {
   const dispatch = useDispatch();
@@ -49,7 +51,7 @@ export default function ClientSettings() {
     }
   };
 
-  const adminName = profileDetails?.fullName || "Admin";
+  const adminName = profileDetails?.fullName || "Client";
   const adminEmail = profileDetails?.email || "No email available";
   const adminRole = profileDetails?.role || "client";
 
@@ -96,7 +98,7 @@ export default function ClientSettings() {
                   dark:text-white
                 "
               >
-                Admin Settings
+                Settings
               </h1>
               <p
                 className="
@@ -166,7 +168,15 @@ export default function ClientSettings() {
                   text-white
                 "
               >
-                {adminName?.charAt(0)?.toUpperCase()}
+                {profileDetails?.profileImage ? (
+                  <img
+                    src={getImageUrl(profileDetails?.profileImage, profile)}
+                    alt="Profile"
+                    className="h-full w-full rounded-xl object-cover"
+                  />
+                ) : (
+                  adminName?.charAt(0)?.toUpperCase() || "A"
+                )}
               </div>
               <div className="min-w-0 flex-1">
                 <h3
@@ -537,7 +547,7 @@ export default function ClientSettings() {
             <button
               type="button"
               onClick={() => setDeleteModalOpen(true)}
-              disabled={loading}
+              disabled={deleteModalOpen}
               className="
                 mt-5
                 inline-flex
@@ -572,7 +582,7 @@ export default function ClientSettings() {
         </div>
         <ConfirmModal
           isOpen={deleteModalOpen}
-          onClose={() => {
+          onCancel={() => {
             if (!loading) {
               setDeleteModalOpen(false);
             }
@@ -588,7 +598,7 @@ export default function ClientSettings() {
 
         <div className="py-6 text-center">
           <p className="text-xs text-gray-400 dark:text-gray-500">
-            AI Chatbot Admin Panel
+            AI Chatbot Client Panel
           </p>
         </div>
       </div>

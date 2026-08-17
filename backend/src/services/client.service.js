@@ -89,5 +89,29 @@ export const updateClientService = async (clientId, updateData) => {
     throw error;
   }
 
-  return client;
+  const user = await findClientUserByClientId(client._id);
+  const [productCount, faqCount] = await Promise.all([
+    getProductCountByClientId(client._id),
+    getFaqCountByClientId(client._id),
+  ]);
+
+  return {
+    productCount,
+    faqCount,
+    businessName: client.businessName,
+    businessType: client.businessType,
+    businessDescription: client.businessDescription,
+    clientKey: client.clientKey,
+    slug: client.slug,
+    chatbot: client.chatbot,
+    status: client.status,
+    clientCreatedAt: client.createdAt,
+    clientUpdatedAt: client.updatedAt,
+    businessId: client._id,
+    clientId: user._id,
+    fullName: user.fullName,
+    email: user.email,
+    profileImage: user.profileImage,
+    role: user.role,
+  };
 };

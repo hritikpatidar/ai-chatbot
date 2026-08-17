@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
 import { X, Save, Loader2 } from "lucide-react";
+import CustomSelect from "../../common/CustomSelect";
 
 const initialForm = {
   question: "",
@@ -266,34 +267,25 @@ export default function FAQModal({
                 >
                   Status
                 </label>
-
-                <select
-                  id="status"
+                <CustomSelect
+                  size="md"
+                  // label="Response Tone"
                   name="status"
                   value={form.status}
                   onChange={handleChange}
                   disabled={loading}
-                  className="
-                    w-full rounded-xl
-                    border border-gray-200
-                    bg-gray-50
-                    px-3.5 py-3
-                    text-sm text-gray-900
-                    outline-none
-                    transition
-                    focus:border-blue-500
-                    focus:ring-2
-                    focus:ring-blue-500/10
-                    disabled:cursor-not-allowed
-                    disabled:opacity-60
-                    dark:border-white/10
-                    dark:bg-[#11151d]
-                    dark:text-white
-                  "
-                >
-                  <option value="active">Active</option>
-                  <option value="inactive">Inactive</option>
-                </select>
+                  options={[
+                    {
+                      value: "active",
+                      label: "Active",
+                    },
+                    {
+                      value: "inactive",
+                      label: "Inactive",
+                    },
+                  ]}
+                  // className={}
+                />
               </div>
             </div>
 

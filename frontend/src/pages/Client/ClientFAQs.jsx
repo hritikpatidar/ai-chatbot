@@ -1,5 +1,12 @@
 import { useEffect, useState } from "react";
-import { Plus, Search, MessageCircleQuestion, RefreshCw } from "lucide-react";
+import {
+  Plus,
+  Search,
+  MessageCircleQuestion,
+  RefreshCw,
+  AlertCircle,
+  CheckCircle2,
+} from "lucide-react";
 
 import FAQTable from "../../components/ClientComponent/FAQ/FAQTable";
 import FAQModal from "../../components/ClientComponent/FAQ/FAQModal";
@@ -21,6 +28,7 @@ export default function ClientFAQs() {
   const [selectedFAQ, setSelectedFAQ] = useState(null);
 
   const [deleteFAQDetails, setDeleteFAQDetails] = useState(null);
+  const [successMessage, setSuccessMessage] = useState("");
 
   const { client } = useSelector(
     (state) => state?.ClientReducer?.clientSlice || {},
@@ -48,6 +56,16 @@ export default function ClientFAQs() {
     limit,
     search,
   });
+
+  useEffect(() => {
+    if (!successMessage) return;
+
+    const timer = setTimeout(() => {
+      setSuccessMessage("");
+    }, 3000);
+
+    return () => clearTimeout(timer);
+  }, [successMessage]);
 
   /* =========================================================
      SEARCH
@@ -103,12 +121,14 @@ export default function ClientFAQs() {
           faqId: selectedFAQ._id,
           payload,
         });
+        setSuccessMessage("FAQ updated successfully.");
       } else {
         // CREATE
         await createFAQ({
           clientId: client?.businessId,
           payload,
         });
+        setSuccessMessage("FAQ added successfully.");
       }
 
       setIsModalOpen(false);
@@ -139,7 +159,7 @@ export default function ClientFAQs() {
       await deleteFAQ(deleteFAQDetails._id);
 
       setDeleteFAQDetails(null);
-
+      setSuccessMessage("FAQ delete successfully.");
       /*
         Agar last item delete hua aur current page
         empty ho gaya to previous page par jao.
@@ -187,7 +207,63 @@ export default function ClientFAQs() {
         {/* =================================================
             HEADER
         ================================================= */}
+        {successMessage && (
+          <div
+            className="
+              mb-5
+              flex
+              items-center
+              gap-3
+              rounded-xl
+              border
+              border-green-200
+              bg-green-50
+              px-4
+              py-3
+              text-sm
+              text-green-700
 
+              dark:border-green-500/20
+              dark:bg-green-500/10
+              dark:text-green-400
+            "
+          >
+            <CheckCircle2 size={18} className="shrink-0" />
+
+            <span>{successMessage}</span>
+          </div>
+        )}
+
+        {error && (
+          <div
+            className="
+              mb-5
+              flex
+              items-center
+              gap-3
+              rounded-xl
+              border
+              border-red-200
+              bg-red-50
+              px-4
+              py-3
+              text-sm
+              text-red-600
+
+              dark:border-red-500/20
+              dark:bg-red-500/10
+              dark:text-red-400
+            "
+          >
+            <AlertCircle size={18} className="shrink-0" />
+
+            <span>
+              {typeof error === "string"
+                ? error
+                : error?.message || "Something went wrong."}
+            </span>
+          </div>
+        )}
         <div className="flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
           <div>
             <div className="flex items-center gap-3">

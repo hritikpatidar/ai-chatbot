@@ -6,10 +6,8 @@ import Client from "../models/Client.js";
 
 export const createClientService = async (data) => {
   const session = await mongoose.startSession();
-
   try {
     session.startTransaction();
-
     const {
       fullName,
       email,
@@ -17,131 +15,113 @@ export const createClientService = async (data) => {
       businessName,
       businessType,
       businessDescription = "",
+      address = {},
+      contact = {},
       clientKey,
       slug,
       chatbot = {},
     } = data;
 
-    const existingUser = await User.findOne({ email }).session(session);
+    const normalizedEmail = email.trim().toLowerCase();
+    const normalizedClientKey = clientKey.trim().toLowerCase();
+    const normalizedSlug = slug.trim().toLowerCase();
+    const existingUser = await User.findOne({
+      email: normalizedEmail,
+    }).session(session);
 
     if (existingUser) {
       throw new Error("USER_ALREADY_EXISTS");
     }
 
-    /*
-     * ------------------------------------------
-     * Check clientKey
-     * ------------------------------------------
-     */
-
     const existingClientKey = await Client.findOne({
-      clientKey,
+      clientKey: normalizedClientKey,
     }).session(session);
 
     if (existingClientKey) {
       throw new Error("CLIENT_KEY_ALREADY_EXISTS");
     }
 
-    /*
-     * ------------------------------------------
-     * Check slug
-     * ------------------------------------------
-     */
-
     const existingSlug = await Client.findOne({
-      slug,
+      slug: normalizedSlug,
     }).session(session);
 
     if (existingSlug) {
       throw new Error("CLIENT_SLUG_ALREADY_EXISTS");
     }
 
-    /*
-     * ------------------------------------------
-     * Hash password
-     * ------------------------------------------
-     */
-
     const hashedPassword = await bcrypt.hash(password, 12);
-
-    /*
-     * ------------------------------------------
-     * Create Client
-     * ------------------------------------------
-     */
-
     const [client] = await Client.create(
       [
         {
-          businessName,
-          businessType,
-          businessDescription,
+          businessName: businessName.trim(),
+          businessType: businessType.trim(),
+          businessDescription: businessDescription.trim(),
+          address: {
+            addressLine1: address.addressLine1?.trim() || "",
+            addressLine2: address.addressLine2?.trim() || "",
+            city: address.city?.trim() || "",
+            state: address.state?.trim() || "",
+            country: address.country?.trim() || "",
+            postalCode: address.postalCode?.trim() || "",
+            googleMapsUrl: address.googleMapsUrl?.trim() || "",
+          },
 
-          clientKey: clientKey.toLowerCase(),
+          contact: {
+            phone: contact.phone?.trim() || "",
+            email: contact.email?.trim().toLowerCase() || "",
+            website: contact.website?.trim() || "",
+            whatsapp: contact.whatsapp?.trim() || "",
+          },
 
-          slug: slug.toLowerCase(),
+          clientKey: normalizedClientKey,
+          slug: normalizedSlug,
 
           chatbot: {
-            name: chatbot.name || "AI Assistant",
-
+            name: chatbot.name?.trim() || "AI Assistant",
             welcomeMessage:
-              chatbot.welcomeMessage ||
+              chatbot.welcomeMessage?.trim() ||
               "Hi 👋 Welcome! How can I help you today?",
 
             language: chatbot.language || "english",
-
             tone: chatbot.tone || "friendly",
-
-            aiInstructions: chatbot.aiInstructions || "",
-
+            aiInstructions: chatbot.aiInstructions?.trim() || "",
             predefinedQuestions: chatbot.predefinedQuestions || [],
           },
-
           status: "active",
         },
       ],
-      { session },
+      {
+        session,
+      },
     );
-
-    /*
-     * ------------------------------------------
-     * Create Client User
-     * ------------------------------------------
-     */
 
     const [user] = await User.create(
       [
         {
-          fullName,
-
-          email: email.toLowerCase(),
-
+          fullName: fullName.trim(),
+          email: normalizedEmail,
           password: hashedPassword,
-
           role: "client",
-
           clientId: client._id,
-
           terms: true,
-
           authProvider: "local",
-
           isEmailVerified: true,
-
           accountStatus: "active",
         },
       ],
-      { session },
+      {
+        session,
+      },
     );
-
     await session.commitTransaction();
-
     return {
       client,
       user,
     };
   } catch (error) {
-    await session.abortTransaction();
+    if (session.inTransaction()) {
+      await session.abortTransaction();
+    }
 
     throw error;
   } finally {

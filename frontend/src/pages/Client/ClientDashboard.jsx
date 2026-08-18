@@ -7,6 +7,7 @@ import {
   Bot,
   ArrowRight,
   Settings,
+  Ticket,
 } from "lucide-react";
 import { motion } from "framer-motion";
 import { useNavigate } from "react-router-dom";
@@ -154,7 +155,7 @@ export default function ClientDashboard() {
               <QuickAction
                 title="Manage Tickets"
                 description="Resolve your tickets"
-                icon={HelpCircle}
+                icon={Ticket}
                 onClick={() => navigate("/client/tickets")}
               />
 

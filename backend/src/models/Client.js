@@ -43,6 +43,83 @@ const clientSchema = new mongoose.Schema(
       trim: true,
     },
 
+    address: {
+      addressLine1: {
+        type: String,
+        default: "",
+        trim: true,
+      },
+
+      addressLine2: {
+        type: String,
+        default: "",
+        trim: true,
+      },
+
+      city: {
+        type: String,
+        default: "",
+        trim: true,
+      },
+
+      state: {
+        type: String,
+        default: "",
+        trim: true,
+      },
+
+      country: {
+        type: String,
+        default: "",
+        trim: true,
+      },
+
+      postalCode: {
+        type: String,
+        default: "",
+        trim: true,
+      },
+
+      googleMapsUrl: {
+        type: String,
+        default: "",
+        trim: true,
+      },
+    },
+
+    contact: {
+      phone: {
+        type: String,
+        default: "",
+        trim: true,
+      },
+
+      alternatePhone: {
+        type: String,
+        default: "",
+        trim: true,
+      },
+
+      email: {
+        type: String,
+        default: "",
+        lowercase: true,
+        trim: true,
+      },
+
+      website: {
+        type: String,
+        default: "",
+        trim: true,
+      },
+
+      whatsapp: {
+        type: String,
+        default: "",
+        trim: true,
+      },
+    },
+
     clientKey: {
       type: String,
       required: true,

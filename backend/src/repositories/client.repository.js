@@ -23,9 +23,36 @@ export const findClientBySlug = async (slug) => {
 };
 
 export const updateClient = async (clientId, updateData) => {
-  return await Client.findByIdAndUpdate(clientId, updateData, {
-    new: true,
-    runValidators: true,
-  });
-};
+  const $set = {};
 
+  Object.entries(updateData).forEach(([key, value]) => {
+    if (key === "address" && value && typeof value === "object") {
+      Object.entries(value).forEach(([addressKey, addressValue]) => {
+        $set[`address.${addressKey}`] = addressValue;
+      });
+
+      return;
+    }
+
+    if (key === "contact" && value && typeof value === "object") {
+      Object.entries(value).forEach(([contactKey, contactValue]) => {
+        $set[`contact.${contactKey}`] = contactValue;
+      });
+
+      return;
+    }
+
+    $set[key] = value;
+  });
+
+  return Client.findByIdAndUpdate(
+    clientId,
+    {
+      $set,
+    },
+    {
+      new: true,
+      runValidators: true,
+    },
+  );
+};

@@ -7,6 +7,8 @@ import { SocketProvider } from "../context/SocketContext";
 import PageLoader from "../components/common/PageLoader";
 import ClientRoute from "./ClientRoute";
 import ClientChatRoute from "./ClientChatRoute";
+import DashboardLayout from "../pages/DashboardLayout";
+import ClientLayout from "../pages/Client/ClientLayout";
 
 // Public Pages
 
@@ -31,7 +33,6 @@ const Projects = lazy(() => import("../pages/Projects"));
 const Settings = lazy(() => import("../pages/Settings"));
 const Profile = lazy(() => import("../pages/Profile"));
 const Security = lazy(() => import("../pages/Security"));
-const DashboardLayout = lazy(() => import("../pages/DashboardLayout"));
 
 // Admin Pages
 
@@ -39,7 +40,6 @@ const ClientDashboard = lazy(() => import("../pages/Client/ClientDashboard"));
 const ClientSettings = lazy(() => import("../pages/Client/ClientSettings"));
 const ChatbotSettings = lazy(() => import("../pages/Client/ChatbotSettings"));
 const ClientProducts = lazy(() => import("../pages/Client/ClientProducts"));
-const ClientLayout = lazy(() => import("../pages/Client/ClientLayout"));
 const ClientFAQs = lazy(() => import("../pages/Client/ClientFAQs"));
 const ClientTickets = lazy(() => import("../pages/Client/ClientTickets"));
 

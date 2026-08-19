@@ -8,7 +8,7 @@ export default function ClientRoute() {
     (state) => state?.authReducer?.AuthSlice,
   );
   const isAuthenticated = Boolean(token) && Boolean(profileDetails?._id);
-  const isAdmin = profileDetails?.role === "client";
+  const isClient = profileDetails?.role === "client";
   if (!isAuthenticated) {
     return (
       <Navigate
@@ -20,7 +20,7 @@ export default function ClientRoute() {
       />
     );
   }
-  if (!isAdmin) {
+  if (!isClient) {
     return <Navigate to="/" replace />;
   }
   return <Outlet />;

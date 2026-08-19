@@ -16,6 +16,12 @@ const conversationSchema = new mongoose.Schema(
       index: true,
     },
 
+    guestId: {
+      type: String,
+      required: false,
+      index: true,
+    },
+
     title: {
       type: String,
       default: "New Chat",

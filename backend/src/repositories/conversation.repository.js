@@ -14,10 +14,12 @@ export const findConversationById = async (conversationId) => {
 export const findConversationByIdAndClient = async (
   conversationId,
   clientId,
+  // guestId,
 ) => {
   return await Conversation.findOne({
     _id: conversationId,
     clientId,
+    // guestId,
   });
 };
 
@@ -33,6 +35,24 @@ export const getUserConversations = async (userId, clientId = null) => {
   }
 
   return await Conversation.find(query).sort({
+    updatedAt: -1,
+  });
+};
+
+export const getGuestConversations = async (guestId, clientId) => {
+  return await Conversation.find({
+    guestId,
+    clientId,
+    isArchived: false,
+  }).sort({ updatedAt: -1 });
+};
+
+export const findGuestConversation = async (clientId, guestId) => {
+  return await Conversation.findOne({
+    clientId,
+    guestId,
+    isArchived: false,
+  }).sort({
     updatedAt: -1,
   });
 };

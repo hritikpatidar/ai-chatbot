@@ -65,6 +65,11 @@ export const getClientByIdService = async (clientId) => {
     businessName: client.businessName,
     businessType: client.businessType,
     businessDescription: client.businessDescription,
+    address: client.address,
+    contact: client.contact,
+    slug: client.slug,
+    status: client.status,
+    chatbot: client.chatbot,
     clientKey: client.clientKey,
     slug: client.slug,
     chatbot: client.chatbot,
@@ -143,6 +148,9 @@ export const updateClientService = async (clientId, updateData) => {
     allowedData.contact = {
       ...(updateData.contact.phone !== undefined && {
         phone: updateData.contact.phone,
+      }),
+      ...(updateData.contact.alternatePhone !== undefined && {
+        alternatePhone: updateData.contact.alternatePhone,
       }),
 
       ...(updateData.contact.email !== undefined && {

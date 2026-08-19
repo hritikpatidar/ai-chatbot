@@ -215,7 +215,6 @@ export default function Welcome() {
             <form
               onSubmit={(e) => {
                 e.preventDefault();
-
                 if (isSendDisable) return;
                 dispatch(clearMessages([]));
                 handleSend();

@@ -5,6 +5,7 @@ import {
   addErrorMessage,
   addMessage,
   appendAssistantChunk,
+  clearMessages,
   fetchClientConfig,
   setActivePage,
   setConversationList,
@@ -72,7 +73,6 @@ export default function useSpeechRecognition({
       dispatch(setConversationLoading(false));
       return;
     }
-
     if (isNewConversation) {
       console.log("🆕 New conversation - skipping messages fetch");
       dispatch(setConversationLoading(false));

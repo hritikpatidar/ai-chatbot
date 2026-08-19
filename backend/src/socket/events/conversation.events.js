@@ -11,8 +11,16 @@ export const registerConversationEvents = (io, socket) => {
     try {
       const userId = socket.user?.id || null;
       const clientId = socket.clientId || null;
+      const guestId = socket.guestId || null;
 
       if (!userId && !clientId) {
+        socket.emit("conversation:error", {
+          success: false,
+          message: "User or client is required",
+        });
+        return;
+      }
+      if (!userId && !guestId) {
         socket.emit("conversation:error", {
           success: false,
           message: "User or client is required",
@@ -23,6 +31,7 @@ export const registerConversationEvents = (io, socket) => {
       const conversations = await getConversationListService({
         userId,
         clientId,
+        guestId,
       });
 
       socket.emit("conversation:list:response", {

@@ -1,455 +1,932 @@
 import { useEffect, useState } from "react";
-import { Bot, Save, RotateCcw, CheckCircle2, AlertCircle } from "lucide-react";
 import { useDispatch, useSelector } from "react-redux";
-import { updateClient } from "../../redux/features/Client/clientSlice";
-import CustomSelect from "../../components/common/CustomSelect";
+import {
+  Bot,
+  Building2,
+  MapPin,
+  Phone,
+  Globe,
+  Plus,
+  Trash2,
+  Save,
+  X,
+  GripVertical,
+  MessageCircle,
+  Sparkles,
+  CheckCircle2,
+  AlertCircle,
+  Loader2,
+} from "lucide-react";
 
-export default function ChatbotSettings() {
-  const dispatch = useDispatch();
-  const { client, clientLoading, error } = useSelector(
-    (state) => state?.ClientReducer?.clientSlice || {},
-  );
-  const [formData, setFormData] = useState({
-    name: "",
-    welcomeMessage: "",
+import { useForm, useFieldArray, Controller } from "react-hook-form";
+import { z } from "zod";
+import { zodResolver } from "@hookform/resolvers/zod";
+
+import {
+  getClientById,
+  updateClient,
+} from "../../redux/features/Client/clientSlice";
+import { formSchema } from "../../utils/validation";
+import CustomSelect from "../../components/common/CustomSelect";
+import PhoneInputField from "../../components/common/PhoneInputField";
+
+const defaultValues = {
+  businessName: "",
+  businessType: "",
+  businessDescription: "",
+
+  address: {
+    addressLine1: "",
+    addressLine2: "",
+    city: "",
+    state: "",
+    country: "",
+    postalCode: "",
+    googleMapsUrl: "",
+  },
+
+  contact: {
+    phone: "",
+    alternatePhone: "",
+    email: "",
+    website: "",
+    whatsapp: "",
+  },
+
+  chatbot: {
+    name: "AI Assistant",
+    welcomeMessage: "Hi 👋 Welcome! How can I help you today?",
     language: "english",
     tone: "friendly",
     aiInstructions: "",
+    predefinedQuestions: [],
+  },
+
+  status: "active",
+};
+
+export default function ClientChatbotSettings() {
+  const dispatch = useDispatch();
+
+  const { client, loading } = useSelector(
+    (state) => state?.ClientReducer?.clientSlice || {},
+  );
+
+  const [saving, setSaving] = useState(false);
+  const [message, setMessage] = useState({
+    type: "",
+    text: "",
   });
-  const [successMessage, setSuccessMessage] = useState("");
-  useEffect(() => {
-    if (client?.chatbot) {
-      setFormData({
-        name: client.chatbot.name || "",
-        welcomeMessage: client.chatbot.welcomeMessage || "",
-        language: client.chatbot.language || "english",
-        tone: client.chatbot.tone || "friendly",
-        aiInstructions: client.chatbot.aiInstructions || "",
-      });
-    }
-  }, [client]);
+
+  const {
+    register,
+    control,
+    handleSubmit,
+    reset,
+    formState: { errors, isDirty },
+  } = useForm({
+    resolver: zodResolver(formSchema),
+    defaultValues,
+    mode: "onChange",
+  });
+
+  const { fields, append, remove } = useFieldArray({
+    control,
+    name: "chatbot.predefinedQuestions",
+  });
 
   useEffect(() => {
-    if (!successMessage) return;
+    if (!message.text) return;
 
     const timer = setTimeout(() => {
-      setSuccessMessage("");
+      setMessage({
+        type: "",
+        text: "",
+      });
     }, 3000);
 
     return () => clearTimeout(timer);
-  }, [successMessage]);
+  }, [message.text]);
 
-  const handleChange = (e) => {
-    const { name, value } = e.target;
-    setFormData((prev) => ({
-      ...prev,
-      [name]: value,
-    }));
-
-    setSuccessMessage("");
-  };
-
-  const handleSubmit = async (e) => {
-    e.preventDefault();
-    if (!client?.businessId) {
-      return;
+  useEffect(() => {
+    if (client?.businessId) {
+      dispatch(getClientById(client?.businessId));
     }
-    try {
-      const result = await dispatch(
-        updateClient({
-          clientId: client.businessId,
-          data: {
-            chatbot: formData,
-          },
-        }),
-      );
+  }, [dispatch, client?.businessId]);
 
-      if (updateClient.fulfilled.match(result)) {
-        setSuccessMessage("Chatbot settings updated successfully.");
-      }
-    } catch (error) {
-      console.error("Chatbot settings update failed:", error);
-    }
-  };
+  useEffect(() => {
+    if (!client) return;
+    reset({
+      businessName: client.businessName || "",
+      businessType: client.businessType || "",
+      businessDescription: client.businessDescription || "",
+      address: {
+        addressLine1: client.address?.addressLine1 || "",
+        addressLine2: client.address?.addressLine2 || "",
+        city: client.address?.city || "",
+        state: client.address?.state || "",
+        country: client.address?.country || "",
+        postalCode: client.address?.postalCode || "",
+        googleMapsUrl: client.address?.googleMapsUrl || "",
+      },
 
-  const handleReset = () => {
-    setFormData({
-      name: client?.chatbot?.name || "",
-      welcomeMessage: client?.chatbot?.welcomeMessage || "",
-      language: client?.chatbot?.language || "english",
-      tone: client?.chatbot?.tone || "friendly",
-      aiInstructions: client?.chatbot?.aiInstructions || "",
+      contact: {
+        phone: client.contact?.phone || "",
+        alternatePhone: client.contact?.alternatePhone || "",
+        email: client.contact?.email || "",
+        website: client.contact?.website || "",
+        whatsapp: client.contact?.whatsapp || "",
+      },
+
+      chatbot: {
+        name: client.chatbot?.name || "AI Assistant",
+        welcomeMessage:
+          client.chatbot?.welcomeMessage ||
+          "Hi 👋 Welcome! How can I help you today?",
+        language: client.chatbot?.language || "english",
+        tone: client.chatbot?.tone || "friendly",
+        aiInstructions: client.chatbot?.aiInstructions || "",
+        predefinedQuestions: client.chatbot?.predefinedQuestions || [],
+      },
+      status: client.status || "active",
+    });
+  }, [client, reset]);
+
+  const onSubmit = async (data) => {
+    if (!client?.businessId) return;
+    setSaving(true);
+    setMessage({
+      type: "",
+      text: "",
     });
 
-    setSuccessMessage("");
+    try {
+      const payload = {
+        businessName: data.businessName,
+        businessType: data.businessType,
+        businessDescription: data.businessDescription,
+        address: {
+          addressLine1: data.address.addressLine1,
+
+          addressLine2: data.address.addressLine2,
+
+          city: data.address.city,
+
+          state: data.address.state,
+
+          country: data.address.country,
+
+          postalCode: data.address.postalCode,
+
+          googleMapsUrl: data.address.googleMapsUrl,
+        },
+        contact: {
+          phone: data.contact.phone,
+
+          alternatePhone: data.contact.alternatePhone,
+
+          email: data.contact.email,
+
+          website: data.contact.website,
+
+          whatsapp: data.contact.whatsapp,
+        },
+        chatbot: {
+          name: data.chatbot.name,
+
+          welcomeMessage: data.chatbot.welcomeMessage,
+
+          language: data.chatbot.language,
+
+          tone: data.chatbot.tone,
+
+          aiInstructions: data.chatbot.aiInstructions,
+
+          predefinedQuestions: data.chatbot.predefinedQuestions.map(
+            (item, index) => ({
+              ...item,
+              sortOrder: index + 1,
+            }),
+          ),
+        },
+        status: data.status,
+      };
+
+      const response = await dispatch(
+        updateClient({ clientId: client?.businessId, payload }),
+      ).unwrap();
+      if (response?.success) {
+        setMessage({
+          type: "success",
+          text: response.message || "Client settings updated successfully.",
+        });
+
+        dispatch(getClientById(client?.businessId));
+      } else {
+        setMessage({
+          type: "error",
+          text: response?.data?.message || "Unable to update client settings.",
+        });
+      }
+    } catch (error) {
+      console.error("Update client settings error:", error);
+
+      setMessage({
+        type: "error",
+        text:
+          error?.response?.data?.message ||
+          "Something went wrong while updating settings.",
+      });
+    } finally {
+      setSaving(false);
+    }
   };
 
-  if (!client?.businessId) {
+  if (loading && !client) {
     return (
-      <div className="flex min-h-100 items-center justify-center px-4">
-        <div className="text-center">
-          <div className="mx-auto flex h-12 w-12 items-center justify-center rounded-xl bg-blue-500/10 text-blue-500">
-            <Bot size={24} />
-          </div>
-
-          <h2 className="mt-4 text-base font-semibold text-gray-900 dark:text-white">
-            Client not found
-          </h2>
-
-          <p className="mt-1 text-sm text-gray-500 dark:text-gray-400">
-            Please select a client before configuring the chatbot.
-          </p>
-        </div>
+      <div className="flex min-h-full items-center justify-center">
+        <Loader2 className="animate-spin text-blue-600" size={30} />
       </div>
     );
   }
 
   return (
     <div className="min-h-full w-full bg-transparent text-gray-900 dark:text-white">
-      <div className="mx-auto w-full max-w-5xl px-4 py-5 sm:px-6 sm:py-6 lg:px-8">
-        <div className="mb-6">
-          <div className="flex items-start gap-3">
-            <div
-              className="
-                flex
-                h-11
-                w-11
-                shrink-0
-                items-center
-                justify-center
-                rounded-xl
-                bg-blue-500/10
-                text-blue-600
-                dark:text-blue-400
-              "
-            >
-              <Bot size={22} />
-            </div>
+      <div className="mx-auto w-full max-w-[1600px] px-4 py-5 sm:px-6 lg:px-8">
+        <div className="mb-6 flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
+          <div>
+            <div className="flex items-center gap-2">
+              <Bot size={25} className="text-blue-600 dark:text-blue-400" />
 
-            <div className="min-w-0">
-              <h1 className="text-xl font-semibold text-gray-900 dark:text-white sm:text-2xl">
+              <h1 className="text-2xl font-semibold tracking-tight">
                 Chatbot Settings
               </h1>
-
-              <p className="mt-1 max-w-2xl text-xs leading-5 text-gray-500 dark:text-gray-400 sm:text-sm">
-                Configure how your AI chatbot looks, communicates, and responds
-                to your customers.
-              </p>
             </div>
+
+            <p className="mt-1 text-sm text-gray-500 dark:text-gray-400">
+              Manage your business information, contact details, chatbot
+              configuration and AI instructions.
+            </p>
+          </div>
+
+          <div className="flex items-center gap-3">
+            <StatusBadge status={client?.status} />
+
+            <button
+              type="button"
+              onClick={handleSubmit(onSubmit)}
+              disabled={saving || !isDirty}
+              className="
+                inline-flex items-center justify-center gap-2
+                rounded-xl
+                bg-blue-600
+                px-4 py-2.5
+                text-sm font-medium text-white
+                shadow-sm
+                transition
+                hover:bg-blue-700
+                disabled:cursor-not-allowed
+                disabled:opacity-50
+              "
+            >
+              {saving ? (
+                <Loader2 size={17} className="animate-spin" />
+              ) : (
+                <Save size={17} />
+              )}
+
+              {saving ? "Saving..." : "Save Changes"}
+            </button>
           </div>
         </div>
 
-        {successMessage && (
+        {message.text && (
           <div
-            className="
-              mb-5
-              flex
-              items-center
-              gap-3
-              rounded-xl
-              border
-              border-green-200
-              bg-green-50
-              px-4
-              py-3
-              text-sm
-              text-green-700
-
-              dark:border-green-500/20
-              dark:bg-green-500/10
-              dark:text-green-400
-            "
+            className={`
+              mb-6 flex items-start gap-3 rounded-xl
+              border p-4
+              ${
+                message.type === "success"
+                  ? `
+                    border-green-200
+                    bg-green-50
+                    text-green-700
+                    dark:border-green-500/20
+                    dark:bg-green-500/10
+                    dark:text-green-400
+                  `
+                  : `
+                    border-red-200
+                    bg-red-50
+                    text-red-700
+                    dark:border-red-500/20
+                    dark:bg-red-500/10
+                    dark:text-red-400
+                  `
+              }
+            `}
           >
-            <CheckCircle2 size={18} className="shrink-0" />
+            {message.type === "success" ? (
+              <CheckCircle2 size={19} />
+            ) : (
+              <AlertCircle size={19} />
+            )}
 
-            <span>{successMessage}</span>
+            <p className="text-sm">{message.text}</p>
+
+            <button
+              type="button"
+              onClick={() =>
+                setMessage({
+                  type: "",
+                  text: "",
+                })
+              }
+              className="ml-auto"
+            >
+              <X size={17} />
+            </button>
           </div>
         )}
 
-        {error && (
-          <div
-            className="
-              mb-5
-              flex
-              items-center
-              gap-3
-              rounded-xl
-              border
-              border-red-200
-              bg-red-50
-              px-4
-              py-3
-              text-sm
-              text-red-600
+        <form onSubmit={handleSubmit(onSubmit)}>
+          <div className="space-y-6">
+            {/* BUSINESS DETAILS */}
 
-              dark:border-red-500/20
-              dark:bg-red-500/10
-              dark:text-red-400
-            "
-          >
-            <AlertCircle size={18} className="shrink-0" />
-
-            <span>
-              {typeof error === "string"
-                ? error
-                : error?.message || "Something went wrong."}
-            </span>
-          </div>
-        )}
-
-        <form onSubmit={handleSubmit}>
-          <div
-            className="
-              overflow-hidden
-              rounded-2xl
-              border
-              border-gray-200
-              bg-white
-              shadow-sm
-
-              dark:border-white/10
-              dark:bg-[#171b23]
-            "
-          >
-            <div className="border-b border-gray-200 p-5 dark:border-white/10 sm:p-6">
-              <div className="mb-5">
-                <h2 className="text-base font-semibold text-gray-900 dark:text-white">
-                  General Settings
-                </h2>
-
-                <p className="mt-1 text-xs text-gray-500 dark:text-gray-400">
-                  Basic chatbot configuration.
-                </p>
-              </div>
-
+            <SectionCard
+              icon={Building2}
+              title="Business Information"
+              description="Basic information about your business."
+            >
               <div className="grid grid-cols-1 gap-5 md:grid-cols-2">
-                {/* Bot Name */}
+                <FormInput
+                  label="Business Name"
+                  required
+                  placeholder="ABC Books"
+                  error={errors.businessName?.message}
+                  {...register("businessName")}
+                />
 
-                <div>
-                  <label
-                    htmlFor="name"
-                    className="
-                      mb-2
-                      block
-                      text-sm
-                      font-medium
-                      text-gray-700
-                      dark:text-gray-300
-                    "
-                  >
-                    Chatbot Name
-                  </label>
+                <FormInput
+                  label="Business Type"
+                  required
+                  placeholder="Book Store"
+                  error={errors.businessType?.message}
+                  {...register("businessType")}
+                />
 
-                  <input
-                    id="name"
-                    type="text"
-                    name="name"
-                    value={formData.name}
-                    onChange={handleChange}
-                    placeholder="AI Assistant"
-                    className="input-style"
+                <div className="md:col-span-2">
+                  <FormTextarea
+                    label="Business Description"
+                    placeholder="Tell customers about your business..."
+                    rows={4}
+                    error={errors.businessDescription?.message}
+                    {...register("businessDescription")}
                   />
                 </div>
+              </div>
+            </SectionCard>
+
+            {/* ADDRESS */}
+
+            <SectionCard
+              icon={MapPin}
+              title="Business Address"
+              description="Add the physical location of your business."
+            >
+              <div className="grid grid-cols-1 gap-5 md:grid-cols-2">
+                <FormInput
+                  label="Address Line 1"
+                  placeholder="12 Main Market"
+                  {...register("address.addressLine1")}
+                />
+
+                <FormInput
+                  label="Address Line 2"
+                  placeholder="Near City Mall"
+                  {...register("address.addressLine2")}
+                />
+
+                <FormInput
+                  label="City"
+                  placeholder="Neemuch"
+                  {...register("address.city")}
+                />
+
+                <FormInput
+                  label="State"
+                  placeholder="Madhya Pradesh"
+                  {...register("address.state")}
+                />
+
+                <FormInput
+                  label="Country"
+                  placeholder="India"
+                  {...register("address.country")}
+                />
+
+                <FormInput
+                  label="Postal Code"
+                  placeholder="458441"
+                  {...register("address.postalCode")}
+                />
+
+                <div className="md:col-span-2">
+                  <FormInput
+                    label="Google Maps URL"
+                    placeholder="https://maps.google.com/..."
+                    error={errors.address?.googleMapsUrl?.message}
+                    {...register("address.googleMapsUrl")}
+                  />
+                </div>
+              </div>
+            </SectionCard>
+
+            {/* CONTACT */}
+
+            <SectionCard
+              icon={Phone}
+              title="Contact Information"
+              description="Contact details that your chatbot can provide to customers."
+            >
+              <div className="grid grid-cols-1 gap-5 md:grid-cols-2">
+                {/* Phone */}
+                <Controller
+                  name="contact.phone"
+                  control={control}
+                  render={({ field }) => (
+                    <PhoneInputField
+                      label="Phone"
+                      name={field.name}
+                      value={field.value}
+                      onChange={field.onChange}
+                      error={errors.contact?.phone?.message}
+                      required
+                    />
+                  )}
+                />
+
+                {/* Alternate Phone */}
+                <Controller
+                  name="contact.alternatePhone"
+                  control={control}
+                  render={({ field }) => (
+                    <PhoneInputField
+                      label="Alternate Phone"
+                      name={field.name}
+                      value={field.value}
+                      onChange={field.onChange}
+                      error={errors.contact?.alternatePhone?.message}
+                    />
+                  )}
+                />
+
+                {/* Email */}
+                <FormInput
+                  label="Email"
+                  type="email"
+                  placeholder="contact@example.com"
+                  error={errors.contact?.email?.message}
+                  {...register("contact.email")}
+                />
+
+                {/* WhatsApp */}
+                <Controller
+                  name="contact.whatsapp"
+                  control={control}
+                  render={({ field }) => (
+                    <PhoneInputField
+                      label="WhatsApp"
+                      name={field.name}
+                      value={field.value}
+                      onChange={field.onChange}
+                      error={errors.contact?.whatsapp?.message}
+                    />
+                  )}
+                />
+
+                {/* Website */}
+                <div className="md:col-span-2">
+                  <FormInput
+                    label="Website"
+                    placeholder="https://example.com"
+                    error={errors.contact?.website?.message}
+                    {...register("contact.website")}
+                  />
+                </div>
+              </div>
+            </SectionCard>
+
+            {/* CHATBOT */}
+
+            <SectionCard
+              icon={Bot}
+              title="Chatbot Configuration"
+              description="Configure how your AI chatbot appears and communicates with customers."
+            >
+              <div className="grid grid-cols-1 gap-5 md:grid-cols-2">
+                <FormInput
+                  label="Bot Name"
+                  required
+                  placeholder="ABC Books Assistant"
+                  error={errors.chatbot?.name?.message}
+                  {...register("chatbot.name")}
+                />
 
                 {/* Language */}
-
-                <div>
-                  <label
-                    htmlFor="language"
-                    className="
-                      mb-2
-                      block
-                      text-sm
-                      font-medium
-                      text-gray-700
-                      dark:text-gray-300
-                    "
-                  >
-                    Language
-                  </label>
-                  <CustomSelect
-                    size="sm"
-                    rounded="rounded-lg"
-                    // label="Language"
-                    name="language"
-                    value={formData.language}
-                    onChange={handleChange}
-                    required
-                    options={[
-                      {
-                        value: "english",
-                        label: "English",
-                      },
-                      {
-                        value: "hindi",
-                        label: "Hindi",
-                      },
-                      {
-                        value: "hinglish",
-                        label: "Hinglish",
-                      },
-                    ]}
-                  />
-                </div>
+                <Controller
+                  name="chatbot.language"
+                  control={control}
+                  render={({ field }) => (
+                    <CustomSelect
+                      size="sm"
+                      label="Language"
+                      name={field.name}
+                      value={field.value}
+                      onChange={field.onChange}
+                      options={[
+                        {
+                          value: "english",
+                          label: "English",
+                        },
+                        {
+                          value: "hindi",
+                          label: "Hindi",
+                        },
+                        {
+                          value: "hinglish",
+                          label: "Hinglish",
+                        },
+                      ]}
+                      placeholder="Select language"
+                      error={errors.chatbot?.language?.message}
+                      required
+                    />
+                  )}
+                />
 
                 {/* Tone */}
+                <Controller
+                  name="chatbot.tone"
+                  control={control}
+                  render={({ field }) => (
+                    <CustomSelect
+                      size="sm"
+                      label="Tone"
+                      name={field.name}
+                      value={field.value}
+                      onChange={field.onChange}
+                      options={[
+                        {
+                          value: "friendly",
+                          label: "Friendly",
+                        },
+                        {
+                          value: "professional",
+                          label: "Professional",
+                        },
+                        {
+                          value: "casual",
+                          label: "Casual",
+                        },
+                        {
+                          value: "formal",
+                          label: "Formal",
+                        },
+                      ]}
+                      placeholder="Select tone"
+                      error={errors.chatbot?.tone?.message}
+                      required
+                    />
+                  )}
+                />
 
-                <div>
-                  <label
-                    htmlFor="tone"
-                    className="
-                      mb-2
-                      block
-                      text-sm
-                      font-medium
-                      text-gray-700
-                      dark:text-gray-300
-                    "
-                  >
-                    Response Tone
-                  </label>
+                {/* Status */}
+                <Controller
+                  name="status"
+                  control={control}
+                  render={({ field }) => (
+                    <CustomSelect
+                      size="sm"
+                      label="Business Status"
+                      name={field.name}
+                      value={field.value}
+                      onChange={field.onChange}
+                      options={[
+                        {
+                          value: "active",
+                          label: "Active",
+                        },
+                        {
+                          value: "inactive",
+                          label: "Inactive",
+                        },
+                      ]}
+                      placeholder="Select status"
+                      error={errors.status?.message}
+                      required
+                    />
+                  )}
+                />
 
-                  <CustomSelect
-                    size="sm"
-                    rounded="rounded-lg"
-                    // label="Response Tone"
-                    name="tone"
-                    value={formData.tone}
-                    onChange={handleChange}
-                    options={[
-                      {
-                        value: "friendly",
-                        label: "Friendly",
-                      },
-                      {
-                        value: "professional",
-                        label: "Professional",
-                      },
-                      {
-                        value: "casual",
-                        label: "Casual",
-                      },
-                      {
-                        value: "formal",
-                        label: "Formal",
-                      },
-                    ]}
-                    // className={}
+                <div className="md:col-span-2">
+                  <FormTextarea
+                    label="Welcome Message"
+                    rows={3}
+                    placeholder="Hi 👋 Welcome! How can I help you today?"
+                    error={errors.chatbot?.welcomeMessage?.message}
+                    {...register("chatbot.welcomeMessage")}
                   />
                 </div>
+
+                <div className="md:col-span-2">
+                  <FormTextarea
+                    label="AI Instructions"
+                    rows={7}
+                    placeholder="Tell the AI how it should help customers..."
+                    error={errors.chatbot?.aiInstructions?.message}
+                    {...register("chatbot.aiInstructions")}
+                  />
+
+                  <p className="mt-1.5 text-xs text-gray-500 dark:text-gray-400">
+                    These instructions guide the chatbot's behavior for this
+                    business.
+                  </p>
+                </div>
               </div>
-            </div>
+            </SectionCard>
 
-            <div className="border-b border-gray-200 p-5 dark:border-white/10 sm:p-6">
-              <div className="mb-5">
-                <h2 className="text-base font-semibold text-gray-900 dark:text-white">
-                  Welcome Message
-                </h2>
+            {/* PREDEFINED QUESTIONS */}
 
-                <p className="mt-1 text-xs text-gray-500 dark:text-gray-400">
-                  This message will be shown when a customer opens the chatbot.
-                </p>
+            <SectionCard
+              icon={MessageCircle}
+              title="Predefined Questions"
+              description="Questions customers can quickly ask your chatbot."
+              action={
+                fields.length === 0 && (
+                  <button
+                    type="button"
+                    onClick={() =>
+                      append({
+                        question: "",
+                        enabled: true,
+                        sortOrder: fields.length + 1,
+                      })
+                    }
+                    className="
+                    inline-flex items-center gap-2
+                    rounded-lg
+                    bg-blue-600
+                    px-3 py-2
+                    text-xs font-medium
+                    text-white
+                    transition
+                    hover:bg-blue-700
+                  "
+                  >
+                    <Plus size={15} />
+                    Add Question
+                  </button>
+                )
+              }
+            >
+              {fields.length === 0 ? (
+                <div
+                  className="
+                    rounded-xl
+                    border border-dashed
+                    border-gray-200
+                    p-8
+                    text-center
+                    dark:border-white/10
+                  "
+                >
+                  <MessageCircle size={25} className="mx-auto text-gray-400" />
+
+                  <p className="mt-2 text-sm font-medium">
+                    No predefined questions
+                  </p>
+
+                  <p className="mt-1 text-xs text-gray-500 dark:text-gray-400">
+                    Add questions that customers can quickly ask.
+                  </p>
+                </div>
+              ) : (
+                <div className="space-y-3">
+                  {fields.map((field, index) => (
+                    <div
+                      key={field.id}
+                      className="
+                        flex flex-col gap-3
+                        rounded-xl
+                        border border-gray-200
+                        bg-gray-50
+                        p-3
+                        sm:flex-row
+                        sm:items-center
+                        dark:border-white/10
+                        dark:bg-[#0f131b]
+                      "
+                    >
+                      <GripVertical
+                        size={18}
+                        className="
+                          hidden shrink-0
+                          text-gray-400
+                          sm:block
+                        "
+                      />
+
+                      <div className="min-w-0 flex-1">
+                        <input
+                          {...register(
+                            `chatbot.predefinedQuestions.${index}.question`,
+                          )}
+                          placeholder="Enter customer question..."
+                          className="
+                            w-full
+                            rounded-lg
+                            border
+                            border-gray-200
+                            bg-white
+                            px-3 py-2.5
+                            text-sm
+                            outline-none
+                            transition
+                            focus:border-blue-500
+                            focus:ring-2
+                            focus:ring-blue-500/10
+                            dark:border-white/10
+                            dark:bg-[#171b23]
+                            dark:text-white
+                            dark:placeholder:text-gray-500
+                          "
+                        />
+
+                        {errors.chatbot?.predefinedQuestions?.[index]?.question
+                          ?.message && (
+                          <p className="mt-1 text-xs text-red-500">
+                            {
+                              errors.chatbot.predefinedQuestions[index].question
+                                .message
+                            }
+                          </p>
+                        )}
+                      </div>
+
+                      <label
+                        className="
+                          flex cursor-pointer
+                          items-center gap-2
+                          text-xs
+                          text-gray-600
+                          dark:text-gray-400
+                        "
+                      >
+                        <input
+                          type="checkbox"
+                          {...register(
+                            `chatbot.predefinedQuestions.${index}.enabled`,
+                          )}
+                          className="h-4 w-4 rounded border-gray-300 text-blue-600 focus:ring-blue-500"
+                        />
+                        Enabled
+                      </label>
+
+                      <button
+                        type="button"
+                        onClick={() => remove(index)}
+                        className="
+                          inline-flex
+                          items-center
+                          justify-center
+                          rounded-lg
+                          p-2
+                          text-red-500
+                          transition
+                          hover:bg-red-500/10
+                        "
+                        title="Delete question"
+                      >
+                        <Trash2 size={17} />
+                      </button>
+                    </div>
+                  ))}
+
+                  {/* Bottum add button */}
+                  {fields.length > 0 && (
+                    <div className="flex justify-end">
+                      <button
+                        type="button"
+                        onClick={() =>
+                          append({
+                            question: "",
+                            enabled: true,
+                            sortOrder: fields.length + 1,
+                          })
+                        }
+                        className="
+                        inline-flex
+                        items-center
+                        gap-2
+                        rounded-lg
+                        bg-blue-600
+                        px-3
+                        py-2
+                        text-xs
+                        font-medium
+                        text-white
+                        transition
+                        hover:bg-blue-700
+                      "
+                      >
+                        <Plus size={15} />
+                        Add Question
+                      </button>
+                    </div>
+                  )}
+                </div>
+              )}
+            </SectionCard>
+
+            {message.text && (
+              <div
+                className={`
+              mb-6 flex items-start gap-3 rounded-xl
+              border p-4
+              ${
+                message.type === "success"
+                  ? `
+                    border-green-200
+                    bg-green-50
+                    text-green-700
+                    dark:border-green-500/20
+                    dark:bg-green-500/10
+                    dark:text-green-400
+                  `
+                  : `
+                    border-red-200
+                    bg-red-50
+                    text-red-700
+                    dark:border-red-500/20
+                    dark:bg-red-500/10
+                    dark:text-red-400
+                  `
+              }
+            `}
+              >
+                {message.type === "success" ? (
+                  <CheckCircle2 size={19} />
+                ) : (
+                  <AlertCircle size={19} />
+                )}
+
+                <p className="text-sm">{message.text}</p>
+
+                <button
+                  type="button"
+                  onClick={() =>
+                    setMessage({
+                      type: "",
+                      text: "",
+                    })
+                  }
+                  className="ml-auto"
+                >
+                  <X size={17} />
+                </button>
               </div>
+            )}
 
-              <textarea
-                name="welcomeMessage"
-                value={formData.welcomeMessage}
-                onChange={handleChange}
-                rows={4}
-                placeholder="Hi 👋 Welcome! How can I help you today?"
-                className="input-style"
-              />
-
-              <div className="mt-2 flex justify-end">
-                <span className="text-[11px] text-gray-400 dark:text-gray-500">
-                  {formData.welcomeMessage.length} characters
-                </span>
-              </div>
-            </div>
-
-            <div className="p-5 sm:p-6">
-              <div className="mb-5">
-                <h2 className="text-base font-semibold text-gray-900 dark:text-white">
-                  AI Instructions
-                </h2>
-
-                <p className="mt-1 text-xs leading-5 text-gray-500 dark:text-gray-400">
-                  Give additional instructions to guide how the AI should answer
-                  customer questions.
-                </p>
-              </div>
-
-              <textarea
-                name="aiInstructions"
-                value={formData.aiInstructions}
-                onChange={handleChange}
-                rows={7}
-                placeholder="Always be polite. Help users with products, pricing, availability and delivery related questions..."
-                className="input-style"
-              />
-
-              <div className="mt-2 flex flex-col gap-1 text-[11px] text-gray-500 dark:text-gray-400 sm:flex-row sm:items-center sm:justify-between">
-                <span>These instructions guide the AI response behavior.</span>
-
-                <span>{formData.aiInstructions.length} characters</span>
-              </div>
-            </div>
+            {/* BOTTOM SAVE */}
 
             <div
               className="
-                flex
-                flex-col-reverse
-                gap-3
-                border-t
-                border-gray-200
-                bg-gray-50/50
-                p-5
-
-                dark:border-white/10
-                dark:bg-white/2
-
+                flex flex-col gap-3
+                rounded-2xl
+                border border-gray-200
+                bg-white
+                p-4
+                shadow-sm
                 sm:flex-row
                 sm:items-center
-                sm:justify-end
-                sm:p-6
+                sm:justify-between
+                dark:border-white/10
+                dark:bg-[#171b23]
               "
             >
-              <button
-                type="button"
-                onClick={handleReset}
-                disabled={clientLoading}
-                className="
-                  inline-flex
-                  items-center
-                  justify-center
-                  gap-2
-                  rounded-xl
-                  border
-                  border-gray-200
-                  bg-white
-                  px-4
-                  py-2.5
-                  text-sm
-                  font-medium
-                  text-gray-700
-                  transition
-                  hover:bg-gray-50
-                  disabled:cursor-not-allowed
-                  disabled:opacity-50
+              <div>
+                <p className="text-sm font-medium">Save your changes</p>
 
-                  dark:border-white/10
-                  dark:bg-[#171b23]
-                  dark:text-gray-300
-                  dark:hover:bg-white/5
-                "
-              >
-                <RotateCcw size={16} />
-                Reset
-              </button>
+                <p className="mt-1 text-xs text-gray-500 dark:text-gray-400">
+                  Changes will immediately update your business chatbot
+                  configuration.
+                </p>
+              </div>
 
               <button
                 type="submit"
-                disabled={clientLoading}
+                disabled={saving || !isDirty}
                 className="
                   inline-flex
                   items-center
@@ -457,29 +934,208 @@ export default function ChatbotSettings() {
                   gap-2
                   rounded-xl
                   bg-blue-600
-                  px-5
-                  py-2.5
-                  text-sm
-                  font-medium
+                  px-5 py-2.5
+                  text-sm font-medium
                   text-white
-                  shadow-sm
                   transition
                   hover:bg-blue-700
-                  focus:outline-none
-                  focus:ring-2
-                  focus:ring-blue-500/30
                   disabled:cursor-not-allowed
-                  disabled:opacity-60
+                  disabled:opacity-50
                 "
               >
-                <Save size={16} />
+                {saving ? (
+                  <Loader2 size={17} className="animate-spin" />
+                ) : (
+                  <Save size={17} />
+                )}
 
-                {clientLoading ? "Saving..." : "Save Changes"}
+                {saving ? "Saving..." : "Save Changes"}
               </button>
             </div>
           </div>
         </form>
       </div>
     </div>
+  );
+}
+
+//  SECTION CARD
+
+function SectionCard({ icon: Icon, title, description, children, action }) {
+  return (
+    <section
+      className="
+        overflow-hidden
+        rounded-2xl
+        border border-gray-200
+        bg-white
+        shadow-sm
+        dark:border-white/10
+        dark:bg-[#171b23]
+      "
+    >
+      <div
+        className="
+          flex flex-col gap-3
+          border-b border-gray-200
+          px-5 py-4
+          sm:flex-row
+          sm:items-center
+          sm:justify-between
+          dark:border-white/10
+        "
+      >
+        <div className="flex items-start gap-3">
+          <div
+            className="
+              flex h-10 w-10
+              shrink-0
+              items-center justify-center
+              rounded-xl
+              bg-blue-500/10
+              text-blue-600
+              dark:text-blue-400
+            "
+          >
+            <Icon size={20} />
+          </div>
+
+          <div>
+            <h2 className="text-sm font-semibold">{title}</h2>
+
+            <p className="mt-0.5 text-xs text-gray-500 dark:text-gray-400">
+              {description}
+            </p>
+          </div>
+        </div>
+
+        {action}
+      </div>
+
+      <div className="p-5">{children}</div>
+    </section>
+  );
+}
+
+//  INPUT
+
+const FormInput = ({ label, required, error, className = "", ...props }) => {
+  return (
+    <div className={className}>
+      <label className="mb-1.5 block text-xs font-medium text-gray-700 dark:text-gray-300">
+        {label}
+
+        {required && <span className="ml-1 text-red-500">*</span>}
+      </label>
+
+      <input
+        {...props}
+        className={`
+          w-full
+          rounded-xl
+          border
+          ${
+            error
+              ? "border-red-400 focus:border-red-500"
+              : "border-gray-200 focus:border-blue-500"
+          }
+          bg-white
+          px-3.5 py-2.5
+          text-sm
+          text-gray-900
+          outline-none
+          transition
+          focus:ring-2
+          focus:ring-blue-500/10
+          dark:border-white/10
+          dark:bg-[#0f131b]
+          dark:text-white
+          dark:placeholder:text-gray-500
+          ${error ? "dark:border-red-500/60" : ""}
+        `}
+      />
+
+      {error && <p className="mt-1 text-xs text-red-500">{error}</p>}
+    </div>
+  );
+};
+
+//  TEXTAREA
+
+const FormTextarea = ({ label, required, error, className = "", ...props }) => {
+  return (
+    <div className={className}>
+      <label className="mb-1.5 block text-xs font-medium text-gray-700 dark:text-gray-300">
+        {label}
+
+        {required && <span className="ml-1 text-red-500">*</span>}
+      </label>
+
+      <textarea
+        {...props}
+        className={`
+          w-full
+          resize-y
+          rounded-xl
+          border
+          ${error ? "border-red-400" : "border-gray-200"}
+          bg-white
+          px-3.5 py-2.5
+          text-sm
+          text-gray-900
+          outline-none
+          transition
+          focus:border-blue-500
+          focus:ring-2
+          focus:ring-blue-500/10
+          dark:border-white/10
+          dark:bg-[#0f131b]
+          dark:text-white
+          dark:placeholder:text-gray-500
+          ${error ? "dark:border-red-500/60" : ""}
+        `}
+      />
+
+      {error && <p className="mt-1 text-xs text-red-500">{error}</p>}
+    </div>
+  );
+};
+
+//  STATUS BADGE
+
+function StatusBadge({ status }) {
+  const active = status === "active";
+
+  return (
+    <span
+      className={`
+        inline-flex items-center gap-1.5
+        rounded-full
+        px-3 py-1.5
+        text-xs font-medium
+        ${
+          active
+            ? `
+              bg-green-500/10
+              text-green-700
+              dark:text-green-400
+            `
+            : `
+              bg-gray-500/10
+              text-gray-600
+              dark:text-gray-400
+            `
+        }
+      `}
+    >
+      <span
+        className={`
+          h-1.5 w-1.5 rounded-full
+          ${active ? "bg-green-500" : "bg-gray-400"}
+        `}
+      />
+
+      {active ? "Active" : "Inactive"}
+    </span>
   );
 }

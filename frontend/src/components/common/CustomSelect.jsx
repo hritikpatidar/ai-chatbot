@@ -80,7 +80,7 @@ export default function CustomSelect({
           className={`
             mb-2
             block
-            text-sm
+            text-xs
             font-medium
             text-gray-700
             dark:text-gray-300

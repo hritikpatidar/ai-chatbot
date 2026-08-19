@@ -1,4 +1,21 @@
 import z from "zod";
+import { isValidPhoneNumber } from "libphonenumber-js";
+
+const validatePhoneNumber = (value) => {
+  if (!value || !value.trim()) {
+    return true;
+  }
+
+  try {
+    const phone = value.trim();
+    // Agar + already hai to dobara add nahi karna
+    const normalizedPhone = phone.startsWith("+") ? phone : `+${phone}`;
+
+    return isValidPhoneNumber(normalizedPhone);
+  } catch {
+    return false;
+  }
+};
 
 const passwordRegex =
   /^(?=.*[a-z])(?=.*[A-Z])(?=.*[0-9])(?=.*[!@#$%^&*_-]).{8,16}$/;
@@ -157,4 +174,97 @@ export const ticketSchema = z.object({
   status: z.enum(["open", "in_progress", "resolved", "closed"]),
 
   priority: z.enum(["low", "medium", "high"]),
+});
+
+const requiredPhoneField = z
+  .string()
+  .trim()
+  .min(1, "Phone number is required")
+  .refine(validatePhoneNumber, {
+    message: "Please enter a valid phone number",
+  });
+
+const optionalPhoneField = z.string().trim();
+
+export const predefinedQuestionSchema = z.object({
+  question: z
+    .string()
+    .trim()
+    .min(2, "Question must be at least 2 characters")
+    .max(250, "Question cannot exceed 250 characters"),
+
+  enabled: z.boolean().default(true),
+
+  sortOrder: z.coerce.number().default(0),
+});
+
+export const formSchema = z.object({
+  /* BUSINESS */
+  businessName: z
+    .string()
+    .trim()
+    .min(2, "Business name is required")
+    .max(150, "Business name cannot exceed 150 characters"),
+  businessType: z
+    .string()
+    .trim()
+    .min(2, "Business type is required")
+    .max(100, "Business type cannot exceed 100 characters"),
+  businessDescription: z
+    .string()
+    .max(1000, "Description cannot exceed 1000 characters")
+    .optional()
+    .or(z.literal("")),
+
+  /* ADDRESS */
+  address: z.object({
+    addressLine1: z.string().max(200).optional().or(z.literal("")),
+    addressLine2: z.string().max(200).optional().or(z.literal("")),
+    city: z.string().max(100).optional().or(z.literal("")),
+    state: z.string().max(100).optional().or(z.literal("")),
+    country: z.string().max(100).optional().or(z.literal("")),
+    postalCode: z.string().max(20).optional().or(z.literal("")),
+    googleMapsUrl: z
+      .string()
+      .url("Please enter a valid Google Maps URL")
+      .optional()
+      .or(z.literal("")),
+  }),
+
+  /* CONTACT */
+  contact: z.object({
+    phone: requiredPhoneField,
+    alternatePhone: optionalPhoneField,
+    whatsapp: optionalPhoneField,
+    email: z
+      .string()
+      .email("Please enter a valid email")
+      .optional()
+      .or(z.literal("")),
+    website: z
+      .string()
+      .url("Please enter a valid website URL")
+      .optional()
+      .or(z.literal("")),
+  }),
+
+  /* CHATBOT */
+  chatbot: z.object({
+    name: z.string().trim().min(2, "Bot name is required").max(100),
+    welcomeMessage: z
+      .string()
+      .trim()
+      .min(2, "Welcome message is required")
+      .max(500),
+    language: z.enum(["english", "hindi", "hinglish"]),
+    tone: z.enum(["friendly", "professional", "casual", "formal"]),
+    aiInstructions: z
+      .string()
+      .max(3000, "AI instructions cannot exceed 3000 characters")
+      .optional()
+      .or(z.literal("")),
+    predefinedQuestions: z.array(predefinedQuestionSchema),
+  }),
+
+  status: z.enum(["active", "inactive"]),
 });

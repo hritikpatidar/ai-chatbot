@@ -155,6 +155,7 @@ import { useLocation, useNavigate } from "react-router-dom";
 import socket from "../socket/socket";
 import { handleLogout } from "../utils/logout";
 import toast from "react-hot-toast";
+import { getGuestId } from "../utils/Auth";
 
 const SocketContext = createContext(null);
 
@@ -203,15 +204,17 @@ export const SocketProvider = ({ children }) => {
       if (!clientKey) {
         return;
       }
-
+      const guestId = !isAuthenticated ? getGuestId(clientKey) : null;
       socket.auth = {
         clientKey,
+        guestId,
       };
 
       console.log("🔌 Client Chatbot Socket Auth:", clientKey);
     } else if (isAuthenticated) {
       socket.auth = {
         token,
+        clientKey,
       };
 
       console.log("🔐 User Socket Auth");

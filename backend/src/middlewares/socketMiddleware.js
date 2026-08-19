@@ -5,6 +5,9 @@ export const socketMiddleware = async (socket, next) => {
   try {
     let token = socket.handshake.auth?.token;
     const clientKey = socket.handshake.auth?.clientKey;
+    const guestId = socket.handshake.auth?.guestId;
+    console.log("socket.handshake.auth", socket.handshake.auth);
+    console.log("guestId", guestId);
     if (!token) {
       const authorization = socket.handshake.headers?.token;
 
@@ -36,6 +39,9 @@ export const socketMiddleware = async (socket, next) => {
       }
       socket.businessClient = client;
       socket.clientId = client._id.toString();
+      if (!socket.user && guestId) {
+        socket.guestId = guestId;
+      }
     }
 
     if (!socket.user && !socket.clientId) {
@@ -46,6 +52,7 @@ export const socketMiddleware = async (socket, next) => {
       socketId: socket.id,
       userId: socket.user?.id || null,
       clientId: socket.clientId || null,
+      guestId: socket.guestId || null,
     });
 
     next();

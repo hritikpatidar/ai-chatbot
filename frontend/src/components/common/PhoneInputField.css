@@ -1,0 +1,342 @@
+/* =========================================================
+   PHONE INPUT CONTAINER
+========================================================= */
+
+.phone-input-container {
+  width: 100% !important;
+}
+
+
+/* =========================================================
+   INPUT
+========================================================= */
+
+.phone-input-field {
+  width: 100% !important;
+  height: 44px !important;
+
+  border-radius: 12px !important;
+
+  background: #ffffff !important;
+  color: #111827 !important;
+
+  border: 1px solid #e5e7eb !important;
+
+  font-size: 14px !important;
+
+  outline: none !important;
+
+  padding-left: 58px !important;
+
+  transition:
+    border-color 0.2s ease,
+    box-shadow 0.2s ease,
+    background-color 0.2s ease;
+}
+
+
+/* Focus */
+
+.phone-input-field:focus {
+  border-color: #3b82f6 !important;
+  box-shadow: 0 0 0 1px #3b82f6 !important;
+}
+
+
+/* Error */
+
+.phone-input-field.phone-input-error {
+  border-color: #f87171 !important;
+}
+
+
+/* =========================================================
+   COUNTRY BUTTON
+========================================================= */
+
+.phone-input-button {
+  width: 48px !important;
+  height: 44px !important;
+
+  background: #f9fafb !important;
+
+  border: 1px solid #e5e7eb !important;
+  border-right: 0 !important;
+
+  border-radius: 12px 0 0 12px !important;
+
+  transition: background-color 0.2s ease !important;
+}
+
+.phone-input-button:hover {
+  background: #f3f4f6 !important;
+}
+
+
+/* Selected flag */
+
+.phone-input-container .selected-flag {
+  width: 48px !important;
+  height: 42px !important;
+
+  background: transparent !important;
+
+  border-radius: 12px 0 0 12px !important;
+}
+
+.phone-input-container .selected-flag:hover {
+  background: #f3f4f6 !important;
+}
+
+
+/* Open */
+
+.phone-input-container .flag-dropdown.open {
+  background: #f9fafb !important;
+
+  border-radius: 12px 0 0 12px !important;
+}
+
+
+/* =========================================================
+   DROPDOWN
+========================================================= */
+
+/*
+ * IMPORTANT:
+ * dropdownClass directly .country-list par apply hota hai.
+ */
+
+.phone-input-dropdown {
+  position: fixed !important;
+
+  z-index: 999999 !important;
+
+  width: 300px !important;
+  max-width: calc(100vw - 32px) !important;
+
+  max-height: 240px !important;
+
+  margin: 0 !important;
+  padding: 4px 0 !important;
+
+  overflow-y: auto !important;
+  overflow-x: hidden !important;
+
+  background: #ffffff !important;
+
+  border: 1px solid #e5e7eb !important;
+
+  border-radius: 12px !important;
+
+  box-shadow:
+    0 12px 30px rgba(0, 0, 0, 0.15) !important;
+
+  scrollbar-width: thin;
+
+  scrollbar-color: #cbd5e1 #f3f4f6;
+}
+
+
+/* =========================================================
+   SCROLLBAR - LIGHT
+========================================================= */
+
+.phone-input-dropdown::-webkit-scrollbar {
+  width: 6px;
+}
+
+.phone-input-dropdown::-webkit-scrollbar-track {
+  background: #f3f4f6;
+  border-radius: 999px;
+}
+
+.phone-input-dropdown::-webkit-scrollbar-thumb {
+  background: #cbd5e1;
+  border-radius: 999px;
+}
+
+.phone-input-dropdown::-webkit-scrollbar-thumb:hover {
+  background: #94a3b8;
+}
+
+
+/* =========================================================
+   COUNTRY ITEM
+========================================================= */
+
+.phone-input-dropdown .country {
+  display: flex !important;
+
+  align-items: center !important;
+
+  min-height: 38px !important;
+
+  padding: 8px 12px !important;
+
+  background: #ffffff !important;
+
+  color: #374151 !important;
+
+  cursor: pointer !important;
+
+  transition:
+    background-color 0.15s ease,
+    color 0.15s ease;
+}
+
+
+/* Hover */
+
+.phone-input-dropdown .country:hover {
+  background: #f3f4f6 !important;
+
+  color: #111827 !important;
+}
+
+
+/* Selected */
+
+.phone-input-dropdown .country.highlight {
+  background: #eff6ff !important;
+
+  color: #2563eb !important;
+}
+
+
+/* Dial code */
+
+.phone-input-dropdown .country .dial-code {
+  color: #6b7280 !important;
+}
+
+
+/* =========================================================
+   DARK MODE
+========================================================= */
+
+.dark .phone-input-field {
+  background: #11151d !important;
+
+  color: #ffffff !important;
+
+  border-color: rgba(255, 255, 255, 0.1) !important;
+}
+
+
+.dark .phone-input-field:focus {
+  border-color: #3b82f6 !important;
+
+  box-shadow: 0 0 0 1px #3b82f6 !important;
+}
+
+
+/* Country button */
+
+.dark .phone-input-button {
+  background: #171b23 !important;
+
+  border-color: rgba(255, 255, 255, 0.1) !important;
+}
+
+
+.dark .phone-input-button:hover {
+  background: #222936 !important;
+}
+
+
+/* Open */
+
+.dark .phone-input-container .flag-dropdown.open {
+  background: #171b23 !important;
+
+  border-color: rgba(255, 255, 255, 0.1) !important;
+}
+
+
+/* Selected flag */
+
+.dark .phone-input-container .selected-flag {
+  background: transparent !important;
+}
+
+
+.dark .phone-input-container .selected-flag:hover {
+  background: #222936 !important;
+}
+
+
+/* =========================================================
+   DARK DROPDOWN
+========================================================= */
+
+.dark .phone-input-dropdown {
+  background: #171b23 !important;
+
+  border-color: rgba(255, 255, 255, 0.1) !important;
+
+  box-shadow:
+    0 15px 35px rgba(0, 0, 0, 0.45) !important;
+
+  scrollbar-color: #4b5563 #171b23;
+}
+
+
+/* Dark scrollbar */
+
+.dark .phone-input-dropdown::-webkit-scrollbar {
+  width: 6px;
+}
+
+.dark .phone-input-dropdown::-webkit-scrollbar-track {
+  background: #171b23;
+}
+
+.dark .phone-input-dropdown::-webkit-scrollbar-thumb {
+  background: #4b5563;
+
+  border-radius: 999px;
+}
+
+.dark .phone-input-dropdown::-webkit-scrollbar-thumb:hover {
+  background: #6b7280;
+}
+
+
+/* Country */
+
+.dark .phone-input-dropdown .country {
+  background: #171b23 !important;
+
+  color: #d1d5db !important;
+}
+
+
+/* Hover */
+
+.dark .phone-input-dropdown .country:hover {
+  background: #222936 !important;
+
+  color: #ffffff !important;
+}
+
+
+/* Selected */
+
+.dark .phone-input-dropdown .country.highlight {
+  background: rgba(59, 130, 246, 0.12) !important;
+
+  color: #60a5fa !important;
+}
+
+
+/* Dial code */
+
+.dark .phone-input-dropdown .country .dial-code {
+  color: #9ca3af !important;
+}
+
+
+.dark .phone-input-dropdown .country:hover .dial-code {
+  color: #d1d5db !important;
+}

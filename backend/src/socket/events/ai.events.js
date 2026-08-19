@@ -25,6 +25,7 @@ import {
   buildKnowledgeContext,
 } from "../../services/knowledge.service.js";
 import { createAITicketService } from "../../services/ticket.service.js";
+import { findOrCreateGuestConversation } from "../../services/conversation.service.js";
 
 const activeStreams = new Map();
 
@@ -44,6 +45,9 @@ export const registerAIEvents = (io, socket) => {
 
       const userId = socket.user?.id || null;
       const clientId = socket.clientId || null;
+      const guestId = socket.guestId || null;
+      console.log("clientId",clientId)
+      console.log("guestId",guestId)
 
       if (!userId && !clientId) {
         socket.emit("ai:error", {
@@ -75,7 +79,7 @@ export const registerAIEvents = (io, socket) => {
       }
 
       let conversation;
-
+      console.log("conversationId",conversationId)
       if (conversationId) {
         if (clientId) {
           conversation = await findConversationByIdAndClient(
@@ -117,7 +121,18 @@ export const registerAIEvents = (io, socket) => {
         if (clientId) {
           conversationData.clientId = clientId;
         }
-        conversation = await createConversation(conversationData);
+
+        if (guestId) {
+          conversation = await findOrCreateGuestConversation({
+            clientId,
+            guestId,
+            title: message.substring(0, 40),
+            lastMessage: message,
+          });
+        } else {
+          conversation = await createConversation(conversationData);
+        }
+        console.log("conversation",conversation)
         socket.emit("conversation:created", {
           conversation,
         });

@@ -9,8 +9,8 @@ import profileRoutes from "./routes/profile.routes.js";
 import clientRoutes from "./routes/client.routes.js";
 import productRoutes from "./routes/product.routes.js";
 import faqRoutes from "./routes/faq.routes.js";
-import ticketRoutes from "./routes/ticket.routes.js"
-import adminRoutes from "./routes/admin.route.js"
+import ticketRoutes from "./routes/ticket.routes.js";
+import adminRoutes from "./routes/admin.route.js";
 import notFound from "./middlewares/notFound.js";
 import errorHandler from "./middlewares/errorHandler.js";
 import { redisClient } from "./config/redis.js";
@@ -21,7 +21,7 @@ const app = express();
 // Middlewares
 app.use(
   cors({
-    origin: env.CLIENT_URL, // https://ai.chatbot.com
+    origin: [env.CLIENT_URL, "https://my-ai-chatbot-project.vercel.app"],
     credentials: true,
   }),
 );

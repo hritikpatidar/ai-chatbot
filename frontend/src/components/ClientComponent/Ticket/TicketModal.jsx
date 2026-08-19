@@ -1,10 +1,11 @@
 import { useEffect, useState } from "react";
 import { Save, Ticket, X } from "lucide-react";
+import CustomSelect from "../../common/CustomSelect";
 
 const INITIAL_FORM = {
   subject: "",
   description: "",
-  category: "general",
+  // category: "general",
   priority: "medium",
   status: "open",
 };
@@ -27,7 +28,6 @@ export default function TicketModal({
       setFormData({
         subject: ticket.subject || "",
         description: ticket.description || "",
-        category: ticket.category || "general",
         priority: ticket.priority || "medium",
         status: ticket.status || "open",
       });
@@ -219,7 +219,95 @@ export default function TicketModal({
                 {formData.subject.length}/150
               </p>
             </div>
+            {/* Priority + Status*/}
+            <div className="grid grid-cols-1 gap-5 sm:grid-cols-2">
+              {/* Priority */}
+              <div>
+                <label
+                  htmlFor="ticket-priority"
+                  className="
+                    mb-2
+                    block
+                    text-sm
+                    font-medium
+                    text-gray-700
+                    dark:text-gray-300
+                  "
+                >
+                  Priority
+                </label>
+                <CustomSelect
+                  size="md"
+                  // label="Response Tone"
+                  name="priority"
+                  value={formData.priority}
+                  onChange={handleChange}
+                  options={[
+                    {
+                      value: "low",
+                      label: "Low",
+                    },
+                    {
+                      value: "medium",
+                      label: "Medium",
+                    },
+                    {
+                      value: "high",
+                      label: "High",
+                    },
+                  ]}
+                  rounded="rounded-lg"
+                  // className={inputClass}
+                  disabled={loading}
+                />
+              </div>
+              {isEdit && (
+                <div>
+                  <label
+                    htmlFor="ticket-status"
+                    className="
+                    mb-2
+                    block
+                    text-sm
+                    font-medium
+                    text-gray-700
+                    dark:text-gray-300
+                  "
+                  >
+                    Status
+                  </label>
 
+                  <CustomSelect
+                    size="md"
+                    // label="Response Tone"
+                    name="status"
+                    value={formData.status}
+                    onChange={handleChange}
+                    options={[
+                      {
+                        value: "open",
+                        label: "Open",
+                      },
+                      {
+                        value: "in_progress",
+                        label: "In Progress",
+                      },
+                      {
+                        value: "resolved",
+                        label: "Resolved",
+                      },
+                      {
+                        value: "closed",
+                        label: "Closed",
+                      },
+                    ]}
+                    rounded="rounded-lg"
+                    // className={inputClass}
+                    disabled={loading}
+                  />
+                </div>
+              )}
+            </div>
             {/* Description */}
             <div>
               <label
@@ -253,104 +341,7 @@ export default function TicketModal({
               </p>
             </div>
 
-            {/* Category + Priority */}
-            <div className="grid grid-cols-1 gap-5 sm:grid-cols-2">
-              {/* Category */}
-              <div>
-                <label
-                  htmlFor="ticket-category"
-                  className="
-                    mb-2
-                    block
-                    text-sm
-                    font-medium
-                    text-gray-700
-                    dark:text-gray-300
-                  "
-                >
-                  Category
-                </label>
-
-                <select
-                  id="ticket-category"
-                  name="category"
-                  value={formData.category}
-                  onChange={handleChange}
-                  className={inputClass}
-                  disabled={loading}
-                >
-                  <option value="general">General</option>
-                  <option value="technical">Technical</option>
-                  <option value="billing">Billing</option>
-                  <option value="product">Product</option>
-                  <option value="chatbot">Chatbot</option>
-                  <option value="other">Other</option>
-                </select>
-              </div>
-
-              {/* Priority */}
-              <div>
-                <label
-                  htmlFor="ticket-priority"
-                  className="
-                    mb-2
-                    block
-                    text-sm
-                    font-medium
-                    text-gray-700
-                    dark:text-gray-300
-                  "
-                >
-                  Priority
-                </label>
-
-                <select
-                  id="ticket-priority"
-                  name="priority"
-                  value={formData.priority}
-                  onChange={handleChange}
-                  className={inputClass}
-                  disabled={loading}
-                >
-                  <option value="low">Low</option>
-                  <option value="medium">Medium</option>
-                  <option value="high">High</option>
-                </select>
-              </div>
-            </div>
-
             {/* Status only while editing */}
-            {isEdit && (
-              <div>
-                <label
-                  htmlFor="ticket-status"
-                  className="
-                    mb-2
-                    block
-                    text-sm
-                    font-medium
-                    text-gray-700
-                    dark:text-gray-300
-                  "
-                >
-                  Status
-                </label>
-
-                <select
-                  id="ticket-status"
-                  name="status"
-                  value={formData.status}
-                  onChange={handleChange}
-                  className={inputClass}
-                  disabled={loading}
-                >
-                  <option value="open">Open</option>
-                  <option value="in_progress">In Progress</option>
-                  <option value="resolved">Resolved</option>
-                  <option value="closed">Closed</option>
-                </select>
-              </div>
-            )}
           </div>
 
           {/* Footer */}

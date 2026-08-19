@@ -1,5 +1,6 @@
 import { Edit, Edit2, MoreHorizontal, Package, Trash2 } from "lucide-react";
 import ActionButton from "../../common/ActionButton";
+import StatusBadge from "../../common/StatusBadge";
 
 export default function ProductTable({
   products = [],
@@ -309,18 +310,3 @@ function AvailabilityBadge({ availability }) {
   );
 }
 
-function StatusBadge({ status }) {
-  const active = status === "active";
-
-  return (
-    <span
-      className={`inline-flex rounded-full px-2.5 py-1 text-[11px] font-medium ${
-        active
-          ? "bg-green-500/10 text-green-600 dark:text-green-400"
-          : "bg-gray-500/10 text-gray-600 dark:text-gray-400"
-      }`}
-    >
-      {active ? "Active" : "Inactive"}
-    </span>
-  );
-}

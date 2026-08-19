@@ -6,6 +6,7 @@ import {
   XCircle,
 } from "lucide-react";
 import ActionButton from "../../common/ActionButton";
+import StatusBadge from "../../common/StatusBadge";
 
 export default function FAQTable({
   faqs = [],
@@ -246,28 +247,5 @@ export default function FAQTable({
   );
 }
 
-function StatusBadge({ status }) {
-  const active = status === "active";
 
-  return (
-    <span
-      className={`
-        inline-flex items-center gap-1.5
-        rounded-full
-        px-2.5 py-1
-        text-[10px]
-        font-medium
-        ${
-          active
-            ? "bg-green-500/10 text-green-600 dark:text-green-400"
-            : "bg-red-500/10 text-red-600 dark:text-red-400"
-        }
-      `}
-    >
-      {active ? <CheckCircle2 size={12} /> : <XCircle size={12} />}
-
-      {active ? "Active" : "Inactive"}
-    </span>
-  );
-}
 

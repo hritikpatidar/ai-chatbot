@@ -120,6 +120,10 @@ export const updateClientTicketService = async ({
   if (data.priority !== undefined) {
     allowedData.priority = data.priority;
   }
+  
+  if (data.priority !== undefined) {
+    allowedData.priority = data.priority;
+  }
 
   if (data.subject !== undefined) {
     allowedData.subject = data.subject;

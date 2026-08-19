@@ -322,12 +322,16 @@ export default function ClientFAQs() {
 
         <div className="mt-6 grid grid-cols-2 gap-3 lg:grid-cols-4">
           <StatBox title="Total FAQs" value={pagination.total} />
-
-          <StatBox title="Current Page" value={pagination.page} />
-
           <StatBox title="Total Pages" value={pagination.totalPages} />
+          <StatBox
+            title="Active"
+            value={faqs.filter((item) => item.status !== "inactive").length}
+          />
 
-          <StatBox title="Showing" value={faqs.length} />
+          <StatBox
+            title="Inactive"
+            value={faqs.filter((item) => item.status !== "active").length}
+          />
         </div>
 
         {/* =================================================

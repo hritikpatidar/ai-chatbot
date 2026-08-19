@@ -46,8 +46,8 @@ export const registerAIEvents = (io, socket) => {
       const userId = socket.user?.id || null;
       const clientId = socket.clientId || null;
       const guestId = socket.guestId || null;
-      console.log("clientId",clientId)
-      console.log("guestId",guestId)
+      console.log("clientId", clientId);
+      console.log("guestId", guestId);
 
       if (!userId && !clientId) {
         socket.emit("ai:error", {
@@ -79,7 +79,7 @@ export const registerAIEvents = (io, socket) => {
       }
 
       let conversation;
-      console.log("conversationId",conversationId)
+      console.log("conversationId", conversationId);
       if (conversationId) {
         if (clientId) {
           conversation = await findConversationByIdAndClient(
@@ -132,7 +132,7 @@ export const registerAIEvents = (io, socket) => {
         } else {
           conversation = await createConversation(conversationData);
         }
-        console.log("conversation",conversation)
+        console.log("conversation", conversation);
         socket.emit("conversation:created", {
           conversation,
         });
@@ -150,78 +150,78 @@ export const registerAIEvents = (io, socket) => {
       if (clientId) {
         const knowledge = await getRelevantClientKnowledge(clientId, message);
         knowledgeContext = buildKnowledgeContext(knowledge);
-        // const classification = await classifyUserMessage({
-        //   message,
-        //   knowledgeContext,
-        //   client,
-        // });
+        const classification = await classifyUserMessage({
+          message,
+          knowledgeContext,
+          client,
+        });
 
-        // // NOT BUSINESS RELATED
-        // if (!classification.businessRelated) {
-        //   const fallbackMessage =
-        //     "I'm sorry, I can only help with questions related to our business and services. I've created a support ticket for you.";
+        // NOT BUSINESS RELATED
+        if (!classification.businessRelated) {
+          const fallbackMessage =
+            "I'm sorry, I can only help with questions related to our business and services. I've created a support ticket for you.";
 
-        //   await createMessage({
-        //     conversationId: conversation._id,
-        //     role: "assistant",
-        //     text: fallbackMessage,
-        //   });
+          await createMessage({
+            conversationId: conversation._id,
+            role: "assistant",
+            text: fallbackMessage,
+          });
 
-        //   const ticket = await createAITicketService({
-        //     userId: userId || null,
-        //     clientId,
-        //     conversationId: conversation._id,
-        //     messageId: userMessage._id,
-        //     userMessage: message,
-        //   });
+          const ticket = await createAITicketService({
+            userId: userId || null,
+            clientId,
+            conversationId: conversation._id,
+            messageId: userMessage._id,
+            userMessage: message,
+          });
 
-        //   socket.emit("ai:chunk", {
-        //     text: fallbackMessage,
-        //   });
+          socket.emit("ai:chunk", {
+            text: fallbackMessage,
+          });
 
-        //   socket.emit("ai:end", {
-        //     success: true,
-        //     conversationId: conversation._id,
-        //     response: fallbackMessage,
-        //     ticketCreated: true,
-        //     ticketId: ticket._id,
-        //   });
+          socket.emit("ai:end", {
+            success: true,
+            conversationId: conversation._id,
+            response: fallbackMessage,
+            ticketCreated: true,
+            ticketId: ticket._id,
+          });
 
-        //   return;
-        // }
-        // // BUSINESS RELATED BUT AI DOES NOT KNOW
-        // if (classification.businessRelated && !classification.canAnswer) {
-        //   const fallbackMessage =
-        //     "I'm sorry, I don't have enough information to answer that. I've created a support ticket for you.";
+          return;
+        }
+        // BUSINESS RELATED BUT AI DOES NOT KNOW
+        if (classification.businessRelated && !classification.canAnswer) {
+          const fallbackMessage =
+            "I'm sorry, I don't have enough information to answer that. I've created a support ticket for you.";
 
-        //   await createMessage({
-        //     conversationId: conversation._id,
-        //     role: "assistant",
-        //     text: fallbackMessage,
-        //   });
+          await createMessage({
+            conversationId: conversation._id,
+            role: "assistant",
+            text: fallbackMessage,
+          });
 
-        //   const ticket = await createAITicketService({
-        //     userId: userId || null,
-        //     clientId,
-        //     conversationId: conversation._id,
-        //     messageId: userMessage._id,
-        //     userMessage: message,
-        //   });
+          const ticket = await createAITicketService({
+            userId: userId || null,
+            clientId,
+            conversationId: conversation._id,
+            messageId: userMessage._id,
+            userMessage: message,
+          });
+          console.log("ticket", ticket._id);
+          socket.emit("ai:chunk", {
+            text: fallbackMessage,
+          });
 
-        //   socket.emit("ai:chunk", {
-        //     text: fallbackMessage,
-        //   });
+          socket.emit("ai:end", {
+            success: true,
+            conversationId: conversation._id,
+            response: fallbackMessage,
+            ticketCreated: true,
+            ticketId: ticket._id,
+          });
 
-        //   socket.emit("ai:end", {
-        //     success: true,
-        //     conversationId: conversation._id,
-        //     response: fallbackMessage,
-        //     ticketCreated: true,
-        //     ticketId: ticket._id,
-        //   });
-
-        //   return;
-        // }
+          return;
+        }
       }
       let systemInstruction = "";
 

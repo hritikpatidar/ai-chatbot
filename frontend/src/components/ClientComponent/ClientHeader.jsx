@@ -10,8 +10,7 @@ export default function ClientHeader({ onMenuClick }) {
     (state) => state?.authReducer?.AuthSlice,
   );
 
-  const { theme, toggleTheme } = useTheme();
-  const isDark = theme === "dark";
+  const { isDarkMode, toggleTheme } = useTheme();
 
   return (
     <header
@@ -88,9 +87,9 @@ export default function ClientHeader({ onMenuClick }) {
             dark:text-gray-300
             dark:hover:text-blue-400
           "
-          title={isDark ? "Switch to light mode" : "Switch to dark mode"}
+          title={isDarkMode ? "Switch to light mode" : "Switch to dark mode"}
         >
-          {isDark ? <Sun size={17} /> : <Moon size={17} />}
+          {isDarkMode ? <Sun size={17} /> : <Moon size={17} />}
         </button>
 
         {/* Notification */}

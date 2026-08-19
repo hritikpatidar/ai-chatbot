@@ -28,6 +28,7 @@ import {
   setConversationList,
 } from "../redux/features/Chat/chatSlice";
 import { useNavigate } from "react-router-dom";
+import { getFileIcon } from "../utils/Auth";
 
 export default function Welcome() {
   const {
@@ -244,40 +245,85 @@ export default function Welcome() {
                             src={URL.createObjectURL(file)}
                             alt=""
                             className="
-                                h-15
-                                w-15
-                                rounded-xl
-                                border
-                                border-gray-200
-                                object-cover
-                                dark:border-white/10
-                              "
+                              h-15
+                              w-15
+                              rounded-xl
+                              border
+                              border-gray-200
+                              object-cover
+                              dark:border-white/10
+                            "
                           />
                         ) : (
-                          <div
-                            className="
-                                flex
-                                h-20
-                                w-32
-                                flex-col
-                                justify-center
-                                rounded-xl
-                                border
-                                border-gray-200
-                                bg-gray-100
-                                px-3
-                                dark:border-white/10
-                                dark:bg-[#232936]
-                              "
-                          >
-                            <span className="truncate text-sm text-gray-900 dark:text-white">
-                              {file.name}
-                            </span>
+                          (() => {
+                            const FileIcon = getFileIcon(file);
 
-                            <span className="mt-1 text-xs text-gray-500 dark:text-gray-400">
-                              {(file.size / 1024 / 1024).toFixed(2)} MB
-                            </span>
-                          </div>
+                            return (
+                              <div
+                                className="
+                                  flex
+                                  h-20
+                                  w-32
+                                  items-center
+                                  gap-3
+                                  rounded-xl
+                                  border
+                                  border-gray-200
+                                  bg-gray-100
+                                  px-3
+                                  dark:border-white/10
+                                  dark:bg-[#232936]
+                                "
+                              >
+                                {/* File Icon */}
+                                <div
+                                  className="
+                                    flex
+                                    h-10
+                                    w-10
+                                    shrink-0
+                                    items-center
+                                    justify-center
+                                    rounded-lg
+                                    bg-white
+                                    text-gray-500
+                                    dark:bg-[#171b23]
+                                    dark:text-gray-300
+                                  "
+                                >
+                                  <FileIcon size={22} />
+                                </div>
+
+                                {/* File Info */}
+                                <div className="min-w-0">
+                                  <span
+                                    className="
+                                      block
+                                      truncate
+                                      text-sm
+                                      font-medium
+                                      text-gray-900
+                                      dark:text-white
+                                    "
+                                  >
+                                    {file.name}
+                                  </span>
+
+                                  <span
+                                    className="
+                                      mt-1
+                                      block
+                                      text-xs
+                                      text-gray-500
+                                      dark:text-gray-400
+                                    "
+                                  >
+                                    {(file.size / 1024 / 1024).toFixed(2)} MB
+                                  </span>
+                                </div>
+                              </div>
+                            );
+                          })()
                         )}
 
                         <button

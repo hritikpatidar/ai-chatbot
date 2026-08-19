@@ -1,3 +1,4 @@
+import { File, FileSpreadsheet, FileText, FileType } from "lucide-react";
 import {
   getItemLocalStorage,
   setItemLocalStorage,
@@ -22,6 +23,38 @@ export const getGuestId = (clientKey) => {
   return guestId;
 };
 
+export const getFileIcon = (file) => {
+  const type = file.type?.toLowerCase() || "";
+  const name = file.name?.toLowerCase() || "";
+
+  // PDF
+  if (type === "application/pdf" || name.endsWith(".pdf")) {
+    return FileText;
+  }
+
+  // Word
+  if (
+    type.includes("word") ||
+    type.includes("document") ||
+    name.endsWith(".doc") ||
+    name.endsWith(".docx")
+  ) {
+    return FileType;
+  }
+
+  // Excel
+  if (
+    type.includes("excel") ||
+    type.includes("spreadsheet") ||
+    name.endsWith(".xls") ||
+    name.endsWith(".xlsx")
+  ) {
+    return FileSpreadsheet;
+  }
+
+  // Default
+  return File;
+};
 
 export const detectURLs = (message) => {
   if (!message) return [];

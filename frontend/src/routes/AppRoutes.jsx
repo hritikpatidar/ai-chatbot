@@ -5,9 +5,9 @@ import { PublicRoute } from "./PublicRoute";
 import { PrivateRoute } from "./PrivateRoute";
 import { SocketProvider } from "../context/SocketContext";
 import PageLoader from "../components/common/PageLoader";
-import ClientRoute from "./ClientRoute";
 import DashboardLayout from "../pages/DashboardLayout";
 import ClientLayout from "../pages/Client/ClientLayout";
+import ClientRoute from "./ClientRoute";
 
 // Public Pages
 

@@ -15,6 +15,7 @@ import { useEffect, useRef } from "react";
 import useSpeechRecognition from "../hooks/useSpeechRecognition";
 import AIMessage from "../components/Chat/AIMessage";
 import { useSelector } from "react-redux";
+import { getFileIcon } from "../utils/Auth";
 
 export default function ChatContainer() {
   const {
@@ -407,7 +408,7 @@ export default function ChatContainer() {
           <div ref={messagesEndRef} />
         </div>
       </div>
-      <div className="py-1 md:px-28 lg:px-50">
+      <div className="py-1 px-6 md:px-28 lg:px-50">
         <div className="mx-auto max-w-5xl">
           <div
             className="
@@ -436,8 +437,8 @@ export default function ChatContainer() {
                           src={URL.createObjectURL(file)}
                           alt=""
                           className="
-                            h-16
-                            w-16
+                            h-15
+                            w-15
                             rounded-xl
                             border
                             border-gray-200
@@ -446,30 +447,75 @@ export default function ChatContainer() {
                           "
                         />
                       ) : (
-                        <div
-                          className="
-                            flex
-                            h-16
-                            w-28
-                            flex-col
-                            justify-center
-                            rounded-xl
-                            border
-                            border-gray-200
-                            bg-gray-100
-                            px-3
-                            dark:border-white/10
-                            dark:bg-[#232936]
-                          "
-                        >
-                          <span className="truncate text-xs text-gray-800 dark:text-white">
-                            {file.name}
-                          </span>
+                        (() => {
+                          const FileIcon = getFileIcon(file);
 
-                          <span className="text-[10px] text-gray-500 dark:text-gray-400">
-                            {(file.size / 1024 / 1024).toFixed(2)} MB
-                          </span>
-                        </div>
+                          return (
+                            <div
+                              className="
+                                flex
+                                h-15
+                                w-32
+                                items-center
+                                gap-2
+                                rounded-xl
+                                border
+                                border-gray-200
+                                bg-gray-100
+                                px-3
+                                dark:border-white/10
+                                dark:bg-[#232936]
+                              "
+                            >
+                              {/* File Icon */}
+                              <div
+                                className="
+                                  flex
+                                  h-10
+                                  w-10
+                                  shrink-0
+                                  items-center
+                                  justify-center
+                                  rounded-lg
+                                  bg-white
+                                  text-gray-500
+                                  dark:bg-[#171b23]
+                                  dark:text-gray-300
+                                "
+                              >
+                                <FileIcon size={22} />
+                              </div>
+
+                              {/* File Info */}
+                              <div className="min-w-0">
+                                <span
+                                  className="
+                                    block
+                                    truncate
+                                    text-sm
+                                    font-medium
+                                    text-gray-900
+                                    dark:text-white
+                                  "
+                                >
+                                  {file.name}
+                                </span>
+
+                                <span
+                                  className="
+                                    mt-1
+                                    block
+                                    text-xs
+                                    text-gray-500
+                                    dark:text-gray-400
+                                  "
+                                >
+                                  {(file.size / 1024 / 1024).toFixed(2)} MB
+                                </span>
+                              </div>
+                            </div>
+                          );
+                        })()
                       )}
 
                       <button

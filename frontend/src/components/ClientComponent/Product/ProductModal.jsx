@@ -1,6 +1,11 @@
-import { useEffect, useState } from "react";
+import { useEffect } from "react";
+import { useForm, Controller } from "react-hook-form";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { z } from "zod";
 import { X, Package } from "lucide-react";
+
 import CustomSelect from "../../common/CustomSelect";
+import { productSchema } from "../../../utils/validation";
 
 const initialForm = {
   name: "",
@@ -21,58 +26,84 @@ export default function ProductModal({
   product = null,
   loading = false,
 }) {
-  const [form, setForm] = useState(initialForm);
-
   const isEdit = Boolean(product);
+
+  const {
+    register,
+    control,
+    handleSubmit,
+    reset,
+    watch,
+    formState: { errors },
+  } = useForm({
+    resolver: zodResolver(productSchema),
+    defaultValues: initialForm,
+    mode: "onChange",
+  });
+
+  const image = watch("image");
+
+  /* =========================================================
+     EDIT / CREATE FORM RESET
+  ========================================================= */
 
   useEffect(() => {
     if (product) {
-      setForm({
+      reset({
         name: product.name || "",
+
         description: product.description || "",
+
         category: product.category || "",
+
         price:
           product.price !== null && product.price !== undefined
             ? product.price
             : "",
+
         currency: product.currency || "INR",
+
         availability: product.availability || "in_stock",
+
         stock:
           product.stock !== null && product.stock !== undefined
             ? product.stock
             : "",
+
         image: product.image || "",
+
         status: product.status || "active",
       });
     } else {
-      setForm(initialForm);
+      reset(initialForm);
     }
-  }, [product, isOpen]);
+  }, [product, isOpen, reset]);
 
   if (!isOpen) return null;
 
-  const handleChange = (e) => {
-    const { name, value } = e.target;
+  /* =========================================================
+     SUBMIT
+  ========================================================= */
 
-    setForm((prev) => ({
-      ...prev,
-      [name]: value,
-    }));
-  };
-
-  const handleSubmit = async (e) => {
-    e.preventDefault();
-
+  const handleFormSubmit = async (data) => {
     const payload = {
-      name: form.name.trim(),
-      description: form.description.trim(),
-      category: form.category.trim(),
-      price: form.price === "" ? null : Number(form.price),
-      currency: form.currency,
-      availability: form.availability,
-      stock: form.stock === "" ? null : Number(form.stock),
-      image: form.image.trim(),
-      status: form.status,
+      name: data.name.trim(),
+
+      description: data.description?.trim() || "",
+
+      category: data.category?.trim() || "",
+
+      price: data.price === "" ? null : Number(data.price),
+
+      currency: data.currency,
+
+      availability: data.availability,
+
+      stock: data.stock === "" ? null : Number(data.stock),
+
+      image: data.image?.trim() || "",
+
+      status: data.status,
     };
 
     await onSubmit(payload);
@@ -94,7 +125,10 @@ export default function ProductModal({
           dark:border-white/10 dark:bg-[#171b23]
         "
       >
-        {/* Header */}
+        {/* =================================================
+            HEADER
+        ================================================= */}
+
         <div
           className="
             flex shrink-0 items-center justify-between
@@ -140,179 +174,214 @@ export default function ProductModal({
           </button>
         </div>
 
-        {/* Form */}
-        <form onSubmit={handleSubmit} className="overflow-y-auto">
+        {/* =================================================
+            FORM
+        ================================================= */}
+
+        <form
+          onSubmit={handleSubmit(handleFormSubmit)}
+          className="overflow-y-auto"
+          noValidate
+        >
           <div className="space-y-5 p-5">
             {/* Name */}
-            <FormField label="Product Name" required>
+
+            <FormField
+              label="Product Name"
+              required
+              error={errors.name?.message}
+            >
               <input
                 type="text"
-                name="name"
-                value={form.name}
-                onChange={handleChange}
-                required
+                {...register("name")}
+                disabled={loading}
                 placeholder="Enter product name"
-                className="input-style"
+                className={`input-style ${errors.name ? "input-error" : ""}`}
               />
             </FormField>
 
             {/* Description */}
-            <FormField label="Description">
+
+            <FormField label="Description" error={errors.description?.message}>
               <textarea
-                name="description"
-                value={form.description}
-                onChange={handleChange}
+                {...register("description")}
+                disabled={loading}
                 rows={3}
                 placeholder="Enter product description"
-                className="input-style resize-none"
+                className={`input-style resize-none ${
+                  errors.description ? "input-error" : ""
+                }`}
               />
             </FormField>
 
             {/* Category + Currency */}
+
             <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
-              <FormField label="Category">
+              <FormField label="Category" error={errors.category?.message}>
                 <input
                   type="text"
-                  name="category"
-                  value={form.category}
-                  onChange={handleChange}
+                  {...register("category")}
+                  disabled={loading}
                   placeholder="e.g. Electronics"
-                  className="input-style"
+                  className={`input-style ${
+                    errors.category ? "input-error" : ""
+                  }`}
                 />
               </FormField>
 
-              <FormField label="Currency">
-                <CustomSelect
-                  size="sm"
-                  // label="Response Tone"
+              <FormField label="Currency" error={errors.currency?.message}>
+                <Controller
                   name="currency"
-                  value={form.currency}
-                  onChange={handleChange}
-                  options={[
-                    {
-                      value: "INR",
-                      label: "INR",
-                    },
-                    {
-                      value: "USD",
-                      label: "USD",
-                    },
-                    {
-                      value: "GBP",
-                      label: "GBP",
-                    },
-                    {
-                      value: "EUR",
-                      label: "EUR",
-                    },
-                  ]}
-                  rounded="rounded-lg"
-                  // className={}
+                  control={control}
+                  render={({ field }) => (
+                    <CustomSelect
+                      size="sm"
+                      name={field.name}
+                      value={field.value}
+                      onChange={field.onChange}
+                      disabled={loading}
+                      options={[
+                        {
+                          value: "INR",
+                          label: "INR",
+                        },
+                        {
+                          value: "USD",
+                          label: "USD",
+                        },
+                        {
+                          value: "GBP",
+                          label: "GBP",
+                        },
+                        {
+                          value: "EUR",
+                          label: "EUR",
+                        },
+                      ]}
+                      rounded="rounded-lg"
+                      error={errors.currency?.message}
+                    />
+                  )}
                 />
               </FormField>
             </div>
 
             {/* Price + Stock */}
+
             <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
-              <FormField label="Price">
+              <FormField label="Price" error={errors.price?.message}>
                 <input
                   type="number"
-                  name="price"
-                  value={form.price}
-                  onChange={handleChange}
+                  {...register("price")}
+                  disabled={loading}
                   min="0"
                   step="0.01"
                   placeholder="0"
-                  className="input-style"
+                  className={`input-style ${errors.price ? "input-error" : ""}`}
                 />
               </FormField>
 
-              <FormField label="Stock">
+              <FormField label="Stock" error={errors.stock?.message}>
                 <input
                   type="number"
-                  name="stock"
-                  value={form.stock}
-                  onChange={handleChange}
+                  {...register("stock")}
+                  disabled={loading}
                   min="0"
                   step="1"
                   placeholder="0"
-                  className="input-style"
+                  className={`input-style ${errors.stock ? "input-error" : ""}`}
                 />
               </FormField>
             </div>
 
             {/* Availability + Status */}
+
             <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
-              <FormField label="Availability">
-                <CustomSelect
-                  size="sm"
-                  // label="Response Tone"
+              <FormField
+                label="Availability"
+                error={errors.availability?.message}
+              >
+                <Controller
                   name="availability"
-                  value={form.availability}
-                  onChange={handleChange}
-                  options={[
-                    {
-                      value: "in_stock",
-                      label: "In Stock",
-                    },
-                    {
-                      value: "out_of_stock",
-                      label: "Out of Stock",
-                    },
-                    {
-                      value: "pre_order",
-                      label: "Pre Order",
-                    },
-                    {
-                      value: "unavailable",
-                      label: "Unavailable",
-                    },
-                  ]}
-                  rounded="rounded-lg"
-                  // className={}
+                  control={control}
+                  render={({ field }) => (
+                    <CustomSelect
+                      size="sm"
+                      name={field.name}
+                      value={field.value}
+                      onChange={field.onChange}
+                      disabled={loading}
+                      options={[
+                        {
+                          value: "in_stock",
+                          label: "In Stock",
+                        },
+                        {
+                          value: "out_of_stock",
+                          label: "Out of Stock",
+                        },
+                        {
+                          value: "pre_order",
+                          label: "Pre Order",
+                        },
+                        {
+                          value: "unavailable",
+                          label: "Unavailable",
+                        },
+                      ]}
+                      rounded="rounded-lg"
+                      error={errors.availability?.message}
+                    />
+                  )}
                 />
               </FormField>
 
-              <FormField label="Status">
-                <CustomSelect
-                  size="sm"
-                  // label="Response Tone"
+              <FormField label="Status" error={errors.status?.message}>
+                <Controller
                   name="status"
-                  value={form.status}
-                  onChange={handleChange}
-                  options={[
-                    {
-                      value: "active",
-                      label: "Active",
-                    },
-                    {
-                      value: "inactive",
-                      label: "Inactive",
-                    },
-                  ]}
-                  rounded="rounded-lg"
-                  // className={}
+                  control={control}
+                  render={({ field }) => (
+                    <CustomSelect
+                      size="sm"
+                      name={field.name}
+                      value={field.value}
+                      onChange={field.onChange}
+                      disabled={loading}
+                      options={[
+                        {
+                          value: "active",
+                          label: "Active",
+                        },
+                        {
+                          value: "inactive",
+                          label: "Inactive",
+                        },
+                      ]}
+                      rounded="rounded-lg"
+                      error={errors.status?.message}
+                    />
+                  )}
                 />
               </FormField>
             </div>
 
             {/* Image */}
-            <FormField label="Image URL">
+
+            <FormField label="Image URL" error={errors.image?.message}>
               <input
                 type="url"
-                name="image"
-                value={form.image}
-                onChange={handleChange}
+                {...register("image")}
+                disabled={loading}
                 placeholder="https://example.com/product.jpg"
-                className="input-style"
+                className={`input-style ${errors.image ? "input-error" : ""}`}
               />
             </FormField>
 
             {/* Image Preview */}
-            {form.image && (
+            {image && (
               <div className="overflow-hidden rounded-xl border border-gray-200 dark:border-white/10">
                 <img
-                  src={form.image}
+                  src={image}
                   alt="Product preview"
                   className="h-40 w-full object-cover"
                   onError={(e) => {
@@ -323,7 +392,10 @@ export default function ProductModal({
             )}
           </div>
 
-          {/* Footer */}
+          {/* =================================================
+              FOOTER
+          ================================================= */}
+
           <div
             className="
               flex flex-col-reverse gap-3
@@ -382,16 +454,29 @@ export default function ProductModal({
   );
 }
 
-function FormField({ label, required, children }) {
+/* =========================================================
+   FORM FIELD
+========================================================= */
+
+function FormField({ label, required, error, children }) {
   return (
     <div>
-      <label className="mb-1.5 block text-xs font-medium text-gray-700 dark:text-gray-300">
+      <label
+        className="
+          mb-1.5 block text-xs font-medium
+          text-gray-700 dark:text-gray-300
+        "
+      >
         {label}
 
         {required && <span className="ml-1 text-red-500">*</span>}
       </label>
 
       {children}
+
+      {error && (
+        <p className="mt-1.5 text-xs text-red-500 dark:text-red-400">{error}</p>
+      )}
     </div>
   );
 }

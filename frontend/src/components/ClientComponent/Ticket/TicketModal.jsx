@@ -1,14 +1,51 @@
-import { useEffect, useState } from "react";
+import { useEffect } from "react";
+import { useForm, Controller } from "react-hook-form";
+import { zodResolver } from "@hookform/resolvers/zod";
 import { Save, Ticket, X } from "lucide-react";
+
 import CustomSelect from "../../common/CustomSelect";
+import { ticketSchema } from "../../../utils/validation";
 
 const INITIAL_FORM = {
   subject: "",
   description: "",
-  // category: "general",
   priority: "medium",
   status: "open",
 };
+
+const PRIORITY_OPTIONS = [
+  {
+    value: "low",
+    label: "Low",
+  },
+  {
+    value: "medium",
+    label: "Medium",
+  },
+  {
+    value: "high",
+    label: "High",
+  },
+];
+
+const STATUS_OPTIONS = [
+  {
+    value: "open",
+    label: "Open",
+  },
+  {
+    value: "in_progress",
+    label: "In Progress",
+  },
+  {
+    value: "resolved",
+    label: "Resolved",
+  },
+  {
+    value: "closed",
+    label: "Closed",
+  },
+];
 
 export default function TicketModal({
   isOpen,
@@ -17,39 +54,53 @@ export default function TicketModal({
   ticket = null,
   loading = false,
 }) {
-  const [formData, setFormData] = useState(INITIAL_FORM);
-
   const isEdit = Boolean(ticket?._id);
 
+  const {
+    register,
+    control,
+    handleSubmit,
+    reset,
+    watch,
+    formState: { errors, isSubmitting },
+  } = useForm({
+    resolver: zodResolver(ticketSchema),
+
+    defaultValues: INITIAL_FORM,
+
+    mode: "onChange",
+
+    reValidateMode: "onChange",
+  });
+
+  const subject = watch("subject") || "";
+  const description = watch("description") || "";
+
+  /*
+   * Reset form whenever modal opens
+   * or ticket changes.
+   */
   useEffect(() => {
     if (!isOpen) return;
 
     if (ticket) {
-      setFormData({
+      reset({
         subject: ticket.subject || "",
         description: ticket.description || "",
         priority: ticket.priority || "medium",
         status: ticket.status || "open",
       });
     } else {
-      setFormData(INITIAL_FORM);
+      reset(INITIAL_FORM);
     }
-  }, [isOpen, ticket]);
+  }, [isOpen, ticket, reset]);
 
-  const handleChange = (e) => {
-    const { name, value } = e.target;
-
-    setFormData((prev) => ({
-      ...prev,
-      [name]: value,
-    }));
-  };
-
-  const handleSubmit = async (e) => {
-    e.preventDefault();
-    if (!formData.subject.trim()) return;
-    if (!formData.description.trim()) return;
-    await onSubmit?.(formData);
+  /*
+   * Existing submit functionality remains same.
+   * Only difference is that validated data comes here.
+   */
+  const handleFormSubmit = async (data) => {
+    await onSubmit?.(data);
   };
 
   if (!isOpen) return null;
@@ -76,6 +127,8 @@ export default function TicketModal({
     dark:placeholder:text-gray-500
   `;
 
+  const isSaving = loading || isSubmitting;
+
   return (
     <div
       className="
@@ -91,7 +144,7 @@ export default function TicketModal({
         backdrop-blur-sm
       "
       onMouseDown={(e) => {
-        if (e.target === e.currentTarget && !loading) {
+        if (e.target === e.currentTarget && !isSaving) {
           onClose?.();
         }
       }}
@@ -161,7 +214,7 @@ export default function TicketModal({
           <button
             type="button"
             onClick={onClose}
-            disabled={loading}
+            disabled={isSaving}
             className="
               shrink-0
               rounded-lg
@@ -183,8 +236,9 @@ export default function TicketModal({
 
         {/* Body */}
         <form
-          onSubmit={handleSubmit}
+          onSubmit={handleSubmit(handleFormSubmit)}
           className="min-h-0 flex-1 overflow-y-auto"
+          noValidate
         >
           <div className="space-y-5 p-5 sm:p-6">
             {/* Subject */}
@@ -200,26 +254,38 @@ export default function TicketModal({
                   dark:text-gray-300
                 "
               >
-                Subject
+                Subject <span className="ml-1 text-red-500">*</span>
               </label>
 
               <input
                 id="ticket-subject"
                 type="text"
-                name="subject"
-                value={formData.subject}
-                onChange={handleChange}
                 placeholder="Enter ticket subject"
                 maxLength={150}
-                className={inputClass}
-                disabled={loading}
+                disabled={isSaving}
+                className={`
+                  ${inputClass}
+                  ${
+                    errors.subject
+                      ? "border-red-400 focus:border-red-500 focus:ring-red-500/10"
+                      : ""
+                  }
+                `}
+                {...register("subject")}
               />
 
+              {errors.subject && (
+                <p className="mt-1.5 text-xs text-red-500 dark:text-red-400">
+                  {errors.subject.message}
+                </p>
+              )}
+
               <p className="mt-1.5 text-xs text-gray-400">
-                {formData.subject.length}/150
+                {subject.length}/150
               </p>
             </div>
-            {/* Priority + Status*/}
+
+            {/* Priority + Status */}
             <div className="grid grid-cols-1 gap-5 sm:grid-cols-2">
               {/* Priority */}
               <div>
@@ -236,78 +302,62 @@ export default function TicketModal({
                 >
                   Priority
                 </label>
-                <CustomSelect
-                  size="md"
-                  // label="Response Tone"
+
+                <Controller
                   name="priority"
-                  value={formData.priority}
-                  onChange={handleChange}
-                  options={[
-                    {
-                      value: "low",
-                      label: "Low",
-                    },
-                    {
-                      value: "medium",
-                      label: "Medium",
-                    },
-                    {
-                      value: "high",
-                      label: "High",
-                    },
-                  ]}
-                  rounded="rounded-lg"
-                  // className={inputClass}
-                  disabled={loading}
+                  control={control}
+                  render={({ field }) => (
+                    <CustomSelect
+                      size="md"
+                      name={field.name}
+                      value={field.value}
+                      onChange={field.onChange}
+                      options={PRIORITY_OPTIONS}
+                      rounded="rounded-lg"
+                      disabled={isSaving}
+                      error={errors.priority?.message}
+                    />
+                  )}
                 />
               </div>
+
+              {/* Status */}
               {isEdit && (
                 <div>
                   <label
                     htmlFor="ticket-status"
                     className="
-                    mb-2
-                    block
-                    text-sm
-                    font-medium
-                    text-gray-700
-                    dark:text-gray-300
-                  "
+                      mb-2
+                      block
+                      text-sm
+                      font-medium
+                      text-gray-700
+                      dark:text-gray-300
+                    "
                   >
                     Status
                   </label>
 
-                  <CustomSelect
-                    size="md"
-                    // label="Response Tone"
+                  <Controller
                     name="status"
-                    value={formData.status}
-                    onChange={handleChange}
-                    options={[
-                      {
-                        value: "open",
-                        label: "Open",
-                      },
-                      {
-                        value: "in_progress",
-                        label: "In Progress",
-                      },
-                      {
-                        value: "resolved",
-                        label: "Resolved",
-                      },
-                      {
-                        value: "closed",
-                        label: "Closed",
-                      },
-                    ]}
-                    rounded="rounded-lg"
-                    // className={inputClass}
-                    disabled={loading}
+                    control={control}
+                    render={({ field }) => (
+                      <CustomSelect
+                        size="md"
+                        name={field.name}
+                        value={field.value}
+                        onChange={field.onChange}
+                        options={STATUS_OPTIONS}
+                        rounded="rounded-lg"
+                        disabled={isSaving}
+                        error={errors.status?.message}
+                      />
+                    )}
                   />
                 </div>
               )}
             </div>
+
             {/* Description */}
             <div>
               <label
@@ -321,27 +371,37 @@ export default function TicketModal({
                   dark:text-gray-300
                 "
               >
-                Description
+                Description <span className="ml-1 text-red-500">*</span>
               </label>
 
               <textarea
                 id="ticket-description"
-                name="description"
-                value={formData.description}
-                onChange={handleChange}
                 placeholder="Describe your issue or request..."
                 rows={6}
                 maxLength={2000}
-                className={`${inputClass} resize-none`}
-                disabled={loading}
+                disabled={isSaving}
+                className={`
+                  ${inputClass}
+                  resize-none
+                  ${
+                    errors.description
+                      ? "border-red-400 focus:border-red-500 focus:ring-red-500/10"
+                      : ""
+                  }
+                `}
+                {...register("description")}
               />
 
+              {errors.description && (
+                <p className="mt-1.5 text-xs text-red-500 dark:text-red-400">
+                  {errors.description.message}
+                </p>
+              )}
+
               <p className="mt-1.5 text-xs text-gray-400">
-                {formData.description.length}/2000
+                {description.length}/2000
               </p>
             </div>
-
-            {/* Status only while editing */}
           </div>
 
           {/* Footer */}
@@ -365,7 +425,7 @@ export default function TicketModal({
             <button
               type="button"
               onClick={onClose}
-              disabled={loading}
+              disabled={isSaving}
               className="
                 inline-flex
                 items-center
@@ -394,11 +454,7 @@ export default function TicketModal({
 
             <button
               type="submit"
-              disabled={
-                loading ||
-                !formData.subject.trim() ||
-                !formData.description.trim()
-              }
+              disabled={isSaving}
               className="
                 inline-flex
                 items-center
@@ -419,7 +475,7 @@ export default function TicketModal({
             >
               <Save size={16} />
 
-              {loading
+              {isSaving
                 ? "Saving..."
                 : isEdit
                   ? "Update Ticket"

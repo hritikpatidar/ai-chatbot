@@ -158,6 +158,102 @@ export const changePasswordSchema = z
     path: ["confirmPassword"],
   });
 
+export const productSchema = z.object({
+  name: z
+    .string()
+    .trim()
+    .min(2, "Product name must be at least 2 characters")
+    .max(150, "Product name cannot exceed 150 characters"),
+
+  description: z
+    .string()
+    .trim()
+    .max(1000, "Description cannot exceed 1000 characters")
+    .optional()
+    .or(z.literal("")),
+
+  category: z
+    .string()
+    .trim()
+    .max(100, "Category cannot exceed 100 characters")
+    .optional()
+    .or(z.literal("")),
+
+  price: z.union([z.string(), z.number()]).refine(
+    (value) => {
+      if (value === "" || value === null || value === undefined) {
+        return true;
+      }
+
+      return Number(value) >= 0;
+    },
+    {
+      message: "Price cannot be negative",
+    },
+  ),
+
+  currency: z.enum(["INR", "USD", "GBP", "EUR"]),
+
+  availability: z.enum([
+    "in_stock",
+    "out_of_stock",
+    "pre_order",
+    "unavailable",
+  ]),
+
+  stock: z.union([z.string(), z.number()]).refine(
+    (value) => {
+      if (value === "" || value === null || value === undefined) {
+        return true;
+      }
+
+      return Number.isInteger(Number(value)) && Number(value) >= 0;
+    },
+    {
+      message: "Stock must be a valid non-negative number",
+    },
+  ),
+
+  image: z
+    .string()
+    .trim()
+    .url("Please enter a valid image URL")
+    .optional()
+    .or(z.literal("")),
+
+  status: z.enum(["active", "inactive"]),
+});
+
+export const faqSchema = z.object({
+  question: z
+    .string()
+    .trim()
+    .min(2, "Question must be at least 2 characters")
+    .max(250, "Question cannot exceed 250 characters"),
+
+  answer: z
+    .string()
+    .trim()
+    .min(2, "Answer must be at least 2 characters")
+    .max(3000, "Answer cannot exceed 3000 characters"),
+
+  category: z
+    .string()
+    .trim()
+    .max(100, "Category cannot exceed 100 characters")
+    .optional()
+    .or(z.literal("")),
+
+  keywords: z
+    .string()
+    .trim()
+    .max(500, "Keywords cannot exceed 500 characters")
+    .optional()
+    .or(z.literal("")),
+
+  status: z.enum(["active", "inactive"]),
+});
+
 export const ticketSchema = z.object({
   subject: z
     .string()

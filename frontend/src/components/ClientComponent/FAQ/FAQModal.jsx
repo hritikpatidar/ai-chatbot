@@ -1,6 +1,14 @@
-import { useEffect, useState } from "react";
+import { useEffect } from "react";
 import { X, Save, Loader2 } from "lucide-react";
+import { useForm, Controller } from "react-hook-form";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { z } from "zod";
+
 import CustomSelect from "../../common/CustomSelect";
+import { faqSchema } from "../../../utils/validation";
+/* =========================================================
+   DEFAULT VALUES
+========================================================= */
 
 const initialForm = {
   question: "",
@@ -17,49 +25,62 @@ export default function FAQModal({
   faq = null,
   loading = false,
 }) {
-  const [form, setForm] = useState(initialForm);
-
   const isEdit = Boolean(faq);
 
+  const {
+    register,
+    handleSubmit,
+    reset,
+    control,
+    formState: { errors },
+  } = useForm({
+    resolver: zodResolver(faqSchema),
+    defaultValues: initialForm,
+    mode: "onChange",
+  });
+
+  /* =========================================================
+     EDIT / CREATE FORM DATA
+  ========================================================= */
+
   useEffect(() => {
+    if (!isOpen) return;
+
     if (faq) {
-      setForm({
+      reset({
         question: faq.question || "",
         answer: faq.answer || "",
         category: faq.category || "",
-        keywords: Array.isArray(faq.keywords) ? faq.keywords.join(", ") : "",
+        keywords: Array.isArray(faq.keywords)
+          ? faq.keywords.join(", ")
+          : "",
         status: faq.status || "active",
       });
     } else {
-      setForm(initialForm);
+      reset(initialForm);
     }
-  }, [faq, isOpen]);
+  }, [faq, isOpen, reset]);
 
-  const handleChange = (e) => {
-    const { name, value } = e.target;
+  /* =========================================================
+     SUBMIT
+  ========================================================= */
 
-    setForm((prev) => ({
-      ...prev,
-      [name]: value,
-    }));
-  };
-
-  const handleSubmit = async (e) => {
-    e.preventDefault();
-
-    if (!form.question.trim() || !form.answer.trim()) {
-      return;
-    }
-
+  const handleFormSubmit = async (data) => {
     const payload = {
-      question: form.question.trim(),
-      answer: form.answer.trim(),
-      category: form.category.trim(),
-      keywords: form.keywords
-        .split(",")
-        .map((item) => item.trim())
-        .filter(Boolean),
-      status: form.status,
+      question: data.question.trim(),
+
+      answer: data.answer.trim(),
+
+      category: data.category?.trim() || "",
+
+      keywords: data.keywords
+        ? data.keywords
+            .split(",")
+            .map((item) => item.trim())
+            .filter(Boolean)
+        : [],
+
+      status: data.status,
     };
 
     await onSubmit(payload);
@@ -137,68 +158,100 @@ export default function FAQModal({
         </div>
 
         {/* Form */}
-        <form onSubmit={handleSubmit} className="overflow-y-auto px-5 py-5">
+        <form
+          onSubmit={handleSubmit(handleFormSubmit)}
+          className="overflow-y-auto px-5 py-5"
+          noValidate
+        >
           <div className="space-y-5">
-            {/* Question */}
+            {/* =================================================
+                QUESTION
+            ================================================= */}
+
             <div>
               <label
                 htmlFor="question"
-                className="mb-2 block text-xs font-medium text-gray-700 dark:text-gray-300"
+                className="
+                  mb-2 block
+                  text-xs font-medium
+                  text-gray-700
+                  dark:text-gray-300
+                "
               >
                 Question <span className="text-red-500">*</span>
               </label>
 
               <input
                 id="question"
-                name="question"
-                value={form.question}
-                onChange={handleChange}
+                {...register("question")}
                 placeholder="e.g. What are your delivery timings?"
                 disabled={loading}
-                required
-                className="
+                className={`
                   w-full rounded-xl
-                  border border-gray-200
+                  border
                   bg-gray-50
                   px-3.5 py-3
                   text-sm text-gray-900
                   outline-none
                   transition
                   placeholder:text-gray-400
-                  focus:border-blue-500
                   focus:ring-2
-                  focus:ring-blue-500/10
                   disabled:cursor-not-allowed
                   disabled:opacity-60
-                  dark:border-white/10
                   dark:bg-[#11151d]
                   dark:text-white
                   dark:placeholder:text-gray-500
-                "
+
+                  ${
+                    errors.question
+                      ? `
+                        border-red-400
+                        focus:border-red-500
+                        focus:ring-red-500/10
+                      `
+                      : `
+                        border-gray-200
+                        focus:border-blue-500
+                        focus:ring-blue-500/10
+                        dark:border-white/10
+                      `
+                  }
+                `}
               />
+
+              {errors.question && (
+                <p className="mt-1.5 text-xs text-red-500 dark:text-red-400">
+                  {errors.question.message}
+                </p>
+              )}
             </div>
 
-            {/* Answer */}
+            {/* =================================================
+                ANSWER
+            ================================================= */}
+
             <div>
               <label
                 htmlFor="answer"
-                className="mb-2 block text-xs font-medium text-gray-700 dark:text-gray-300"
+                className="
+                  mb-2 block
+                  text-xs font-medium
+                  text-gray-700
+                  dark:text-gray-300
+                "
               >
                 Answer <span className="text-red-500">*</span>
               </label>
 
               <textarea
                 id="answer"
-                name="answer"
-                value={form.answer}
-                onChange={handleChange}
+                {...register("answer")}
                 placeholder="Write the answer..."
                 rows={5}
                 disabled={loading}
-                required
-                className="
+                className={`
                   w-full resize-none rounded-xl
-                  border border-gray-200
+                  border
                   bg-gray-50
                   px-3.5 py-3
                   text-sm leading-6
@@ -206,133 +259,220 @@ export default function FAQModal({
                   outline-none
                   transition
                   placeholder:text-gray-400
-                  focus:border-blue-500
                   focus:ring-2
-                  focus:ring-blue-500/10
                   disabled:cursor-not-allowed
                   disabled:opacity-60
-                  dark:border-white/10
                   dark:bg-[#11151d]
                   dark:text-white
                   dark:placeholder:text-gray-500
-                "
+
+                  ${
+                    errors.answer
+                      ? `
+                        border-red-400
+                        focus:border-red-500
+                        focus:ring-red-500/10
+                      `
+                      : `
+                        border-gray-200
+                        focus:border-blue-500
+                        focus:ring-blue-500/10
+                        dark:border-white/10
+                      `
+                  }
+                `}
               />
+
+              {errors.answer && (
+                <p className="mt-1.5 text-xs text-red-500 dark:text-red-400">
+                  {errors.answer.message}
+                </p>
+              )}
             </div>
 
-            {/* Category + Status */}
+            {/* =================================================
+                CATEGORY + STATUS
+            ================================================= */}
+
             <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
               {/* Category */}
+
               <div>
                 <label
                   htmlFor="category"
-                  className="mb-2 block text-xs font-medium text-gray-700 dark:text-gray-300"
+                  className="
+                    mb-2 block
+                    text-xs font-medium
+                    text-gray-700
+                    dark:text-gray-300
+                  "
                 >
                   Category
                 </label>
 
                 <input
                   id="category"
-                  name="category"
-                  value={form.category}
-                  onChange={handleChange}
+                  {...register("category")}
                   placeholder="e.g. Delivery"
                   disabled={loading}
-                  className="
+                  className={`
                     w-full rounded-xl
-                    border border-gray-200
+                    border
                     bg-gray-50
                     px-3.5 py-3
                     text-sm text-gray-900
                     outline-none
                     transition
                     placeholder:text-gray-400
-                    focus:border-blue-500
                     focus:ring-2
-                    focus:ring-blue-500/10
                     disabled:cursor-not-allowed
                     disabled:opacity-60
-                    dark:border-white/10
                     dark:bg-[#11151d]
                     dark:text-white
                     dark:placeholder:text-gray-500
-                  "
+
+                    ${
+                      errors.category
+                        ? `
+                          border-red-400
+                          focus:border-red-500
+                          focus:ring-red-500/10
+                        `
+                        : `
+                          border-gray-200
+                          focus:border-blue-500
+                          focus:ring-blue-500/10
+                          dark:border-white/10
+                        `
+                    }
+                  `}
                 />
+
+                {errors.category && (
+                  <p className="mt-1.5 text-xs text-red-500 dark:text-red-400">
+                    {errors.category.message}
+                  </p>
+                )}
               </div>
 
               {/* Status */}
+
               <div>
                 <label
                   htmlFor="status"
-                  className="mb-2 block text-xs font-medium text-gray-700 dark:text-gray-300"
+                  className="
+                    mb-2 block
+                    text-xs font-medium
+                    text-gray-700
+                    dark:text-gray-300
+                  "
                 >
                   Status
                 </label>
-                <CustomSelect
-                  size="md"
-                  // label="Response Tone"
+
+                <Controller
                   name="status"
-                  value={form.status}
-                  onChange={handleChange}
-                  disabled={loading}
-                  options={[
-                    {
-                      value: "active",
-                      label: "Active",
-                    },
-                    {
-                      value: "inactive",
-                      label: "Inactive",
-                    },
-                  ]}
-                  // className={}
+                  control={control}
+                  render={({ field }) => (
+                    <CustomSelect
+                      size="md"
+                      name={field.name}
+                      value={field.value}
+                      onChange={field.onChange}
+                      disabled={loading}
+                      options={[
+                        {
+                          value: "active",
+                          label: "Active",
+                        },
+                        {
+                          value: "inactive",
+                          label: "Inactive",
+                        },
+                      ]}
+                    />
+                  )}
                 />
+
+                {errors.status && (
+                  <p className="mt-1.5 text-xs text-red-500 dark:text-red-400">
+                    {errors.status.message}
+                  </p>
+                )}
               </div>
             </div>
 
-            {/* Keywords */}
+            {/* =================================================
+                KEYWORDS
+            ================================================= */}
+
             <div>
               <label
                 htmlFor="keywords"
-                className="mb-2 block text-xs font-medium text-gray-700 dark:text-gray-300"
+                className="
+                  mb-2 block
+                  text-xs font-medium
+                  text-gray-700
+                  dark:text-gray-300
+                "
               >
                 Keywords
               </label>
 
               <input
                 id="keywords"
-                name="keywords"
-                value={form.keywords}
-                onChange={handleChange}
+                {...register("keywords")}
                 placeholder="delivery, shipping, order"
                 disabled={loading}
-                className="
+                className={`
                   w-full rounded-xl
-                  border border-gray-200
+                  border
                   bg-gray-50
                   px-3.5 py-3
                   text-sm text-gray-900
                   outline-none
                   transition
                   placeholder:text-gray-400
-                  focus:border-blue-500
                   focus:ring-2
-                  focus:ring-blue-500/10
                   disabled:cursor-not-allowed
                   disabled:opacity-60
-                  dark:border-white/10
                   dark:bg-[#11151d]
                   dark:text-white
                   dark:placeholder:text-gray-500
-                "
+
+                  ${
+                    errors.keywords
+                      ? `
+                        border-red-400
+                        focus:border-red-500
+                        focus:ring-red-500/10
+                      `
+                      : `
+                        border-gray-200
+                        focus:border-blue-500
+                        focus:ring-blue-500/10
+                        dark:border-white/10
+                      `
+                  }
+                `}
               />
 
               <p className="mt-1.5 text-[11px] text-gray-400 dark:text-gray-500">
                 Separate multiple keywords using commas.
               </p>
+
+              {errors.keywords && (
+                <p className="mt-1.5 text-xs text-red-500 dark:text-red-400">
+                  {errors.keywords.message}
+                </p>
+              )}
             </div>
           </div>
 
-          {/* Footer */}
+          {/* =================================================
+              FOOTER
+          ================================================= */}
+
           <div
             className="
               mt-6 flex flex-col-reverse
@@ -366,7 +506,7 @@ export default function FAQModal({
 
             <button
               type="submit"
-              disabled={loading || !form.question.trim() || !form.answer.trim()}
+              disabled={loading}
               className="
                 inline-flex items-center
                 justify-center gap-2
@@ -385,7 +525,10 @@ export default function FAQModal({
             >
               {loading ? (
                 <>
-                  <Loader2 size={15} className="animate-spin" />
+                  <Loader2
+                    size={15}
+                    className="animate-spin"
+                  />
                   Saving...
                 </>
               ) : (

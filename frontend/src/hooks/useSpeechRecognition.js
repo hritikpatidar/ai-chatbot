@@ -5,7 +5,6 @@ import {
   addErrorMessage,
   addMessage,
   appendAssistantChunk,
-  clearMessages,
   fetchClientConfig,
   setActivePage,
   setConversationList,

@@ -7,7 +7,7 @@ import ClientSidebar from "../../components/ClientComponent/ClientSidebar";
 
 export default function ClientLayout() {
   const [mobileOpen, setMobileOpen] = useState(false);
-
+  debugger
   return (
     <div
       className="

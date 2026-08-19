@@ -6,7 +6,6 @@ import { PrivateRoute } from "./PrivateRoute";
 import { SocketProvider } from "../context/SocketContext";
 import PageLoader from "../components/common/PageLoader";
 import ClientRoute from "./ClientRoute";
-import ClientChatRoute from "./ClientChatRoute";
 import DashboardLayout from "../pages/DashboardLayout";
 import ClientLayout from "../pages/Client/ClientLayout";
 
@@ -67,9 +66,9 @@ export default function AppRoutes() {
               
               Logged-in + Guest both can access.
 
-              Guest user ko / route per jane se rokne ke liye ClientChatRoute add kiya hai ye login per redirect karega
+              Guest user ko / route per jane se rokne ke liye ClientRoute add kiya hai ye login per redirect karega
           ========================================== */}
-          <Route element={<ClientChatRoute />}>
+          <Route element={<ClientRoute />}>
             <Route element={<DashboardLayout />}>
               <Route path="/" element={<Welcome />} />
               <Route path="/c/:conversationId" element={<ChatContainer />} />
@@ -78,8 +77,7 @@ export default function AppRoutes() {
 
           {/* PRIVATE ROUTES */}
 
-          <Route element={<PrivateRoute />}>
-            {/* PRIVATE USER ROUTES */}
+          <Route element={<PrivateRoute allowedRoles={["user"]} />}>
             <Route element={<DashboardLayout />}>
               <Route path="/library" element={<Library />} />
               <Route path="/projects" element={<Projects />} />
@@ -87,9 +85,15 @@ export default function AppRoutes() {
               <Route path="/settings" element={<Settings />} />
               <Route path="/security" element={<Security />} />
             </Route>
-            {/* PRIVATE Client ROUTES */}
-            <Route element={<ClientRoute />}>
-              <Route path="/client" element={<ClientLayout />}>
+          </Route>
+
+          {/* =========================================
+                  PRIVATE CLIENT ROUTES
+              ========================================= */}
+
+          <Route element={<PrivateRoute allowedRoles={["client"]} />}>
+            <Route element={<ClientLayout />}>
+              <Route path="/client">
                 <Route index element={<ClientDashboard />} />
                 <Route path="products" element={<ClientProducts />} />
                 <Route path="faqs" element={<ClientFAQs />} />

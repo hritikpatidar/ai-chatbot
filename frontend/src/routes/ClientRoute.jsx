@@ -1,6 +1,7 @@
 import { Navigate, Outlet, useLocation, useNavigate } from "react-router-dom";
 import { useSelector } from "react-redux";
 import GuestHeader from "../components/ClientComponent/GuestHeader";
+import AnimatedBackground from "../components/AnimatedBackground";
 
 export default function ClientRoute() {
   const location = useLocation();

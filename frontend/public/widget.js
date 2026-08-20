@@ -124,11 +124,6 @@
 
       -webkit-tap-highlight-color: transparent;
 
-      /*
-        IMPORTANT:
-        No transition here.
-        Robot -> X will change instantly.
-      */
       transition: none;
     }
 
@@ -149,9 +144,6 @@
           0 10px 12px rgba(0, 0, 0, 0.20)
         );
 
-      /*
-        No animation
-      */
       transition: none;
 
       transform: none;
@@ -160,11 +152,6 @@
     /* ==========================================================
        Hover
        ========================================================== */
-
-    /*
-      No hover animation.
-      Robot will remain exactly in the same position.
-    */
 
     .ai-widget-button:hover {
       transform: none;
@@ -182,10 +169,6 @@
     /* ==========================================================
        Active / Click
        ========================================================== */
-
-    /*
-      No click scale animation.
-    */
 
     .ai-widget-button:active {
       transform: none;
@@ -211,9 +194,6 @@
       box-shadow:
         0 6px 18px rgba(37, 99, 235, 0.30);
 
-      /*
-        No animation when opening.
-      */
       transition: none;
 
       transform: none;
@@ -243,9 +223,6 @@
 
       flex-shrink: 0;
 
-      /*
-        No animation
-      */
       transition: none;
 
       transform: none;
@@ -724,13 +701,27 @@
 
   iframe.setAttribute(
     "loading",
-    "lazy"
+    "eager"
   );
 
   iframe.setAttribute(
     "referrerpolicy",
     "strict-origin-when-cross-origin"
   );
+
+  // ============================================================
+  // IMPORTANT SCROLL SETTINGS
+  // ============================================================
+
+  // Enable native iframe scrolling.
+  iframe.setAttribute(
+    "scrolling",
+    "yes"
+  );
+
+  // ============================================================
+  // Iframe Style
+  // ============================================================
 
   Object.assign(
     iframe.style,
@@ -766,8 +757,18 @@
       display:
         "none",
 
+      // IMPORTANT:
+      // Do not hide iframe overflow.
       overflow:
-        "hidden",
+        "auto",
+
+      // Keep scroll interaction inside widget.
+      overscrollBehavior:
+        "contain",
+
+      // Better touch scrolling on iOS/mobile.
+      WebkitOverflowScrolling:
+        "touch",
 
       margin:
         "0",
@@ -875,6 +876,16 @@
 
           borderRadius:
             CONFIG.mobile.borderRadius,
+
+          // Keep scrolling enabled.
+          overflow:
+            "auto",
+
+          overscrollBehavior:
+            "contain",
+
+          WebkitOverflowScrolling:
+            "touch",
         }
       );
 
@@ -921,6 +932,16 @@
 
           borderRadius:
             CONFIG.desktop.borderRadius,
+
+          // Keep scrolling enabled.
+          overflow:
+            "auto",
+
+          overscrollBehavior:
+            "contain",
+
+          WebkitOverflowScrolling:
+            "touch",
         }
       );
 

@@ -15,7 +15,6 @@ export default function GuestHeader() {
     clientConfigLoading,
     clientConfigError,
   } = useSelector((store) => store.chatSlice);
-  debugger;
   const chatbotName = `${clientConfig?.businessName || "AI"} Assistant`;
 
   const handleLogin = () => {

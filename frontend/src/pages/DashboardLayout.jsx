@@ -6,12 +6,15 @@ import AnimatedBackground from "../components/AnimatedBackground";
 
 export default function DashboardLayout() {
   const location = useLocation();
+
   const { token, profileDetails } = useSelector(
     (state) => state?.authReducer?.AuthSlice,
   );
+
   const isAuthenticated = Boolean(token) && Boolean(profileDetails?._id);
-  const isChatPage =
-    location.pathname === "/" || location.pathname.startsWith("/c/");
+
+  const isWelcomePage = location.pathname === "/";
+  const isChatPage = location.pathname.startsWith("/c/");
 
   return (
     <div
@@ -30,6 +33,7 @@ export default function DashboardLayout() {
       `}
     >
       <AnimatedBackground />
+
       {isAuthenticated && (
         <div className="relative z-40 shrink-0">
           <Sidebar />
@@ -37,11 +41,12 @@ export default function DashboardLayout() {
       )}
 
       <main
-        className={`
+        className="
           relative
           z-10
           flex
           h-full
+          min-h-0
           min-w-0
           flex-1
           flex-col
@@ -50,7 +55,7 @@ export default function DashboardLayout() {
           transition-colors
           duration-300
           dark:bg-[#0b0f17]/80
-        `}
+        "
       >
         {isAuthenticated && (
           <div className="relative z-50 shrink-0">
@@ -61,11 +66,24 @@ export default function DashboardLayout() {
         <div
           className={`
             min-h-0
+            min-w-0
             flex-1
             w-full
             bg-transparent
-            ${isChatPage ? "overflow-hidden" : "overflow-y-auto"}
-            ${isChatPage ? "" : "px-4 sm:px-6 lg:px-10 xl:px-15"}
+
+            ${
+              isWelcomePage
+                ? "overflow-y-auto overscroll-contain"
+                : isChatPage
+                  ? "overflow-hidden"
+                  : "overflow-y-auto"
+            }
+
+            ${
+              isWelcomePage || isChatPage
+                ? ""
+                : "px-4 sm:px-6 lg:px-10 xl:px-15"
+            }
           `}
         >
           <Outlet />

@@ -148,17 +148,20 @@ export default function Welcome() {
 
   return (
     <div
-      className="
-        flex
-        flex-1
-        flex-col
-        items-center
-        justify-center
-        relative
-        z-0
-        pt-15
-        overflow-y-auto
-      "
+      className={`
+    relative
+    z-0
+    flex
+    w-full
+    min-h-0
+    flex-col
+    items-center
+    pt-15
+    pb-10
+    overflow-y-auto
+    overscroll-contain
+    ${isClientChatbot ? "h-full justify-start" : "flex-1 justify-center"}
+  `}
     >
       {isClientChatbot ? (
         <>

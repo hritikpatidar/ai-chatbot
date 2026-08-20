@@ -29,21 +29,6 @@ export default function ClientRoute() {
   }
 
   // Guest
-  // if (isGuest) {
-  //   return (
-  //     <div className="flex h-screen min-h-0 flex-col overflow-hidden bg-white dark:bg-[#0b0f14]">
-  //       {/* Guest Header */}
-  //       <div className="shrink-0">
-  //         <GuestHeader />
-  //       </div>
-
-  //       {/* Guest Chat Content */}
-  //       <main className="min-h-0 flex-1 overflow-y-auto">
-  //         <Outlet />
-  //       </main>
-  //     </div>
-  //   );
-  // }
   if (isGuest) {
     return (
       <div className="flex h-screen min-h-0 flex-col overflow-hidden bg-white dark:bg-[#0b0f14]">
@@ -53,22 +38,12 @@ export default function ClientRoute() {
         </div>
 
         {/* Guest Chat Content */}
-        <main
-          className="
-          min-h-0
-          flex-1
-          overflow-y-auto
-          overflow-x-hidden
-          overscroll-contain
-          [scrollbar-gutter:stable]
-        "
-        >
+        <main className="min-h-0 flex-1 overflow-y-auto">
           <Outlet />
         </main>
       </div>
     );
   }
-
   // Not authenticated + no clientKey
   return (
     <Navigate

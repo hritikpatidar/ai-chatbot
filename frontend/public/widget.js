@@ -54,11 +54,12 @@
       // Medium close button
       closeButtonSize: "48px",
 
-      iframeRight: "24px",
-      iframeBottom: "96px",
+      // Iframe position
+      iframeRight: "30px",
+      iframeTop: "13%",
 
       iframeWidth: "400px",
-      iframeHeight: "620px",
+      iframeHeight: "calc(80vh - 24px)",
 
       borderRadius: "18px",
     },
@@ -73,11 +74,12 @@
       // Medium close button
       closeButtonSize: "46px",
 
+      // Iframe position
       iframeRight: "8px",
-      iframeBottom: "82px",
+      iframeTop: "20%",
 
       iframeWidth: "calc(100vw - 16px)",
-      iframeHeight: "calc(100vh - 98px)",
+      iframeHeight: "calc(80vh - 24px)",
 
       borderRadius: "16px",
     },
@@ -713,7 +715,6 @@
   // IMPORTANT SCROLL SETTINGS
   // ============================================================
 
-  // Enable native iframe scrolling.
   iframe.setAttribute(
     "scrolling",
     "yes"
@@ -731,8 +732,9 @@
       right:
         CONFIG.desktop.iframeRight,
 
-      bottom:
-        CONFIG.desktop.iframeBottom,
+      // Changed from bottom to top
+      top:
+        CONFIG.desktop.iframeTop,
 
       width:
         CONFIG.desktop.iframeWidth,
@@ -757,16 +759,12 @@
       display:
         "none",
 
-      // IMPORTANT:
-      // Do not hide iframe overflow.
       overflow:
         "auto",
 
-      // Keep scroll interaction inside widget.
       overscrollBehavior:
         "contain",
 
-      // Better touch scrolling on iOS/mobile.
       WebkitOverflowScrolling:
         "touch",
 
@@ -820,22 +818,11 @@
         : "Open chat"
     );
 
-    /*
-      Direct icon replacement.
-      No animation.
-    */
-
     if (isOpen) {
       setOpenButton();
     } else {
       setClosedButton();
     }
-
-    /*
-      Immediately update the button dimensions.
-      Since transition is none, there will be
-      no resize animation.
-    */
 
     updateResponsive();
   }
@@ -865,8 +852,9 @@
           right:
             CONFIG.mobile.iframeRight,
 
-          bottom:
-            CONFIG.mobile.iframeBottom,
+          // Changed from bottom to top
+          top:
+            CONFIG.mobile.iframeTop,
 
           width:
             CONFIG.mobile.iframeWidth,
@@ -877,7 +865,6 @@
           borderRadius:
             CONFIG.mobile.borderRadius,
 
-          // Keep scrolling enabled.
           overflow:
             "auto",
 
@@ -921,8 +908,9 @@
           right:
             CONFIG.desktop.iframeRight,
 
-          bottom:
-            CONFIG.desktop.iframeBottom,
+          // Changed from bottom to top
+          top:
+            CONFIG.desktop.iframeTop,
 
           width:
             CONFIG.desktop.iframeWidth,
@@ -933,7 +921,6 @@
           borderRadius:
             CONFIG.desktop.borderRadius,
 
-          // Keep scrolling enabled.
           overflow:
             "auto",
 

@@ -34,7 +34,7 @@ export default function DashboardLayout() {
         dark:text-white
       "
     >
-      <AnimatedBackground />
+      {/* <AnimatedBackground /> */}
 
       {isAuthenticated && (
         <aside className="relative z-40 flex min-h-0 shrink-0">

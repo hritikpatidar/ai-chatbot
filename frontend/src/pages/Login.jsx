@@ -64,7 +64,7 @@ export default function Login() {
       "
     >
       {/* Background */}
-      <AnimatedBackground />
+      {/* <AnimatedBackground /> */}
 
       <motion.div
         initial={{ opacity: 0 }}

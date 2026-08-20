@@ -22,7 +22,7 @@ export default function ClientLayout() {
       "
     >
       {/* Background */}
-      <AnimatedBackground />
+      {/* <AnimatedBackground /> */}
 
       {/* Sidebar */}
       <ClientSidebar mobileOpen={mobileOpen} setMobileOpen={setMobileOpen} />

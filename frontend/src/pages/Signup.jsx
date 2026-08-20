@@ -77,7 +77,7 @@ export default function Signup() {
       "
     >
       {/* Background */}
-      <AnimatedBackground />
+      {/* <AnimatedBackground /> */}
 
       <motion.div
         initial={{ opacity: 0 }}

@@ -47,7 +47,7 @@ export default function ResetPassword() {
 
   return (
     <div className="relative flex min-h-screen items-center justify-center overflow-hidden bg-[#0B1120] px-5">
-      <AnimatedBackground />
+      {/* <AnimatedBackground /> */}
 
       <motion.div
         initial={{ opacity: 0, y: 40 }}

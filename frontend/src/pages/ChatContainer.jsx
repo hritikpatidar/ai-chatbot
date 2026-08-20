@@ -54,10 +54,44 @@ export default function ChatContainer() {
   }, [messages]);
 
   return (
-    // <div className="flex h-full w-full flex-col bg-gray-50 text-gray-900 transition-colors duration-300 dark:bg-[#0b0f17] dark:text-white">
-    <div className="flex h-full w-full flex-col bg-transparent text-gray-900 transition-colors duration-300 dark:text-white">
-      <div className="flex-1 overflow-y-auto px-4">
-        <div className="mx-auto flex min-h-full max-w-5xl flex-col py-1 md:px-28 lg:px-22">
+    <div
+      className=" flex
+        h-full
+        min-h-0
+        w-full
+        flex-col
+        overflow-hidden
+        bg-transparent
+        text-gray-900
+        dark:text-white
+      "
+    >
+      <div
+        className="
+          min-h-0
+          min-w-0
+          flex-1
+          overflow-y-auto
+          overscroll-contain
+          px-3
+          sm:px-4
+        "
+      >
+        <div
+          className="
+            mx-auto
+            flex
+            min-h-full
+            w-full
+            max-w-5xl
+            flex-col
+            px-1
+            py-2
+            sm:px-2
+            md:px-10
+            lg:px-16
+          "
+        >
           {conversationLoading ? (
             <div className="absolute inset-0 flex items-center justify-center">
               <div className="flex items-center gap-2 text-sm text-gray-500 dark:text-gray-400">
@@ -408,8 +442,18 @@ export default function ChatContainer() {
           <div ref={messagesEndRef} />
         </div>
       </div>
-      <div className="py-1 px-6 md:px-28 lg:px-50">
-        <div className="mx-auto max-w-5xl">
+      <div
+        className="
+          shrink-0
+          px-2
+          pb-2
+          pt-1
+          sm:px-4
+          md:px-10
+          lg:px-16
+        "
+      >
+        <div className="mx-auto w-full max-w-5xl">
           <div
             className="
               rounded-2xl

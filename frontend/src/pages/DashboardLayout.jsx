@@ -1,7 +1,9 @@
 import { Outlet, useLocation } from "react-router-dom";
 import { useSelector } from "react-redux";
+
 import Sidebar from "../components/Sidebar";
 import ChatHeader from "../components/Chat/ChatHeader";
+import GuestHeader from "../components/ClientComponent/GuestHeader";
 import AnimatedBackground from "../components/AnimatedBackground";
 
 export default function DashboardLayout() {
@@ -11,33 +13,33 @@ export default function DashboardLayout() {
     (state) => state?.authReducer?.AuthSlice,
   );
 
-  const isAuthenticated = Boolean(token) && Boolean(profileDetails?._id);
+  const isAuthenticated =
+    Boolean(token) && Boolean(profileDetails?._id);
 
   const isWelcomePage = location.pathname === "/";
   const isChatPage = location.pathname.startsWith("/c/");
 
   return (
     <div
-      className={`
+      className="
         relative
         flex
-        ${isAuthenticated ? "h-screen" : "h-full"}
+        h-dvh
+        min-h-0
         w-full
         overflow-hidden
         bg-gray-50
         text-gray-900
-        transition-colors
-        duration-300
         dark:bg-[#0b0f17]
         dark:text-white
-      `}
+      "
     >
       <AnimatedBackground />
 
       {isAuthenticated && (
-        <div className="relative z-40 shrink-0">
+        <aside className="relative z-40 flex min-h-0 shrink-0">
           <Sidebar />
-        </div>
+        </aside>
       )}
 
       <main
@@ -45,44 +47,39 @@ export default function DashboardLayout() {
           relative
           z-10
           flex
-          h-full
           min-h-0
           min-w-0
           flex-1
           flex-col
           overflow-hidden
-          bg-gray-50/80
-          transition-colors
-          duration-300
-          dark:bg-[#0b0f17]/80
         "
       >
-        {isAuthenticated && (
-          <div className="relative z-50 shrink-0">
+        {/* Authenticated Header */}
+        {isAuthenticated ? (
+          <header className="relative z-50 shrink-0">
             <ChatHeader />
-          </div>
+          </header>
+        ) : (
+          /* Guest Header */
+          <header className="relative z-50 shrink-0">
+            <GuestHeader />
+          </header>
         )}
 
+        {/* Content */}
         <div
           className={`
             min-h-0
             min-w-0
             flex-1
             w-full
-            bg-transparent
 
             ${
-              isWelcomePage
-                ? "overflow-y-auto overscroll-contain"
-                : isChatPage
-                  ? "overflow-hidden"
+              isChatPage
+                ? "overflow-hidden"
+                : isWelcomePage
+                  ? "overflow-y-auto"
                   : "overflow-y-auto"
-            }
-
-            ${
-              isWelcomePage || isChatPage
-                ? ""
-                : "px-4 sm:px-6 lg:px-10 xl:px-15"
             }
           `}
         >

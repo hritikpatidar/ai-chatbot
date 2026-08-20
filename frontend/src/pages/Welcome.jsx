@@ -149,19 +149,21 @@ export default function Welcome() {
   return (
     <div
       className={`
-    relative
-    z-0
-    flex
-    w-full
-    min-h-0
-    flex-col
-    items-center
-    pt-15
-    pb-10
-    overflow-y-auto
-    overscroll-contain
-    ${isClientChatbot ? "h-full justify-start" : "flex-1 justify-center"}
-  `}
+        relative
+        z-0
+        flex
+        w-full
+        min-h-full
+        flex-col
+        items-center
+        px-3
+        pt-6
+        pb-8
+        sm:px-4
+        sm:pt-10
+        sm:pb-10
+        ${isClientChatbot ? "justify-start" : "justify-center"}
+      `}
     >
       {isClientChatbot ? (
         <>
@@ -170,8 +172,10 @@ export default function Welcome() {
           <div className="mt-8 px-4 text-center sm:mt-10 lg:mt-12">
             <h1
               className="
-                text-3xl
+                px-2
+                text-2xl
                 font-bold
+                leading-tight
                 tracking-tight
                 text-gray-900
                 sm:text-4xl
@@ -198,8 +202,9 @@ export default function Welcome() {
                 mx-auto
                 mt-3
                 max-w-2xl
+                px-2
                 text-sm
-                leading-relaxed
+                leading-6
                 text-gray-600
                 sm:text-base
                 md:text-lg
@@ -214,7 +219,7 @@ export default function Welcome() {
 
           {/* Client Input */}
 
-          <div className="mt-10 w-full max-w-4xl px-4">
+          <div className="mt-8 w-full max-w-4xl px-3 sm:mt-10 sm:px-4">
             <form
               onSubmit={(e) => {
                 e.preventDefault();
@@ -222,14 +227,15 @@ export default function Welcome() {
                 handleSend();
               }}
               className="
+                w-full
                 rounded-3xl
                 border
                 border-gray-200
                 bg-white/90
-                p-4
+                p-3
                 shadow-xl
                 backdrop-blur-xl
-                transition-colors
+                sm:p-4
                 dark:border-white/10
                 dark:bg-[#171b23]/80
               "
@@ -456,8 +462,18 @@ export default function Welcome() {
 
               {/* Bottom */}
 
-              <div className="mt-5 flex items-center justify-between gap-3">
-                <div className="flex items-center gap-2 overflow-x-auto whitespace-nowrap">
+              <div className="mt-4 flex items-center justify-between gap-2 sm:mt-5 sm:gap-3">
+                <div
+                  className="flex
+                    min-w-0
+                    flex-1
+                    items-center
+                    gap-2
+                    overflow-x-auto
+                    whitespace-nowrap
+                    pb-1
+                  "
+                >
                   {/* Attachment */}
 
                   <button

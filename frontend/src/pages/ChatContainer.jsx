@@ -498,7 +498,7 @@ export default function ChatContainer() {
                             <div
                               className="
                                 flex
-                                h-15
+                                h-14
                                 w-32
                                 items-center
                                 gap-2

@@ -243,7 +243,7 @@ export default function Welcome() {
               {/* Selected Files */}
 
               {selectedFiles.length > 0 && (
-                <div className="mb-4 flex gap-3 overflow-x-auto pb-2">
+                <div className="mb-4 flex gap-3 overflow-x-auto pb-2 scroll-auto">
                   {selectedFiles.map((file, index) => {
                     const isImage = file.type.startsWith("image/");
 
@@ -271,7 +271,7 @@ export default function Welcome() {
                               <div
                                 className="
                                   flex
-                                  h-20
+                                  h-14
                                   w-32
                                   items-center
                                   gap-3

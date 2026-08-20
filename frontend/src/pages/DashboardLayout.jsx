@@ -15,10 +15,10 @@ export default function DashboardLayout() {
 
   return (
     <div
-      className="
+      className={`
         relative
         flex
-        h-screen
+        ${isAuthenticated ? "h-screen" : "h-full"}
         w-full
         overflow-hidden
         bg-gray-50
@@ -27,7 +27,7 @@ export default function DashboardLayout() {
         duration-300
         dark:bg-[#0b0f17]
         dark:text-white
-      "
+      `}
     >
       <AnimatedBackground />
       {isAuthenticated && (
@@ -52,7 +52,6 @@ export default function DashboardLayout() {
           dark:bg-[#0b0f17]/80
         `}
       >
-
         {isAuthenticated && (
           <div className="relative z-50 shrink-0">
             <ChatHeader />
@@ -64,8 +63,8 @@ export default function DashboardLayout() {
             min-h-0
             flex-1
             w-full
-            overflow-y-auto
             bg-transparent
+            ${isChatPage ? "overflow-hidden" : "overflow-y-auto"}
             ${isChatPage ? "" : "px-4 sm:px-6 lg:px-10 xl:px-15"}
           `}
         >

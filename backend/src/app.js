@@ -47,14 +47,14 @@ app.use("/api/faqs", faqRoutes);
 app.use("/api/tickets", ticketRoutes);
 app.use("/api/admin", adminRoutes);
 app.use("/uploads", express.static(path.join(process.cwd(), "src/uploads")));
-app.use(notFound);
-app.use(errorHandler);
-// Health Check
 app.get("/", (req, res) => {
   res.status(200).json({
     success: true,
     message: "AI Chatbot API Running 🚀",
   });
 });
+app.use(notFound);
+app.use(errorHandler);
+// Health Check
 
 export default app;

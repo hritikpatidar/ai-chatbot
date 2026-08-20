@@ -1,26 +1,39 @@
 import { createClient } from "redis";
 import env from "./env.js";
 
-let redisClient;
+export const redisClient = createClient({
+  url: env.REDIS_URL,
+});
+
+redisClient.on("connect", () => {
+  console.log("🔄 Redis connecting...");
+});
+
+redisClient.on("ready", () => {
+  console.log("✅ Redis Connected & Ready");
+});
+
+redisClient.on("reconnecting", () => {
+  console.log("🔁 Redis reconnecting...");
+});
+
+redisClient.on("end", () => {
+  console.log("🔴 Redis connection closed");
+});
+
+redisClient.on("error", (err) => {
+  console.error("❌ Redis Error:", err);
+});
 
 export const connectRedis = async () => {
-  redisClient = createClient({
-    url: env.REDIS_URL,
-  });
+  try {
+    if (!redisClient.isOpen) {
+      await redisClient.connect();
+    }
 
-  redisClient.on("connect", () => {
-    console.log("✅ Redis Connected");
-  });
-
-  redisClient.on("ready", () => {
-    console.log("🚀 Redis Ready");
-  });
-
-  redisClient.on("error", (err) => {
-    console.error("❌ Redis Error:", err.message);
-  });
-
-  await redisClient.connect();
+    console.log("🚀 Redis connection successful");
+  } catch (error) {
+    console.error("❌ Redis Connection Failed:", error);
+    throw error;
+  }
 };
-
-export { redisClient };

@@ -51,12 +51,12 @@
       // Robot size
       buttonSize: "72px",
 
-      // Medium close button
+      // Close button
       closeButtonSize: "48px",
 
       // Iframe position
       iframeRight: "30px",
-      iframeTop: "13%",
+      iframeBottom: "104px",
 
       iframeWidth: "400px",
       iframeHeight: "calc(80vh - 24px)",
@@ -71,12 +71,12 @@
       // Robot size
       buttonSize: "64px",
 
-      // Medium close button
+      // Close button
       closeButtonSize: "46px",
 
       // Iframe position
       iframeRight: "8px",
-      iframeTop: "20%",
+      iframeBottom: "88px",
 
       iframeWidth: "calc(100vw - 16px)",
       iframeHeight: "calc(80vh - 24px)",
@@ -99,7 +99,13 @@
        ========================================================== */
 
     .ai-widget-button {
-      position: fixed;
+      position: fixed !important;
+
+      right: 24px !important;
+      bottom: 24px !important;
+
+      left: auto !important;
+      top: auto !important;
 
       display: flex;
       align-items: center;
@@ -120,7 +126,7 @@
 
       outline: none;
 
-      z-index: 999999;
+      z-index: 2147483647 !important;
 
       overflow: visible;
 
@@ -242,6 +248,26 @@
     }
 
     /* ==========================================================
+       Iframe
+       ========================================================== */
+
+    .ai-chatbot-widget-iframe {
+      position: fixed !important;
+
+      top: auto !important;
+
+      z-index: 2147483646 !important;
+
+      margin: 0 !important;
+      padding: 0 !important;
+
+      border: 0 !important;
+
+      max-width: none !important;
+      max-height: none !important;
+    }
+
+    /* ==========================================================
        Mobile
        ========================================================== */
 
@@ -250,6 +276,12 @@
       .ai-widget-button {
         width: 64px;
         height: 64px;
+
+        right: 16px !important;
+        bottom: 16px !important;
+
+        left: auto !important;
+        top: auto !important;
 
         transition: none;
       }
@@ -690,6 +722,9 @@
   const iframe =
     document.createElement("iframe");
 
+  iframe.className =
+    "ai-chatbot-widget-iframe";
+
   iframe.src =
     `${CHATBOT_URL}/?clientKey=${encodeURIComponent(clientId)}`;
 
@@ -712,7 +747,7 @@
   );
 
   // ============================================================
-  // IMPORTANT SCROLL SETTINGS
+  // Iframe Scroll Settings
   // ============================================================
 
   iframe.setAttribute(
@@ -732,9 +767,11 @@
       right:
         CONFIG.desktop.iframeRight,
 
-      // Changed from bottom to top
+      bottom:
+        CONFIG.desktop.iframeBottom,
+
       top:
-        CONFIG.desktop.iframeTop,
+        "auto",
 
       width:
         CONFIG.desktop.iframeWidth,
@@ -754,7 +791,7 @@
         "0 20px 60px rgba(0, 0, 0, 0.30)",
 
       zIndex:
-        "999998",
+        "2147483646",
 
       display:
         "none",
@@ -773,6 +810,12 @@
 
       padding:
         "0",
+
+      maxWidth:
+        "none",
+
+      maxHeight:
+        "none",
     }
   );
 
@@ -846,15 +889,24 @@
 
     if (isMobile) {
 
+      // --------------------------------------------------------
+      // Mobile Iframe
+      // --------------------------------------------------------
+
       Object.assign(
         iframe.style,
         {
+          position:
+            "fixed",
+
           right:
             CONFIG.mobile.iframeRight,
 
-          // Changed from bottom to top
+          bottom:
+            CONFIG.mobile.iframeBottom,
+
           top:
-            CONFIG.mobile.iframeTop,
+            "auto",
 
           width:
             CONFIG.mobile.iframeWidth,
@@ -873,17 +925,33 @@
 
           WebkitOverflowScrolling:
             "touch",
+
+          zIndex:
+            "2147483646",
         }
       );
+
+      // --------------------------------------------------------
+      // Mobile Button
+      // --------------------------------------------------------
 
       Object.assign(
         button.style,
         {
+          position:
+            "fixed",
+
           right:
             CONFIG.mobile.buttonRight,
 
           bottom:
             CONFIG.mobile.buttonBottom,
+
+          left:
+            "auto",
+
+          top:
+            "auto",
 
           width:
             isOpen
@@ -895,6 +963,9 @@
               ? CONFIG.mobile.closeButtonSize
               : CONFIG.mobile.buttonSize,
 
+          zIndex:
+            "2147483647",
+
           transition:
             "none",
         }
@@ -902,15 +973,24 @@
 
     } else {
 
+      // --------------------------------------------------------
+      // Desktop Iframe
+      // --------------------------------------------------------
+
       Object.assign(
         iframe.style,
         {
+          position:
+            "fixed",
+
           right:
             CONFIG.desktop.iframeRight,
 
-          // Changed from bottom to top
+          bottom:
+            CONFIG.desktop.iframeBottom,
+
           top:
-            CONFIG.desktop.iframeTop,
+            "auto",
 
           width:
             CONFIG.desktop.iframeWidth,
@@ -929,17 +1009,33 @@
 
           WebkitOverflowScrolling:
             "touch",
+
+          zIndex:
+            "2147483646",
         }
       );
+
+      // --------------------------------------------------------
+      // Desktop Button
+      // --------------------------------------------------------
 
       Object.assign(
         button.style,
         {
+          position:
+            "fixed",
+
           right:
             CONFIG.desktop.buttonRight,
 
           bottom:
             CONFIG.desktop.buttonBottom,
+
+          left:
+            "auto",
+
+          top:
+            "auto",
 
           width:
             isOpen
@@ -950,6 +1046,9 @@
             isOpen
               ? CONFIG.desktop.closeButtonSize
               : CONFIG.desktop.buttonSize,
+
+          zIndex:
+            "2147483647",
 
           transition:
             "none",

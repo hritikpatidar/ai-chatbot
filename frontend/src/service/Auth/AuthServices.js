@@ -1,3 +1,4 @@
+import { getItemLocalStorage } from "../../utils/browserServices";
 import httpServices from "../httpServices";
 
 export const signupService = (userData) => {
@@ -30,4 +31,9 @@ export const ChangePasswordService = (data) => {
 
 export const logoutService = (data) => {
   return httpServices.post("/auth/logout", data);
+};
+
+export const refreshAccessToken = async (refreshToken) => {
+  // const refreshToken = getItemLocalStorage("refreshToken");
+  return httpServices.post("/auth/refresh-token", refreshToken);
 };

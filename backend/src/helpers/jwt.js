@@ -23,3 +23,12 @@ export const verifyAccessToken = (token) => {
   }
 };
 
+export const verifyRefreshToken = (token) => {
+  try {
+    const decoded = jwt.verify(token, env.JWT_REFRESH_SECRET);
+    return decoded;
+  } catch (error) {
+    console.error("JWT Verify Error:", error);
+    throw error;
+  }
+};

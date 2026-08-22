@@ -6,6 +6,8 @@ import {
   updateLastLogin,
   userUpdatePassword,
   userFindByIdWithPassword,
+  UserFindById,
+  findUserForRefreshToken,
 } from "../repositories/user.repository.js";
 
 import { comparePassword, hashPassword } from "../helpers/bcrypt.js";
@@ -16,11 +18,14 @@ import {
   generateAccessToken,
   generateRefreshToken,
   verifyAccessToken,
+  verifyRefreshToken,
 } from "../helpers/jwt.js";
 import {
   createRefreshToken,
   deleteRefreshToken,
   findRefreshToken,
+  findRefreshTokenByUserId,
+  updateRefreshToken,
 } from "../repositories/refreshToken.repository.js";
 import { deleteOTP, getOTP, saveOTP } from "../helpers/redisOTP.js";
 import { sendOTPService } from "./otp.service.js";
@@ -130,9 +135,7 @@ export const verifyEmailOTPService = async (body) => {
 
 export const loginService = async (body) => {
   const { email, password } = body;
-
   const user = await userFindByEmailWithPassword(email);
-
   if (!user) {
     throw new Error("Invalid email or password");
   }
@@ -144,19 +147,15 @@ export const loginService = async (body) => {
       message: "Resend OTP on your registered email",
     };
   }
-
   if (user.accountStatus !== "active") {
     throw new Error("Your account is not active");
   }
-
   const isPasswordMatched = await comparePassword(password, user.password);
-
   if (!isPasswordMatched) {
     throw new Error("Invalid email or password");
   }
-
   const payload = {
-    id: user?.role === "client" ? user?.clientId :user._id,
+    id: user?.role === "client" ? user?.clientId : user._id,
     email: user.email,
     role: user.role,
   };
@@ -164,15 +163,23 @@ export const loginService = async (body) => {
   const accessToken = generateAccessToken(payload);
   const refreshToken = generateRefreshToken(payload);
 
-  await createRefreshToken({
-    userId: user._id,
-    refreshToken,
-    expiresAt: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000),
-  });
+  const expiresAt = new Date(Date.now() + 7 * 24 * 60 * 60 * 1000);
+  const existingRefreshToken = await findRefreshTokenByUserId(user._id);
 
+  if (existingRefreshToken) {
+    await updateRefreshToken(user._id, {
+      refreshToken,
+      expiresAt,
+    });
+  } else {
+    await createRefreshToken({
+      userId: user._id,
+      refreshToken,
+      expiresAt,
+    });
+  }
   await updateLastLogin(user._id);
   user.password = undefined;
-
   return {
     success: true,
     message: "Login successful",
@@ -284,5 +291,34 @@ export const changePasswordService = async (body) => {
   return {
     success: true,
     message: "Password changed successfully",
+  };
+};
+
+export const refreshAccessToken = async (refreshToken) => {
+  let decoded;
+  try {
+    decoded = verifyRefreshToken(refreshToken);
+  } catch (error) {
+    throw new Error("Invalid or expired refresh token");
+  }
+  if (!decoded?.id || !decoded?.role) {
+    throw new Error("Invalid refresh token");
+  }
+  const storedToken = await findRefreshToken(refreshToken);
+  if (!storedToken) {
+    throw new Error("Refresh token is invalid or revoked");
+  }
+  const user = await findUserForRefreshToken(decoded);
+  if (!user) {
+    throw new Error("User not found");
+  }
+  const accessToken = generateAccessToken({
+    id: user.role === "client" ? user.clientId : user._id,
+    email: user.email,
+    role: user.role,
+  });
+
+  return {
+    accessToken,
   };
 };

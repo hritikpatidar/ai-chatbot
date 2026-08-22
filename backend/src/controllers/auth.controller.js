@@ -189,3 +189,26 @@ export const changePassword = async (req, res) => {
     });
   }
 };
+
+export const refreshAccessTokenController = async (req, res, next) => {
+  try {
+    const { refreshToken } = req.body;
+
+    if (!refreshToken) {
+      return res.status(401).json({
+        success: false,
+        message: "Refresh token is required",
+      });
+    }
+
+    const result = await authService.refreshAccessToken(refreshToken);
+
+    return res.status(200).json({
+      success: true,
+      message: "Access token refreshed successfully",
+      data: result,
+    });
+  } catch (error) {
+    next(error);
+  }
+};

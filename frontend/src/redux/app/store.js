@@ -11,10 +11,11 @@ import {
   REGISTER,
 } from "redux-persist";
 import { combineReducers } from "@reduxjs/toolkit";
-import AuthSlice from "../features/Auth/authSlice";
-import chatSlice from '../features/Chat/chatSlice';
-import clientSlice from "../features/Client/clientSlice"
+import AuthSlice, { updateAccessToken } from "../features/Auth/authSlice";
+import chatSlice from "../features/Chat/chatSlice";
+import clientSlice from "../features/Client/clientSlice";
 import { thunk } from "redux-thunk";
+import { setTokenUpdater } from "../authToken";
 
 const storage = Storage.default ?? Storage;
 
@@ -29,7 +30,7 @@ const ClientReducer = combineReducers({
 const appReducer = combineReducers({
   authReducer,
   chatSlice,
-  ClientReducer
+  ClientReducer,
 });
 
 const rootReducer = (state, action) => {
@@ -40,7 +41,7 @@ const rootReducer = (state, action) => {
 };
 const persistedReducer = persistReducer(
   { key: "root", version: 1, storage },
-  rootReducer
+  rootReducer,
 );
 
 export const store = configureStore({
@@ -57,6 +58,10 @@ export const store = configureStore({
   //     ignoredActions: [FLUSH, REHYDRATE, PAUSE, PERSIST, PURGE, REGISTER],
   //   },
   // }),
+});
+
+setTokenUpdater((token) => {
+  store.dispatch(updateAccessToken(token));
 });
 
 export const persistor = persistStore(store);

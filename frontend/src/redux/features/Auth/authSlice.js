@@ -63,6 +63,11 @@ const AuthSlice = createSlice({
     setIsProfileModalOpen: (state, action) => {
       state.isProfileModalOpen = action?.payload;
     },
+
+    updateAccessToken: (state, action) => {
+      state.token = action.payload;
+    },
+
     logoutSuccess: (state) => {
       state.loading = false;
       state.token = "";
@@ -128,5 +133,6 @@ const AuthSlice = createSlice({
   },
 });
 
-export const { setIsProfileModalOpen, logoutSuccess } = AuthSlice.actions;
+export const { setIsProfileModalOpen, updateAccessToken, logoutSuccess } =
+  AuthSlice.actions;
 export default AuthSlice.reducer;

@@ -82,3 +82,19 @@ export const findClientUserByClientId = async (clientId) => {
     .select("-password")
     .lean();
 };
+
+export const findUserForRefreshToken = async (decoded) => {
+  if (!decoded?.id || !decoded?.role) {
+    return null;
+  }
+
+  if (decoded.role === "client") {
+    return await User.findOne({
+      clientId: decoded.id,
+      role: "client",
+      accountStatus: "active",
+    }).select("-password");
+  }
+
+  return await User.findById(decoded.id).select("-password");
+};

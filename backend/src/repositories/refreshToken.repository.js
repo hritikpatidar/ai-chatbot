@@ -19,3 +19,22 @@ export const deleteAllRefreshTokens = async (userId) => {
     userId,
   });
 };
+
+export const findRefreshTokenByUserId = async (userId) => {
+  return await RefreshToken.findOne({
+    userId,
+  });
+};
+
+export const updateRefreshToken = async (userId, data) => {
+  return await RefreshToken.findOneAndUpdate(
+    { userId },
+    {
+      $set: data,
+    },
+    {
+      new: true,
+      runValidators: true,
+    },
+  );
+};

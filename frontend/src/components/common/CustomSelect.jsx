@@ -17,7 +17,10 @@ export default function CustomSelect({
   labelClassName = "",
 }) {
   const [isOpen, setIsOpen] = useState(false);
+  const [openDirection, setOpenDirection] = useState("bottom");
+
   const wrapperRef = useRef(null);
+  const buttonRef = useRef(null);
 
   const selectedOption = options.find((option) => option.value === value);
 
@@ -26,27 +29,106 @@ export default function CustomSelect({
       button: "h-10 px-3 text-xs",
       icon: 15,
       menu: "text-xs",
+      menuHeight: 250,
     },
 
     md: {
       button: "h-11 px-3.5 text-sm",
       icon: 17,
       menu: "text-sm",
+      menuHeight: 250,
     },
 
     lg: {
       button: "h-12 px-4 text-sm",
       icon: 18,
       menu: "text-sm",
+      menuHeight: 250,
     },
   };
 
   const currentSize = sizeClasses[size] || sizeClasses.md;
 
-  /* Close dropdown when clicking outside */
+  /*
+   * Calculate whether dropdown should open
+   * upwards or downwards.
+   */
+  const calculateDirection = () => {
+    if (!buttonRef.current) return;
+
+    const buttonRect = buttonRef.current.getBoundingClientRect();
+
+    const viewportHeight = window.innerHeight;
+
+    // Space available below button
+    const spaceBelow = viewportHeight - buttonRect.bottom;
+
+    // Space available above button
+    const spaceAbove = buttonRect.top;
+
+    /*
+     * Approximate dropdown height.
+     *
+     * max-h-60 = 240px
+     * plus margin/padding/border approximately 20px
+     */
+    const requiredHeight = Math.min(
+      currentSize.menuHeight,
+      options.length * 42 + 20,
+    );
+
+    /*
+     * If there is enough space below,
+     * open downwards.
+     */
+    if (spaceBelow >= requiredHeight + 10) {
+      setOpenDirection("bottom");
+      return;
+    }
+
+    /*
+     * If there is not enough space below
+     * but enough space above,
+     * open upwards.
+     */
+    if (spaceAbove >= requiredHeight + 10) {
+      setOpenDirection("top");
+      return;
+    }
+
+    /*
+     * If neither side has enough space,
+     * open on whichever side has more space.
+     */
+    if (spaceAbove > spaceBelow) {
+      setOpenDirection("top");
+    } else {
+      setOpenDirection("bottom");
+    }
+  };
+
+  /*
+   * Toggle dropdown.
+   */
+  const handleToggle = () => {
+    if (disabled) return;
+
+    if (!isOpen) {
+      calculateDirection();
+    }
+
+    setIsOpen((prev) => !prev);
+  };
+
+  /*
+   * Close dropdown when clicking outside.
+   */
   useEffect(() => {
     const handleClickOutside = (event) => {
-      if (wrapperRef.current && !wrapperRef.current.contains(event.target)) {
+      if (
+        wrapperRef.current &&
+        !wrapperRef.current.contains(event.target)
+      ) {
         setIsOpen(false);
       }
     };
@@ -58,6 +140,36 @@ export default function CustomSelect({
     };
   }, []);
 
+  /*
+   * Recalculate dropdown position when:
+   * - window resizes
+   * - window scrolls
+   */
+  useEffect(() => {
+    if (!isOpen) return;
+
+    const handlePositionChange = () => {
+      calculateDirection();
+    };
+
+    window.addEventListener("resize", handlePositionChange);
+
+    window.addEventListener("scroll", handlePositionChange, true);
+
+    return () => {
+      window.removeEventListener("resize", handlePositionChange);
+
+      window.removeEventListener(
+        "scroll",
+        handlePositionChange,
+        true,
+      );
+    };
+  }, [isOpen, options.length]);
+
+  /*
+   * Select option.
+   */
   const handleSelect = (option) => {
     if (option.disabled) return;
 
@@ -72,7 +184,10 @@ export default function CustomSelect({
   };
 
   return (
-    <div ref={wrapperRef} className={`relative w-full ${className}`}>
+    <div
+      ref={wrapperRef}
+      className={`relative w-full ${className}`}
+    >
       {/* Label */}
       {label && (
         <label
@@ -89,17 +204,20 @@ export default function CustomSelect({
         >
           {label}
 
-          {required && <span className="ml-1 text-red-500">*</span>}
+          {required && (
+            <span className="ml-1 text-red-500">*</span>
+          )}
         </label>
       )}
 
       {/* Dropdown */}
       <div className="relative">
         <button
+          ref={buttonRef}
           type="button"
           id={name}
           disabled={disabled}
-          onClick={() => setIsOpen((prev) => !prev)}
+          onClick={handleToggle}
           className={`
             flex
             w-full
@@ -179,7 +297,9 @@ export default function CustomSelect({
               }
             `}
           >
-            {selectedOption ? selectedOption.label : placeholder}
+            {selectedOption
+              ? selectedOption.label
+              : placeholder}
           </span>
 
           {/* Arrow */}
@@ -191,6 +311,7 @@ export default function CustomSelect({
               transition-transform
               duration-200
               dark:text-gray-500
+
               ${isOpen ? "rotate-180 text-blue-500" : ""}
             `}
           />
@@ -199,12 +320,11 @@ export default function CustomSelect({
         {/* Dropdown Menu */}
         {isOpen && !disabled && (
           <div
-            className="
+            className={`
               absolute
               left-0
               right-0
               z-50
-              mt-2
               overflow-hidden
               rounded-xl
               border
@@ -215,13 +335,26 @@ export default function CustomSelect({
               shadow-gray-200/50
               animate-in
               fade-in
-              slide-in-from-top-1
               duration-150
 
               dark:border-white/10
               dark:bg-[#171b23]
               dark:shadow-black/30
-            "
+
+              ${
+                openDirection === "bottom"
+                  ? `
+                    top-full
+                    mt-2
+                    slide-in-from-top-1
+                  `
+                  : `
+                    bottom-full
+                    mb-2
+                    slide-in-from-bottom-1
+                  `
+              }
+            `}
           >
             <div className="max-h-60 overflow-y-auto">
               {options.length === 0 ? (
@@ -239,14 +372,17 @@ export default function CustomSelect({
                 </div>
               ) : (
                 options.map((option) => {
-                  const isSelected = option.value === value;
+                  const isSelected =
+                    option.value === value;
 
                   return (
                     <button
                       key={option.value}
                       type="button"
                       disabled={option.disabled}
-                      onClick={() => handleSelect(option)}
+                      onClick={() =>
+                        handleSelect(option)
+                      }
                       className={`
                         flex
                         w-full
@@ -288,7 +424,9 @@ export default function CustomSelect({
                         }
                       `}
                     >
-                      <span className="truncate">{option.label}</span>
+                      <span className="truncate">
+                        {option.label}
+                      </span>
 
                       {isSelected && (
                         <Check

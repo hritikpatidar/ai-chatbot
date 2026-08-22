@@ -158,6 +158,47 @@ export const changePasswordSchema = z
     path: ["confirmPassword"],
   });
 
+const imageSchema = z
+  .any()
+  .nullable()
+  .optional()
+  .refine(
+    (file) => {
+      if (!file) return true;
+      return file instanceof File;
+    },
+    {
+      message: "Please select a valid image",
+    },
+  )
+  .refine(
+    (file) => {
+      if (!file) return true;
+
+      const allowedTypes = [
+        "image/jpeg",
+        "image/jpg",
+        "image/png",
+        "image/webp",
+      ];
+
+      return allowedTypes.includes(file.type);
+    },
+    {
+      message: "Only JPG, PNG or WEBP images are allowed",
+    },
+  )
+  .refine(
+    (file) => {
+      if (!file) return true;
+
+      return file.size <= 5 * 1024 * 1024;
+    },
+    {
+      message: "Image size must be less than 5MB",
+    },
+  );
+
 export const productSchema = z.object({
   name: z
     .string()
@@ -214,12 +255,7 @@ export const productSchema = z.object({
     },
   ),
 
-  image: z
-    .string()
-    .trim()
-    .url("Please enter a valid image URL")
-    .optional()
-    .or(z.literal("")),
+  image: imageSchema,
 
   status: z.enum(["active", "inactive"]),
 

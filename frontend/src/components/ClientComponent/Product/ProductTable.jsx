@@ -1,6 +1,8 @@
 import { Edit, Edit2, MoreHorizontal, Package, Trash2 } from "lucide-react";
 import ActionButton from "../../common/ActionButton";
 import StatusBadge from "../../common/StatusBadge";
+import { getImageUrl } from "../../../utils/imageUrl";
+import profile from "../../../assets/profile1.jpg";
 
 export default function ProductTable({
   products = [],
@@ -126,7 +128,7 @@ export default function ProductTable({
                     >
                       {product.image ? (
                         <img
-                          src={product.image}
+                          src={getImageUrl(product?.image, profile)}
                           alt={product.name}
                           className="h-full w-full object-cover"
                         />

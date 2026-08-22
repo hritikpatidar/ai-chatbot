@@ -98,20 +98,50 @@ export default function ClientProducts() {
     if (!client?.businessId) {
       return;
     }
+
     try {
+      const formData = new FormData();
+
+      // Basic product fields
+      formData.append("name", payload.name || "");
+      formData.append("description", payload.description || "");
+      formData.append("category", payload.category || "");
+      formData.append("price", payload.price ?? "");
+      formData.append("currency", payload.currency || "INR");
+      formData.append("availability", payload.availability || "");
+      formData.append("stock", payload.stock ?? "");
+      formData.append("status", payload.status || "active");
+
+      // Metadata
+      if (payload.metadata) {
+        formData.append("metadata", JSON.stringify(payload.metadata));
+      }
+
+      // Image
+      if (payload.image instanceof File) {
+        formData.append("image", payload.image);
+      }
+
       if (selectedProduct?._id) {
+        // UPDATE
         await updateProduct({
           productId: selectedProduct._id,
-          data: payload,
+          data: formData,
         });
+
         setSuccessMessage("Product updated successfully.");
       } else {
+        // CREATE
+        formData.append("clientId", client.businessId);
+
         await createProduct({
           clientId: client.businessId,
-          data: payload,
+          data: formData,
         });
+
         setSuccessMessage("Product added successfully.");
       }
+
       setIsModalOpen(false);
       setSelectedProduct(null);
     } catch (error) {
@@ -271,18 +301,11 @@ export default function ClientProducts() {
         <div className="mt-6 grid grid-cols-2 gap-3 lg:grid-cols-4">
           <StatBox title="Total Products" value={pagination.total} />
 
-          <StatBox
-            title="Total Page"
-            value={
-              pagination.totalPages
-            }
-          />
+          <StatBox title="Total Page" value={pagination.totalPages} />
 
           <StatBox
             title="Active"
-            value={
-              products.filter((item) => item.status !== "inactive").length
-            }
+            value={products.filter((item) => item.status !== "inactive").length}
           />
 
           <StatBox

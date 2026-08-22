@@ -3,6 +3,7 @@ import bcrypt from "bcrypt";
 
 import User from "../models/User.js";
 import Client from "../models/Client.js";
+import { sendClientWelcomeEmail } from "./email.service.js";
 
 export const createClientService = async (data) => {
   const session = await mongoose.startSession();
@@ -68,6 +69,7 @@ export const createClientService = async (data) => {
 
           contact: {
             phone: contact.phone?.trim() || "",
+            alternatePhone: contact.alternatePhone?.trim() || "",
             email: contact.email?.trim().toLowerCase() || "",
             website: contact.website?.trim() || "",
             whatsapp: contact.whatsapp?.trim() || "",
@@ -114,6 +116,21 @@ export const createClientService = async (data) => {
       },
     );
     await session.commitTransaction();
+    // Send welcome email after successful transaction
+    try {
+      await sendClientWelcomeEmail({
+        fullName: user.fullName,
+        businessName: client.businessName,
+        email: user.email,
+        password: password,
+        slug: client.slug,
+      });
+    } catch (emailError) {
+      console.error(
+        "Client created successfully, but welcome email could not be sent:",
+        emailError,
+      );
+    }
     return {
       client,
       user,

@@ -280,7 +280,7 @@ export default function OTPVerification() {
 
         {/* Floating Particles */}
 
-        {[...Array(58)].map((_, i) => (
+        {/* {[...Array(58)].map((_, i) => (
           <motion.div
             key={i}
             className="
@@ -307,7 +307,7 @@ export default function OTPVerification() {
               ease: "easeInOut",
             }}
           />
-        ))}
+        ))} */}
       </div>
 
       {/* Main Content */}

@@ -55,7 +55,7 @@ export const verifyEmailOTP = async (req, res) => {
   }
 };
 
-export const login = async (req, res) => {
+export const login = async (req, res) => { 
   try {
     const { error } = loginValidation.validate(req.body);
 

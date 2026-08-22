@@ -59,9 +59,9 @@ export const createClientValidation = Joi.object({
       "string.max": "Phone number cannot exceed 20 characters",
     }),
 
-    // alternatePhone: Joi.string().trim().max(20).allow("").default("").messages({
-    //   "string.max": "Alternate phone number cannot exceed 20 characters",
-    // }),
+    alternatePhone: Joi.string().trim().max(20).allow("").default("").messages({
+      "string.max": "Alternate phone number cannot exceed 20 characters",
+    }),
 
     email: Joi.string()
       .trim()

@@ -37,6 +37,26 @@ const metadataOptions = [
     label: "Project Type",
   },
   {
+    value: "serviceType",
+    label: "Service Type",
+  },
+  {
+    value: "services",
+    label: "Services",
+  },
+  {
+    value: "solutions",
+    label: "Solutions",
+  },
+  {
+    value: "industries",
+    label: "Industries",
+  },
+  {
+    value: "chatbotTypes",
+    label: "Chatbot Types",
+  },
+  {
     value: "features",
     label: "Features",
   },

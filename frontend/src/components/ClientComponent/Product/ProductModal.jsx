@@ -1,8 +1,7 @@
 import { useEffect } from "react";
-import { useForm, Controller } from "react-hook-form";
+import { useForm, Controller, useFieldArray } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { z } from "zod";
-import { X, Package } from "lucide-react";
+import { X, Package, Plus, Trash2 } from "lucide-react";
 
 import CustomSelect from "../../common/CustomSelect";
 import { productSchema } from "../../../utils/validation";
@@ -17,6 +16,9 @@ const initialForm = {
   stock: "",
   image: "",
   status: "active",
+
+  // Dynamic metadata
+  metadata: [],
 };
 
 export default function ProductModal({
@@ -41,6 +43,15 @@ export default function ProductModal({
     mode: "onChange",
   });
 
+  const {
+    fields: metadataFields,
+    append: appendMetadata,
+    remove: removeMetadata,
+  } = useFieldArray({
+    control,
+    name: "metadata",
+  });
+
   const image = watch("image");
 
   /* =========================================================
@@ -49,30 +60,32 @@ export default function ProductModal({
 
   useEffect(() => {
     if (product) {
+      const metadata = product.metadata
+        ? Object.entries(product.metadata).map(([key, value]) => ({
+            key,
+            value: Array.isArray(value)
+              ? value.join(", ")
+              : String(value ?? ""),
+          }))
+        : [];
+
       reset({
         name: product.name || "",
-
         description: product.description || "",
-
         category: product.category || "",
-
         price:
           product.price !== null && product.price !== undefined
             ? product.price
             : "",
-
         currency: product.currency || "INR",
-
         availability: product.availability || "in_stock",
-
         stock:
           product.stock !== null && product.stock !== undefined
             ? product.stock
             : "",
-
         image: product.image || "",
-
         status: product.status || "active",
+        metadata,
       });
     } else {
       reset(initialForm);
@@ -86,26 +99,35 @@ export default function ProductModal({
   ========================================================= */
 
   const handleFormSubmit = async (data) => {
+    const metadata = {};
+
+    (data.metadata || []).forEach((item) => {
+      const key = item?.key?.trim();
+      if (!key) return;
+      const value = item?.value?.trim() || "";
+      if (!value) return;
+      if (value.includes(",")) {
+        metadata[key] = value
+          .split(",")
+          .map((item) => item.trim())
+          .filter(Boolean);
+      } else {
+        metadata[key] = value;
+      }
+    });
+
     const payload = {
       name: data.name.trim(),
-
       description: data.description?.trim() || "",
-
       category: data.category?.trim() || "",
-
       price: data.price === "" ? null : Number(data.price),
-
       currency: data.currency,
-
       availability: data.availability,
-
       stock: data.stock === "" ? null : Number(data.stock),
-
       image: data.image?.trim() || "",
-
       status: data.status,
+      metadata,
     };
-
     await onSubmit(payload);
   };
 
@@ -184,7 +206,9 @@ export default function ProductModal({
           noValidate
         >
           <div className="space-y-5 p-5">
-            {/* Name */}
+            {/* =================================================
+                NAME
+            ================================================= */}
 
             <FormField
               label="Product Name"
@@ -200,7 +224,9 @@ export default function ProductModal({
               />
             </FormField>
 
-            {/* Description */}
+            {/* =================================================
+                DESCRIPTION
+            ================================================= */}
 
             <FormField label="Description" error={errors.description?.message}>
               <textarea
@@ -214,7 +240,9 @@ export default function ProductModal({
               />
             </FormField>
 
-            {/* Category + Currency */}
+            {/* =================================================
+                CATEGORY + CURRENCY
+            ================================================= */}
 
             <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
               <FormField label="Category" error={errors.category?.message}>
@@ -266,7 +294,9 @@ export default function ProductModal({
               </FormField>
             </div>
 
-            {/* Price + Stock */}
+            {/* =================================================
+                PRICE + STOCK
+            ================================================= */}
 
             <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
               <FormField label="Price" error={errors.price?.message}>
@@ -294,7 +324,9 @@ export default function ProductModal({
               </FormField>
             </div>
 
-            {/* Availability + Status */}
+            {/* =================================================
+                AVAILABILITY + STATUS
+            ================================================= */}
 
             <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
               <FormField
@@ -365,7 +397,9 @@ export default function ProductModal({
               </FormField>
             </div>
 
-            {/* Image */}
+            {/* =================================================
+                IMAGE
+            ================================================= */}
 
             <FormField label="Image URL" error={errors.image?.message}>
               <input
@@ -377,7 +411,10 @@ export default function ProductModal({
               />
             </FormField>
 
-            {/* Image Preview */}
+            {/* =================================================
+                IMAGE PREVIEW
+            ================================================= */}
+
             {image && (
               <div className="overflow-hidden rounded-xl border border-gray-200 dark:border-white/10">
                 <img
@@ -390,6 +427,278 @@ export default function ProductModal({
                 />
               </div>
             )}
+
+            {/* =================================================
+                METADATA
+            ================================================= */}
+
+            <div
+              className="
+                rounded-xl
+                border border-gray-200
+                bg-gray-50/50
+                p-4
+                dark:border-white/10
+                dark:bg-white/[0.02]
+              "
+            >
+              {/* Metadata Header */}
+
+              <div className="mb-4 flex items-center justify-between gap-3">
+                <div>
+                  <h3 className="text-sm font-semibold text-gray-900 dark:text-white">
+                    Metadata
+                  </h3>
+
+                  <p className="mt-0.5 text-xs text-gray-500 dark:text-gray-400">
+                    Add custom information about this product.
+                  </p>
+                </div>
+
+                <button
+                  type="button"
+                  disabled={loading}
+                  onClick={() =>
+                    appendMetadata({
+                      key: "",
+                      value: "",
+                    })
+                  }
+                  className="
+                    inline-flex
+                    shrink-0
+                    items-center
+                    gap-1.5
+                    rounded-lg
+                    bg-blue-600
+                    px-3
+                    py-2
+                    text-xs
+                    font-medium
+                    text-white
+                    transition
+                    hover:bg-blue-700
+                    disabled:cursor-not-allowed
+                    disabled:opacity-50
+                  "
+                >
+                  <Plus size={14} />
+                  Add Metadata
+                </button>
+              </div>
+
+              {/* Metadata Fields */}
+
+              {metadataFields.length === 0 ? (
+                <div
+                  className="
+                    rounded-lg
+                    border border-dashed
+                    border-gray-300
+                    px-4
+                    py-6
+                    text-center
+                    dark:border-white/10
+                  "
+                >
+                  <p className="text-xs text-gray-500 dark:text-gray-400">
+                    No metadata added yet.
+                  </p>
+
+                  <p className="mt-1 text-[11px] text-gray-400 dark:text-gray-500">
+                    Add custom fields like technologies, features, projectType,
+                    etc.
+                  </p>
+                </div>
+              ) : (
+                <div className="space-y-3">
+                  {metadataFields.map((field, index) => (
+                    <div
+                      key={field.id}
+                      className="
+                        flex
+                        flex-col
+                        gap-3
+                        rounded-lg
+                        border
+                        border-gray-200
+                        bg-white
+                        p-3
+                        sm:flex-row
+                        sm:items-start
+                        dark:border-white/10
+                        dark:bg-[#11151d]
+                      "
+                    >
+                      {/* Key */}
+
+                      {/* Key */}
+
+                      <div className="flex-1">
+                        <label
+                          className="
+                            mb-1.5
+                            block
+                            text-xs
+                            font-medium
+                            text-gray-700
+                            dark:text-gray-300
+                          "
+                        >
+                          Key
+                        </label>
+
+                        <Controller
+                          name={`metadata.${index}.key`}
+                          control={control}
+                          render={({ field }) => (
+                            <CustomSelect
+                              size="sm"
+                              name={field.name}
+                              value={field.value}
+                              onChange={field.onChange}
+                              disabled={loading}
+                              placeholder="Select metadata"
+                              rounded="rounded-lg"
+                              error={errors.metadata?.[index]?.key?.message}
+                              options={[
+                                {
+                                  value: "technologies",
+                                  label: "Technologies",
+                                },
+                                {
+                                  value: "projectType",
+                                  label: "Project Type",
+                                },
+                                {
+                                  value: "features",
+                                  label: "Features",
+                                },
+                                {
+                                  value: "framework",
+                                  label: "Framework",
+                                },
+                                {
+                                  value: "frontend",
+                                  label: "Frontend",
+                                },
+                                {
+                                  value: "backend",
+                                  label: "Backend",
+                                },
+                                {
+                                  value: "database",
+                                  label: "Database",
+                                },
+                                {
+                                  value: "authentication",
+                                  label: "Authentication",
+                                },
+                                {
+                                  value: "deployment",
+                                  label: "Deployment",
+                                },
+                                {
+                                  value: "api",
+                                  label: "API",
+                                },
+                                {
+                                  value: "integrations",
+                                  label: "Integrations",
+                                },
+                                {
+                                  value: "version",
+                                  label: "Version",
+                                },
+                                {
+                                  value: "license",
+                                  label: "License",
+                                },
+                                {
+                                  value: "platform",
+                                  label: "Platform",
+                                },
+                                {
+                                  value: "description",
+                                  label: "Description",
+                                },
+                              ]}
+                            />
+                          )}
+                        />
+                      </div>
+
+                      {/* Value */}
+
+                      <div className="flex-1">
+                        <label
+                          className="
+                            mb-1.5
+                            block
+                            text-xs
+                            font-medium
+                            text-gray-700
+                            dark:text-gray-300
+                          "
+                        >
+                          Value
+                        </label>
+
+                        <input
+                          type="text"
+                          {...register(`metadata.${index}.value`)}
+                          disabled={loading}
+                          placeholder="e.g. React.js, Node.js, MongoDB"
+                          className={`input-style ${
+                            errors.metadata?.[index]?.value ? "input-error" : ""
+                          }`}
+                        />
+
+                        {errors.metadata?.[index]?.value?.message && (
+                          <p className="mt-1 text-xs text-red-500">
+                            {errors.metadata[index].value.message}
+                          </p>
+                        )}
+                      </div>
+
+                      {/* Delete */}
+
+                      <button
+                        type="button"
+                        disabled={loading}
+                        onClick={() => removeMetadata(index)}
+                        className="
+                          mt-0
+                          flex
+                          h-10
+                          w-10
+                          shrink-0
+                          items-center
+                          justify-center
+                          rounded-lg
+                          border
+                          border-gray-200
+                          text-gray-500
+                          transition
+                          hover:border-red-200
+                          hover:bg-red-50
+                          hover:text-red-500
+                          sm:mt-6
+                          dark:border-white/10
+                          dark:text-gray-400
+                          dark:hover:border-red-500/20
+                          dark:hover:bg-red-500/10
+                          dark:hover:text-red-400
+                        "
+                        title="Remove metadata"
+                      >
+                        <Trash2 size={16} />
+                      </button>
+                    </div>
+                  ))}
+                </div>
+              )}
+            </div>
           </div>
 
           {/* =================================================

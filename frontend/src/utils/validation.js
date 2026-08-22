@@ -222,6 +222,16 @@ export const productSchema = z.object({
     .or(z.literal("")),
 
   status: z.enum(["active", "inactive"]),
+
+  metadata: z
+    .array(
+      z.object({
+        key: z.string().trim().min(1, "Please select a metadata key"),
+
+        value: z.string().trim().min(1, "Metadata value is required"),
+      }),
+    )
+    .default([]),
 });
 
 export const faqSchema = z.object({

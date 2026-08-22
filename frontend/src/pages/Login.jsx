@@ -37,6 +37,8 @@ export default function Login() {
         setItemLocalStorage("userRole", response?.user?.role);
         if (response?.user?.role === "client") {
           navigate("/client");
+        } else if (response?.user?.role === "admin") {
+          navigate("/admin");
         } else {
           navigate("/");
         }
@@ -79,7 +81,6 @@ export default function Login() {
           max-w-7xl
         "
       >
-
         <motion.div
           initial={{ x: -80, opacity: 0 }}
           animate={{ x: 0, opacity: 1 }}
@@ -363,7 +364,6 @@ export default function Login() {
               autoComplete="off"
               onSubmit={handleSubmit(onSubmit)}
             >
-
               <motion.div
                 initial={{ y: 25, opacity: 0 }}
                 animate={{ y: 0, opacity: 1 }}

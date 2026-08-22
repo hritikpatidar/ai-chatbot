@@ -758,7 +758,7 @@ export default function ProductModal({
                       hover:border-blue-400
                       hover:bg-blue-50/50
                       dark:border-white/10
-                      dark:bg-white/[0.02]
+                      dark:bg-white/2
                       dark:hover:border-blue-500/50
                       dark:hover:bg-blue-500/5
                     "
@@ -874,7 +874,7 @@ export default function ProductModal({
                 bg-gray-50/50
                 p-4
                 dark:border-white/10
-                dark:bg-white/[0.02]
+                dark:bg-white/2
               "
             >
               {/* HEADER */}

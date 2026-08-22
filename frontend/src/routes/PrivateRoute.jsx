@@ -23,7 +23,6 @@ export const PrivateRoute = ({ allowedRoles = [] }) => {
   }
 
   const userRole = profileDetails?.role;
-
   if (allowedRoles.length > 0 && !allowedRoles.includes(userRole)) {
     if (userRole === "client") {
       return <Navigate to="/client" replace />;

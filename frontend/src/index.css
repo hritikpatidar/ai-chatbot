@@ -98,3 +98,22 @@ summary {
   background: #f0ede8 !important;
 }
 
+
+
+@layer components {
+  .table-head {
+    @apply px-5 py-3 text-left text-[10px] font-semibold uppercase tracking-wider text-gray-400 dark:text-gray-500;
+  }
+
+  .table-cell {
+    @apply px-5 py-4;
+  }
+
+  .input-style {
+    @apply w-full rounded-lg border border-gray-200 bg-white px-3 py-2.5 text-sm text-gray-900 outline-none transition placeholder:text-gray-400 focus:border-blue-500 focus:ring-2 focus:ring-blue-500/10 dark:border-white/10 dark:bg-white/[0.03] dark:text-white dark:placeholder:text-gray-500;
+  }
+
+  .input-error {
+    @apply border-red-400 focus:border-red-500 focus:ring-red-500/10;
+  }
+}

@@ -108,40 +108,6 @@ export default function AdminClient() {
     }
   };
 
-  const handleAddClient = async (data) => {
-    try {
-      setAddClientLoading(true);
-
-      console.log("Create client payload:", data);
-
-      // Yaha tumhari create API lagegi
-      //
-      // const response = await dispatch(
-      //   createClient(data)
-      // ).unwrap();
-
-      // Temporary demo:
-      const newClient = {
-        _id: Date.now().toString(),
-        fullName: data.fullName,
-        email: data.email,
-        businessName: data.businessName,
-        accountStatus: data.status,
-        createdAt: new Date().toISOString(),
-        lastLogin: null,
-        profileImage: "",
-      };
-
-      setClients((prev) => [newClient, ...prev]);
-
-      setIsAddClientOpen(false);
-    } catch (error) {
-      console.error("Create client failed:", error);
-    } finally {
-      setAddClientLoading(false);
-    }
-  };
-
   return (
     <div className="space-y-6">
       {/* Header */}
@@ -354,12 +320,8 @@ export default function AdminClient() {
       <AdminAddClientModal
         isOpen={isAddClientOpen}
         onClose={() => {
-          if (!addClientLoading) {
             setIsAddClientOpen(false);
-          }
         }}
-        onSubmit={handleAddClient}
-        loading={addClientLoading}
       />
 
       {/* Delete Modal */}

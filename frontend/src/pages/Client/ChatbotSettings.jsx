@@ -71,6 +71,7 @@ export default function ClientChatbotSettings() {
   const { client, loading } = useSelector(
     (state) => state?.ClientReducer?.clientSlice || {},
   );
+  const [draggedIndex, setDraggedIndex] = useState(null);
 
   const [saving, setSaving] = useState(false);
   const [message, setMessage] = useState({
@@ -90,7 +91,7 @@ export default function ClientChatbotSettings() {
     mode: "onChange",
   });
 
-  const { fields, append, remove } = useFieldArray({
+  const { fields, append, remove, move } = useFieldArray({
     control,
     name: "chatbot.predefinedQuestions",
   });
@@ -167,41 +168,26 @@ export default function ClientChatbotSettings() {
         businessDescription: data.businessDescription,
         address: {
           addressLine1: data.address.addressLine1,
-
           addressLine2: data.address.addressLine2,
-
           city: data.address.city,
-
           state: data.address.state,
-
           country: data.address.country,
-
           postalCode: data.address.postalCode,
-
           googleMapsUrl: data.address.googleMapsUrl,
         },
         contact: {
           phone: data.contact.phone,
-
           alternatePhone: data.contact.alternatePhone,
-
           email: data.contact.email,
-
           website: data.contact.website,
-
           whatsapp: data.contact.whatsapp,
         },
         chatbot: {
           name: data.chatbot.name,
-
           welcomeMessage: data.chatbot.welcomeMessage,
-
           language: data.chatbot.language,
-
           tone: data.chatbot.tone,
-
           aiInstructions: data.chatbot.aiInstructions,
-
           predefinedQuestions: data.chatbot.predefinedQuestions.map(
             (item, index) => ({
               ...item,
@@ -240,6 +226,29 @@ export default function ClientChatbotSettings() {
     } finally {
       setSaving(false);
     }
+  };
+
+  const handleDragStart = (index) => {
+    if (loading) return;
+    setDraggedIndex(index);
+  };
+
+  const handleDragOver = (event) => {
+    event.preventDefault();
+  };
+
+  const handleDrop = (targetIndex) => {
+    if (loading || draggedIndex === null || draggedIndex === targetIndex) {
+      setDraggedIndex(null);
+      return;
+    }
+
+    move(draggedIndex, targetIndex);
+    setDraggedIndex(null);
+  };
+
+  const handleDragEnd = () => {
+    setDraggedIndex(null);
   };
 
   if (loading && !client) {
@@ -716,6 +725,11 @@ export default function ClientChatbotSettings() {
                   {fields.map((field, index) => (
                     <div
                       key={field.id}
+                      draggable={!loading}
+                      onDragStart={() => handleDragStart(index)}
+                      onDragOver={handleDragOver}
+                      onDrop={() => handleDrop(index)}
+                      onDragEnd={handleDragEnd}
                       className="
                         flex flex-col gap-3
                         rounded-xl
@@ -728,14 +742,12 @@ export default function ClientChatbotSettings() {
                         dark:bg-[#0f131b]
                       "
                     >
-                      <GripVertical
-                        size={18}
-                        className="
-                          hidden shrink-0
-                          text-gray-400
-                          sm:block
-                        "
-                      />
+                      <div
+                        className="flex h-9 w-6 shrink-0 cursor-grab items-center justify-center text-gray-400 active:cursor-grabbing dark:text-gray-500"
+                        title="Drag to reorder"
+                      >
+                        <GripVertical size={18} />
+                      </div>
 
                       <div className="min-w-0 flex-1">
                         <input

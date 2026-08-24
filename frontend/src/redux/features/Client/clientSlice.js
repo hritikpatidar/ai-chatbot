@@ -13,23 +13,6 @@ const initialState = {
   clientError: "",
 };
 
-// Create Client
-export const createClient = createAsyncThunk(
-  "admin/createClient",
-  async (payload, { rejectWithValue }) => {
-    try {
-      const response = await createClientService(payload);
-
-      return response.data;
-    } catch (error) {
-      return rejectWithValue(
-        error.response?.data || {
-          message: "Failed to create client",
-        },
-      );
-    }
-  },
-);
 
 // Get Client
 export const getClientById = createAsyncThunk(
@@ -90,20 +73,6 @@ const clientSlice = createSlice({
 
   extraReducers: (builder) => {
     builder
-      .addCase(createClient.pending, (state) => {
-        state.clientLoading = true;
-        state.clientError = "";
-      })
-      .addCase(createClient.fulfilled, (state, action) => {
-        state.clientLoading = false;
-        state.client = action.payload?.client || null;
-        state.clientError = "";
-      })
-      .addCase(createClient.rejected, (state, action) => {
-        state.clientLoading = false;
-        state.clientError =
-          action.payload?.message || "Failed to create client";
-      })
       .addCase(getClientById.pending, (state) => {
         state.clientLoading = true;
         state.clientError = "";

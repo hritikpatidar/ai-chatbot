@@ -5,7 +5,7 @@ export const getClientByIdService = async (clientId) => {
 };
 
 export const createClientService = async (payload) => {
-  return httpServices.post("/client", payload);
+  return httpServices.post("/admin/create-client", payload);
 };
 
 export const updateClientService = async (clientId, payload) => {

@@ -1,12 +1,10 @@
-import React, { useEffect } from "react";
+import React, { useEffect, useState } from "react";
 import { createPortal } from "react-dom";
-
 import {
   X,
   UserPlus,
   User,
   Building2,
-  BriefcaseBusiness,
   KeyRound,
   MapPin,
   Phone,
@@ -17,37 +15,23 @@ import {
   Plus,
   Trash2,
   GripVertical,
+  CheckCircle2,
+  AlertCircle,
 } from "lucide-react";
-
-import { useForm, useFieldArray } from "react-hook-form";
-
-/* ============================================================
-   DEFAULT VALUES
-============================================================ */
+import { Controller, useFieldArray, useForm } from "react-hook-form";
+import { zodResolver } from "@hookform/resolvers/zod";
+import PhoneInputField from "../common/PhoneInputField";
+import { clientSchema } from "../../utils/validation";
+import { createClientService } from "../../service/Client/clientServices";
 
 const defaultValues = {
-  /* ==========================================================
-     ACCOUNT
-  ========================================================== */
-
   fullName: "",
   email: "",
   password: "",
-
   status: "active",
-
-  /* ==========================================================
-     BUSINESS
-  ========================================================== */
-
   businessName: "",
   businessType: "",
   businessDescription: "",
-
-  /* ==========================================================
-     ADDRESS
-  ========================================================== */
-
   address: {
     addressLine1: "",
     addressLine2: "",
@@ -57,11 +41,6 @@ const defaultValues = {
     postalCode: "",
     googleMapsUrl: "",
   },
-
-  /* ==========================================================
-     CONTACT
-  ========================================================== */
-
   contact: {
     phone: "",
     alternatePhone: "",
@@ -69,43 +48,25 @@ const defaultValues = {
     website: "",
     whatsapp: "",
   },
-
-  /* ==========================================================
-     CLIENT CONFIGURATION
-  ========================================================== */
-
   clientKey: "",
   slug: "",
-
-  /* ==========================================================
-     CHATBOT
-  ========================================================== */
-
   chatbot: {
     name: "",
-
     welcomeMessage: "",
-
     language: "english",
-
     tone: "professional",
-
     aiInstructions: "",
-
-    predefinedQuestions: [],
+    predefinedQuestions: [
+      {
+        question: "",
+        enabled: true,
+        sortOrder: 1,
+      },
+    ],
   },
 };
 
-/* ============================================================
-   MODAL
-============================================================ */
-
-export default function AdminAddClientModal({
-  isOpen,
-  onClose,
-  onSubmit,
-  loading = false,
-}) {
+export default function AdminAddClientModal({ isOpen, onClose }) {
   const {
     register,
     handleSubmit,
@@ -113,30 +74,29 @@ export default function AdminAddClientModal({
     watch,
     setValue,
     control,
-    formState: { errors },
+    formState: { errors, isSubmitting },
   } = useForm({
+    resolver: zodResolver(clientSchema),
     defaultValues,
     mode: "onChange",
   });
-
-  /* ==========================================================
-     PREDEFINED QUESTIONS ARRAY
-  ========================================================== */
+  const [loading, setLoading] = useState(false);
+  const [apiError, setApiError] = useState("");
+  const [successMessage, setSuccessMessage] = useState("");
+  const isLoading = loading || isSubmitting;
 
   const {
     fields: questionFields,
     append,
     remove,
+    move,
   } = useFieldArray({
     control,
     name: "chatbot.predefinedQuestions",
   });
 
   const businessName = watch("businessName");
-
-  /* ==========================================================
-     BODY SCROLL LOCK
-  ========================================================== */
+  const [draggedIndex, setDraggedIndex] = useState(null);
 
   useEffect(() => {
     if (!isOpen) return;
@@ -153,48 +113,90 @@ export default function AdminAddClientModal({
     };
   }, [isOpen]);
 
-  /* ==========================================================
-     CLOSE
-  ========================================================== */
-
   const handleClose = () => {
-    if (loading) return;
-
+    if (isLoading) return;
     reset(defaultValues);
+    setDraggedIndex(null);
     onClose?.();
   };
 
-  /* ==========================================================
-     SUBMIT
-  ========================================================== */
-
   const submitHandler = async (data) => {
-    /*
-      Ensure sortOrder always matches
-      the current question order.
-    */
+    try {
+      setLoading(true);
+      setApiError("");
+      setSuccessMessage("");
 
-    const formattedData = {
-      ...data,
+      const formattedQuestions = data.chatbot.predefinedQuestions.map(
+        (item, index) => ({
+          question: item.question.trim(),
+          enabled: Boolean(item.enabled),
+          sortOrder: index + 1,
+        }),
+      );
+      const payload = {
+        fullName: data.fullName.trim(),
+        email: data.email.trim().toLowerCase(),
+        password: data.password,
+        // status: data.status,
+        businessName: data.businessName.trim(),
+        businessType: data.businessType.trim(),
+        businessDescription: data.businessDescription?.trim() || "",
+        address: {
+          addressLine1: data.address.addressLine1?.trim() || "",
+          addressLine2: data.address.addressLine2?.trim() || "",
+          city: data.address.city?.trim() || "",
+          state: data.address.state?.trim() || "",
+          country: data.address.country?.trim() || "India",
+          postalCode: data.address.postalCode?.trim() || "",
+          googleMapsUrl: data.address.googleMapsUrl?.trim() || "",
+        },
 
-      chatbot: {
-        ...data.chatbot,
+        contact: {
+          phone: data.contact.phone?.trim() || "",
+          alternatePhone: data.contact.alternatePhone?.trim() || "",
+          email: data.contact.email?.trim().toLowerCase() || "",
+          website: data.contact.website?.trim() || "",
+          whatsapp: data.contact.whatsapp?.trim() || "",
+        },
 
-        predefinedQuestions: data.chatbot.predefinedQuestions.map(
-          (item, index) => ({
-            ...item,
-            sortOrder: index + 1,
-          }),
-        ),
-      },
-    };
+        clientKey: data.clientKey.trim(),
+        slug: data.slug.trim(),
+        chatbot: {
+          name: data.chatbot.name.trim(),
+          welcomeMessage: data.chatbot.welcomeMessage?.trim() || "",
+          language: data.chatbot.language,
+          tone: data.chatbot.tone,
+          aiInstructions: data.chatbot.aiInstructions.trim(),
+          predefinedQuestions: formattedQuestions,
+        },
+      };
+      const response = await createClientService(payload);
+      if (response?.data?.success) {
+        setSuccessMessage(
+          response?.data?.message || "Client settings updated successfully.",
+        );
+      }
 
-    await onSubmit?.(formattedData);
+      reset(defaultValues);
+      setTimeout(() => {
+        onClose?.();
+        setSuccessMessage("");
+        reset(defaultValues);
+        setDraggedIndex(null);
+      }, 700);
+    } catch (error) {
+      console.error("Create client error:", error);
+
+      const message =
+        error?.response?.data?.message ||
+        error?.response?.data?.error ||
+        error?.message ||
+        "Something went wrong while creating the client.";
+      setApiError(message);
+    } finally {
+      setLoading(false);
+    }
   };
-
-  /* ==========================================================
-     GENERATE CLIENT KEY
-  ========================================================== */
 
   const generateClientKey = () => {
     const value = businessName
@@ -216,10 +218,6 @@ export default function AdminAddClientModal({
     });
   };
 
-  /* ==========================================================
-     ADD QUESTION
-  ========================================================== */
-
   const handleAddQuestion = () => {
     append({
       question: "",
@@ -228,33 +226,37 @@ export default function AdminAddClientModal({
     });
   };
 
-  if (!isOpen) {
-    return null;
-  }
+  const handleDragStart = (index) => {
+    if (isLoading) return;
+    setDraggedIndex(index);
+  };
+
+  const handleDragOver = (event) => {
+    event.preventDefault();
+  };
+
+  const handleDrop = (targetIndex) => {
+    if (isLoading || draggedIndex === null || draggedIndex === targetIndex) {
+      setDraggedIndex(null);
+      return;
+    }
+
+    move(draggedIndex, targetIndex);
+    setDraggedIndex(null);
+  };
+
+  const handleDragEnd = () => {
+    setDraggedIndex(null);
+  };
+
+  if (!isOpen) return null;
 
   return createPortal(
     <div
-      className="
-        fixed
-        inset-0
-        z-40
-
-        flex
-        items-center
-        justify-center
-
-        bg-black/50
-        p-4
-
-        backdrop-blur-sm
-      "
+      className="fixed inset-0 z-40 flex items-center justify-center bg-black/50 p-4 backdrop-blur-sm"
       role="dialog"
       aria-modal="true"
     >
-      {/* ======================================================
-          BACKDROP
-      ====================================================== */}
-
       <div
         className="absolute inset-0"
         onMouseDown={(event) => {
@@ -264,107 +266,22 @@ export default function AdminAddClientModal({
         }}
       />
 
-      {/* ======================================================
-          MODAL
-      ====================================================== */}
-
       <div
-        className="
-          relative
-          z-10
-
-          flex
-          max-h-[90vh]
-          w-full
-          max-w-4xl
-          flex-col
-
-          overflow-hidden
-
-          rounded-2xl
-
-          border
-          border-gray-200
-
-          bg-white
-
-          shadow-2xl
-
-          dark:border-white/10
-          dark:bg-[#171b23]
-        "
-        onMouseDown={(event) => {
-          event.stopPropagation();
-        }}
+        className="relative z-10 flex max-h-[90vh] w-full max-w-4xl flex-col overflow-hidden rounded-2xl border border-gray-200 bg-white shadow-2xl dark:border-white/10 dark:bg-[#171b23]"
+        onMouseDown={(event) => event.stopPropagation()}
       >
-        {/* ====================================================
-            HEADER
-        ==================================================== */}
-
-        <div
-          className="
-            flex
-            shrink-0
-            items-center
-            justify-between
-
-            border-b
-            border-gray-200
-
-            px-5
-            py-4
-
-            dark:border-white/10
-          "
-        >
+        <div className="flex shrink-0 items-center justify-between border-b border-gray-200 px-5 py-4 dark:border-white/10">
           <div className="flex min-w-0 items-center gap-3">
-            <div
-              className="
-                flex
-                h-10
-                w-10
-                shrink-0
-                items-center
-                justify-center
-
-                rounded-xl
-
-                bg-blue-500/10
-                text-blue-500
-              "
-            >
+            <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-blue-500/10 text-blue-500">
               <UserPlus size={20} />
             </div>
 
             <div className="min-w-0">
-              <h2
-                className="
-                  truncate
-
-                  text-base
-                  font-semibold
-
-                  text-gray-900
-
-                  dark:text-white
-                "
-              >
+              <h2 className="truncate text-base font-semibold text-gray-900 dark:text-white">
                 Add New Client
               </h2>
 
-              <p
-                className="
-                  mt-0.5
-
-                  truncate
-
-                  text-xs
-
-                  text-gray-500
-
-                  dark:text-gray-400
-                "
-              >
+              <p className="mt-0.5 truncate text-xs text-gray-500 dark:text-gray-400">
                 Create a new client, business and chatbot configuration
               </p>
             </div>
@@ -373,86 +290,78 @@ export default function AdminAddClientModal({
           <button
             type="button"
             onClick={handleClose}
-            disabled={loading}
-            className="
-              shrink-0
-
-              rounded-lg
-              p-2
-
-              text-gray-500
-
-              transition
-
-              hover:bg-gray-100
-              hover:text-gray-900
-
-              disabled:cursor-not-allowed
-              disabled:opacity-50
-
-              dark:text-gray-400
-              dark:hover:bg-white/10
-              dark:hover:text-white
-            "
+            disabled={isLoading}
+            className="shrink-0 rounded-lg p-2 text-gray-500 transition hover:bg-gray-100 hover:text-gray-900 disabled:cursor-not-allowed disabled:opacity-50 dark:text-gray-400 dark:hover:bg-white/10 dark:hover:text-white"
           >
             <X size={18} />
           </button>
         </div>
 
-        {/* ====================================================
-            FORM
-        ==================================================== */}
-
         <form
           onSubmit={handleSubmit(submitHandler)}
-          className="
-            flex
-            min-h-0
-            flex-1
-            flex-col
-          "
+          className="flex min-h-0 flex-1 flex-col"
           noValidate
         >
-          {/* ==================================================
-              SCROLL CONTENT
-          ================================================== */}
+          {successMessage && (
+            <div
+              className="
+                flex
+                items-center
+                gap-3
+                rounded-lg
+                border
+                border-green-200
+                bg-green-50
+                px-4
+                py-3
+                text-sm
+                text-green-700
+                dark:border-green-500/20
+                dark:bg-green-500/10
+                dark:text-green-400
+              "
+            >
+              <CheckCircle2 size={18} />
 
-          <div
-            className="
-              min-h-0
-              flex-1
+              <span>{successMessage}</span>
+            </div>
+          )}
+          {apiError && (
+            <div
+              className="
+                flex
+                items-start
+                gap-3
+                rounded-lg
+                border
+                border-red-200
+                bg-red-50
+                px-4
+                py-3
+                text-sm
+                text-red-700
+                dark:border-red-500/20
+                dark:bg-red-500/10
+                dark:text-red-400
+              "
+            >
+              <AlertCircle size={18} className="mt-0.5 shrink-0" />
 
-              overflow-y-auto
-              overflow-x-hidden
+              <div>
+                <p className="font-medium">Error</p>
 
-              overscroll-contain
-
-              p-5
-
-              [scrollbar-width:thin]
-              [scrollbar-color:#9ca3af_transparent]
-
-              dark:[scrollbar-color:#4b5563_transparent]
-            "
-          >
+                <p className="mt-0.5 text-xs">{apiError}</p>
+              </div>
+            </div>
+          )}
+          <div className="min-h-0 flex-1 overflow-y-auto overflow-x-hidden overscroll-contain p-5 [scrollbar-color:#9ca3af_transparent] scrollbar-thin dark:[scrollbar-color:#4b5563_transparent]">
             <div className="space-y-5">
-              {/* =================================================
-                  ACCOUNT INFORMATION
-              ================================================= */}
-
               <FormSection
                 icon={User}
                 title="Account Information"
                 description="Login credentials for the client."
               >
-                <div
-                  className="
-                    grid
-                    grid-cols-1
-                    gap-4
-                    sm:grid-cols-2
-                  "
-                >
+                <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
                   <FormField
                     label="Full Name"
                     required
@@ -460,11 +369,9 @@ export default function AdminAddClientModal({
                   >
                     <Input
                       type="text"
-                      {...register("fullName", {
-                        required: "Full name is required",
-                      })}
-                      disabled={loading}
                       placeholder="Saviesa Infotech"
+                      disabled={isLoading}
+                      {...register("fullName")}
                     />
                   </FormField>
 
@@ -475,11 +382,9 @@ export default function AdminAddClientModal({
                   >
                     <Input
                       type="email"
-                      {...register("email", {
-                        required: "Email is required",
-                      })}
-                      disabled={loading}
                       placeholder="info@example.com"
+                      disabled={isLoading}
+                      {...register("email")}
                     />
                   </FormField>
 
@@ -490,20 +395,17 @@ export default function AdminAddClientModal({
                   >
                     <Input
                       type="password"
-                      {...register("password", {
-                        required: "Password is required",
-                        minLength: {
-                          value: 6,
-                          message: "Password must be at least 6 characters",
-                        },
-                      })}
-                      disabled={loading}
                       placeholder="Enter password"
+                      disabled={isLoading}
+                      {...register("password")}
                     />
                   </FormField>
 
-                  <FormField label="Account Status">
-                    <SelectInput {...register("status")} disabled={loading}>
+                  <FormField
+                    label="Account Status"
+                    error={errors.status?.message}
+                  >
+                    <SelectInput disabled={isLoading} {...register("status")}>
                       <option value="active">Active</option>
                       <option value="inactive">Inactive</option>
                     </SelectInput>
@@ -511,23 +413,12 @@ export default function AdminAddClientModal({
                 </div>
               </FormSection>
 
-              {/* =================================================
-                  BUSINESS INFORMATION
-              ================================================= */}
-
               <FormSection
                 icon={Building2}
                 title="Business Information"
                 description="Basic information about the client's business."
               >
-                <div
-                  className="
-                    grid
-                    grid-cols-1
-                    gap-4
-                    sm:grid-cols-2
-                  "
-                >
+                <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
                   <FormField
                     label="Business Name"
                     required
@@ -535,11 +426,9 @@ export default function AdminAddClientModal({
                   >
                     <Input
                       type="text"
-                      {...register("businessName", {
-                        required: "Business name is required",
-                      })}
-                      disabled={loading}
                       placeholder="Saviesa Infotech"
+                      disabled={isLoading}
+                      {...register("businessName")}
                     />
                   </FormField>
 
@@ -550,11 +439,9 @@ export default function AdminAddClientModal({
                   >
                     <Input
                       type="text"
-                      {...register("businessType", {
-                        required: "Business type is required",
-                      })}
-                      disabled={loading}
                       placeholder="IT Software and Technology Company"
+                      disabled={isLoading}
+                      {...register("businessType")}
                     />
                   </FormField>
 
@@ -563,65 +450,23 @@ export default function AdminAddClientModal({
                       label="Business Description"
                       error={errors.businessDescription?.message}
                     >
-                      <textarea
-                        {...register("businessDescription")}
-                        disabled={loading}
+                      <Textarea
                         rows={4}
                         placeholder="Describe the client's business..."
-                        className="
-                          w-full
-                          resize-none
-                          rounded-lg
-
-                          border
-                          border-gray-200
-
-                          bg-white
-
-                          px-3
-                          py-2.5
-
-                          text-sm
-                          text-gray-900
-
-                          outline-none
-
-                          transition
-
-                          placeholder:text-gray-400
-
-                          focus:border-blue-500
-                          focus:ring-2
-                          focus:ring-blue-500/10
-
-                          dark:border-white/10
-                          dark:bg-[#171b23]
-                          dark:text-white
-                          dark:placeholder:text-gray-500
-                        "
+                        disabled={isLoading}
+                        {...register("businessDescription")}
                       />
                     </FormField>
                   </div>
                 </div>
               </FormSection>
 
-              {/* =================================================
-                  CLIENT CONFIGURATION
-              ================================================= */}
-
               <FormSection
                 icon={KeyRound}
                 title="Client Configuration"
                 description="Unique identifiers used by the chatbot widget."
               >
-                <div
-                  className="
-                    grid
-                    grid-cols-1
-                    gap-4
-                    sm:grid-cols-2
-                  "
-                >
+                <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
                   <FormField
                     label="Client Key"
                     required
@@ -630,58 +475,22 @@ export default function AdminAddClientModal({
                     <div className="flex gap-2">
                       <Input
                         type="text"
-                        {...register("clientKey", {
-                          required: "Client key is required",
-                        })}
-                        disabled={loading}
                         placeholder="saviesa-infotech"
+                        disabled={isLoading}
+                        {...register("clientKey")}
                       />
 
                       <button
                         type="button"
                         onClick={generateClientKey}
-                        disabled={loading}
-                        className="
-                          shrink-0
-
-                          rounded-lg
-
-                          border
-                          border-gray-200
-
-                          bg-white
-
-                          px-3
-
-                          text-xs
-                          font-medium
-
-                          text-gray-700
-
-                          transition
-
-                          hover:bg-gray-50
-
-                          disabled:cursor-not-allowed
-                          disabled:opacity-50
-
-                          dark:border-white/10
-                          dark:bg-[#171b23]
-                          dark:text-gray-300
-                          dark:hover:bg-white/5
-                        "
+                        disabled={isLoading}
+                        className="shrink-0 rounded-lg border border-gray-200 bg-white px-3 text-xs font-medium text-gray-700 transition hover:bg-gray-50 disabled:cursor-not-allowed disabled:opacity-50 dark:border-white/10 dark:bg-[#171b23] dark:text-gray-300 dark:hover:bg-white/5"
                       >
                         Generate
                       </button>
                     </div>
 
-                    <p
-                      className="
-                        mt-1.5
-                        text-[11px]
-                        text-gray-400
-                      "
-                    >
+                    <p className="mt-1.5 text-[11px] text-gray-400">
                       Example: saviesa-infotech
                     </p>
                   </FormField>
@@ -689,169 +498,178 @@ export default function AdminAddClientModal({
                   <FormField label="Slug" required error={errors.slug?.message}>
                     <Input
                       type="text"
-                      {...register("slug", {
-                        required: "Slug is required",
-                      })}
-                      disabled={loading}
                       placeholder="saviesa-infotech"
+                      disabled={isLoading}
+                      {...register("slug")}
                     />
                   </FormField>
                 </div>
               </FormSection>
-
-              {/* =================================================
-                  BUSINESS ADDRESS
-              ================================================= */}
 
               <FormSection
                 icon={MapPin}
                 title="Business Address"
                 description="Physical location of the client business."
               >
-                <div
-                  className="
-                    grid
-                    grid-cols-1
-                    gap-4
-                    sm:grid-cols-2
-                  "
-                >
-                  <FormField label="Address Line 1">
+                <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+                  <FormField
+                    label="Address Line 1"
+                    error={errors.address?.addressLine1?.message}
+                  >
                     <Input
-                      {...register("address.addressLine1")}
-                      disabled={loading}
                       placeholder="717, Shekhar Central, Palasia Square"
+                      disabled={isLoading}
+                      {...register("address.addressLine1")}
                     />
                   </FormField>
 
-                  <FormField label="Address Line 2">
+                  <FormField
+                    label="Address Line 2"
+                    error={errors.address?.addressLine2?.message}
+                  >
                     <Input
-                      {...register("address.addressLine2")}
-                      disabled={loading}
                       placeholder="Near..."
+                      disabled={isLoading}
+                      {...register("address.addressLine2")}
                     />
                   </FormField>
 
-                  <FormField label="City">
+                  <FormField label="City" error={errors.address?.city?.message}>
                     <Input
-                      {...register("address.city")}
-                      disabled={loading}
                       placeholder="Indore"
+                      disabled={isLoading}
+                      {...register("address.city")}
                     />
                   </FormField>
 
-                  <FormField label="State">
+                  <FormField
+                    label="State"
+                    error={errors.address?.state?.message}
+                  >
                     <Input
-                      {...register("address.state")}
-                      disabled={loading}
                       placeholder="Madhya Pradesh"
+                      disabled={isLoading}
+                      {...register("address.state")}
                     />
                   </FormField>
 
-                  <FormField label="Country">
+                  <FormField
+                    label="Country"
+                    error={errors.address?.country?.message}
+                  >
                     <Input
-                      {...register("address.country")}
-                      disabled={loading}
                       placeholder="India"
+                      disabled={isLoading}
+                      {...register("address.country")}
                     />
                   </FormField>
 
-                  <FormField label="Postal Code">
+                  <FormField
+                    label="Postal Code"
+                    error={errors.address?.postalCode?.message}
+                  >
                     <Input
-                      {...register("address.postalCode")}
-                      disabled={loading}
                       placeholder="452001"
+                      disabled={isLoading}
+                      {...register("address.postalCode")}
                     />
                   </FormField>
 
                   <div className="sm:col-span-2">
-                    <FormField label="Google Maps URL">
+                    <FormField
+                      label="Google Maps URL"
+                      error={errors.address?.googleMapsUrl?.message}
+                    >
                       <Input
                         type="url"
-                        {...register("address.googleMapsUrl")}
-                        disabled={loading}
                         placeholder="https://maps.google.com/..."
+                        disabled={isLoading}
+                        {...register("address.googleMapsUrl")}
                       />
                     </FormField>
                   </div>
                 </div>
               </FormSection>
-
-              {/* =================================================
-                  CONTACT INFORMATION
-              ================================================= */}
 
               <FormSection
                 icon={Phone}
                 title="Contact Information"
-                description="Public contact details for the business."
+                description="Contact details that your chatbot can provide to customers."
               >
-                <div
-                  className="
-                    grid
-                    grid-cols-1
-                    gap-4
-                    sm:grid-cols-2
-                  "
-                >
+                <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+                  <Controller
+                    name="contact.phone"
+                    control={control}
+                    render={({ field }) => (
+                      <PhoneInputField
+                        label="Phone"
+                        name={field.name}
+                        value={field.value}
+                        onChange={field.onChange}
+                        error={errors.contact?.phone?.message}
+                        required
+                        disabled={isLoading}
+                      />
+                    )}
+                  />
+
+                  <Controller
+                    name="contact.alternatePhone"
+                    control={control}
+                    render={({ field }) => (
+                      <PhoneInputField
+                        label="Alternate Phone"
+                        name={field.name}
+                        value={field.value}
+                        onChange={field.onChange}
+                        error={errors.contact?.alternatePhone?.message}
+                        disabled={isLoading}
+                      />
+                    )}
+                  />
+
                   <FormField
-                    label="Phone"
-                    required
-                    error={errors.contact?.phone?.message}
+                    label="Email"
+                    error={errors.contact?.email?.message}
                   >
                     <Input
-                      type="text"
-                      {...register("contact.phone", {
-                        required: "Phone is required",
-                      })}
-                      disabled={loading}
-                      placeholder="+91 9993993230"
-                    />
-                  </FormField>
-
-                  <FormField label="Alternate Phone">
-                    <Input
-                      type="text"
-                      {...register("contact.alternatePhone")}
-                      disabled={loading}
-                      placeholder="+91 9755755957"
-                    />
-                  </FormField>
-
-                  <FormField label="Contact Email">
-                    <Input
                       type="email"
+                      placeholder="contact@example.com"
+                      disabled={isLoading}
                       {...register("contact.email")}
-                      disabled={loading}
-                      placeholder="info@example.com"
                     />
                   </FormField>
 
-                  <FormField label="WhatsApp">
-                    <Input
-                      type="text"
-                      {...register("contact.whatsapp")}
-                      disabled={loading}
-                      placeholder="+91 9993993230"
-                    />
-                  </FormField>
+                  <Controller
+                    name="contact.whatsapp"
+                    control={control}
+                    render={({ field }) => (
+                      <PhoneInputField
+                        label="WhatsApp"
+                        name={field.name}
+                        value={field.value}
+                        onChange={field.onChange}
+                        error={errors.contact?.whatsapp?.message}
+                        disabled={isLoading}
+                      />
+                    )}
+                  />
 
                   <div className="sm:col-span-2">
-                    <FormField label="Website">
+                    <FormField
+                      label="Website"
+                      error={errors.contact?.website?.message}
+                    >
                       <Input
                         type="url"
-                        {...register("contact.website")}
-                        disabled={loading}
                         placeholder="https://example.com"
+                        disabled={isLoading}
+                        {...register("contact.website")}
                       />
                     </FormField>
                   </div>
                 </div>
               </FormSection>
-
-              {/* =================================================
-                  CHATBOT CONFIGURATION
-              ================================================= */}
 
               <FormSection
                 icon={Bot}
@@ -859,34 +677,15 @@ export default function AdminAddClientModal({
                 description="Configure the chatbot identity, behavior and predefined questions."
               >
                 <div className="space-y-5">
-                  {/* =================================================
-                      BASIC CHATBOT INFORMATION
-                  ================================================= */}
-
                   <div>
                     <div className="mb-3 flex items-center gap-2">
                       <MessageSquare size={16} className="text-blue-500" />
-
-                      <h4
-                        className="
-                          text-sm
-                          font-semibold
-                          text-gray-900
-                          dark:text-white
-                        "
-                      >
+                      <h4 className="text-sm font-semibold text-gray-900 dark:text-white">
                         Basic Chatbot Information
                       </h4>
                     </div>
 
-                    <div
-                      className="
-                        grid
-                        grid-cols-1
-                        gap-4
-                        sm:grid-cols-2
-                      "
-                    >
+                    <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
                       <FormField
                         label="Chatbot Name"
                         required
@@ -894,11 +693,9 @@ export default function AdminAddClientModal({
                       >
                         <Input
                           type="text"
-                          {...register("chatbot.name", {
-                            required: "Chatbot name is required",
-                          })}
-                          disabled={loading}
                           placeholder="Saviesa AI Assistant"
+                          disabled={isLoading}
+                          {...register("chatbot.name")}
                         />
                       </FormField>
 
@@ -908,15 +705,11 @@ export default function AdminAddClientModal({
                         error={errors.chatbot?.language?.message}
                       >
                         <SelectInput
-                          {...register("chatbot.language", {
-                            required: "Language is required",
-                          })}
-                          disabled={loading}
+                          disabled={isLoading}
+                          {...register("chatbot.language")}
                         >
                           <option value="english">English</option>
-
                           <option value="hindi">Hindi</option>
-
                           <option value="hinglish">Hinglish</option>
                         </SelectInput>
                       </FormField>
@@ -927,423 +720,141 @@ export default function AdminAddClientModal({
                         error={errors.chatbot?.tone?.message}
                       >
                         <SelectInput
-                          {...register("chatbot.tone", {
-                            required: "Tone is required",
-                          })}
-                          disabled={loading}
+                          disabled={isLoading}
+                          {...register("chatbot.tone")}
                         >
                           <option value="professional">Professional</option>
-
                           <option value="friendly">Friendly</option>
-
                           <option value="casual">Casual</option>
-
                           <option value="formal">Formal</option>
                         </SelectInput>
                       </FormField>
 
-                      <FormField label="Welcome Message">
-                        <textarea
-                          {...register("chatbot.welcomeMessage")}
-                          disabled={loading}
+                      <FormField
+                        label="Welcome Message"
+                        required
+                        error={errors.chatbot?.welcomeMessage?.message}
+                      >
+                        <Textarea
                           rows={3}
                           placeholder="Hi 👋 Welcome to our company..."
-                          className="
-                            w-full
-                            resize-none
-                            rounded-lg
-
-                            border
-                            border-gray-200
-
-                            bg-white
-
-                            px-3
-                            py-2.5
-
-                            text-sm
-                            text-gray-900
-
-                            outline-none
-
-                            transition
-
-                            placeholder:text-gray-400
-
-                            focus:border-blue-500
-                            focus:ring-2
-                            focus:ring-blue-500/10
-
-                            dark:border-white/10
-                            dark:bg-[#171b23]
-                            dark:text-white
-                            dark:placeholder:text-gray-500
-                          "
+                          disabled={isLoading}
+                          {...register("chatbot.welcomeMessage")}
                         />
                       </FormField>
                     </div>
                   </div>
 
-                  {/* =================================================
-                      AI INSTRUCTIONS
-                  ================================================= */}
-
                   <div>
                     <FormField
                       label="AI Instructions"
-                      required
                       error={errors.chatbot?.aiInstructions?.message}
                     >
-                      <textarea
-                        {...register("chatbot.aiInstructions", {
-                          required: "AI instructions are required",
-                        })}
-                        disabled={loading}
+                      <Textarea
                         rows={14}
                         placeholder="Enter instructions for the AI chatbot..."
-                        className="
-                          w-full
-                          resize-y
-                          rounded-lg
-
-                          border
-                          border-gray-200
-
-                          bg-white
-
-                          px-3
-                          py-2.5
-
-                          font-mono
-                          text-xs
-                          leading-5
-                          text-gray-900
-
-                          outline-none
-
-                          transition
-
-                          placeholder:font-sans
-                          placeholder:text-gray-400
-
-                          focus:border-blue-500
-                          focus:ring-2
-                          focus:ring-blue-500/10
-
-                          dark:border-white/10
-                          dark:bg-[#171b23]
-                          dark:text-white
-                          dark:placeholder:text-gray-500
-                        "
+                        disabled={isLoading}
+                        className="font-mono text-xs leading-5"
+                        {...register("chatbot.aiInstructions")}
                       />
 
-                      <p
-                        className="
-                          mt-1.5
-                          text-[11px]
-                          leading-4
-                          text-gray-400
-                        "
-                      >
+                      <p className="mt-1.5 text-[11px] leading-4 text-gray-400">
                         These instructions control what the chatbot knows, how
                         it answers and what information it should not reveal.
                       </p>
                     </FormField>
                   </div>
 
-                  {/* =================================================
-                        PREDEFINED QUESTIONS
-                    ================================================= */}
-
                   <div>
-                    <div
-                      className="
-                        mb-3
-                        flex
-                        flex-col
-                        gap-3
-
-                        sm:flex-row
-                        sm:items-center
-                        sm:justify-between
-                        "
-                    >
+                    <div className="mb-3 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
                       <div>
                         <div className="flex items-center gap-2">
                           <MessageSquare size={16} className="text-blue-500" />
 
-                          <h4
-                            className="
-                                text-sm
-                                font-semibold
-                                text-gray-900
-                                dark:text-white
-                            "
-                          >
+                          <h4 className="text-sm font-semibold text-gray-900 dark:text-white">
                             Predefined Questions
                           </h4>
                         </div>
 
-                        <p
-                          className="
-                            mt-1
-                            text-xs
-                            text-gray-500
-                            dark:text-gray-400
-                            "
-                        >
+                        <p className="mt-1 text-xs text-gray-500 dark:text-gray-400">
                           Questions customers can quickly ask your chatbot.
                         </p>
                       </div>
 
-                      {/* =================================================
-                        HEADER ADD BUTTON
-                    ================================================= */}
-
-                      {questionFields.length === 0 && (
-                        <button
-                          type="button"
-                          onClick={handleAddQuestion}
-                          disabled={loading}
-                          className="
-                            inline-flex
-                            items-center
-                            justify-center
-                            gap-2
-
-                            rounded-lg
-
-                            bg-blue-600
-
-                            px-3
-                            py-2
-
-                            text-xs
-                            font-medium
-                            text-white
-
-                            transition
-
-                            hover:bg-blue-700
-
-                            disabled:cursor-not-allowed
-                            disabled:opacity-50
-                            "
-                        >
-                          <Plus size={15} />
-                          Add Question
-                        </button>
-                      )}
+                      <button
+                        type="button"
+                        onClick={handleAddQuestion}
+                        disabled={isLoading}
+                        className="inline-flex items-center justify-center gap-1.5 rounded-lg bg-blue-600 px-3 py-2 text-xs font-medium text-white transition hover:bg-blue-700 disabled:cursor-not-allowed disabled:opacity-50"
+                      >
+                        <Plus size={15} />
+                        Add Question
+                      </button>
                     </div>
 
-                    {/* =================================================
-                        EMPTY STATE
-                    ================================================= */}
-
-                    {questionFields.length === 0 ? (
-                      <div
-                        className="
-                            rounded-xl
-
-                            border
-                            border-dashed
-                            border-gray-200
-
-                            p-8
-
-                            text-center
-
-                            dark:border-white/10
-                        "
-                      >
-                        <MessageSquare
-                          size={25}
-                          className="mx-auto text-gray-400"
-                        />
-
-                        <p
-                          className="
-                            mt-2
-                            text-sm
-                            font-medium
-                            text-gray-900
-                            dark:text-white
-                            "
+                    <div className="space-y-3">
+                      {questionFields.map((field, index) => (
+                        <div
+                          key={field.id}
+                          draggable={!isLoading}
+                          onDragStart={() => handleDragStart(index)}
+                          onDragOver={handleDragOver}
+                          onDrop={() => handleDrop(index)}
+                          onDragEnd={handleDragEnd}
+                          className={`rounded-xl border border-gray-200 bg-gray-50 p-3 transition dark:border-white/10 dark:bg-[#171b23] ${
+                            draggedIndex === index ? "opacity-50" : ""
+                          }`}
                         >
-                          No predefined questions
-                        </p>
-
-                        <p
-                          className="
-                            mt-1
-                            text-xs
-                            text-gray-500
-                            dark:text-gray-400
-                            "
-                        >
-                          Add questions that customers can quickly ask.
-                        </p>
-                      </div>
-                    ) : (
-                      <div className="space-y-3">
-                        {/* =================================================
-                            QUESTIONS
-                        ================================================= */}
-
-                        {questionFields.map((field, index) => (
-                          <div
-                            key={field.id}
-                            className="
-                                flex
-                                flex-col
-                                gap-3
-
-                                rounded-xl
-
-                                border
-                                border-gray-200
-
-                                bg-gray-50
-
-                                p-3
-
-                                sm:flex-row
-                                sm:items-center
-
-                                dark:border-white/10
-                                dark:bg-[#0f131b]
-                            "
-                          >
-                            {/* =================================================
-                                DRAG / ORDER ICON
-                            ================================================= */}
-
-                            <GripVertical
-                              size={18}
-                              className="
-                                hidden
-                                shrink-0
-
-                                text-gray-400
-
-                                sm:block
-                                "
-                            />
-                            <div className="min-w-0 flex-1">
-                              <input
-                                {...register(
-                                  `chatbot.predefinedQuestions.${index}.question`,
-                                )}
-                                placeholder="Enter customer question..."
-                                className="
-                            w-full
-                            rounded-lg
-                            border
-                            border-gray-200
-                            bg-white
-                            px-3 py-2.5
-                            text-sm
-                            outline-none
-                            transition
-                            focus:border-blue-500
-                            focus:ring-2
-                            focus:ring-blue-500/10
-                            dark:border-white/10
-                            dark:bg-[#171b23]
-                            dark:text-white
-                            dark:placeholder:text-gray-500
-                          "
-                              />
-
-                              {errors.chatbot?.predefinedQuestions?.[index]
-                                ?.question?.message && (
-                                <p className="mt-1 text-xs text-red-500">
-                                  {
-                                    errors.chatbot.predefinedQuestions[index]
-                                      .question.message
-                                  }
-                                </p>
-                              )}
+                          <div className="flex items-center gap-3">
+                            <div
+                              className="flex h-9 w-6 shrink-0 cursor-grab items-center justify-center text-gray-400 active:cursor-grabbing dark:text-gray-500"
+                              title="Drag to reorder"
+                            >
+                              <GripVertical size={18} />
                             </div>
 
-                            {/* =================================================
-                                ENABLED
-                            ================================================= */}
+                            <div className="min-w-0 flex-1">
+                              <FormField
+                                label=""
+                                error={
+                                  errors.chatbot?.predefinedQuestions?.[index]
+                                    ?.question?.message
+                                }
+                              >
+                                <Input
+                                  type="text"
+                                  placeholder="Tell me about Saviesa Infotech"
+                                  disabled={isLoading}
+                                  {...register(
+                                    `chatbot.predefinedQuestions.${index}.question`,
+                                  )}
+                                />
+                              </FormField>
+                            </div>
 
-                            <label
-                              className="
-                                flex
-                                shrink-0
-                                cursor-pointer
-                                items-center
-                                gap-2
-
-                                text-xs
-
-                                text-gray-600
-
-                                dark:text-gray-400
-                                "
-                            >
+                            <label className="inline-flex shrink-0 cursor-pointer items-center gap-2 text-xs text-gray-600 dark:text-gray-400">
                               <input
                                 type="checkbox"
+                                disabled={isLoading}
+                                className="h-4 w-4 rounded border-gray-300 text-blue-600 focus:ring-blue-500 dark:border-gray-600"
                                 {...register(
                                   `chatbot.predefinedQuestions.${index}.enabled`,
                                 )}
-                                disabled={loading}
-                                className="
-                                    h-4
-                                    w-4
-
-                                    rounded
-
-                                    border-gray-300
-
-                                    text-blue-600
-
-                                    focus:ring-blue-500
-
-                                    dark:border-gray-600
-                                "
                               />
-                              Enabled
+                              <span>Enabled</span>
                             </label>
-
-                            {/* =================================================
-                                DELETE
-                            ================================================= */}
 
                             <button
                               type="button"
                               onClick={() => remove(index)}
-                              disabled={loading}
-                              className="
-                                inline-flex
-                                shrink-0
-                                items-center
-                                justify-center
-
-                                rounded-lg
-
-                                p-2
-
-                                text-red-500
-
-                                transition
-
-                                hover:bg-red-500/10
-
-                                disabled:cursor-not-allowed
-                                disabled:opacity-30
-                                "
-                              title="Delete question"
+                              disabled={
+                                isLoading || questionFields.length === 1
+                              }
+                              title="Remove question"
+                              className="shrink-0 rounded-lg p-2 text-red-500 transition hover:bg-red-50 disabled:cursor-not-allowed disabled:opacity-30 dark:hover:bg-red-500/10"
                             >
                               <Trash2 size={17} />
                             </button>
-
-                            {/* =================================================
-                                SORT ORDER
-                            ================================================= */}
 
                             <input
                               type="hidden"
@@ -1355,142 +866,33 @@ export default function AdminAddClientModal({
                               )}
                             />
                           </div>
-                        ))}
-
-                        {/* =================================================
-                            BOTTOM ADD BUTTON
-                        ================================================= */}
-
-                        <div className="flex justify-end">
-                          <button
-                            type="button"
-                            onClick={handleAddQuestion}
-                            disabled={loading}
-                            className="
-                                inline-flex
-                                items-center
-                                gap-2
-
-                                rounded-lg
-
-                                bg-blue-600
-
-                                px-3
-                                py-2
-
-                                text-xs
-                                font-medium
-                                text-white
-
-                                transition
-
-                                hover:bg-blue-700
-
-                                disabled:cursor-not-allowed
-                                disabled:opacity-50
-                            "
-                          >
-                            <Plus size={15} />
-                            Add Question
-                          </button>
                         </div>
-                      </div>
-                    )}
+                      ))}
+                    </div>
                   </div>
                 </div>
               </FormSection>
-
-              {/* Bottom spacing */}
 
               <div className="h-1" />
             </div>
           </div>
 
-          {/* ==================================================
-              FOOTER
-          ================================================== */}
-
-          <div
-            className="
-              flex
-              shrink-0
-              flex-col-reverse
-              gap-3
-
-              border-t
-              border-gray-200
-
-              p-5
-
-              sm:flex-row
-              sm:justify-end
-
-              dark:border-white/10
-            "
-          >
+          <div className="flex shrink-0 flex-col-reverse gap-3 border-t border-gray-200 p-5 sm:flex-row sm:justify-end dark:border-white/10">
             <button
               type="button"
               onClick={handleClose}
-              disabled={loading}
-              className="
-                rounded-lg
-
-                border
-                border-gray-200
-
-                px-4
-                py-2.5
-
-                text-sm
-                font-medium
-
-                text-gray-700
-
-                transition
-
-                hover:bg-gray-50
-
-                disabled:cursor-not-allowed
-                disabled:opacity-50
-
-                dark:border-white/10
-                dark:text-gray-300
-                dark:hover:bg-white/5
-              "
+              disabled={isLoading}
+              className="rounded-lg border border-gray-200 px-4 py-2.5 text-sm font-medium text-gray-700 transition hover:bg-gray-50 disabled:cursor-not-allowed disabled:opacity-50 dark:border-white/10 dark:text-gray-300 dark:hover:bg-white/5"
             >
               Cancel
             </button>
 
             <button
               type="submit"
-              disabled={loading}
-              className="
-                flex
-                items-center
-                justify-center
-                gap-2
-
-                rounded-lg
-
-                bg-blue-600
-
-                px-5
-                py-2.5
-
-                text-sm
-                font-medium
-
-                text-white
-
-                transition
-
-                hover:bg-blue-700
-
-                disabled:cursor-not-allowed
-                disabled:opacity-60
-              "
+              disabled={isLoading}
+              className="flex items-center justify-center gap-2 rounded-lg bg-blue-600 px-5 py-2.5 text-sm font-medium text-white transition hover:bg-blue-700 disabled:cursor-not-allowed disabled:opacity-60"
             >
-              {loading ? (
+              {isLoading ? (
                 <>
                   <Loader2 size={16} className="animate-spin" />
                   Creating...
@@ -1510,241 +912,76 @@ export default function AdminAddClientModal({
   );
 }
 
-/* ============================================================
-   FORM SECTION
-============================================================ */
-
 function FormSection({ icon: Icon, title, description, children }) {
   return (
-    <section
-      className="
-        overflow-hidden
-
-        rounded-xl
-
-        border
-        border-gray-200
-
-        bg-white
-
-        dark:border-white/10
-        dark:bg-[#11151d]
-      "
-    >
-      {/* SECTION HEADER */}
-
-      <div
-        className="
-          flex
-          items-center
-          gap-3
-
-          border-b
-          border-gray-200
-
-          px-4
-          py-3.5
-
-          dark:border-white/10
-        "
-      >
-        <div
-          className="
-            flex
-            h-9
-            w-9
-            shrink-0
-            items-center
-            justify-center
-
-            rounded-lg
-
-            bg-blue-500/10
-            text-blue-500
-          "
-        >
+    <section className="overflow-hidden rounded-xl border border-gray-200 bg-white dark:border-white/10 dark:bg-[#11151d]">
+      <div className="flex items-center gap-3 border-b border-gray-200 px-4 py-3.5 dark:border-white/10">
+        <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-blue-500/10 text-blue-500">
           <Icon size={18} />
         </div>
 
         <div className="min-w-0">
-          <h3
-            className="
-              text-sm
-              font-semibold
-
-              text-gray-900
-
-              dark:text-white
-            "
-          >
+          <h3 className="text-sm font-semibold text-gray-900 dark:text-white">
             {title}
           </h3>
 
-          <p
-            className="
-              mt-0.5
-
-              text-xs
-
-              text-gray-500
-
-              dark:text-gray-400
-            "
-          >
+          <p className="mt-0.5 text-xs text-gray-500 dark:text-gray-400">
             {description}
           </p>
         </div>
       </div>
-
-      {/* SECTION CONTENT */}
 
       <div className="p-4">{children}</div>
     </section>
   );
 }
 
-/* ============================================================
-   FORM FIELD
-============================================================ */
-
 function FormField({ label, required = false, error, children }) {
   return (
     <div className="min-w-0">
-      <label
-        className="
-          mb-1.5
+      {label && (
+        <label className="mb-1.5 block text-xs font-medium text-gray-700 dark:text-gray-300">
+          {label}
 
-          block
-
-          text-xs
-          font-medium
-
-          text-gray-700
-
-          dark:text-gray-300
-        "
-      >
-        {label}
-
-        {required && <span className="ml-1 text-red-500">*</span>}
-      </label>
+          {required && <span className="ml-1 text-red-500">*</span>}
+        </label>
+      )}
 
       {children}
 
       {error && (
-        <p
-          className="
-            mt-1.5
-
-            text-xs
-
-            text-red-500
-
-            dark:text-red-400
-          "
-        >
-          {error}
-        </p>
+        <p className="mt-1.5 text-xs text-red-500 dark:text-red-400">{error}</p>
       )}
     </div>
   );
 }
 
-/* ============================================================
-   INPUT
-============================================================ */
-
-const Input = React.forwardRef(({ className = "", ...props }, ref) => {
-  return (
-    <input
-      ref={ref}
-      {...props}
-      className={`
-          h-10
-          w-full
-
-          rounded-lg
-
-          border
-          border-gray-200
-
-          bg-white
-
-          px-3
-
-          text-sm
-          text-gray-900
-
-          outline-none
-
-          transition
-
-          placeholder:text-gray-400
-
-          focus:border-blue-500
-          focus:ring-2
-          focus:ring-blue-500/10
-
-          disabled:cursor-not-allowed
-          disabled:opacity-60
-
-          dark:border-white/10
-          dark:bg-[#171b23]
-          dark:text-white
-          dark:placeholder:text-gray-500
-
-          ${className}
-        `}
-    />
-  );
-});
+const Input = React.forwardRef(({ className = "", ...props }, ref) => (
+  <input
+    ref={ref}
+    {...props}
+    className={`h-10 w-full rounded-lg border border-gray-200 bg-white px-3 text-sm text-gray-900 outline-none transition placeholder:text-gray-400 focus:border-blue-500 focus:ring-2 focus:ring-blue-500/10 disabled:cursor-not-allowed disabled:opacity-60 dark:border-white/10 dark:bg-[#171b23] dark:text-white dark:placeholder:text-gray-500 ${className}`}
+  />
+));
 
 Input.displayName = "Input";
 
-/* ============================================================
-   SELECT
-============================================================ */
+const Textarea = React.forwardRef(({ className = "", ...props }, ref) => (
+  <textarea
+    ref={ref}
+    {...props}
+    className={`w-full resize-none rounded-lg border border-gray-200 bg-white px-3 py-2.5 text-sm text-gray-900 outline-none transition placeholder:text-gray-400 focus:border-blue-500 focus:ring-2 focus:ring-blue-500/10 disabled:cursor-not-allowed disabled:opacity-60 dark:border-white/10 dark:bg-[#171b23] dark:text-white dark:placeholder:text-gray-500 ${className}`}
+  />
+));
 
-const SelectInput = React.forwardRef(({ className = "", ...props }, ref) => {
-  return (
-    <select
-      ref={ref}
-      {...props}
-      className={`
-          h-10
-          w-full
+Textarea.displayName = "Textarea";
 
-          rounded-lg
-
-          border
-          border-gray-200
-
-          bg-white
-
-          px-3
-
-          text-sm
-          text-gray-900
-
-          outline-none
-
-          transition
-
-          focus:border-blue-500
-          focus:ring-2
-          focus:ring-blue-500/10
-
-          disabled:cursor-not-allowed
-          disabled:opacity-60
-
-          dark:border-white/10
-          dark:bg-[#171b23]
-          dark:text-white
-
-          ${className}
-        `}
-    />
-  );
-});
+const SelectInput = React.forwardRef(({ className = "", ...props }, ref) => (
+  <select
+    ref={ref}
+    {...props}
+    className={`h-10 w-full rounded-lg border border-gray-200 bg-white px-3 text-sm text-gray-900 outline-none transition focus:border-blue-500 focus:ring-2 focus:ring-blue-500/10 disabled:cursor-not-allowed disabled:opacity-60 dark:border-white/10 dark:bg-[#171b23] dark:text-white ${className}`}
+  />
+));
 
 SelectInput.displayName = "SelectInput";

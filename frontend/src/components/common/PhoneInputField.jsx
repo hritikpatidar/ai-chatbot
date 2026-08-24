@@ -181,7 +181,6 @@ export default function PhoneInputField({
         containerClass="phone-input-container"
         inputClass={`
           phone-input-field
-          ${error ? "phone-input-error" : ""}
         `}
         buttonClass="phone-input-button"
         dropdownClass="phone-input-dropdown"

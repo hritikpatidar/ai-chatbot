@@ -23,6 +23,7 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import PhoneInputField from "../common/PhoneInputField";
 import { clientSchema } from "../../utils/validation";
 import { createClientService } from "../../service/Client/clientServices";
+import CustomSelect from "../common/CustomSelect";
 
 const defaultValues = {
   fullName: "",
@@ -112,6 +113,16 @@ export default function AdminAddClientModal({ isOpen, onClose }) {
       document.documentElement.style.overflow = originalHtmlOverflow;
     };
   }, [isOpen]);
+
+  useEffect(() => {
+    if (!successMessage && !apiError) return;
+    const timer = setTimeout(() => {
+      setSuccessMessage("");
+      setApiError("");
+    }, 3000);
+
+    return () => clearTimeout(timer);
+  }, [successMessage, apiError]);
 
   const handleClose = () => {
     if (isLoading) return;
@@ -253,7 +264,7 @@ export default function AdminAddClientModal({ isOpen, onClose }) {
 
   return createPortal(
     <div
-      className="fixed inset-0 z-40 flex items-center justify-center bg-black/50 p-4 backdrop-blur-sm"
+      className="fixed inset-0 z-30 flex items-center justify-center bg-black/50 p-4 backdrop-blur-sm"
       role="dialog"
       aria-modal="true"
     >
@@ -405,10 +416,32 @@ export default function AdminAddClientModal({ isOpen, onClose }) {
                     label="Account Status"
                     error={errors.status?.message}
                   >
-                    <SelectInput disabled={isLoading} {...register("status")}>
-                      <option value="active">Active</option>
-                      <option value="inactive">Inactive</option>
-                    </SelectInput>
+                    <Controller
+                      name="status"
+                      control={control}
+                      render={({ field }) => (
+                        <CustomSelect
+                          size="sm"
+                          // label="Business Status"
+                          name={field.name}
+                          value={field.value}
+                          onChange={field.onChange}
+                          options={[
+                            {
+                              value: "active",
+                              label: "Active",
+                            },
+                            {
+                              value: "inactive",
+                              label: "Inactive",
+                            },
+                          ]}
+                          placeholder="Select status"
+                          error={errors.status?.message}
+                          required
+                        />
+                      )}
+                    />
                   </FormField>
                 </div>
               </FormSection>
@@ -704,14 +737,36 @@ export default function AdminAddClientModal({ isOpen, onClose }) {
                         required
                         error={errors.chatbot?.language?.message}
                       >
-                        <SelectInput
-                          disabled={isLoading}
-                          {...register("chatbot.language")}
-                        >
-                          <option value="english">English</option>
-                          <option value="hindi">Hindi</option>
-                          <option value="hinglish">Hinglish</option>
-                        </SelectInput>
+                        <Controller
+                          name="chatbot.language"
+                          control={control}
+                          render={({ field }) => (
+                            <CustomSelect
+                              size="sm"
+                              // label="Language"
+                              name={field.name}
+                              value={field.value}
+                              onChange={field.onChange}
+                              options={[
+                                {
+                                  value: "english",
+                                  label: "English",
+                                },
+                                {
+                                  value: "hindi",
+                                  label: "Hindi",
+                                },
+                                {
+                                  value: "hinglish",
+                                  label: "Hinglish",
+                                },
+                              ]}
+                              placeholder="Select language"
+                              error={errors.chatbot?.language?.message}
+                              required
+                            />
+                          )}
+                        />
                       </FormField>
 
                       <FormField
@@ -719,15 +774,40 @@ export default function AdminAddClientModal({ isOpen, onClose }) {
                         required
                         error={errors.chatbot?.tone?.message}
                       >
-                        <SelectInput
-                          disabled={isLoading}
-                          {...register("chatbot.tone")}
-                        >
-                          <option value="professional">Professional</option>
-                          <option value="friendly">Friendly</option>
-                          <option value="casual">Casual</option>
-                          <option value="formal">Formal</option>
-                        </SelectInput>
+                        <Controller
+                          name="chatbot.tone"
+                          control={control}
+                          render={({ field }) => (
+                            <CustomSelect
+                              size="sm"
+                              // label="Tone"
+                              name={field.name}
+                              value={field.value}
+                              onChange={field.onChange}
+                              options={[
+                                {
+                                  value: "friendly",
+                                  label: "Friendly",
+                                },
+                                {
+                                  value: "professional",
+                                  label: "Professional",
+                                },
+                                {
+                                  value: "casual",
+                                  label: "Casual",
+                                },
+                                {
+                                  value: "formal",
+                                  label: "Formal",
+                                },
+                              ]}
+                              placeholder="Select tone"
+                              error={errors.chatbot?.tone?.message}
+                              required
+                            />
+                          )}
+                        />
                       </FormField>
 
                       <FormField
@@ -914,7 +994,7 @@ export default function AdminAddClientModal({ isOpen, onClose }) {
 
 function FormSection({ icon: Icon, title, description, children }) {
   return (
-    <section className="overflow-hidden rounded-xl border border-gray-200 bg-white dark:border-white/10 dark:bg-[#11151d]">
+    <section className="rounded-xl border border-gray-200 bg-white dark:border-white/10 dark:bg-[#11151d]">
       <div className="flex items-center gap-3 border-b border-gray-200 px-4 py-3.5 dark:border-white/10">
         <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-blue-500/10 text-blue-500">
           <Icon size={18} />
@@ -960,7 +1040,7 @@ const Input = React.forwardRef(({ className = "", ...props }, ref) => (
   <input
     ref={ref}
     {...props}
-    className={`h-10 w-full rounded-lg border border-gray-200 bg-white px-3 text-sm text-gray-900 outline-none transition placeholder:text-gray-400 focus:border-blue-500 focus:ring-2 focus:ring-blue-500/10 disabled:cursor-not-allowed disabled:opacity-60 dark:border-white/10 dark:bg-[#171b23] dark:text-white dark:placeholder:text-gray-500 ${className}`}
+    className={`h-10 w-full rounded-xl border border-gray-200 bg-white px-3 text-sm text-gray-900 outline-none transition placeholder:text-gray-400 focus:border-blue-500 focus:ring-2 focus:ring-blue-500/10 disabled:cursor-not-allowed disabled:opacity-60 dark:border-white/10 dark:bg-[#171b23] dark:text-white dark:placeholder:text-gray-500 ${className}`}
   />
 ));
 
@@ -970,7 +1050,7 @@ const Textarea = React.forwardRef(({ className = "", ...props }, ref) => (
   <textarea
     ref={ref}
     {...props}
-    className={`w-full resize-none rounded-lg border border-gray-200 bg-white px-3 py-2.5 text-sm text-gray-900 outline-none transition placeholder:text-gray-400 focus:border-blue-500 focus:ring-2 focus:ring-blue-500/10 disabled:cursor-not-allowed disabled:opacity-60 dark:border-white/10 dark:bg-[#171b23] dark:text-white dark:placeholder:text-gray-500 ${className}`}
+    className={`w-full resize-none rounded-xl border border-gray-200 bg-white px-3 py-2.5 text-sm text-gray-900 outline-none transition placeholder:text-gray-400 focus:border-blue-500 focus:ring-2 focus:ring-blue-500/10 disabled:cursor-not-allowed disabled:opacity-60 dark:border-white/10 dark:bg-[#171b23] dark:text-white dark:placeholder:text-gray-500 ${className}`}
   />
 ));
 
@@ -980,7 +1060,7 @@ const SelectInput = React.forwardRef(({ className = "", ...props }, ref) => (
   <select
     ref={ref}
     {...props}
-    className={`h-10 w-full rounded-lg border border-gray-200 bg-white px-3 text-sm text-gray-900 outline-none transition focus:border-blue-500 focus:ring-2 focus:ring-blue-500/10 disabled:cursor-not-allowed disabled:opacity-60 dark:border-white/10 dark:bg-[#171b23] dark:text-white ${className}`}
+    className={`h-10 w-full rounded-xl border border-gray-200 bg-white px-3 text-sm text-gray-900 outline-none transition focus:border-blue-500 focus:ring-2 focus:ring-blue-500/10 disabled:cursor-not-allowed disabled:opacity-60 dark:border-white/10 dark:bg-[#171b23] dark:text-white ${className}`}
   />
 ));
 

@@ -38,21 +38,17 @@
 /* Focus */
 
 .phone-input-field:focus {
-  border-color: #3b82f6 !important;
+  /* border-color: #3b82f6 !important; */
   box-shadow: 0 0 0 1px #3b82f6 !important;
 }
 
 
 /* Error */
 
-.phone-input-field.phone-input-error {
+/* .phone-input-field.phone-input-error {
   border-color: #f87171 !important;
-}
+} */
 
-
-/* =========================================================
-   COUNTRY BUTTON
-========================================================= */
 
 .phone-input-button {
   width: 48px !important;

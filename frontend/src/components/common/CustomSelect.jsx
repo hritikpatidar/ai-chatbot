@@ -237,29 +237,17 @@ export default function CustomSelect({
 
             ${currentSize.button}
 
-            ${
-              error
-                ? `
-                  border-red-400
-                  hover:border-red-500
-                  focus:border-red-500
-                  focus:ring-1
-                  focus:ring-red-500
-                `
-                : `
-                  border-gray-200
-                  hover:border-gray-300
+            border-gray-200
+            hover:border-gray-300
 
-                  ${
-                    isOpen
-                      ? `
-                        border-blue-500
-                        ring-1
-                        ring-blue-500
-                      `
-                      : ""
-                  }
+            ${
+              isOpen
+                ? `
+                  border-blue-500
+                  ring-1
+                  ring-blue-500
                 `
+                : ""
             }
 
             disabled:cursor-not-allowed

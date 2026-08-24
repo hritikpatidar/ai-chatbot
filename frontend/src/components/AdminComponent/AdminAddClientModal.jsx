@@ -17,6 +17,8 @@ import {
   GripVertical,
   CheckCircle2,
   AlertCircle,
+  Eye,
+  EyeOff,
 } from "lucide-react";
 import { Controller, useFieldArray, useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -97,7 +99,7 @@ export default function AdminAddClientModal({
   const [apiError, setApiError] = useState("");
   const [successMessage, setSuccessMessage] = useState("");
   const isLoading = loading || isSubmitting;
-
+  const [showPassword, setShowPassword] = useState(false);
   const {
     fields: questionFields,
     append,
@@ -181,6 +183,10 @@ export default function AdminAddClientModal({
       reset(defaultValues);
     }
   }, [isOpen, client, reset]);
+
+  useEffect(() => {
+    setShowPassword(false);
+  }, [client]);
 
   useEffect(() => {
     if (!isOpen) return;
@@ -505,12 +511,54 @@ export default function AdminAddClientModal({
                       required={client ? false : true}
                       error={errors.password?.message}
                     >
-                      <Input
-                        type="password"
-                        placeholder="Enter password"
-                        disabled={isLoading}
-                        {...register("password")}
-                      />
+                      <div className="relative">
+                        <Input
+                          type={showPassword ? "text" : "password"}
+                          placeholder={
+                            client
+                              ? "Leave blank to keep current password"
+                              : "Enter password"
+                          }
+                          disabled={isLoading}
+                          className="pr-10"
+                          {...register("password")}
+                        />
+
+                        <button
+                          type="button"
+                          onClick={() => setShowPassword((prev) => !prev)}
+                          disabled={isLoading}
+                          aria-label={
+                            showPassword ? "Hide password" : "Show password"
+                          }
+                          className="
+                            absolute
+                            right-2
+                            top-1/2
+                            flex
+                            h-8
+                            w-8
+                            -translate-y-1/2
+                            items-center
+                            justify-center
+                            rounded-md
+                            text-gray-400
+                            transition
+                            hover:bg-gray-100
+                            hover:text-gray-600
+                            disabled:cursor-not-allowed
+                            disabled:opacity-50
+                            dark:hover:bg-white/10
+                            dark:hover:text-gray-200
+                          "
+                        >
+                          {showPassword ? (
+                            <EyeOff size={17} />
+                          ) : (
+                            <Eye size={17} />
+                          )}
+                        </button>
+                      </div>
                     </FormField>
                   )}
                   {isEdit && (

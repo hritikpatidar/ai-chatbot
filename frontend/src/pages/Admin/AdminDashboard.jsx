@@ -12,6 +12,7 @@ import {
 } from "lucide-react";
 import AdminStatCard from "../../components/AdminComponent/AdminStatCard";
 import ActionButton from "../../components/common/ActionButton";
+import { useNavigate } from "react-router-dom";
 
 const recentClients = [
   {
@@ -80,6 +81,7 @@ const statusStyles = {
 };
 
 export default function AdminDashboard() {
+  const navigate = useNavigate();
   return (
     <div className="space-y-6">
       {/* Page Heading */}
@@ -121,6 +123,7 @@ export default function AdminDashboard() {
 
         <button
           type="button"
+          onClick={() => navigate("/admin/clients")}
           className="
             inline-flex
             w-fit
@@ -513,6 +516,7 @@ export default function AdminDashboard() {
 
           <button
             type="button"
+            onClick={() => navigate("/admin/clients")}
             className="
               inline-flex
               items-center

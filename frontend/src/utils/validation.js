@@ -411,11 +411,102 @@ export const formSchema = z.object({
   status: z.enum(["active", "inactive"]),
 });
 
-export const clientSchema = z.object({
+// export const clientSchema = z.object({
+//   fullName: z.string().trim().min(1, "Full name is required"),
+//   email: z.string().trim().email("Please enter a valid email address"),
+//   password: z.string().min(6, "Password must be at least 6 characters"),
+//   status: z.enum(["active", "inactive"]),
+//   businessName: z
+//     .string()
+//     .trim()
+//     .min(2, "Business name is required")
+//     .max(150, "Business name cannot exceed 150 characters"),
+//   businessType: z
+//     .string()
+//     .trim()
+//     .min(2, "Business type is required")
+//     .max(100, "Business type cannot exceed 100 characters"),
+//   businessDescription: z
+//     .string()
+//     .max(1000, "Description cannot exceed 1000 characters")
+//     .optional()
+//     .or(z.literal("")),
+//   address: z.object({
+//     addressLine1: z.string().max(200).optional().or(z.literal("")),
+//     addressLine2: z.string().max(200).optional().or(z.literal("")),
+//     city: z.string().max(100).optional().or(z.literal("")),
+//     state: z.string().max(100).optional().or(z.literal("")),
+//     country: z.string().max(100).optional().or(z.literal("")),
+//     postalCode: z.string().max(20).optional().or(z.literal("")),
+//     googleMapsUrl: z
+//       .string()
+//       .url("Please enter a valid Google Maps URL")
+//       .optional()
+//       .or(z.literal("")),
+//   }),
+
+//   contact: z.object({
+//     phone: requiredPhoneField,
+//     alternatePhone: optionalPhoneField,
+//     whatsapp: optionalPhoneField,
+//     email: z
+//       .string()
+//       .email("Please enter a valid email")
+//       .optional()
+//       .or(z.literal("")),
+//     website: z
+//       .string()
+//       .url("Please enter a valid website URL")
+//       .optional()
+//       .or(z.literal("")),
+//   }),
+
+//   clientKey: z
+//     .string()
+//     .trim()
+//     .min(1, "Client key is required")
+//     .regex(
+//       /^[a-z0-9]+(?:-[a-z0-9]+)*$/,
+//       "Client key can contain only lowercase letters, numbers and hyphens",
+//     ),
+
+//   slug: z
+//     .string()
+//     .trim()
+//     .min(1, "Slug is required")
+//     .regex(
+//       /^[a-z0-9]+(?:-[a-z0-9]+)*$/,
+//       "Slug can contain only lowercase letters, numbers and hyphens",
+//     ),
+
+//   chatbot: z.object({
+//     name: z.string().trim().min(2, "Chatbot name is required").max(100),
+//     welcomeMessage: z
+//       .string()
+//       .trim()
+//       .min(2, "Welcome message is required")
+//       .max(500),
+//     language: z.enum(["english", "hindi", "hinglish"]),
+//     tone: z.enum(["friendly", "professional", "casual", "formal"]),
+//     aiInstructions: z
+//       .string()
+//       .max(10000, "AI instructions cannot exceed 3000 characters")
+//       .optional()
+//       .or(z.literal("")),
+//     predefinedQuestions: z.array(predefinedQuestionSchema),
+//   }),
+// });
+
+const baseClientSchema = z.object({
   fullName: z.string().trim().min(1, "Full name is required"),
   email: z.string().trim().email("Please enter a valid email address"),
-  password: z.string().min(6, "Password must be at least 6 characters"),
   status: z.enum(["active", "inactive"]),
+  businessName: z
+    .string()
+    .trim()
+    .min(2, "Business name is required")
+    .max(150, "Business name cannot exceed 150 characters"),
+
   businessName: z
     .string()
     .trim()
@@ -495,4 +586,21 @@ export const clientSchema = z.object({
       .or(z.literal("")),
     predefinedQuestions: z.array(predefinedQuestionSchema),
   }),
+});
+
+export const clientSchema = baseClientSchema.extend({
+  password: z.string().min(6, "Password must be at least 6 characters"),
+});
+
+export const editClientSchema = baseClientSchema.extend({
+  password: z
+    .string()
+    .trim()
+    .optional()
+    .or(z.literal(""))
+    .refine(
+      (value) => !value || value.length >= 6,
+      "Password must be at least 6 characters",
+    ),
+  accountStatus: z.enum(["active", "blocked"]),
 });

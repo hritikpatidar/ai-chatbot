@@ -143,7 +143,7 @@ export default function AdminHeader({ onMenuClick, collapsed }) {
             gap-2
             rounded-lg
             border
-            border-gray-200
+            border-gray-400
             bg-gray-50
             px-3
             md:flex
@@ -154,7 +154,7 @@ export default function AdminHeader({ onMenuClick, collapsed }) {
           <Search
             size={16}
             className="
-              text-gray-400
+              text-gray-600
               dark:text-gray-500
             "
           />
@@ -177,11 +177,11 @@ export default function AdminHeader({ onMenuClick, collapsed }) {
             className="
               rounded
               border
-              border-gray-200
+              border-gray-400
               px-1.5
               py-0.5
               text-[10px]
-              text-gray-400
+              text-gray-600
               dark:border-white/10
             "
           >

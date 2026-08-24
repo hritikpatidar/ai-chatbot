@@ -56,3 +56,7 @@ export const updateClient = async (clientId, updateData) => {
     },
   );
 };
+
+export const deleteClientById = async (clientId, session) => {
+  return await Client.findByIdAndDelete(clientId).session(session);
+};

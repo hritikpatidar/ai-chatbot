@@ -21,15 +21,20 @@ import {
 import { Controller, useFieldArray, useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import PhoneInputField from "../common/PhoneInputField";
-import { clientSchema } from "../../utils/validation";
-import { createClientService } from "../../service/Client/clientServices";
+import { clientSchema, editClientSchema } from "../../utils/validation";
+import {
+  createClientService,
+  updateClientService,
+} from "../../service/Client/clientServices";
 import CustomSelect from "../common/CustomSelect";
+import { useUpdateAdminClient } from "../../hooks/Admin/useAdminClients";
 
 const defaultValues = {
   fullName: "",
   email: "",
   password: "",
   status: "active",
+  accountStatus: "active",
   businessName: "",
   businessType: "",
   businessDescription: "",
@@ -67,7 +72,14 @@ const defaultValues = {
   },
 };
 
-export default function AdminAddClientModal({ isOpen, onClose }) {
+export default function AdminAddClientModal({
+  isOpen,
+  client = null,
+  isEdit,
+  onClose,
+  onSuccess,
+}) {
+  const schema = isEdit ? editClientSchema : clientSchema;
   const {
     register,
     handleSubmit,
@@ -77,7 +89,7 @@ export default function AdminAddClientModal({ isOpen, onClose }) {
     control,
     formState: { errors, isSubmitting },
   } = useForm({
-    resolver: zodResolver(clientSchema),
+    resolver: zodResolver(schema),
     defaultValues,
     mode: "onChange",
   });
@@ -96,8 +108,79 @@ export default function AdminAddClientModal({ isOpen, onClose }) {
     name: "chatbot.predefinedQuestions",
   });
 
+  const { mutateAsync: updateClient, isPending: updateLoading } =
+    useUpdateAdminClient();
+
   const businessName = watch("businessName");
   const [draggedIndex, setDraggedIndex] = useState(null);
+
+  useEffect(() => {
+    if (!isOpen) return;
+
+    setApiError("");
+    setSuccessMessage("");
+
+    if (client) {
+      reset({
+        fullName: client?.user?.fullName || "",
+        email: client?.user?.email || "",
+        password: "",
+
+        status: client?.status || "active",
+        accountStatus: client?.user?.accountStatus || "active",
+
+        businessName: client?.businessName || "",
+        businessType: client?.businessType || "",
+        businessDescription: client?.businessDescription || "",
+
+        address: {
+          addressLine1: client?.address?.addressLine1 || "",
+          addressLine2: client?.address?.addressLine2 || "",
+          city: client?.address?.city || "",
+          state: client?.address?.state || "",
+          country: client?.address?.country || "India",
+          postalCode: client?.address?.postalCode || "",
+          googleMapsUrl: client?.address?.googleMapsUrl || "",
+        },
+
+        contact: {
+          phone: client?.contact?.phone || "",
+          alternatePhone: client?.contact?.alternatePhone || "",
+          whatsapp: client?.contact?.whatsapp || "",
+          email: client?.contact?.email || "",
+          website: client?.contact?.website || "",
+        },
+
+        clientKey: client?.clientKey || "",
+        slug: client?.slug || "",
+
+        chatbot: {
+          name: client?.chatbot?.name || "",
+          welcomeMessage: client?.chatbot?.welcomeMessage || "",
+          language: client?.chatbot?.language || "english",
+          tone: client?.chatbot?.tone || "professional",
+          aiInstructions: client?.chatbot?.aiInstructions || "",
+
+          predefinedQuestions:
+            client?.chatbot?.predefinedQuestions?.length > 0
+              ? client.chatbot.predefinedQuestions.map((item, index) => ({
+                  question: item?.question || "",
+                  enabled: item?.enabled ?? true,
+                  sortOrder: item?.sortOrder || index + 1,
+                }))
+              : [
+                  {
+                    question: "",
+                    enabled: true,
+                    sortOrder: 1,
+                  },
+                ],
+        },
+      });
+    } else {
+      reset(defaultValues);
+    }
+  }, [isOpen, client, reset]);
 
   useEffect(() => {
     if (!isOpen) return;
@@ -147,17 +230,22 @@ export default function AdminAddClientModal({ isOpen, onClose }) {
       const payload = {
         fullName: data.fullName.trim(),
         email: data.email.trim().toLowerCase(),
-        password: data.password,
-        // status: data.status,
+
+        ...(client && {
+          status: data.status,
+          accountStatus: data.accountStatus,
+        }),
+
         businessName: data.businessName.trim(),
         businessType: data.businessType.trim(),
         businessDescription: data.businessDescription?.trim() || "",
+
         address: {
           addressLine1: data.address.addressLine1?.trim() || "",
           addressLine2: data.address.addressLine2?.trim() || "",
           city: data.address.city?.trim() || "",
           state: data.address.state?.trim() || "",
-          country: data.address.country?.trim() || "India",
+          country: data.address.country?.trim() || "",
           postalCode: data.address.postalCode?.trim() || "",
           googleMapsUrl: data.address.googleMapsUrl?.trim() || "",
         },
@@ -165,45 +253,58 @@ export default function AdminAddClientModal({ isOpen, onClose }) {
         contact: {
           phone: data.contact.phone?.trim() || "",
           alternatePhone: data.contact.alternatePhone?.trim() || "",
+          whatsapp: data.contact.whatsapp?.trim() || "",
           email: data.contact.email?.trim().toLowerCase() || "",
           website: data.contact.website?.trim() || "",
-          whatsapp: data.contact.whatsapp?.trim() || "",
         },
 
         clientKey: data.clientKey.trim(),
         slug: data.slug.trim(),
+
         chatbot: {
           name: data.chatbot.name.trim(),
-          welcomeMessage: data.chatbot.welcomeMessage?.trim() || "",
+          welcomeMessage: data.chatbot.welcomeMessage.trim(),
           language: data.chatbot.language,
           tone: data.chatbot.tone,
-          aiInstructions: data.chatbot.aiInstructions.trim(),
+          aiInstructions: data.chatbot.aiInstructions?.trim() || "",
           predefinedQuestions: formattedQuestions,
         },
       };
-      const response = await createClientService(payload);
-      if (response?.data?.success) {
-        setSuccessMessage(
-          response?.data?.message || "Client settings updated successfully.",
-        );
+
+      // Password only send while creating
+      if (!isEdit) {
+        payload.password = data.password;
       }
 
-      reset(defaultValues);
-      setTimeout(() => {
-        onClose?.();
-        setSuccessMessage("");
-        reset(defaultValues);
-        setDraggedIndex(null);
-      }, 700);
+      let response;
+      if (isEdit && client?._id) {
+        response = await updateClient({
+          clientId: client._id,
+          payload,
+        });
+      } else {
+        response = await createClientService(payload);
+      }
+      if (response?.data?.success === true) {
+        setSuccessMessage(
+          response?.data?.message ||
+            `Client ${isEdit ? "updated" : "created"} successfully`,
+        );
+        await onSuccess?.(response?.data);
+      } else {
+        throw new Error(
+          response?.data?.message ||
+            `Failed to ${isEdit ? "update" : "create"} client`,
+        );
+      }
     } catch (error) {
-      console.error("Create client error:", error);
+      console.error("Client submit error:", error);
 
-      const message =
+      setApiError(
         error?.response?.data?.message ||
-        error?.response?.data?.error ||
-        error?.message ||
-        "Something went wrong while creating the client.";
-      setApiError(message);
+          error?.message ||
+          (client ? "Failed to update client." : "Failed to create client."),
+      );
     } finally {
       setLoading(false);
     }
@@ -284,12 +385,12 @@ export default function AdminAddClientModal({ isOpen, onClose }) {
         <div className="flex shrink-0 items-center justify-between border-b border-gray-200 px-5 py-4 dark:border-white/10">
           <div className="flex min-w-0 items-center gap-3">
             <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-blue-500/10 text-blue-500">
-              <UserPlus size={20} />
+              {client ? <Save size={18} /> : <UserPlus size={18} />}
             </div>
 
             <div className="min-w-0">
               <h2 className="truncate text-base font-semibold text-gray-900 dark:text-white">
-                Add New Client
+                {client ? "Edit Client" : "Add New Client"}
               </h2>
 
               <p className="mt-0.5 truncate text-xs text-gray-500 dark:text-gray-400">
@@ -398,51 +499,53 @@ export default function AdminAddClientModal({ isOpen, onClose }) {
                       {...register("email")}
                     />
                   </FormField>
-
-                  <FormField
-                    label="Password"
-                    required
-                    error={errors.password?.message}
-                  >
-                    <Input
-                      type="password"
-                      placeholder="Enter password"
-                      disabled={isLoading}
-                      {...register("password")}
-                    />
-                  </FormField>
-
-                  <FormField
-                    label="Account Status"
-                    error={errors.status?.message}
-                  >
-                    <Controller
-                      name="status"
-                      control={control}
-                      render={({ field }) => (
-                        <CustomSelect
-                          size="sm"
-                          // label="Business Status"
-                          name={field.name}
-                          value={field.value}
-                          onChange={field.onChange}
-                          options={[
-                            {
-                              value: "active",
-                              label: "Active",
-                            },
-                            {
-                              value: "inactive",
-                              label: "Inactive",
-                            },
-                          ]}
-                          placeholder="Select status"
-                          error={errors.status?.message}
-                          required
-                        />
-                      )}
-                    />
-                  </FormField>
+                  {!client && (
+                    <FormField
+                      label="Password"
+                      required={client ? false : true}
+                      error={errors.password?.message}
+                    >
+                      <Input
+                        type="password"
+                        placeholder="Enter password"
+                        disabled={isLoading}
+                        {...register("password")}
+                      />
+                    </FormField>
+                  )}
+                  {isEdit && (
+                    <FormField
+                      label="Account Status"
+                      error={errors.accountStatus?.message}
+                    >
+                      <Controller
+                        name="accountStatus"
+                        control={control}
+                        render={({ field }) => (
+                          <CustomSelect
+                            size="sm"
+                            // label="Business Status"
+                            name={field.name}
+                            value={field.value}
+                            onChange={field.onChange}
+                            options={[
+                              {
+                                value: "active",
+                                label: "Active",
+                              },
+                              {
+                                value: "blocked",
+                                label: "Blocked",
+                              },
+                            ]}
+                            placeholder="Select status"
+                            error={errors.accountStatus?.message}
+                            required
+                          />
+                        )}
+                      />
+                    </FormField>
+                  )}
                 </div>
               </FormSection>
 
@@ -809,6 +912,37 @@ export default function AdminAddClientModal({ isOpen, onClose }) {
                           )}
                         />
                       </FormField>
+                      <FormField
+                        label="Business Status"
+                        error={errors.status?.message}
+                      >
+                        <Controller
+                          name="status"
+                          control={control}
+                          render={({ field }) => (
+                            <CustomSelect
+                              size="sm"
+                              // label="Business Status"
+                              name={field.name}
+                              value={field.value}
+                              onChange={field.onChange}
+                              options={[
+                                {
+                                  value: "active",
+                                  label: "Active",
+                                },
+                                {
+                                  value: "inactive",
+                                  label: "Inactive",
+                                },
+                              ]}
+                              placeholder="Select status"
+                              error={errors.status?.message}
+                              required
+                            />
+                          )}
+                        />
+                      </FormField>
 
                       <FormField
                         label="Welcome Message"
@@ -969,20 +1103,34 @@ export default function AdminAddClientModal({ isOpen, onClose }) {
 
             <button
               type="submit"
-              disabled={isLoading}
-              className="flex items-center justify-center gap-2 rounded-lg bg-blue-600 px-5 py-2.5 text-sm font-medium text-white transition hover:bg-blue-700 disabled:cursor-not-allowed disabled:opacity-60"
+              disabled={loading}
+              className="
+    flex
+    items-center
+    justify-center
+    gap-2
+    rounded-lg
+    bg-blue-600
+    px-5
+    py-2.5
+    text-sm
+    font-semibold
+    text-white
+    transition
+    hover:bg-blue-700
+    disabled:cursor-not-allowed
+    disabled:opacity-50
+  "
             >
-              {isLoading ? (
-                <>
-                  <Loader2 size={16} className="animate-spin" />
-                  Creating...
-                </>
-              ) : (
-                <>
-                  <Save size={16} />
-                  Create Client
-                </>
-              )}
+              {loading && <Loader2 size={16} className="animate-spin" />}
+
+              {loading
+                ? client
+                  ? "Updating..."
+                  : "Creating..."
+                : client
+                  ? "Update Client"
+                  : "Create Client"}
             </button>
           </div>
         </form>

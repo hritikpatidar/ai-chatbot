@@ -3,9 +3,13 @@ import { MoreVertical, Eye, Pencil, Trash2, Users, Edit2 } from "lucide-react";
 
 import AdminClientStatus from "./AdminClientStatus";
 import ActionButton from "../common/ActionButton";
+import profile from "../../assets/profile1.jpg";
+import { getImageUrl } from "../../utils/imageUrl";
+
 
 export default function AdminClientTable({
   clients = [],
+  pagination={},
   loading = false,
   onView,
   onEdit,
@@ -134,7 +138,7 @@ export default function AdminClientTable({
           "
         >
           <Users size={14} />
-          {clients.length} Clients
+          {pagination.total} Clients
         </div>
       </div>
 
@@ -268,7 +272,9 @@ export default function AdminClientTable({
             <tbody>
               {clients.map((client) => {
                 const clientName =
-                  client?.fullName || client?.name || "Unnamed Client";
+                  client?.user?.fullName ||
+                  client?.user?.name ||
+                  "Unnamed Client";
 
                 const businessName =
                   client?.businessName ||
@@ -276,9 +282,9 @@ export default function AdminClientTable({
                   client?.businessId ||
                   "-";
 
-                const email = client?.email || "-";
+                const email = client?.user?.email || "-";
 
-                const profileImage = client?.profileImage || "";
+                const profileImage = client?.user?.profileImage || "";
 
                 const isActive =
                   client?.accountStatus === "active" ||
@@ -289,11 +295,9 @@ export default function AdminClientTable({
                   ? new Date(client.createdAt).toLocaleDateString()
                   : "-";
 
-                const lastActive = client?.lastActiveAt
-                  ? new Date(client.lastActiveAt).toLocaleString()
-                  : client?.lastLogin
-                    ? new Date(client.lastLogin).toLocaleString()
-                    : "Never";
+                const lastActive = client?.user?.lastLogin
+                  ? new Date(client?.user?.lastLogin).toLocaleString()
+                  : "Never";
 
                 return (
                   <tr
@@ -313,7 +317,7 @@ export default function AdminClientTable({
                       <div className="flex items-center gap-3">
                         {profileImage ? (
                           <img
-                            src={profileImage}
+                            src={getImageUrl(profileImage, profile)}
                             alt={clientName}
                             className="
                               h-10
@@ -426,8 +430,8 @@ export default function AdminClientTable({
                         <div className="flex shrink-0 gap-1">
                           <ActionButton
                             icon={<Eye size={14} />}
-                            title="Edit"
-                            onClick={() => onEdit?.(client)}
+                            title="view"
+                            onClick={() => onView?.(client)}
                           />
                           <ActionButton
                             icon={<Edit2 size={14} />}

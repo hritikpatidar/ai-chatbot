@@ -37,8 +37,8 @@ export const getClientConfigService = async (clientKey) => {
     businessDescription: client.businessDescription,
     chatbot: client.chatbot,
     clientKey: user.clientKey,
-    clientId: user._id,
-    fullName: user.fullName,
+    clientId: user?._id,
+    fullName: user?.fullName,
     email: user.email,
     profileImage: user.profileImage,
     role: user.role,
@@ -47,7 +47,6 @@ export const getClientConfigService = async (clientKey) => {
 
 export const getClientByIdService = async (clientId) => {
   const client = await findClientById(clientId);
-
   if (!client) {
     const error = new Error("Client not found");
     error.statusCode = 404;
@@ -58,6 +57,12 @@ export const getClientByIdService = async (clientId) => {
     getProductCountByClientId(client._id),
     getFaqCountByClientId(client._id),
   ]);
+
+  if (!user) {
+    const error = new Error("client user is block");
+    error.statusCode = 404;
+    throw error;
+  }
 
   return {
     productCount,
@@ -77,7 +82,7 @@ export const getClientByIdService = async (clientId) => {
     clientCreatedAt: client.createdAt,
     clientUpdatedAt: client.updatedAt,
     businessId: client._id,
-    clientId: user._id,
+    clientId: user?._id,
     fullName: user.fullName,
     email: user.email,
     profileImage: user.profileImage,

@@ -98,3 +98,9 @@ export const findUserForRefreshToken = async (decoded) => {
 
   return await User.findById(decoded.id).select("-password");
 };
+
+export const deleteUserByClientId = async (clientId, session) => {
+  return await User.findOneAndDelete({
+    clientId,
+  }).session(session);
+};

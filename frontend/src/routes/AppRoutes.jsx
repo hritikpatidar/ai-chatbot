@@ -11,11 +11,11 @@ import ClientRoute from "./ClientRoute";
 import AdminLayout from "../pages/Admin/AdminLayout";
 import AdminDashboard from "../pages/Admin/AdminDashboard";
 import AdminClient from "../pages/Admin/AdminClients";
-import AdminClientDetails from "../pages/Admin/AdminClientDetails";
 import AdminProfile from "../pages/Admin/AdminProfile";
 import AdminSettings from "../pages/Admin/AdminSettings";
 import AdminSubscriptions from "../pages/Admin/AdminSubscriptions";
 import AdminAnalytics from "../pages/Admin/AdminAnalytics";
+import AdminClientView from "../pages/Admin/AdminClientView";
 
 // Public Pages
 
@@ -116,9 +116,10 @@ export default function AppRoutes() {
               <Route path="/admin">
                 <Route index element={<AdminDashboard />} />
                 <Route path="/admin/clients" element={<AdminClient />} />
+
                 <Route
                   path="/admin/clients/:clientId"
-                  element={<AdminClientDetails />}
+                  element={<AdminClientView />}
                 />
                 <Route path="/admin/profile" element={<AdminProfile />} />
                 <Route path="/admin/settings" element={<AdminSettings />} />

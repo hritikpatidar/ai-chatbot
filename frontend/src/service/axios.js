@@ -102,7 +102,7 @@ axiosInstance.interceptors.response.use(
     /* =====================================================
        NO RESPONSE
     ===================================================== */
-
+    console.log("error", error);
     if (!error.response) {
       console.log("error", error);
 
@@ -117,6 +117,10 @@ axiosInstance.interceptors.response.use(
 
     if (status === 404) {
       console.log("Not Found");
+    }
+    if (status === 400) {
+      console.log("Bad Request:", status);
+      return Promise.resolve(error.response);
     }
 
     /* =====================================================

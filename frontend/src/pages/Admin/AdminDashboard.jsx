@@ -163,7 +163,7 @@ export default function AdminDashboard() {
   );
 
   const { stats, activity, system, recentClients } = normalizedData;
-
+  debugger
   /* STATS */
 
   const totalClients =
@@ -1209,7 +1209,7 @@ export default function AdminDashboard() {
                   const status =
                     client?.status || client?.accountStatus || "inactive";
                   const chatbotStatus =
-                    client?.chatbot?.status ||
+                    client?.chatbot?.status ||client?.status ||
                     client?.chatbotStatus ||
                     (client?.chatbot?.online ? "online" : "offline");
                   const lastLogin =

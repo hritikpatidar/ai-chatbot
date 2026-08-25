@@ -1,0 +1,32 @@
+import { useQuery } from "@tanstack/react-query";
+import { getAdminDashboardService } from "../../service/Admin/adminDashboardServices";
+
+const useAdminDashboard = () => {
+  const dashboardQuery = useQuery({
+    queryKey: ["adminDashboard"],
+
+    queryFn: async () => {
+      const response = await getAdminDashboardService();
+      if (response?.data?.success === false) {
+        throw new Error(
+          response?.data?.message || "Failed to fetch dashboard",
+        );
+      }
+      return response?.data?.data;
+    },
+
+    staleTime: 30 * 1000,
+    retry: 1,
+    refetchOnWindowFocus: false,
+  });
+
+  return {
+    dashboard: dashboardQuery.data || null,
+    isLoading: dashboardQuery.isLoading,
+    isFetching: dashboardQuery.isFetching,
+    error: dashboardQuery.error,
+    refetch: dashboardQuery.refetch,
+  };
+};
+
+export default useAdminDashboard;

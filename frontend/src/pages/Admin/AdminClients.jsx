@@ -97,7 +97,6 @@ export default function AdminClient() {
   };
 
   const handleView = (client) => {
-    console.log("View client:", client);
     navigate(`/admin/clients/${client._id}`);
   };
 

@@ -86,8 +86,7 @@ export default function AppRoutes() {
             </Route>
           </Route>
 
-          {/* PRIVATE ROUTES */}
-
+          {/* PRIVATE USER ROUTES */}
           <Route element={<PrivateRoute allowedRoles={["user"]} />}>
             <Route element={<DashboardLayout />}>
               <Route path="/library" element={<Library />} />
@@ -98,10 +97,7 @@ export default function AppRoutes() {
             </Route>
           </Route>
 
-          {/* =========================================
-                  PRIVATE CLIENT ROUTES
-              ========================================= */}
-
+          {/* PRIVATE CLIENT ROUTES */}
           <Route element={<PrivateRoute allowedRoles={["client"]} />}>
             <Route element={<ClientLayout />}>
               <Route path="/client">
@@ -114,12 +110,13 @@ export default function AppRoutes() {
               </Route>
             </Route>
           </Route>
+
+          {/* PRIVATE ADMIN ROUTES */}
           <Route element={<PrivateRoute allowedRoles={["admin"]} />}>
             <Route element={<AdminLayout />}>
               <Route path="/admin">
                 <Route index element={<AdminDashboard />} />
                 <Route path="/admin/clients" element={<AdminClient />} />
-
                 <Route
                   path="/admin/clients/:clientId"
                   element={<AdminClientView />}

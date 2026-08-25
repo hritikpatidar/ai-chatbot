@@ -19,10 +19,7 @@ import ActionButton from "../../components/common/ActionButton";
 import { useNavigate } from "react-router-dom";
 import useAdminDashboard from "../../hooks/Admin/useAdminDashboard";
 
-/* =========================================================
-   HELPERS
-========================================================= */
-
+//  HELPERS
 const formatRelativeTime = (date) => {
   if (!date) {
     return "Never";
@@ -106,12 +103,9 @@ const getPercentage = (value, total) => {
   );
 };
 
-/* =========================================================
-   NORMALIZE API DATA
-
-   Backend response thoda different ho to yaha handle
-   kar sakte ho.
-========================================================= */
+//  NORMALIZE API DATA
+//  Backend response thoda different ho to yaha handle
+//  kar sakte ho.
 
 const normalizeDashboardData = (data) => {
   if (!data) {
@@ -124,13 +118,10 @@ const normalizeDashboardData = (data) => {
   }
 
   const stats = data?.stats || data?.statistics || {};
-
   const recentClients =
     data?.recentClients || data?.clients?.recent || data?.recent?.clients || [];
-
   const activity =
     data?.clientActivity || data?.activity || data?.clientActivityData || [];
-
   const system = data?.systemOverview || data?.system || {};
 
   return {
@@ -141,9 +132,7 @@ const normalizeDashboardData = (data) => {
   };
 };
 
-/* =========================================================
-   STATUS STYLES
-========================================================= */
+//  STATUS STYLES
 
 const statusStyles = {
   active: `
@@ -159,18 +148,14 @@ const statusStyles = {
   `,
 };
 
-/* =========================================================
-   MAIN COMPONENT
-========================================================= */
+//  MAIN COMPONENT
 
 export default function AdminDashboard() {
   const navigate = useNavigate();
 
   const { dashboard, isLoading, isFetching, error, refetch } =
     useAdminDashboard();
-  /* =======================================================
-     NORMALIZED DATA
-  ======================================================= */
+  //  NORMALIZED DATA
 
   const normalizedData = useMemo(
     () => normalizeDashboardData(dashboard),
@@ -179,9 +164,7 @@ export default function AdminDashboard() {
 
   const { stats, activity, system, recentClients } = normalizedData;
 
-  /* =======================================================
-     STATS
-  ======================================================= */
+  /* STATS */
 
   const totalClients =
     stats?.totalClients ??
@@ -204,9 +187,7 @@ export default function AdminDashboard() {
   const newClients =
     stats?.newClients ?? stats?.clients?.new ?? dashboard?.newClients ?? 0;
 
-  /* =======================================================
-     TRENDS
-  ======================================================= */
+  /* TRENDS */
 
   const totalClientsTrend =
     stats?.totalClientsTrend ?? stats?.trends?.totalClients ?? null;
@@ -217,9 +198,7 @@ export default function AdminDashboard() {
   const newClientsTrend =
     stats?.newClientsTrend ?? stats?.trends?.newClients ?? null;
 
-  /* =======================================================
-     SYSTEM OVERVIEW
-  ======================================================= */
+  /* SYSTEM OVERVIEW */
 
   const chatbotOnline =
     system?.chatbotsOnline ??
@@ -248,21 +227,6 @@ export default function AdminDashboard() {
     system?.subscriptionPercentage ??
     getPercentage(activeSubscriptions, totalSubscriptions);
 
-  /* =======================================================
-     ACTIVITY CHART
-
-     Expected:
-     [
-       { month: "Jan", value: 45 },
-       { month: "Feb", value: 65 }
-     ]
-
-     Or:
-     [
-       { label: "Jan", count: 45 }
-     ]
-  ======================================================= */
-
   const chartData = useMemo(() => {
     if (!Array.isArray(activity)) {
       return [];
@@ -287,31 +251,17 @@ export default function AdminDashboard() {
       ? Math.max(...chartData.map((item) => item.value), 1)
       : 1;
 
-  /* =======================================================
-     REFRESH
-  ======================================================= */
-
   const handleRefresh = () => {
     refetch();
   };
 
-  /* =======================================================
-     VIEW CLIENT
-  ======================================================= */
-
   const handleViewClient = (client) => {
     const clientId = client?._id || client?.id || client?.clientId;
-
     if (!clientId) {
       return;
     }
-
     navigate(`/admin/clients/${clientId}`);
   };
-
-  /* =======================================================
-     LOADING
-  ======================================================= */
 
   if (isLoading) {
     return <DashboardSkeleton />;
@@ -319,10 +269,6 @@ export default function AdminDashboard() {
 
   return (
     <div className="space-y-6">
-      {/* =====================================================
-          PAGE HEADER
-      ===================================================== */}
-
       <div
         className="
           flex
@@ -361,7 +307,6 @@ export default function AdminDashboard() {
 
         <div className="flex items-center gap-2">
           {/* Refresh */}
-
           <button
             type="button"
             onClick={handleRefresh}
@@ -391,7 +336,6 @@ export default function AdminDashboard() {
             "
           >
             <RefreshCw size={15} className={isFetching ? "animate-spin" : ""} />
-
             <span className="hidden sm:inline">Refresh</span>
           </button>
 
@@ -417,15 +361,12 @@ export default function AdminDashboard() {
             "
           >
             <Users size={16} />
-
             <span>View All Clients</span>
           </button>
         </div>
       </div>
 
-      {/* =====================================================
-          ERROR
-      ===================================================== */}
+      {/* ERROR */}
 
       {error && (
         <div
@@ -454,7 +395,6 @@ export default function AdminDashboard() {
                 dark:text-red-400
               "
             />
-
             <div>
               <p
                 className="
@@ -466,7 +406,6 @@ export default function AdminDashboard() {
               >
                 Failed to load dashboard
               </p>
-
               <p
                 className="
                   mt-0.5
@@ -480,7 +419,6 @@ export default function AdminDashboard() {
               </p>
             </div>
           </div>
-
           <button
             type="button"
             onClick={handleRefresh}
@@ -501,9 +439,7 @@ export default function AdminDashboard() {
         </div>
       )}
 
-      {/* =====================================================
-          STATS
-      ===================================================== */}
+      {/* STATS */}
 
       <div
         className="
@@ -566,9 +502,7 @@ export default function AdminDashboard() {
         />
       </div>
 
-      {/* =====================================================
-          MIDDLE SECTION
-      ===================================================== */}
+      {/* MIDDLE SECTION */}
 
       <div
         className="
@@ -578,9 +512,7 @@ export default function AdminDashboard() {
           xl:grid-cols-3
         "
       >
-        {/* ===================================================
-            CLIENT ACTIVITY
-        =================================================== */}
+        {/* CLIENT ACTIVITY */}
 
         <div
           className="
@@ -891,7 +823,7 @@ export default function AdminDashboard() {
 
               {/* Bottom Summary */}
               {/* <div
-        className="
+                className="
           mt-5
           flex
           items-center
@@ -905,54 +837,52 @@ export default function AdminDashboard() {
           dark:border-white/5
           dark:bg-white/[0.02]
         "
-      >
-        <div className="flex items-center gap-2">
-          <span
-            className="
+              >
+                <div className="flex items-center gap-2">
+                  <span
+                    className="
               h-2
               w-2
               rounded-full
               bg-blue-500
               shadow-[0_0_8px_rgba(59,130,246,0.6)]
             "
-          />
+                  />
 
-          <span
-            className="
+                  <span
+                    className="
               text-[11px]
               font-medium
               text-gray-500
               dark:text-gray-400
             "
-          >
-            Activity
-          </span>
-        </div>
+                  >
+                    Activity
+                  </span>
+                </div>
 
-        <span
-          className="
+                <span
+                  className="
             text-xs
             font-semibold
             text-gray-700
             dark:text-gray-200
           "
-        >
-          {formatNumber(
-            chartData.reduce(
-              (total, item) => total + Number(item.value || 0),
-              0,
-            ),
-          )}{" "}
-          total
-        </span>
-      </div> */}
+                >
+                  {formatNumber(
+                    chartData.reduce(
+                      (total, item) => total + Number(item.value || 0),
+                      0,
+                    ),
+                  )}{" "}
+                  total
+                </span>
+              </div> */}
             </div>
           )}
         </div>
 
-        {/* ===================================================
-            SYSTEM OVERVIEW
-        =================================================== */}
+        {/* SYSTEM OVERVIEW */}
 
         <div
           className="
@@ -1033,7 +963,6 @@ export default function AdminDashboard() {
           </div>
 
           {/* System Status */}
-
           <div
             className="
               mt-7
@@ -1109,9 +1038,7 @@ export default function AdminDashboard() {
         </div>
       </div>
 
-      {/* =====================================================
-          RECENT CLIENTS
-      ===================================================== */}
+      {/* RECENT CLIENTS */}
 
       <div
         className="
@@ -1241,7 +1168,6 @@ export default function AdminDashboard() {
           </div>
         ) : (
           /* Table */
-
           <div className="overflow-x-auto">
             <table className="w-full min-w-212.5">
               <thead>
@@ -1253,15 +1179,10 @@ export default function AdminDashboard() {
                   "
                 >
                   <th className="table-head">Client</th>
-
                   <th className="table-head">Plan</th>
-
                   <th className="table-head">Status</th>
-
                   <th className="table-head">Chatbot</th>
-
                   <th className="table-head">Last Login</th>
-
                   <th className="table-head text-right">Action</th>
                 </tr>
               </thead>
@@ -1270,38 +1191,30 @@ export default function AdminDashboard() {
                 {recentClients.map((client, index) => {
                   const clientId =
                     client?._id || client?.id || client?.clientId || index;
-
                   const name =
                     client?.businessName ||
                     client?.name ||
                     client?.fullName ||
                     "Unknown Client";
-
                   const email =
                     client?.email ||
                     client?.contact?.email ||
                     client?.user?.email ||
                     "-";
-
                   const plan =
                     client?.plan?.name ||
                     client?.subscription?.planName ||
                     client?.plan ||
                     "-";
-
                   const status =
                     client?.status || client?.accountStatus || "inactive";
-
                   const chatbotStatus =
                     client?.chatbot?.status ||
                     client?.chatbotStatus ||
                     (client?.chatbot?.online ? "online" : "offline");
-
                   const lastLogin =
                     client?.lastLogin || client?.user?.lastLogin || null;
-
                   const initials = client?.initials || getInitials(name);
-
                   return (
                     <tr
                       key={clientId}
@@ -1316,7 +1229,6 @@ export default function AdminDashboard() {
                         "
                     >
                       {/* Client */}
-
                       <td className="table-cell">
                         <div
                           className="
@@ -1421,7 +1333,6 @@ export default function AdminDashboard() {
                       </td>
 
                       {/* Chatbot */}
-
                       <td className="table-cell">
                         <span
                           className="
@@ -1503,10 +1414,7 @@ export default function AdminDashboard() {
   );
 }
 
-/* =========================================================
-   PROGRESS ITEM
-========================================================= */
-
+/* PROGRESS ITEM */
 function ProgressItem({ label, value, progress }) {
   return (
     <div>
@@ -1566,10 +1474,7 @@ function ProgressItem({ label, value, progress }) {
   );
 }
 
-/* =========================================================
-   EMPTY CHART
-========================================================= */
-
+/* EMPTY CHART */
 function EmptyChart() {
   return (
     <div
@@ -1625,15 +1530,11 @@ function EmptyChart() {
   );
 }
 
-/* =========================================================
-   DASHBOARD SKELETON
-========================================================= */
-
+/* DASHBOARD SKELETON */
 function DashboardSkeleton() {
   return (
     <div className="space-y-6">
       {/* Header */}
-
       <div
         className="
           flex
@@ -1681,7 +1582,6 @@ function DashboardSkeleton() {
       </div>
 
       {/* Stats */}
-
       <div
         className="
           grid
@@ -1706,7 +1606,6 @@ function DashboardSkeleton() {
       </div>
 
       {/* Middle */}
-
       <div
         className="
           grid
@@ -1738,7 +1637,6 @@ function DashboardSkeleton() {
       </div>
 
       {/* Table */}
-
       <div
         className="
           h-80

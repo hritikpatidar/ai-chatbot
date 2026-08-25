@@ -145,9 +145,7 @@ export const findOrCreateGuestConversation = async ({
   title,
   lastMessage,
 }) => {
-  console.log("asdf",clientId, guestId, title, lastMessage);
   let conversation = await findGuestConversation(clientId, guestId);
-  console.log("conversation find", conversation);
   if (conversation) {
     return conversation;
   }

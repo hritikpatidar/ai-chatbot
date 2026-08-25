@@ -6,8 +6,6 @@ export const socketMiddleware = async (socket, next) => {
     let token = socket.handshake.auth?.token;
     const clientKey = socket.handshake.auth?.clientKey;
     const guestId = socket.handshake.auth?.guestId;
-    console.log("socket.handshake.auth", socket.handshake.auth);
-    console.log("guestId", guestId);
     if (!token) {
       const authorization = socket.handshake.headers?.token;
 
@@ -47,13 +45,6 @@ export const socketMiddleware = async (socket, next) => {
     if (!socket.user && !socket.clientId) {
       return next(new Error("AUTH_OR_CLIENT_REQUIRED"));
     }
-
-    console.log("🔐 Socket authenticated:", {
-      socketId: socket.id,
-      userId: socket.user?.id || null,
-      clientId: socket.clientId || null,
-      guestId: socket.guestId || null,
-    });
 
     next();
   } catch (error) {

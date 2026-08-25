@@ -46,8 +46,6 @@ export const registerAIEvents = (io, socket) => {
       const userId = socket.user?.id || null;
       const clientId = socket.clientId || null;
       const guestId = socket.guestId || null;
-      console.log("clientId", clientId);
-      console.log("guestId", guestId);
 
       if (!userId && !clientId) {
         socket.emit("ai:error", {
@@ -79,7 +77,6 @@ export const registerAIEvents = (io, socket) => {
       }
 
       let conversation;
-      console.log("conversationId", conversationId);
       if (conversationId) {
         if (clientId) {
           conversation = await findConversationByIdAndClient(
@@ -132,7 +129,6 @@ export const registerAIEvents = (io, socket) => {
         } else {
           conversation = await createConversation(conversationData);
         }
-        console.log("conversation", conversation);
         socket.emit("conversation:created", {
           conversation,
         });
@@ -145,7 +141,6 @@ export const registerAIEvents = (io, socket) => {
       });
 
       const history = await getRecentConversationMessages(conversation._id, 20);
-      console.log("📚 Conversation History:", history.length);
       let knowledgeContext = "";
       if (clientId) {
         const knowledge = await getRelevantClientKnowledge(clientId, message);
@@ -207,7 +202,6 @@ export const registerAIEvents = (io, socket) => {
             messageId: userMessage._id,
             userMessage: message,
           });
-          console.log("ticket", ticket._id);
           socket.emit("ai:chunk", {
             text: fallbackMessage,
           });

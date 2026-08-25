@@ -65,7 +65,6 @@ export const updateProduct = async (productId, data, user) => {
         oldImagePath.replace(/^\/uploads\//, "uploads/"),
       );
       await fs.unlink(oldFilePath);
-      console.log("✅ Old product image deleted:", oldFilePath);
     } catch (error) {
       if (error.code !== "ENOENT") {
         console.error("❌ Old product image delete failed:", error);
@@ -91,7 +90,6 @@ export const deleteProduct = async (productId) => {
       const cleanImagePath = imagePath.replace(/^\/+/, "");
       const filePath = path.join(process.cwd(), "src", cleanImagePath);
       await fs.unlink(filePath);
-      console.log("Product image deleted:", filePath);
     } catch (error) {
       if (error.code !== "ENOENT") {
         console.error("Product image delete error:", error);

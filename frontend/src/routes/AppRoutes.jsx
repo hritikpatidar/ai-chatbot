@@ -16,6 +16,7 @@ import AdminSettings from "../pages/Admin/AdminSettings";
 import AdminSubscriptions from "../pages/Admin/AdminSubscriptions";
 import AdminAnalytics from "../pages/Admin/AdminAnalytics";
 import AdminClientView from "../pages/Admin/AdminClientView";
+import ScrollToTop from "../components/ScrollToTop";
 
 // Public Pages
 
@@ -53,6 +54,8 @@ const ClientTickets = lazy(() => import("../pages/Client/ClientTickets"));
 export default function AppRoutes() {
   return (
     <SocketProvider>
+      <ScrollToTop />
+
       <Suspense fallback={<PageLoader />}>
         <Routes>
           {/* PUBLIC AUTH ROUTES */}

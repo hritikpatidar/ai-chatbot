@@ -304,9 +304,6 @@ ${message}
     });
 
     const text = response.text?.trim();
-
-    console.log("🧠 Raw Classification:", text);
-
     if (!text) {
       throw new Error("Empty classification response");
     }
@@ -318,8 +315,6 @@ ${message}
       .trim();
 
     const classification = JSON.parse(cleanedText);
-
-    console.log("✅ Classification:", classification);
 
     return {
       businessRelated: Boolean(

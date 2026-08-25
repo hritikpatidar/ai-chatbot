@@ -201,7 +201,6 @@ export const getAllClientsService = async ({
 
   const data = clients.map((client) => {
     const user = userMap.get(String(client._id));
-    console.log("user", user);
     return {
       ...client,
       user: user

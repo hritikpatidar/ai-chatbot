@@ -8,6 +8,7 @@ import {
   getClientById,
   updateAdminClient,
 } from "../controllers/admin.controller.js";
+import { getAdminDashboard } from "../controllers/adminDashboard.controller.js";
 
 const router = express.Router();
 
@@ -16,5 +17,6 @@ router.get("/clients", authMiddleware, getAllClients);
 router.get("/clients/:clientId", authMiddleware, getClientById);
 router.delete("/delete-client/:clientId", authMiddleware, deleteClient);
 router.put("/clients/:clientId", authMiddleware, updateAdminClient);
+router.get("/dashboard", authMiddleware, getAdminDashboard);
 
 export default router;

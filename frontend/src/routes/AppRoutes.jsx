@@ -50,6 +50,13 @@ const ChatbotSettings = lazy(() => import("../pages/Client/ChatbotSettings"));
 const ClientProducts = lazy(() => import("../pages/Client/ClientProducts"));
 const ClientFAQs = lazy(() => import("../pages/Client/ClientFAQs"));
 const ClientTickets = lazy(() => import("../pages/Client/ClientTickets"));
+const SubscriptionPlans = lazy(
+  () => import("../pages/Admin/SubscriptionPlans/SubscriptionPlans"),
+);
+
+const SubscriptionPlanDetails = lazy(
+  () => import("../pages/Admin/SubscriptionPlans/SubscriptionPlanDetails"),
+);
 
 export default function AppRoutes() {
   return (
@@ -128,6 +135,15 @@ export default function AppRoutes() {
                   element={<AdminSubscriptions />}
                 />
                 <Route path="/admin/analytics" element={<AdminAnalytics />} />
+                <Route
+                  path="/admin/subscription-plans"
+                  element={<SubscriptionPlans />}
+                />
+
+                <Route
+                  path="/admin/subscription-plans/:planId"
+                  element={<SubscriptionPlanDetails />}
+                />
               </Route>
             </Route>
           </Route>

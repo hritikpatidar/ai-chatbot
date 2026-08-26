@@ -26,6 +26,11 @@ const menuItems = [
     end: true,
   },
   {
+    label: "Subscription Plans",
+    path: "/admin/subscription-plans",
+    icon: CreditCard,
+  },
+  {
     label: "Subscriptions",
     path: "/admin/subscriptions",
     icon: CreditCard,
@@ -243,11 +248,7 @@ export default function AdminSidebar({
                 >
                   <Icon size={19} className="shrink-0" />
 
-                  {!collapsed && (
-                    <span className="truncate">
-                      {item.label}
-                    </span>
-                  )}
+                  {!collapsed && <span className="truncate">{item.label}</span>}
                 </NavLink>
               );
             })}
@@ -290,9 +291,7 @@ export default function AdminSidebar({
             ) : (
               <>
                 <ChevronLeft size={18} />
-                <span className="text-xs">
-                  Collapse Sidebar
-                </span>
+                <span className="text-xs">Collapse Sidebar</span>
               </>
             )}
           </button>

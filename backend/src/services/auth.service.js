@@ -94,7 +94,9 @@ export const verifyEmailOTPService = async (body) => {
   if (purpose === "register") {
     const user = await verifyUserEmail(email);
     const payload = {
-      id: user._id,
+      id: user?.role === "client" ? user?.clientId : user._id,
+      clientId: user?.clientId,
+      fullName: user.fullName,
       email: user.email,
       role: user.role,
     };
@@ -156,6 +158,8 @@ export const loginService = async (body) => {
   }
   const payload = {
     id: user?.role === "client" ? user?.clientId : user._id,
+    clientId: user?.clientId,
+    fullName: user.fullName,
     email: user.email,
     role: user.role,
   };

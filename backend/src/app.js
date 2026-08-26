@@ -11,6 +11,11 @@ import productRoutes from "./routes/product.routes.js";
 import faqRoutes from "./routes/faq.routes.js";
 import ticketRoutes from "./routes/ticket.routes.js";
 import adminRoutes from "./routes/admin.route.js";
+
+import subscriptionRoutes from "./routes/subscription.routes.js";
+import stripeRoutes from "./routes/stripe.routes.js";
+import { stripeWebhook } from "./controllers/stripe.controller.js";
+
 import notFound from "./middlewares/notFound.js";
 import errorHandler from "./middlewares/errorHandler.js";
 import { redisClient } from "./config/redis.js";
@@ -24,6 +29,14 @@ app.use(
     origin: [env.CLIENT_URL, "https://my-ai-chatbot-project.vercel.app"],
     credentials: true,
   }),
+);
+
+app.post(
+  "/api/stripe/webhook",
+  express.raw({
+    type: "application/json",
+  }),
+  stripeWebhook,
 );
 
 app.use(express.json());
@@ -46,6 +59,8 @@ app.use("/api/products", productRoutes);
 app.use("/api/faqs", faqRoutes);
 app.use("/api/tickets", ticketRoutes);
 app.use("/api/admin", adminRoutes);
+app.use("/api/subscription", subscriptionRoutes);
+app.use("/api/stripe", stripeRoutes);
 app.use("/uploads", express.static(path.join(process.cwd(), "src/uploads")));
 app.get("/", (req, res) => {
   res.status(200).json({

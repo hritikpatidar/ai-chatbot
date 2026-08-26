@@ -39,6 +39,10 @@ const env = {
   // ChatGPT API
   VITE_OPENAI_API_KEY: process.env.VITE_OPENAI_API_KEY,
 
+  //Stripe
+  STRIPE_SECRET_KEY: process.env.STRIPE_SECRET_KEY,
+  STRIPE_WEBHOOK_SECRET: process.env.STRIPE_WEBHOOK_SECRET,
+
   // AWS S3
   AWS_REGION: process.env.AWS_REGION,
   AWS_ACCESS_KEY_ID: process.env.AWS_ACCESS_KEY_ID,

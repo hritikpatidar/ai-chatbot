@@ -604,3 +604,62 @@ export const editClientSchema = baseClientSchema.extend({
     ),
   accountStatus: z.enum(["active", "blocked"]),
 });
+
+export const subscriptionPlanValidation = z.object({
+  name: z
+    .string()
+    .trim()
+    .min(2, "Plan name must be at least 2 characters")
+    .max(50, "Plan name must not exceed 50 characters"),
+
+  description: z
+    .string()
+    .trim()
+    .max(300, "Description must not exceed 300 characters")
+    .optional()
+    .or(z.literal("")),
+
+  stripePriceId: z
+    .string()
+    .trim()
+    .min(1, "Stripe Price ID is required")
+    .regex(/^price_/, "Invalid Stripe Price ID"),
+
+  stripeProductId: z
+    .string()
+    .trim()
+    .min(1, "Stripe Product ID is required")
+    .regex(/^prod_/, "Invalid Stripe Product ID"),
+
+  amount: z
+    .number({
+      message: "Amount is required",
+    })
+    .min(0, "Amount cannot be negative"),
+
+  currency: z
+    .string()
+    .trim()
+    .min(3, "Currency is required")
+    .max(3, "Currency must be 3 characters")
+    .transform((value) => value.toLowerCase()),
+
+  interval: z.enum(["month", "year"], {
+    message: "Billing interval is required",
+  }),
+
+  features: z
+    .array(z.string().trim().min(1, "Feature cannot be empty"))
+    .default([]),
+
+  sortOrder: z
+    .number({
+      message: "Sort order is required",
+    })
+    .int("Sort order must be a whole number")
+    .min(0, "Sort order cannot be negative"),
+
+  status: z.enum(["active", "inactive"], {
+    message: "Status is required",
+  }),
+});

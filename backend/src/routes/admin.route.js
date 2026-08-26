@@ -9,6 +9,7 @@ import {
   updateAdminClient,
 } from "../controllers/admin.controller.js";
 import { getAdminDashboard } from "../controllers/adminDashboard.controller.js";
+import { createSubscriptionPlanController, deleteSubscriptionPlanController, getAdminSubscriptionPlanController, getAllSubscriptionPlansController, updateSubscriptionPlanController } from "../controllers/adminSubscriptionPlan.controller.js";
 
 const router = express.Router();
 
@@ -18,5 +19,35 @@ router.get("/clients/:clientId", authMiddleware, getClientById);
 router.delete("/delete-client/:clientId", authMiddleware, deleteClient);
 router.put("/clients/:clientId", authMiddleware, updateAdminClient);
 router.get("/dashboard", authMiddleware, getAdminDashboard);
+
+router.post(
+  "/subscription-plans",
+  authMiddleware,
+  createSubscriptionPlanController,
+);
+
+router.get(
+  "/subscription-plans",
+  authMiddleware,
+  getAllSubscriptionPlansController,
+);
+
+router.get(
+  "/subscription-plans/:planId",
+  authMiddleware,
+  getAdminSubscriptionPlanController,
+);
+
+router.patch(
+  "/subscription-plans/:planId",
+  authMiddleware,
+  updateSubscriptionPlanController,
+);
+
+router.delete(
+  "/subscription-plans/:planId",
+  authMiddleware,
+  deleteSubscriptionPlanController,
+);
 
 export default router;

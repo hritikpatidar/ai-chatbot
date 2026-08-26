@@ -9,10 +9,11 @@ import {
   AlertCircle,
 } from "lucide-react";
 
-import { useForm } from "react-hook-form";
+import { Controller, useForm } from "react-hook-form";
 
 import { zodResolver } from "@hookform/resolvers/zod";
 import { subscriptionPlanValidation } from "../../../utils/validation";
+import CustomSelect from "../../common/CustomSelect";
 
 const defaultValues = {
   name: "",
@@ -45,11 +46,13 @@ const SubscriptionPlanForm = ({
     reset,
     setValue,
     watch,
+    control,
     formState: { errors },
   } = useForm({
     resolver: zodResolver(subscriptionPlanValidation),
     defaultValues,
   });
+  debugger
 
   const features = watch("features") || [];
 
@@ -214,7 +217,7 @@ const SubscriptionPlanForm = ({
           BASIC INFORMATION
       ===================================================== */}
 
-      <div className="rounded-2xl border border-gray-200 bg-white p-5 shadow-sm dark:border-gray-800 dark:bg-gray-900 sm:p-6">
+      <div className="rounded-2xl border border-gray-200 bg-white p-5 shadow-sm dark:border-gray-800 dark:bg-[#11151d] sm:p-6">
         <h2 className="mb-5 text-base font-semibold text-gray-900 dark:text-white">
           Basic Information
         </h2>
@@ -245,7 +248,7 @@ const SubscriptionPlanForm = ({
               rows={3}
               placeholder="Basic subscription plan"
               {...register("description")}
-              className="w-full rounded-xl border border-gray-200 bg-white px-4 py-3 text-sm text-gray-900 outline-none transition placeholder:text-gray-400 focus:border-indigo-500 dark:border-gray-700 dark:bg-gray-950 dark:text-white"
+              className="w-full rounded-xl border border-gray-300 bg-white px-4 py-3 text-sm text-gray-900 outline-none transition placeholder:text-gray-400 focus:border-blue-500 dark:border-gray-700 dark:bg-[#171b23] dark:text-white"
             />
 
             {errors.description && (
@@ -261,7 +264,7 @@ const SubscriptionPlanForm = ({
           STRIPE
       ===================================================== */}
 
-      <div className="rounded-2xl border border-gray-200 bg-white p-5 shadow-sm dark:border-gray-800 dark:bg-gray-900 sm:p-6">
+      <div className="rounded-2xl border border-gray-200 bg-white p-5 shadow-sm dark:border-gray-800 dark:bg-[#11151d] sm:p-6">
         <h2 className="mb-5 text-base font-semibold text-gray-900 dark:text-white">
           Stripe Configuration
         </h2>
@@ -289,7 +292,7 @@ const SubscriptionPlanForm = ({
           PRICING
       ===================================================== */}
 
-      <div className="rounded-2xl border border-gray-200 bg-white p-5 shadow-sm dark:border-gray-800 dark:bg-gray-900 sm:p-6">
+      <div className="rounded-2xl border border-gray-200 bg-white p-5 shadow-sm dark:border-gray-800 dark:bg-[#11151d] sm:p-6">
         <h2 className="mb-5 text-base font-semibold text-gray-900 dark:text-white">
           Pricing
         </h2>
@@ -312,15 +315,30 @@ const SubscriptionPlanForm = ({
             <label className="mb-2 block text-sm font-medium text-gray-700 dark:text-gray-300">
               Billing Interval
             </label>
-
-            <select
-              {...register("interval")}
-              className="w-full rounded-xl border border-gray-200 bg-white px-4 py-3 text-sm text-gray-900 outline-none focus:border-indigo-500 dark:border-gray-700 dark:bg-gray-950 dark:text-white"
-            >
-              <option value="month">Monthly</option>
-              <option value="year">Yearly</option>
-            </select>
-
+            <Controller
+              name="interval"
+              control={control}
+              render={({ field }) => (
+                <CustomSelect
+                  size="md"
+                  name={field.name}
+                  value={field.value}
+                  onChange={field.onChange}
+                  options={[
+                    {
+                      value: "month",
+                      label: "Monthly",
+                    },
+                    {
+                      value: "year",
+                      label: "Yearly",
+                    },
+                  ]}
+                  rounded="rounded-xl"
+                  error={errors.interval?.message}
+                />
+              )}
+            />
             {errors.interval && (
               <p className="mt-1 text-xs text-red-500">
                 {errors.interval.message}
@@ -345,7 +363,7 @@ const SubscriptionPlanForm = ({
           FEATURES
       ===================================================== */}
 
-      <div className="rounded-2xl border border-gray-200 bg-white p-5 shadow-sm dark:border-gray-800 dark:bg-gray-900 sm:p-6">
+      <div className="rounded-2xl border border-gray-200 bg-white p-5 shadow-sm dark:border-gray-800 dark:bg-[#11151d] sm:p-6">
         <h2 className="mb-5 text-base font-semibold text-gray-900 dark:text-white">
           Plan Features
         </h2>
@@ -361,7 +379,7 @@ const SubscriptionPlanForm = ({
               }
             }}
             placeholder="e.g. 100 chatbot conversations"
-            className="flex-1 rounded-xl border border-gray-200 bg-white px-4 py-3 text-sm text-gray-900 outline-none focus:border-indigo-500 dark:border-gray-700 dark:bg-gray-950 dark:text-white"
+            className="flex-1 rounded-xl border border-gray-200 bg-white px-4 py-3 text-sm text-gray-900 outline-none focus:border-blue-500 dark:border-gray-700 dark:bg-[#171b23] dark:text-white"
           />
 
           <button
@@ -380,7 +398,7 @@ const SubscriptionPlanForm = ({
 
         <div className="mt-4 space-y-2">
           {features.length === 0 && (
-            <p className="rounded-xl bg-gray-50 p-4 text-sm text-gray-500 dark:bg-gray-950 dark:text-gray-400">
+            <p className="rounded-xl bg-gray-50 p-4 text-sm text-gray-500 dark:bg-[#171b23] dark:text-gray-400">
               No features added yet.
             </p>
           )}
@@ -415,7 +433,7 @@ const SubscriptionPlanForm = ({
           STATUS
       ===================================================== */}
 
-      <div className="rounded-2xl border border-gray-200 bg-white p-5 shadow-sm dark:border-gray-800 dark:bg-gray-900 sm:p-6">
+      <div className="rounded-2xl border border-gray-200 bg-white p-5 shadow-sm dark:border-gray-800 dark:bg-[#11151d] sm:p-6">
         <h2 className="mb-5 text-base font-semibold text-gray-900 dark:text-white">
           Plan Status
         </h2>
@@ -425,13 +443,37 @@ const SubscriptionPlanForm = ({
             Status
           </label>
 
-          <select
+          {/* <select
             {...register("status")}
-            className="w-full rounded-xl border border-gray-200 bg-white px-4 py-3 text-sm text-gray-900 outline-none focus:border-indigo-500 dark:border-gray-700 dark:bg-gray-950 dark:text-white"
+            className="w-full rounded-xl border border-gray-200 bg-white px-4 py-3 text-sm text-gray-900 outline-none focus:border-blue-500 dark:border-gray-700 dark:bg-[#171b23] dark:text-white"
           >
             <option value="active">Active</option>
             <option value="inactive">Inactive</option>
-          </select>
+          </select> */}
+          <Controller
+            name="status"
+            control={control}
+            render={({ field }) => (
+              <CustomSelect
+                size="md"
+                name={field.name}
+                value={field.value}
+                onChange={field.onChange}
+                options={[
+                  {
+                    value: "active",
+                    label: "Active",
+                  },
+                  {
+                    value: "inactive",
+                    label: "Inactive",
+                  },
+                ]}
+                rounded="rounded-xl"
+                error={errors.status?.message}
+              />
+            )}
+          />
         </div>
       </div>
 
@@ -478,7 +520,7 @@ const Input = ({ label, required, error, ...props }) => {
 
       <input
         {...props}
-        className="w-full rounded-xl border border-gray-200 bg-white px-4 py-3 text-sm text-gray-900 outline-none transition placeholder:text-gray-400 focus:border-indigo-500 dark:border-gray-700 dark:bg-gray-950 dark:text-white"
+        className="w-full rounded-xl border border-gray-300 bg-white px-4 py-3 text-sm text-gray-900 outline-none transition placeholder:text-gray-400 focus:border-blue-500 dark:border-gray-700 dark:bg-[#171b23] dark:text-white"
       />
 
       {error && <p className="mt-1 text-xs text-red-500">{error}</p>}

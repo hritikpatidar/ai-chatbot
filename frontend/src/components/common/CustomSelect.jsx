@@ -33,7 +33,7 @@ export default function CustomSelect({
     },
 
     md: {
-      button: "h-11 px-3.5 text-sm",
+      button: "h-12 px-3.5 text-sm",
       icon: 17,
       menu: "text-sm",
       menuHeight: 250,
@@ -254,7 +254,7 @@ export default function CustomSelect({
             disabled:opacity-60
             disabled:bg-gray-100
 
-            dark:bg-[#11151d]
+            dark:bg-[#171b23]
             dark:text-white
             dark:border-white/10
             dark:hover:border-white/20

@@ -1,4 +1,6 @@
 import React, { useMemo, useState } from "react";
+import { Controller, useForm } from "react-hook-form";
+
 import {
   CreditCard,
   Users,
@@ -11,10 +13,31 @@ import {
   Clock3,
   Crown,
 } from "lucide-react";
+import CustomSelect from "../../components/common/CustomSelect";
+
 
 export default function AdminSubscriptions() {
   const [search, setSearch] = useState("");
-  const [status, setStatus] = useState("all");
+
+  /* =========================================================
+     CUSTOM SELECT FORM
+  ========================================================= */
+
+  const {
+    control,
+    watch,
+    formState: { errors },
+  } = useForm({
+    defaultValues: {
+      status: "all",
+    },
+  });
+
+  const status = watch("status");
+
+  /* =========================================================
+     SUBSCRIPTIONS
+  ========================================================= */
 
   const subscriptions = [
     {
@@ -69,34 +92,76 @@ export default function AdminSubscriptions() {
     },
   ];
 
+  /* =========================================================
+     FILTER
+  ========================================================= */
+
   const filteredSubscriptions = useMemo(() => {
     return subscriptions.filter((item) => {
       const matchesSearch =
-        item.client.toLowerCase().includes(search.toLowerCase()) ||
-        item.email.toLowerCase().includes(search.toLowerCase()) ||
-        item.id.toLowerCase().includes(search.toLowerCase());
+        item.client
+          .toLowerCase()
+          .includes(search.toLowerCase()) ||
+        item.email
+          .toLowerCase()
+          .includes(search.toLowerCase()) ||
+        item.id
+          .toLowerCase()
+          .includes(search.toLowerCase());
 
-      const matchesStatus = status === "all" || item.status === status;
+      const matchesStatus =
+        status === "all" ||
+        item.status === status;
 
       return matchesSearch && matchesStatus;
     });
   }, [search, status]);
 
   return (
-    <div className="min-h-full bg-gray-50 p-4 dark:bg-[#0d1117] sm:p-6">
-      {/* Header */}
+    <div className="min-h-full">
+      {/* =====================================================
+          HEADER
+      ===================================================== */}
+
       <div className="mb-6">
-        <h1 className="text-xl font-bold text-gray-900 dark:text-white sm:text-2xl">
+        <h1
+          className="
+            text-xl
+            font-bold
+            text-gray-900
+            dark:text-white
+            sm:text-2xl
+          "
+        >
           Subscriptions
         </h1>
 
-        <p className="mt-1 text-sm text-gray-500 dark:text-gray-400">
+        <p
+          className="
+            mt-1
+            text-sm
+            text-gray-500
+            dark:text-gray-400
+          "
+        >
           Monitor client subscriptions and platform revenue
         </p>
       </div>
 
-      {/* Stats */}
-      <div className="mb-6 grid grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-4">
+      {/* =====================================================
+          STATS
+      ===================================================== */}
+
+      <div
+        className="
+          mb-6
+          grid
+          grid-cols-1
+          gap-4
+          sm:grid-cols-2
+          xl:grid-cols-4
+        "
+      >
         <SubscriptionStat
           title="Total Subscriptions"
           value="1,248"
@@ -126,8 +191,19 @@ export default function AdminSubscriptions() {
         />
       </div>
 
-      {/* Plans */}
-      <div className="mb-6 grid grid-cols-1 gap-4 md:grid-cols-3">
+      {/* =====================================================
+          PLANS
+      ===================================================== */}
+
+      <div
+        className="
+          mb-6
+          grid
+          grid-cols-1
+          gap-4
+          md:grid-cols-3
+        "
+      >
         <PlanCard
           title="Starter"
           price="£19"
@@ -151,20 +227,27 @@ export default function AdminSubscriptions() {
         />
       </div>
 
-      {/* Table Card */}
+      {/* =====================================================
+          TABLE CARD
+      ===================================================== */}
+
       <div
         className="
-          overflow-hidden
           rounded-2xl
           border
+          
           border-gray-200
           bg-white
           shadow-sm
+
           dark:border-white/10
           dark:bg-[#11161f]
         "
       >
-        {/* Toolbar */}
+        {/* ===================================================
+            TOOLBAR
+        =================================================== */}
+
         <div
           className="
             flex
@@ -173,13 +256,16 @@ export default function AdminSubscriptions() {
             border-b
             border-gray-200
             p-4
+
             sm:flex-row
             sm:items-center
             sm:justify-between
+
             dark:border-white/10
           "
         >
-          {/* Search */}
+          {/* SEARCH */}
+
           <div
             className="
               flex
@@ -192,17 +278,27 @@ export default function AdminSubscriptions() {
               border-gray-200
               bg-gray-50
               px-3
+
               sm:max-w-sm
+
               dark:border-white/10
               dark:bg-white/3
             "
           >
-            <Search size={16} className="text-gray-400" />
+            <Search
+              size={16}
+              className="
+                shrink-0
+                text-gray-400
+              "
+            />
 
             <input
               type="text"
               value={search}
-              onChange={(e) => setSearch(e.target.value)}
+              onChange={(e) =>
+                setSearch(e.target.value)
+              }
               placeholder="Search subscriptions..."
               className="
                 w-full
@@ -211,42 +307,69 @@ export default function AdminSubscriptions() {
                 text-gray-800
                 outline-none
                 placeholder:text-gray-400
+
                 dark:text-white
               "
             />
           </div>
 
-          {/* Status */}
-          <select
-            value={status}
-            onChange={(e) => setStatus(e.target.value)}
-            className="
-              h-10
-              rounded-lg
-              border
-              border-gray-200
-              bg-white
-              px-3
-              text-sm
-              text-gray-700
-              outline-none
-              dark:border-white/10
-              dark:bg-[#171c25]
-              dark:text-white
-            "
-          >
-            <option value="all">All Status</option>
-            <option value="active">Active</option>
-            <option value="pending">Pending</option>
-            <option value="cancelled">Cancelled</option>
-          </select>
+          {/* =================================================
+              CUSTOM STATUS SELECT
+          ================================================= */}
+
+          <div className="w-full sm:w-44">
+            <Controller
+              name="status"
+              control={control}
+              render={({ field }) => (
+                <CustomSelect
+                  size="sm"
+                  name={field.name}
+                  value={field.value}
+                  onChange={field.onChange}
+                  options={[
+                    {
+                      value: "all",
+                      label: "All Status",
+                    },
+                    {
+                      value: "active",
+                      label: "Active",
+                    },
+                    {
+                      value: "pending",
+                      label: "Pending",
+                    },
+                    {
+                      value: "cancelled",
+                      label: "Cancelled",
+                    },
+                  ]}
+                  rounded="rounded-lg"
+                  error={errors.status?.message}
+                />
+              )}
+            />
+          </div>
         </div>
 
-        {/* Desktop Table */}
+        {/* ===================================================
+            DESKTOP TABLE
+        =================================================== */}
+
         <div className="hidden overflow-x-auto md:block">
           <table className="w-full">
             <thead>
-              <tr className="border-b border-gray-200 bg-gray-50 dark:border-white/10 dark:bg-white/2">
+              <tr
+                className="
+                  border-b
+                  border-gray-200
+                  bg-gray-50
+
+                  dark:border-white/10
+                  dark:bg-white/2
+                "
+              >
                 <TableHead>Client</TableHead>
                 <TableHead>Plan</TableHead>
                 <TableHead>Amount</TableHead>
@@ -258,110 +381,285 @@ export default function AdminSubscriptions() {
             </thead>
 
             <tbody>
-              {filteredSubscriptions.map((item) => (
-                <tr
-                  key={item.id}
-                  className="border-b border-gray-100 transition hover:bg-gray-50 dark:border-white/5 dark:hover:bg-white/2"
-                >
-                  <td className="px-4 py-4">
-                    <div>
-                      <p className="text-sm font-medium text-gray-900 dark:text-white">
-                        {item.client}
-                      </p>
+              {filteredSubscriptions.map(
+                (item) => (
+                  <tr
+                    key={item.id}
+                    className="
+                      border-b
+                      border-gray-100
+                      transition
+                      hover:bg-gray-50
 
-                      <p className="mt-0.5 text-xs text-gray-500 dark:text-gray-400">
-                        {item.email}
-                      </p>
+                      dark:border-white/5
+                      dark:hover:bg-white/2
+                    "
+                  >
+                    {/* CLIENT */}
 
-                      <p className="mt-0.5 text-[10px] text-gray-400">
-                        {item.id}
-                      </p>
-                    </div>
-                  </td>
+                    <td className="px-4 py-4">
+                      <div>
+                        <p
+                          className="
+                            text-sm
+                            font-medium
+                            text-gray-900
+                            dark:text-white
+                          "
+                        >
+                          {item.client}
+                        </p>
 
-                  <td className="px-4 py-4">
-                    <span className="text-sm text-gray-700 dark:text-gray-300">
-                      {item.plan}
-                    </span>
-                  </td>
+                        <p
+                          className="
+                            mt-0.5
+                            text-xs
+                            text-gray-500
+                            dark:text-gray-400
+                          "
+                        >
+                          {item.email}
+                        </p>
 
-                  <td className="px-4 py-4">
-                    <span className="text-sm font-semibold text-gray-900 dark:text-white">
-                      £{item.amount}
-                    </span>
+                        <p
+                          className="
+                            mt-0.5
+                            text-[10px]
+                            text-gray-400
+                          "
+                        >
+                          {item.id}
+                        </p>
+                      </div>
+                    </td>
 
-                    <span className="text-xs text-gray-400">/month</span>
-                  </td>
+                    {/* PLAN */}
 
-                  <td className="px-4 py-4">
-                    <StatusBadge status={item.status} />
-                  </td>
+                    <td className="px-4 py-4">
+                      <span
+                        className="
+                          text-sm
+                          text-gray-700
+                          dark:text-gray-300
+                        "
+                      >
+                        {item.plan}
+                      </span>
+                    </td>
 
-                  <td className="px-4 py-4 text-sm text-gray-500 dark:text-gray-400">
-                    {item.startDate}
-                  </td>
+                    {/* AMOUNT */}
 
-                  <td className="px-4 py-4 text-sm text-gray-500 dark:text-gray-400">
-                    {item.nextBilling}
-                  </td>
+                    <td className="px-4 py-4">
+                      <span
+                        className="
+                          text-sm
+                          font-semibold
+                          text-gray-900
+                          dark:text-white
+                        "
+                      >
+                        £{item.amount}
+                      </span>
 
-                  <td className="px-4 py-4">
-                    <button
-                      type="button"
+                      <span
+                        className="
+                          text-xs
+                          text-gray-400
+                        "
+                      >
+                        /month
+                      </span>
+                    </td>
+
+                    {/* STATUS */}
+
+                    <td className="px-4 py-4">
+                      <StatusBadge
+                        status={item.status}
+                      />
+                    </td>
+
+                    {/* START DATE */}
+
+                    <td
                       className="
-                        flex
-                        h-8
-                        w-8
-                        items-center
-                        justify-center
-                        rounded-lg
-                        text-gray-400
-                        hover:bg-gray-100
-                        dark:hover:bg-white/5
+                        px-4
+                        py-4
+                        text-sm
+                        text-gray-500
+                        dark:text-gray-400
                       "
                     >
-                      <MoreVertical size={17} />
-                    </button>
+                      {item.startDate}
+                    </td>
+
+                    {/* NEXT BILLING */}
+
+                    <td
+                      className="
+                        px-4
+                        py-4
+                        text-sm
+                        text-gray-500
+                        dark:text-gray-400
+                      "
+                    >
+                      {item.nextBilling}
+                    </td>
+
+                    {/* ACTION */}
+
+                    <td className="px-4 py-4">
+                      <button
+                        type="button"
+                        className="
+                          flex
+                          h-8
+                          w-8
+                          items-center
+                          justify-center
+                          rounded-lg
+                          text-gray-400
+                          transition
+
+                          hover:bg-gray-100
+
+                          dark:hover:bg-white/5
+                        "
+                      >
+                        <MoreVertical
+                          size={17}
+                        />
+                      </button>
+                    </td>
+                  </tr>
+                )
+              )}
+
+              {filteredSubscriptions.length ===
+                0 && (
+                <tr>
+                  <td
+                    colSpan={7}
+                    className="
+                      px-4
+                      py-12
+                      text-center
+                    "
+                  >
+                    <p
+                      className="
+                        text-sm
+                        text-gray-500
+                        dark:text-gray-400
+                      "
+                    >
+                      No subscriptions found.
+                    </p>
                   </td>
                 </tr>
-              ))}
+              )}
             </tbody>
           </table>
         </div>
 
-        {/* Mobile Cards */}
-        <div className="divide-y divide-gray-100 dark:divide-white/5 md:hidden">
-          {filteredSubscriptions.map((item) => (
-            <div key={item.id} className="p-4">
-              <div className="flex items-start justify-between gap-3">
-                <div>
-                  <p className="text-sm font-semibold text-gray-900 dark:text-white">
-                    {item.client}
-                  </p>
+        {/* ===================================================
+            MOBILE CARDS
+        =================================================== */}
 
-                  <p className="mt-1 text-xs text-gray-500 dark:text-gray-400">
-                    {item.email}
-                  </p>
+        <div
+          className="
+            divide-y
+            divide-gray-100
+            dark:divide-white/5
+            md:hidden
+          "
+        >
+          {filteredSubscriptions.map(
+            (item) => (
+              <div
+                key={item.id}
+                className="p-4"
+              >
+                <div
+                  className="
+                    flex
+                    items-start
+                    justify-between
+                    gap-3
+                  "
+                >
+                  <div>
+                    <p
+                      className="
+                        text-sm
+                        font-semibold
+                        text-gray-900
+                        dark:text-white
+                      "
+                    >
+                      {item.client}
+                    </p>
+
+                    <p
+                      className="
+                        mt-1
+                        text-xs
+                        text-gray-500
+                        dark:text-gray-400
+                      "
+                    >
+                      {item.email}
+                    </p>
+                  </div>
+
+                  <StatusBadge
+                    status={item.status}
+                  />
                 </div>
 
-                <StatusBadge status={item.status} />
+                <div
+                  className="
+                    mt-4
+                    grid
+                    grid-cols-2
+                    gap-3
+                  "
+                >
+                  <MobileInfo
+                    label="Plan"
+                    value={item.plan}
+                  />
+
+                  <MobileInfo
+                    label="Amount"
+                    value={`£${item.amount}/month`}
+                  />
+
+                  <MobileInfo
+                    label="Start Date"
+                    value={item.startDate}
+                  />
+
+                  <MobileInfo
+                    label="Next Billing"
+                    value={item.nextBilling}
+                  />
+                </div>
               </div>
+            )
+          )}
 
-              <div className="mt-4 grid grid-cols-2 gap-3">
-                <MobileInfo label="Plan" value={item.plan} />
-
-                <MobileInfo label="Amount" value={`£${item.amount}/month`} />
-
-                <MobileInfo label="Start Date" value={item.startDate} />
-
-                <MobileInfo label="Next Billing" value={item.nextBilling} />
-              </div>
-            </div>
-          ))}
-
-          {filteredSubscriptions.length === 0 && (
+          {filteredSubscriptions.length ===
+            0 && (
             <div className="p-10 text-center">
-              <p className="text-sm text-gray-500 dark:text-gray-400">
+              <p
+                className="
+                  text-sm
+                  text-gray-500
+                  dark:text-gray-400
+                "
+              >
                 No subscriptions found.
               </p>
             </div>
@@ -372,7 +670,16 @@ export default function AdminSubscriptions() {
   );
 }
 
-const SubscriptionStat = ({ title, value, change, icon }) => {
+/* =========================================================
+   SUBSCRIPTION STAT
+========================================================= */
+
+const SubscriptionStat = ({
+  title,
+  value,
+  change,
+  icon,
+}) => {
   return (
     <div
       className="
@@ -382,6 +689,7 @@ const SubscriptionStat = ({ title, value, change, icon }) => {
         bg-white
         p-5
         shadow-sm
+
         dark:border-white/10
         dark:bg-[#11161f]
       "
@@ -397,6 +705,7 @@ const SubscriptionStat = ({ title, value, change, icon }) => {
             rounded-xl
             bg-blue-50
             text-blue-600
+
             dark:bg-blue-500/10
             dark:text-blue-400
           "
@@ -413,6 +722,7 @@ const SubscriptionStat = ({ title, value, change, icon }) => {
             text-[10px]
             font-medium
             text-green-600
+
             dark:bg-green-500/10
             dark:text-green-400
           "
@@ -421,16 +731,43 @@ const SubscriptionStat = ({ title, value, change, icon }) => {
         </span>
       </div>
 
-      <p className="mt-4 text-xs text-gray-500 dark:text-gray-400">{title}</p>
+      <p
+        className="
+          mt-4
+          text-xs
+          text-gray-500
+          dark:text-gray-400
+        "
+      >
+        {title}
+      </p>
 
-      <p className="mt-1 text-2xl font-bold text-gray-900 dark:text-white">
+      <p
+        className="
+          mt-1
+          text-2xl
+          font-bold
+          text-gray-900
+          dark:text-white
+        "
+      >
         {value}
       </p>
     </div>
   );
 };
 
-const PlanCard = ({ title, price, subscribers, icon, popular = false }) => {
+/* =========================================================
+   PLAN CARD
+========================================================= */
+
+const PlanCard = ({
+  title,
+  price,
+  subscribers,
+  icon,
+  popular = false,
+}) => {
   return (
     <div
       className="
@@ -441,6 +778,7 @@ const PlanCard = ({ title, price, subscribers, icon, popular = false }) => {
         bg-white
         p-5
         shadow-sm
+
         dark:border-white/10
         dark:bg-[#11161f]
       "
@@ -458,6 +796,7 @@ const PlanCard = ({ title, price, subscribers, icon, popular = false }) => {
             text-[10px]
             font-semibold
             text-blue-600
+
             dark:bg-blue-500/10
             dark:text-blue-400
           "
@@ -477,6 +816,7 @@ const PlanCard = ({ title, price, subscribers, icon, popular = false }) => {
             rounded-lg
             bg-gray-100
             text-gray-600
+
             dark:bg-white/5
             dark:text-gray-300
           "
@@ -485,26 +825,58 @@ const PlanCard = ({ title, price, subscribers, icon, popular = false }) => {
         </div>
 
         <div>
-          <p className="text-sm font-semibold text-gray-900 dark:text-white">
+          <p
+            className="
+              text-sm
+              font-semibold
+              text-gray-900
+              dark:text-white
+            "
+          >
             {title}
           </p>
 
-          <p className="text-xs text-gray-500 dark:text-gray-400">
+          <p
+            className="
+              text-xs
+              text-gray-500
+              dark:text-gray-400
+            "
+          >
             {subscribers}
           </p>
         </div>
       </div>
 
       <div className="mt-5">
-        <span className="text-2xl font-bold text-gray-900 dark:text-white">
+        <span
+          className="
+            text-2xl
+            font-bold
+            text-gray-900
+            dark:text-white
+          "
+        >
           {price}
         </span>
 
-        <span className="text-xs text-gray-500 dark:text-gray-400">/month</span>
+        <span
+          className="
+            text-xs
+            text-gray-500
+            dark:text-gray-400
+          "
+        >
+          /month
+        </span>
       </div>
     </div>
   );
 };
+
+/* =========================================================
+   STATUS BADGE
+========================================================= */
 
 const StatusBadge = ({ status }) => {
   const config = {
@@ -514,20 +886,24 @@ const StatusBadge = ({ status }) => {
         "bg-green-50 text-green-600 dark:bg-green-500/10 dark:text-green-400",
       icon: <CheckCircle2 size={12} />,
     },
+
     pending: {
       text: "Pending",
       className:
         "bg-yellow-50 text-yellow-600 dark:bg-yellow-500/10 dark:text-yellow-400",
       icon: <Clock3 size={12} />,
     },
+
     cancelled: {
       text: "Cancelled",
-      className: "bg-red-50 text-red-600 dark:bg-red-500/10 dark:text-red-400",
+      className:
+        "bg-red-50 text-red-600 dark:bg-red-500/10 dark:text-red-400",
       icon: <XCircle size={12} />,
     },
   };
 
-  const item = config[status] || config.pending;
+  const item =
+    config[status] || config.pending;
 
   return (
     <span
@@ -544,10 +920,15 @@ const StatusBadge = ({ status }) => {
       `}
     >
       {item.icon}
+
       {item.text}
     </span>
   );
 };
+
+/* =========================================================
+   TABLE HEAD
+========================================================= */
 
 const TableHead = ({ children }) => {
   return (
@@ -562,6 +943,7 @@ const TableHead = ({ children }) => {
         uppercase
         tracking-wide
         text-gray-500
+
         dark:text-gray-400
       "
     >
@@ -570,14 +952,36 @@ const TableHead = ({ children }) => {
   );
 };
 
-const MobileInfo = ({ label, value }) => {
+/* =========================================================
+   MOBILE INFO
+========================================================= */
+
+const MobileInfo = ({
+  label,
+  value,
+}) => {
   return (
     <div>
-      <p className="text-[10px] uppercase tracking-wide text-gray-400">
+      <p
+        className="
+          text-[10px]
+          uppercase
+          tracking-wide
+          text-gray-400
+        "
+      >
         {label}
       </p>
 
-      <p className="mt-1 text-xs font-medium text-gray-700 dark:text-gray-300">
+      <p
+        className="
+          mt-1
+          text-xs
+          font-medium
+          text-gray-700
+          dark:text-gray-300
+        "
+      >
         {value}
       </p>
     </div>

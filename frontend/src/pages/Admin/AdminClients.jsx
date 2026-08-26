@@ -10,7 +10,6 @@ import {
 } from "lucide-react";
 
 import AdminClientTable from "../../components/AdminComponent/AdminClientTable";
-import AdminConfirmModal from "../../components/AdminComponent/AdminConfirmModal";
 import AdminAddClientModal from "../../components/AdminComponent/AdminAddClientModal";
 import Pagination from "../../components/common/Pagination";
 
@@ -20,6 +19,7 @@ import {
   useAdminClients,
   useDeleteAdminClient,
 } from "../../hooks/Admin/useAdminClients";
+import ConfirmModal from "../../components/ClientComponent/ConfirmModal";
 
 export default function AdminClient() {
   const navigate = useNavigate();
@@ -33,7 +33,7 @@ export default function AdminClient() {
   const [selectedClient, setSelectedClient] = useState(null);
   const [isConfirmOpen, setIsConfirmOpen] = useState(false);
   const [isAddClientOpen, setIsAddClientOpen] = useState(false);
-
+  console.log("selectedClient",selectedClient)
   const { clients, pagination, isLoading, isFetching, error, refetch } =
     useAdminClients({
       page,
@@ -297,22 +297,27 @@ export default function AdminClient() {
 
       {/* DELETE MODAL */}
 
-      <AdminConfirmModal
-        isOpen={isConfirmOpen}
-        onClose={() => {
+      <ConfirmModal
+        isOpen={Boolean(isConfirmOpen)}
+        title="Delete Client?"
+        message={
+          <>
+            Are you sure you want to delete{" "}
+            <strong>{selectedClient?.user?.fullName}</strong> this client?
+            <br />
+            <span className="text-xs">This action cannot be undone.</span>
+          </>
+        }
+        confirmText="Delete"
+        cancelText="Cancel"
+        loading={deleteLoading}
+        onCancel={() => {
           if (!deleteLoading) {
             setIsConfirmOpen(false);
             setSelectedClient(null);
           }
         }}
         onConfirm={handleConfirmDelete}
-        loading={deleteLoading}
-        title="Delete Client?"
-        message={`Are you sure you want to delete ${
-          selectedClient?.fullName || "this client"
-        }? This action cannot be undone.`}
-        confirmText="Delete"
-        cancelText="Cancel"
       />
     </div>
   );

@@ -13,7 +13,7 @@ export default function AdminClientTable({
   loading = false,
   onView,
   onEdit,
-  onDelete,
+  onDelete
 }) {
   if (loading) {
     return (

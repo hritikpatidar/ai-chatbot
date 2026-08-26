@@ -127,7 +127,7 @@ export default function AdminAnalytics() {
   ];
 
   return (
-    <div className="min-h-full bg-gray-50 p-4 dark:bg-[#0d1117] sm:p-6 lg:p-7">
+    <div className="min-h-full ">
       {/* =====================================================
           HEADER
       ===================================================== */}

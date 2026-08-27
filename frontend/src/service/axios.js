@@ -59,17 +59,15 @@ axiosInstance.interceptors.request.use(
     const token = getItemLocalStorage("token");
     const lang = getItemLocalStorage("i18nextLng");
 
-    if (token) {
-      config.headers = {
-        ...config.headers,
-        Authorization: `Bearer ${token}`,
-        lang: lang || "en",
-      };
-    } else {
-      config.headers = {
-        ...config.headers,
-        lang: lang || "en",
-      };
+    config.headers = {
+      ...config.headers,
+      lang: lang || "en",
+    };
+
+    // Agar request me already Authorization diya gaya hai
+    // to normal login token overwrite mat karo.
+    if (!config.headers.Authorization && token) {
+      config.headers.Authorization = `Bearer ${token}`;
     }
 
     return config;
@@ -256,9 +254,9 @@ const handleRefreshFailure = () => {
   removeItemLocalStorage("token");
   removeItemLocalStorage("refreshToken");
 
-  if (typeof window !== "undefined") {
-    window.location.href = "/login";
-  }
+  // if (typeof window !== "undefined") {
+  //   window.location.href = "/login";
+  // }
 };
 
 /* =========================================================

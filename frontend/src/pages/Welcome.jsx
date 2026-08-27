@@ -28,7 +28,14 @@ import {
   setConversationList,
 } from "../redux/features/Chat/chatSlice";
 import { useNavigate } from "react-router-dom";
-import { getFileIcon } from "../utils/Auth";
+import { getFileIcon, getGuestId } from "../utils/Auth";
+import WelcomeUserModal from "../components/WelcomeUserModal";
+import {
+  getItemLocalStorage,
+  removeItemLocalStorage,
+  setItemLocalStorage,
+} from "../utils/browserServices";
+import { verifyWidgetSessionService } from "../service/Widget/WidgetServices";
 
 export default function Welcome() {
   const {
@@ -60,6 +67,9 @@ export default function Welcome() {
   const { profileDetails } = useSelector(
     (store) => store.authReducer.AuthSlice,
   );
+  const [showWelcomeModal, setShowWelcomeModal] = useState(false);
+  const [guestId, setGuestId] = useState("");
+  const [isSessionChecking, setIsSessionChecking] = useState(true);
 
   useEffect(() => {
     const handleConversationCreate = async ({ conversation }) => {
@@ -146,6 +156,56 @@ export default function Welcome() {
     handleSend(question);
   };
 
+  useEffect(() => {
+    if (!clientKey) {
+      setIsSessionChecking(false);
+      return;
+    }
+    initializeWidget();
+  }, [clientKey]);
+
+  const initializeWidget = async () => {
+    try {
+      setIsSessionChecking(true);
+      const id = getGuestId(clientKey);
+      setGuestId(id);
+      const sessionToken = getItemLocalStorage(`widgetSession:${clientKey}`);
+      // 3. No session
+      if (!sessionToken) {
+        setShowWelcomeModal(true);
+        return;
+      }
+      // 4. Verify existing session
+      try {
+        const response = await verifyWidgetSessionService(sessionToken);
+        if (response?.data?.success && response?.data?.data?.valid) {
+          setShowWelcomeModal(false);
+          return;
+        }
+        // Invalid session
+        removeItemLocalStorage(`widgetSession:${clientKey}`);
+        setShowWelcomeModal(true);
+      } catch (error) {
+        if (error?.response?.status === 401) {
+          removeItemLocalStorage(`widgetSession:${clientKey}`);
+          setShowWelcomeModal(true);
+        }
+      }
+    } finally {
+      setIsSessionChecking(false);
+    }
+  };
+
+  const handleUserSuccess = (data) => {
+    if (data?.sessionToken) {
+      setItemLocalStorage(`widgetSession:${clientKey}`, data.sessionToken);
+    }
+    setShowWelcomeModal(false);
+  };
+
+  if (isSessionChecking) {
+    return null;
+  }
   return (
     <div
       className={`
@@ -1096,6 +1156,13 @@ export default function Welcome() {
           </div>
         </>
       )}
+      <WelcomeUserModal
+        isOpen={showWelcomeModal}
+        onClose={() => setShowWelcomeModal(false)}
+        clientKey={clientKey}
+        guestId={guestId}
+        onSuccess={handleUserSuccess}
+      />
     </div>
   );
 }

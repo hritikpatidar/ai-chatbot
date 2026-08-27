@@ -163,7 +163,6 @@ export default function AdminDashboard() {
   );
 
   const { stats, activity, system, recentClients } = normalizedData;
-  debugger
   /* STATS */
 
   const totalClients =

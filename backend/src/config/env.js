@@ -14,6 +14,9 @@ const env = {
   // Redis
   REDIS_URL: process.env.REDIS_URL,
 
+  // Widget Session
+  WIDGET_SESSION_DAYS_EXPIRE: process.env.WIDGET_SESSION_DAYS_EXPIRE,
+
   // JWT
   JWT_ACCESS_SECRET: process.env.JWT_ACCESS_SECRET,
   JWT_REFRESH_SECRET: process.env.JWT_REFRESH_SECRET,

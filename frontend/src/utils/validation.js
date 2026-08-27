@@ -663,3 +663,15 @@ export const subscriptionPlanValidation = z.object({
     message: "Status is required",
   }),
 });
+
+export const welcomeUserSchema = z.object({
+  name: z
+    .string()
+    .trim()
+    .min(2, "Name must be at least 2 characters")
+    .max(100, "Name cannot exceed 100 characters"),
+
+  email: z.string().trim().email("Please enter a valid email address"),
+
+  phone: optionalPhoneField,
+});

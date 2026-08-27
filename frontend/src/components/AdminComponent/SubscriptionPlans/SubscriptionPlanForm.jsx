@@ -52,7 +52,6 @@ const SubscriptionPlanForm = ({
     resolver: zodResolver(subscriptionPlanValidation),
     defaultValues,
   });
-  debugger
 
   const features = watch("features") || [];
 

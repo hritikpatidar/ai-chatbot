@@ -13,6 +13,7 @@ import { useTheme } from "../../context/ThemeContext";
 import { useDispatch, useSelector } from "react-redux";
 import { useNavigate } from "react-router-dom";
 import { handleLogout } from "../../utils/logout";
+import NotificationDropdown from "../common/NotificationDropdown";
 
 export default function AdminHeader({ onMenuClick, collapsed }) {
   const dispatch = useDispatch();
@@ -216,7 +217,7 @@ export default function AdminHeader({ onMenuClick, collapsed }) {
 
         {/* Notification */}
 
-        <button
+        {/* <button
           type="button"
           className="
             relative
@@ -249,7 +250,8 @@ export default function AdminHeader({ onMenuClick, collapsed }) {
               dark:ring-[#11151d]
             "
           />
-        </button>
+        </button> */}
+        <NotificationDropdown />
 
         {/* Divider */}
 

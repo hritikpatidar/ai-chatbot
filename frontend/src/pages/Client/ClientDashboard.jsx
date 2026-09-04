@@ -40,23 +40,22 @@ export default function ClientDashboard() {
 
   return (
     <div className="min-h-full w-full bg-transparent text-gray-900 dark:text-white">
-      <div className="mx-auto w-full max-w-[1600px] px-4 py-5 sm:px-6 lg:px-8">
-        {/* Header */}
-        <div className="mb-6 flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
-          <div>
-            <h1 className="text-2xl font-semibold tracking-tight">
-              Admin Dashboard
-            </h1>
+      {/* Header */}
+      <div className="mb-6 flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+        <div>
+          <h1 className="text-2xl font-semibold tracking-tight">
+            Admin Dashboard
+          </h1>
 
-            <p className="mt-1 text-sm text-gray-500 dark:text-gray-400">
-              Manage your client, products, FAQs and chatbot configuration.
-            </p>
-          </div>
+          <p className="mt-1 text-sm text-gray-500 dark:text-gray-400">
+            Manage your client, products, FAQs and chatbot configuration.
+          </p>
+        </div>
 
-          <button
-            type="button"
-            onClick={() => navigate("/client/client-settings")}
-            className="
+        <button
+          type="button"
+          onClick={() => navigate("/client/client-settings")}
+          className="
               inline-flex items-center justify-center gap-2
               rounded-lg
               border border-gray-200
@@ -73,55 +72,55 @@ export default function ClientDashboard() {
               dark:hover:border-blue-500
               dark:hover:text-blue-400
             "
-          >
-            <Settings size={16} />
-            Settings
-          </button>
+        >
+          <Settings size={16} />
+          Settings
+        </button>
+      </div>
+
+      {/* Stats */}
+      <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-4">
+        <StatCard
+          title="Client"
+          value={client?.businessName || "Not configured"}
+          icon={Building2}
+          description={client?.status || "inactive"}
+        />
+
+        <StatCard
+          title="Products"
+          value="Manage"
+          icon={Package}
+          description="Product catalogue"
+          onClick={() => navigate("/client/products")}
+        />
+
+        <StatCard
+          title="FAQs"
+          value="Manage"
+          icon={HelpCircle}
+          description="Frequently asked questions"
+          onClick={() => navigate("/client/faqs")}
+        />
+
+        <StatCard
+          title="Chatbot"
+          value={chatbot?.name || "AI Assistant"}
+          icon={Bot}
+          description={chatbot?.language || "English"}
+        />
+      </div>
+
+      {/* Main Content */}
+      <div className="mt-6 grid grid-cols-1 gap-6 xl:grid-cols-3">
+        {/* Client Overview */}
+        <div className="xl:col-span-2">
+          <ClientOverview />
         </div>
 
-        {/* Stats */}
-        <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-4">
-          <StatCard
-            title="Client"
-            value={client?.businessName || "Not configured"}
-            icon={Building2}
-            description={client?.status || "inactive"}
-          />
-
-          <StatCard
-            title="Products"
-            value="Manage"
-            icon={Package}
-            description="Product catalogue"
-            onClick={() => navigate("/client/products")}
-          />
-
-          <StatCard
-            title="FAQs"
-            value="Manage"
-            icon={HelpCircle}
-            description="Frequently asked questions"
-            onClick={() => navigate("/client/faqs")}
-          />
-
-          <StatCard
-            title="Chatbot"
-            value={chatbot?.name || "AI Assistant"}
-            icon={Bot}
-            description={chatbot?.language || "English"}
-          />
-        </div>
-
-        {/* Main Content */}
-        <div className="mt-6 grid grid-cols-1 gap-6 xl:grid-cols-3">
-          {/* Client Overview */}
-          <div className="xl:col-span-2">
-            <ClientOverview />
-          </div>
-
-          {/* Quick Actions */}
-          <div
-            className="
+        {/* Quick Actions */}
+        <div
+          className="
               rounded-2xl
               border border-gray-200
               bg-white
@@ -130,55 +129,55 @@ export default function ClientDashboard() {
               dark:border-white/10
               dark:bg-[#171b23]
             "
-          >
-            <h2 className="text-base font-semibold">Quick Actions</h2>
+        >
+          <h2 className="text-base font-semibold">Quick Actions</h2>
 
-            <p className="mt-1 text-xs text-gray-500 dark:text-gray-400">
-              Manage your chatbot data quickly.
-            </p>
+          <p className="mt-1 text-xs text-gray-500 dark:text-gray-400">
+            Manage your chatbot data quickly.
+          </p>
 
-            <div className="mt-5 space-y-3">
-              <QuickAction
-                title="Manage Products"
-                description="Add or update products"
-                icon={Package}
-                onClick={() => navigate("/client/products")}
-              />
+          <div className="mt-5 space-y-3">
+            <QuickAction
+              title="Manage Products"
+              description="Add or update products"
+              icon={Package}
+              onClick={() => navigate("/client/products")}
+            />
 
-              <QuickAction
-                title="Manage FAQs"
-                description="Add or update FAQs"
-                icon={HelpCircle}
-                onClick={() => navigate("/client/faqs")}
-              />
+            <QuickAction
+              title="Manage FAQs"
+              description="Add or update FAQs"
+              icon={HelpCircle}
+              onClick={() => navigate("/client/faqs")}
+            />
 
-              <QuickAction
-                title="Manage Tickets"
-                description="Resolve your tickets"
-                icon={Ticket}
-                onClick={() => navigate("/client/tickets")}
-              />
+            <QuickAction
+              title="Manage Tickets"
+              description="Resolve your tickets"
+              icon={Ticket}
+              onClick={() => navigate("/client/tickets")}
+            />
 
-              <QuickAction
-                title="Chatbot Settings"
-                description="Configure your AI chatbot"
-                icon={Bot}
-                onClick={() => navigate("/client/chatbot-settings")}
-              />
+            <QuickAction
+              title="Chatbot Settings"
+              description="Configure your AI chatbot"
+              icon={Bot}
+              onClick={() => navigate("/client/chatbot-settings")}
+            />
 
-              <QuickAction
-                title="Client Settings"
-                description="Update business information"
-                icon={Building2}
-                onClick={() => navigate("/client/client-settings")}
-              />
-            </div>
+            <QuickAction
+              title="Client Settings"
+              description="Update business information"
+              icon={Building2}
+              onClick={() => navigate("/client/client-settings")}
+            />
           </div>
         </div>
+      </div>
 
-        {/* Chatbot Information */}
-        <div
-          className="
+      {/* Chatbot Information */}
+      <div
+        className="
             mt-6
             rounded-2xl
             border border-gray-200
@@ -188,26 +187,24 @@ export default function ClientDashboard() {
             dark:border-white/10
             dark:bg-[#171b23]
           "
-        >
-          <div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
-            <div>
-              <div className="flex items-center gap-2">
-                <Bot size={20} className="text-blue-500" />
+      >
+        <div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
+          <div>
+            <div className="flex items-center gap-2">
+              <Bot size={20} className="text-blue-500" />
 
-                <h2 className="text-base font-semibold">
-                  Chatbot Configuration
-                </h2>
-              </div>
-
-              <p className="mt-1 text-xs text-gray-500 dark:text-gray-400">
-                Current chatbot configuration for your client.
-              </p>
+              <h2 className="text-base font-semibold">Chatbot Configuration</h2>
             </div>
 
-            <button
-              type="button"
-              onClick={() => navigate("/client/chatbot-settings")}
-              className="
+            <p className="mt-1 text-xs text-gray-500 dark:text-gray-400">
+              Current chatbot configuration for your client.
+            </p>
+          </div>
+
+          <button
+            type="button"
+            onClick={() => navigate("/client/chatbot-settings")}
+            className="
                 inline-flex
                 items-center
                 gap-2
@@ -218,42 +215,38 @@ export default function ClientDashboard() {
                 dark:text-blue-400
                 dark:hover:text-blue-300
               "
-            >
-              Edit
-              <ArrowRight size={15} />
-            </button>
-          </div>
+          >
+            Edit
+            <ArrowRight size={15} />
+          </button>
+        </div>
 
-          <div className="mt-5 grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
-            <InfoItem
-              label="Bot Name"
-              value={chatbot?.name || "AI Assistant"}
-            />
-            <InfoItem label="Language" value={chatbot?.language || "English"} />
-            <InfoItem label="Tone" value={chatbot?.tone || "Friendly"} />
-            <InfoItem label="Status" value={client?.status || "inactive"} />
-          </div>
+        <div className="mt-5 grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
+          <InfoItem label="Bot Name" value={chatbot?.name || "AI Assistant"} />
+          <InfoItem label="Language" value={chatbot?.language || "English"} />
+          <InfoItem label="Tone" value={chatbot?.tone || "Friendly"} />
+          <InfoItem label="Status" value={client?.status || "inactive"} />
+        </div>
 
-          {chatbot?.welcomeMessage && (
-            <div
-              className="
+        {chatbot?.welcomeMessage && (
+          <div
+            className="
                 mt-4
                 rounded-xl
                 bg-gray-50
                 p-4
                 dark:bg-[#0f131b]
               "
-            >
-              <p className="text-xs font-medium text-gray-500 dark:text-gray-400">
-                Welcome Message
-              </p>
+          >
+            <p className="text-xs font-medium text-gray-500 dark:text-gray-400">
+              Welcome Message
+            </p>
 
-              <p className="mt-1 text-sm text-gray-800 dark:text-gray-200">
-                {chatbot.welcomeMessage}
-              </p>
-            </div>
-          )}
-        </div>
+            <p className="mt-1 text-sm text-gray-800 dark:text-gray-200">
+              {chatbot.welcomeMessage}
+            </p>
+          </div>
+        )}
       </div>
     </div>
   );

@@ -246,21 +246,6 @@ export default function ClientTickets() {
     <div className="min-h-full w-full">
       <div
         className="
-          mx-auto
-          w-full
-          max-w-[1600px]
-          px-4
-          py-5
-          sm:px-6
-          lg:px-8
-        "
-      >
-        {/* ===================================================
-            HEADER
-        =================================================== */}
-
-        <div
-          className="
             flex
             flex-col
             gap-4
@@ -268,35 +253,35 @@ export default function ClientTickets() {
             lg:items-center
             lg:justify-between
           "
-        >
-          <div>
-            <h1
-              className="
+      >
+        <div>
+          <h1
+            className="
                 text-xl
                 font-semibold
                 text-gray-900
                 dark:text-white
               "
-            >
-              Support Tickets
-            </h1>
+          >
+            Support Tickets
+          </h1>
 
-            <p
-              className="
+          <p
+            className="
                 mt-1
                 text-xs
                 text-gray-500
                 dark:text-gray-400
               "
-            >
-              Manage your support tickets
-            </p>
-          </div>
+          >
+            Manage your support tickets
+          </p>
+        </div>
 
-          <button
-            type="button"
-            onClick={handleAddTicket}
-            className="
+        <button
+          type="button"
+          onClick={handleAddTicket}
+          className="
               inline-flex
               items-center
               justify-center
@@ -311,18 +296,14 @@ export default function ClientTickets() {
               transition
               hover:bg-blue-700
             "
-          >
-            <Plus size={17} />
-            Create Ticket
-          </button>
-        </div>
+        >
+          <Plus size={17} />
+          Create Ticket
+        </button>
+      </div>
 
-        {/* ===================================================
-            FILTER TOOLBAR
-        =================================================== */}
-
-        <div
-          className="
+      <div
+        className="
             mt-6
             flex flex-col gap-3
             rounded-xl
@@ -334,24 +315,24 @@ export default function ClientTickets() {
             dark:border-white/10
             dark:bg-[#171b23]
           "
-        >
-          {/* Search */}
-          <div className="relative w-full sm:max-w-sm">
-            <Search
-              size={16}
-              className="
+      >
+        {/* Search */}
+        <div className="relative w-full sm:max-w-sm">
+          <Search
+            size={16}
+            className="
                 absolute left-3 top-1/2
                 -translate-y-1/2
                 text-gray-400
               "
-            />
+          />
 
-            <input
-              type="text"
-              value={search}
-              onChange={(e) => setSearch(e.target.value)}
-              placeholder="Search tickets..."
-              className="
+          <input
+            type="text"
+            value={search}
+            onChange={(e) => setSearch(e.target.value)}
+            placeholder="Search tickets..."
+            className="
                 w-full
                 rounded-lg
                 border border-gray-200
@@ -369,12 +350,12 @@ export default function ClientTickets() {
                 dark:text-white
                 dark:placeholder:text-gray-500
               "
-            />
-          </div>
+          />
+        </div>
 
-          {/* Filters + Refresh */}
-          <div
-            className="
+        {/* Filters + Refresh */}
+        <div
+          className="
               flex
               w-full
               flex-col
@@ -383,31 +364,31 @@ export default function ClientTickets() {
               sm:flex-row
               sm:items-center
             "
-          >
-            <CustomSelect
-              size="sm"
-              rounded="rounded-lg"
-              value={status}
-              onChange={handleStatusChange}
-              placeholder="All Status"
-              options={[
-                { value: "", label: "All Status" },
-                { value: "open", label: "Open" },
-                { value: "in_progress", label: "In Progress" },
-                { value: "resolved", label: "Resolved" },
-                { value: "closed", label: "Closed" },
-              ]}
-              className="
+        >
+          <CustomSelect
+            size="sm"
+            rounded="rounded-lg"
+            value={status}
+            onChange={handleStatusChange}
+            placeholder="All Status"
+            options={[
+              { value: "", label: "All Status" },
+              { value: "open", label: "Open" },
+              { value: "in_progress", label: "In Progress" },
+              { value: "resolved", label: "Resolved" },
+              { value: "closed", label: "Closed" },
+            ]}
+            className="
                 w-full
                 sm:w-auto
                 dark:border-white/10
                 dark:bg-[#0f131a]
                 dark:text-gray-300
               "
-            />
+          />
 
-            {/* Priority */}
-            {/* <select
+          {/* Priority */}
+          {/* <select
               value={priority}
               onChange={handlePriorityChange}
               className="
@@ -433,34 +414,34 @@ export default function ClientTickets() {
               <option value="medium">Medium</option>
               <option value="high">High</option>
             </select> */}
-            <CustomSelect
-              size="sm"
-              rounded="rounded-lg"
-              value={priority}
-              onChange={handlePriorityChange}
-              placeholder="All Priority"
-              options={[
-                { value: "", label: "All Priority" },
-                { value: "low", label: "Low" },
-                { value: "medium", label: "Medium" },
-                { value: "high", label: "High" },
-                { value: "urgent", label: "Urgent" },
-              ]}
-              className="
+          <CustomSelect
+            size="sm"
+            rounded="rounded-lg"
+            value={priority}
+            onChange={handlePriorityChange}
+            placeholder="All Priority"
+            options={[
+              { value: "", label: "All Priority" },
+              { value: "low", label: "Low" },
+              { value: "medium", label: "Medium" },
+              { value: "high", label: "High" },
+              { value: "urgent", label: "Urgent" },
+            ]}
+            className="
                 w-full
                 sm:w-auto
                 dark:border-white/10
                 dark:bg-[#0f131a]
                 dark:text-gray-300
               "
-            />
+          />
 
-            {/* Refresh */}
-            <button
-              type="button"
-              onClick={handleRefresh}
-              disabled={isFetching}
-              className="
+          {/* Refresh */}
+          <button
+            type="button"
+            onClick={handleRefresh}
+            disabled={isFetching}
+            className="
                 inline-flex
                 w-full
                 items-center
@@ -482,19 +463,16 @@ export default function ClientTickets() {
                 dark:text-gray-300
                 dark:hover:bg-white/5
               "
-            >
-              <RefreshCw
-                size={15}
-                className={isFetching ? "animate-spin" : ""}
-              />
-              Refresh
-            </button>
-          </div>
+          >
+            <RefreshCw size={15} className={isFetching ? "animate-spin" : ""} />
+            Refresh
+          </button>
         </div>
+      </div>
 
-        {error && (
-          <div
-            className="
+      {error && (
+        <div
+          className="
               mt-4
               rounded-lg
               border
@@ -508,38 +486,37 @@ export default function ClientTickets() {
               dark:bg-red-500/10
               dark:text-red-400
             "
-          >
-            {errorMessage}
-          </div>
-        )}
+        >
+          {errorMessage}
+        </div>
+      )}
 
-        {/* ===================================================
+      {/* ===================================================
             TABLE
         =================================================== */}
 
-        <div className="mt-4">
-          <TicketTable
-            tickets={filteredTickets}
-            loading={isLoading && !tickets.length}
-            onEdit={handleEditTicket}
-            onDelete={handleDeleteTicket}
-          />
-        </div>
+      <div className="mt-4">
+        <TicketTable
+          tickets={filteredTickets}
+          loading={isLoading && !tickets.length}
+          onEdit={handleEditTicket}
+          onDelete={handleDeleteTicket}
+        />
+      </div>
 
-        {/* ===================================================
+      {/* ===================================================
             PAGINATION
         =================================================== */}
 
-        <Pagination
-          page={pagination.page}
-          totalPages={pagination.totalPages}
-          total={pagination.total}
-          currentCount={filteredTickets.length}
-          isFetching={isFetching}
-          onPrevious={handlePreviousPage}
-          onNext={handleNextPage}
-        />
-      </div>
+      <Pagination
+        page={pagination.page}
+        totalPages={pagination.totalPages}
+        total={pagination.total}
+        currentCount={filteredTickets.length}
+        isFetching={isFetching}
+        onPrevious={handlePreviousPage}
+        onNext={handleNextPage}
+      />
 
       {/* =====================================================
           EDIT TICKET MODAL

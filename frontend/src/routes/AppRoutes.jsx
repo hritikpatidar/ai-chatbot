@@ -62,6 +62,7 @@ import SubscriptionClientPlans from "../pages/Subscription/SubscriptionPlans";
 import SubscriptionCheckout from "../pages/Subscription/SubscriptionCheckout";
 import SubscriptionDetails from "../pages/Subscription/SubscriptionDetails";
 import SubscriptionSuccess from "../pages/Subscription/SubscriptionSuccess";
+import Notifications from "../pages/Notifications";
 
 export default function AppRoutes() {
   return (
@@ -119,7 +120,11 @@ export default function AppRoutes() {
                 <Route path="chatbot-settings" element={<ChatbotSettings />} />
                 <Route path="client-settings" element={<ClientSettings />} />
                 <Route path="tickets" element={<ClientTickets />} />
-                <Route path="subscription" element={<SubscriptionClientPlans />} />
+                <Route path="notifications" element={<Notifications />} />
+                <Route
+                  path="subscription"
+                  element={<SubscriptionClientPlans />}
+                />
                 <Route
                   path="subscription/checkout/:planId"
                   element={<SubscriptionCheckout />}
@@ -148,6 +153,7 @@ export default function AppRoutes() {
                 />
                 <Route path="/admin/profile" element={<AdminProfile />} />
                 <Route path="/admin/settings" element={<AdminSettings />} />
+                <Route path="notifications" element={<Notifications />} />
                 <Route
                   path="/admin/subscriptions"
                   element={<AdminSubscriptions />}

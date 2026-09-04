@@ -58,6 +58,7 @@ export default function ClientLayout() {
             min-h-0
             flex-1
             overflow-y-auto
+           mx-auto w-full max-w-[1600px] px-4 py-5 sm:px-6 lg:px-8
           "
         >
           <Outlet />

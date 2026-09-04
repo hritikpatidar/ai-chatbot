@@ -50,7 +50,9 @@ const PlanCard = ({
       <div className="mt-6">
         <div className="flex items-end gap-1">
           <span className="text-4xl font-bold text-gray-900 dark:text-white">
-            {plan.currency?.toUpperCase()} {plan.amount}
+            {/* {plan.currency?.toUpperCase()} {plan.amount} */}
+            {plan.currency?.toUpperCase()}{" "}
+                  {(Number(plan.amount) / 100).toFixed(2)}
           </span>
 
           <span className="mb-1 text-sm text-gray-500">

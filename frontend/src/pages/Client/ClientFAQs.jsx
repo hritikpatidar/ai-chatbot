@@ -203,13 +203,12 @@ export default function ClientFAQs() {
 
   return (
     <div className="min-h-full w-full">
-      <div className="mx-auto w-full max-w-[1600px] px-4 py-5 sm:px-6 lg:px-8">
-        {/* =================================================
+      {/* =================================================
             HEADER
         ================================================= */}
-        {successMessage && (
-          <div
-            className="
+      {successMessage && (
+        <div
+          className="
               mb-5
               flex
               items-center
@@ -227,16 +226,16 @@ export default function ClientFAQs() {
               dark:bg-green-500/10
               dark:text-green-400
             "
-          >
-            <CheckCircle2 size={18} className="shrink-0" />
+        >
+          <CheckCircle2 size={18} className="shrink-0" />
 
-            <span>{successMessage}</span>
-          </div>
-        )}
+          <span>{successMessage}</span>
+        </div>
+      )}
 
-        {error && (
-          <div
-            className="
+      {error && (
+        <div
+          className="
               mb-5
               flex
               items-center
@@ -254,54 +253,54 @@ export default function ClientFAQs() {
               dark:bg-red-500/10
               dark:text-red-400
             "
-          >
-            <AlertCircle size={18} className="shrink-0" />
+        >
+          <AlertCircle size={18} className="shrink-0" />
 
-            <span>
-              {typeof error === "string"
-                ? error
-                : error?.message || "Something went wrong."}
-            </span>
-          </div>
-        )}
-        <div className="flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
-          <div>
-            <div className="flex items-center gap-3">
-              <div
-                className="
+          <span>
+            {typeof error === "string"
+              ? error
+              : error?.message || "Something went wrong."}
+          </span>
+        </div>
+      )}
+      <div className="flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
+        <div>
+          <div className="flex items-center gap-3">
+            <div
+              className="
                   flex h-10 w-10
                   items-center justify-center
                   rounded-xl
                   bg-blue-500/10
                   text-blue-500
                 "
-              >
-                <MessageCircleQuestion size={21} />
-              </div>
+            >
+              <MessageCircleQuestion size={21} />
+            </div>
 
-              <div>
-                <h1
-                  className="
+            <div>
+              <h1
+                className="
                     text-xl font-semibold
                     text-gray-900
                     dark:text-white
                   "
-                >
-                  FAQs
-                </h1>
+              >
+                FAQs
+              </h1>
 
-                <p className="text-xs text-gray-500 dark:text-gray-400">
-                  Manage frequently asked questions
-                </p>
-              </div>
+              <p className="text-xs text-gray-500 dark:text-gray-400">
+                Manage frequently asked questions
+              </p>
             </div>
           </div>
+        </div>
 
-          <button
-            type="button"
-            onClick={handleAddFAQ}
-            disabled={!client}
-            className="
+        <button
+          type="button"
+          onClick={handleAddFAQ}
+          disabled={!client}
+          className="
               flex items-center justify-center gap-2
               rounded-lg bg-blue-600
               px-4 py-2.5
@@ -310,36 +309,36 @@ export default function ClientFAQs() {
               disabled:cursor-not-allowed
               disabled:opacity-50
             "
-          >
-            <Plus size={17} />
-            Add FAQ
-          </button>
-        </div>
+        >
+          <Plus size={17} />
+          Add FAQ
+        </button>
+      </div>
 
-        {/* =================================================
+      {/* =================================================
             STATS
         ================================================= */}
 
-        <div className="mt-6 grid grid-cols-2 gap-3 lg:grid-cols-4">
-          <StatBox title="Total FAQs" value={pagination.total} />
-          <StatBox title="Total Pages" value={pagination.totalPages} />
-          <StatBox
-            title="Active"
-            value={faqs.filter((item) => item.status !== "inactive").length}
-          />
+      <div className="mt-6 grid grid-cols-2 gap-3 lg:grid-cols-4">
+        <StatBox title="Total FAQs" value={pagination.total} />
+        <StatBox title="Total Pages" value={pagination.totalPages} />
+        <StatBox
+          title="Active"
+          value={faqs.filter((item) => item.status !== "inactive").length}
+        />
 
-          <StatBox
-            title="Inactive"
-            value={faqs.filter((item) => item.status !== "active").length}
-          />
-        </div>
+        <StatBox
+          title="Inactive"
+          value={faqs.filter((item) => item.status !== "active").length}
+        />
+      </div>
 
-        {/* =================================================
+      {/* =================================================
             TOOLBAR
         ================================================= */}
 
-        <div
-          className="
+      <div
+        className="
             mt-6 flex flex-col gap-3
             rounded-xl border border-gray-200
             bg-white p-3
@@ -348,23 +347,23 @@ export default function ClientFAQs() {
             dark:border-white/10
             dark:bg-[#171b23]
           "
-        >
-          <div className="relative w-full sm:max-w-sm">
-            <Search
-              size={16}
-              className="
+      >
+        <div className="relative w-full sm:max-w-sm">
+          <Search
+            size={16}
+            className="
                 absolute left-3 top-1/2
                 -translate-y-1/2
                 text-gray-400
               "
-            />
+          />
 
-            <input
-              type="text"
-              value={search}
-              onChange={handleSearch}
-              placeholder="Search FAQs..."
-              className="
+          <input
+            type="text"
+            value={search}
+            onChange={handleSearch}
+            placeholder="Search FAQs..."
+            className="
                 w-full rounded-lg border
                 border-gray-200 bg-gray-50
                 py-2.5 pl-9 pr-3 text-sm
@@ -375,14 +374,14 @@ export default function ClientFAQs() {
                 dark:text-white
                 dark:placeholder:text-gray-500
               "
-            />
-          </div>
+          />
+        </div>
 
-          <button
-            type="button"
-            onClick={handleRefresh}
-            disabled={isFetching}
-            className="
+        <button
+          type="button"
+          onClick={handleRefresh}
+          disabled={isFetching}
+          className="
               flex items-center justify-center gap-2
               rounded-lg border border-gray-200
               px-3 py-2.5
@@ -394,19 +393,19 @@ export default function ClientFAQs() {
               dark:text-gray-300
               dark:hover:bg-white/5
             "
-          >
-            <RefreshCw size={15} className={isFetching ? "animate-spin" : ""} />
-            Refresh
-          </button>
-        </div>
+        >
+          <RefreshCw size={15} className={isFetching ? "animate-spin" : ""} />
+          Refresh
+        </button>
+      </div>
 
-        {/* =================================================
+      {/* =================================================
             ERROR
         ================================================= */}
 
-        {error && (
-          <div
-            className="
+      {error && (
+        <div
+          className="
               mt-4 rounded-lg border
               border-red-200 bg-red-50
               px-4 py-3 text-sm
@@ -415,38 +414,37 @@ export default function ClientFAQs() {
               dark:bg-red-500/10
               dark:text-red-400
             "
-          >
-            {error?.message || "Something went wrong"}
-          </div>
-        )}
+        >
+          {error?.message || "Something went wrong"}
+        </div>
+      )}
 
-        {/* =================================================
+      {/* =================================================
             TABLE
         ================================================= */}
 
-        <div className="mt-4">
-          <FAQTable
-            faqs={faqs}
-            loading={isLoading}
-            onEdit={handleEditFAQ}
-            onDelete={handleDelete}
-          />
-        </div>
+      <div className="mt-4">
+        <FAQTable
+          faqs={faqs}
+          loading={isLoading}
+          onEdit={handleEditFAQ}
+          onDelete={handleDelete}
+        />
+      </div>
 
-        {/* =================================================
+      {/* =================================================
             PAGINATION
         ================================================= */}
 
-        <Pagination
-          page={pagination.page}
-          totalPages={pagination.totalPages}
-          total={pagination.total}
-          currentCount={faqs.length}
-          isFetching={isFetching}
-          onPrevious={handlePreviousPage}
-          onNext={handleNextPage}
-        />
-      </div>
+      <Pagination
+        page={pagination.page}
+        totalPages={pagination.totalPages}
+        total={pagination.total}
+        currentCount={faqs.length}
+        isFetching={isFetching}
+        onPrevious={handlePreviousPage}
+        onNext={handleNextPage}
+      />
 
       {/* =================================================
           ADD / EDIT MODAL

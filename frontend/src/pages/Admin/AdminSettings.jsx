@@ -44,7 +44,7 @@ export default function AdminSettings ()  {
   };
 
   return (
-    <div className="min-h-full bg-gray-50 p-4 dark:bg-[#0d1117] sm:p-6">
+    <div className="min-h-full bg-gray-50 dark:bg-[#0d1117] ">
       {/* Header */}
       <div className="mb-6">
         <h1 className="text-xl font-bold text-gray-900 dark:text-white sm:text-2xl">

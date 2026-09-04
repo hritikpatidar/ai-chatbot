@@ -21,7 +21,7 @@ const SubscriptionSuccess = () => {
   } = location.state || {};
 
   return (
-    <div className="flex min-h-[70vh] items-center justify-center p-4">
+    <div className="flex min-h-[70vh] items-center justify-center ">
       <div className="w-full max-w-lg rounded-3xl border border-gray-200 bg-white p-7 text-center shadow-xl dark:border-gray-800 dark:bg-[#171b23] sm:p-10">
 
         <div className="mx-auto flex h-20 w-20 items-center justify-center rounded-full bg-emerald-100 dark:bg-emerald-500/10">

@@ -183,10 +183,9 @@ export default function ClientProducts() {
 
   return (
     <div className="min-h-full w-full">
-      <div className="mx-auto w-full max-w-[1600px] px-4 py-5 sm:px-6 lg:px-8">
-        {successMessage && (
-          <div
-            className="
+      {successMessage && (
+        <div
+          className="
               mb-5
               flex
               items-center
@@ -204,16 +203,16 @@ export default function ClientProducts() {
               dark:bg-green-500/10
               dark:text-green-400
             "
-          >
-            <CheckCircle2 size={18} className="shrink-0" />
+        >
+          <CheckCircle2 size={18} className="shrink-0" />
 
-            <span>{successMessage}</span>
-          </div>
-        )}
+          <span>{successMessage}</span>
+        </div>
+      )}
 
-        {error && (
-          <div
-            className="
+      {error && (
+        <div
+          className="
               mb-5
               flex
               items-center
@@ -231,60 +230,60 @@ export default function ClientProducts() {
               dark:bg-red-500/10
               dark:text-red-400
             "
-          >
-            <AlertCircle size={18} className="shrink-0" />
+        >
+          <AlertCircle size={18} className="shrink-0" />
 
-            <span>
-              {typeof error === "string"
-                ? error
-                : error?.message || "Something went wrong."}
-            </span>
-          </div>
-        )}
-        <div
-          className="
+          <span>
+            {typeof error === "string"
+              ? error
+              : error?.message || "Something went wrong."}
+          </span>
+        </div>
+      )}
+      <div
+        className="
             flex flex-col gap-4
             lg:flex-row lg:items-center
             lg:justify-between
           "
-        >
-          <div>
-            <div className="flex items-center gap-3">
-              <div
-                className="
+      >
+        <div>
+          <div className="flex items-center gap-3">
+            <div
+              className="
                   flex h-10 w-10
                   items-center justify-center
                   rounded-xl
                   bg-blue-500/10
                   text-blue-500
                 "
-              >
-                <Package size={21} />
-              </div>
+            >
+              <Package size={21} />
+            </div>
 
-              <div>
-                <h1
-                  className="
+            <div>
+              <h1
+                className="
                     text-xl font-semibold
                     text-gray-900
                     dark:text-white
                   "
-                >
-                  Products
-                </h1>
+              >
+                Products
+              </h1>
 
-                <p className="text-xs text-gray-500 dark:text-gray-400">
-                  Manage your client product catalog
-                </p>
-              </div>
+              <p className="text-xs text-gray-500 dark:text-gray-400">
+                Manage your client product catalog
+              </p>
             </div>
           </div>
+        </div>
 
-          <button
-            type="button"
-            onClick={handleAddProduct}
-            disabled={!client}
-            className="
+        <button
+          type="button"
+          onClick={handleAddProduct}
+          disabled={!client}
+          className="
               flex items-center justify-center gap-2
               rounded-lg bg-blue-600 px-4 py-2.5
               text-sm font-medium text-white
@@ -292,30 +291,30 @@ export default function ClientProducts() {
               disabled:cursor-not-allowed
               disabled:opacity-50
             "
-          >
-            <Plus size={17} />
-            Add Product
-          </button>
-        </div>
+        >
+          <Plus size={17} />
+          Add Product
+        </button>
+      </div>
 
-        <div className="mt-6 grid grid-cols-2 gap-3 lg:grid-cols-4">
-          <StatBox title="Total Products" value={pagination.total} />
+      <div className="mt-6 grid grid-cols-2 gap-3 lg:grid-cols-4">
+        <StatBox title="Total Products" value={pagination.total} />
 
-          <StatBox title="Total Page" value={pagination.totalPages} />
+        <StatBox title="Total Page" value={pagination.totalPages} />
 
-          <StatBox
-            title="Active"
-            value={products.filter((item) => item.status !== "inactive").length}
-          />
+        <StatBox
+          title="Active"
+          value={products.filter((item) => item.status !== "inactive").length}
+        />
 
-          <StatBox
-            title="Inactive"
-            value={products.filter((item) => item.status !== "active").length}
-          />
-        </div>
+        <StatBox
+          title="Inactive"
+          value={products.filter((item) => item.status !== "active").length}
+        />
+      </div>
 
-        <div
-          className="
+      <div
+        className="
             mt-6 flex flex-col gap-3
             rounded-xl border border-gray-200
             bg-white p-3
@@ -324,23 +323,23 @@ export default function ClientProducts() {
             dark:border-white/10
             dark:bg-[#171b23]
           "
-        >
-          <div className="relative w-full sm:max-w-sm">
-            <Search
-              size={16}
-              className="
+      >
+        <div className="relative w-full sm:max-w-sm">
+          <Search
+            size={16}
+            className="
                 absolute left-3 top-1/2
                 -translate-y-1/2
                 text-gray-400
               "
-            />
+          />
 
-            <input
-              type="text"
-              value={search}
-              onChange={(e) => setSearch(e.target.value)}
-              placeholder="Search products..."
-              className="
+          <input
+            type="text"
+            value={search}
+            onChange={(e) => setSearch(e.target.value)}
+            placeholder="Search products..."
+            className="
                 w-full rounded-lg border
                 border-gray-200 bg-gray-50
                 py-2.5 pl-9 pr-3 text-sm
@@ -352,14 +351,14 @@ export default function ClientProducts() {
                 dark:text-white
                 dark:placeholder:text-gray-500
               "
-            />
-          </div>
+          />
+        </div>
 
-          <button
-            type="button"
-            onClick={handleRefresh}
-            disabled={isFetching}
-            className="
+        <button
+          type="button"
+          onClick={handleRefresh}
+          disabled={isFetching}
+          className="
               flex items-center justify-center gap-2
               rounded-lg border border-gray-200
               px-3 py-2.5 text-xs font-medium
@@ -370,15 +369,15 @@ export default function ClientProducts() {
               dark:text-gray-300
               dark:hover:bg-white/5
             "
-          >
-            <RefreshCw size={15} className={isFetching ? "animate-spin" : ""} />
-            Refresh
-          </button>
-        </div>
+        >
+          <RefreshCw size={15} className={isFetching ? "animate-spin" : ""} />
+          Refresh
+        </button>
+      </div>
 
-        {errorMessage && (
-          <div
-            className="
+      {errorMessage && (
+        <div
+          className="
               mt-4 rounded-lg border
               border-red-200 bg-red-50
               px-4 py-3 text-sm text-red-600
@@ -386,30 +385,29 @@ export default function ClientProducts() {
               dark:bg-red-500/10
               dark:text-red-400
             "
-          >
-            {errorMessage}
-          </div>
-        )}
-
-        <div className="mt-4">
-          <ProductTable
-            products={filteredProducts}
-            loading={isLoading}
-            onEdit={handleEditProduct}
-            onDelete={handleDelete}
-          />
+        >
+          {errorMessage}
         </div>
+      )}
 
-        <Pagination
-          page={pagination.page}
-          totalPages={pagination.totalPages}
-          total={pagination.total}
-          currentCount={products.length}
-          isFetching={isFetching}
-          onPrevious={handlePreviousPage}
-          onNext={handleNextPage}
+      <div className="mt-4">
+        <ProductTable
+          products={filteredProducts}
+          loading={isLoading}
+          onEdit={handleEditProduct}
+          onDelete={handleDelete}
         />
       </div>
+
+      <Pagination
+        page={pagination.page}
+        totalPages={pagination.totalPages}
+        total={pagination.total}
+        currentCount={products.length}
+        isFetching={isFetching}
+        onPrevious={handlePreviousPage}
+        onNext={handleNextPage}
+      />
 
       <ProductModal
         isOpen={isModalOpen}

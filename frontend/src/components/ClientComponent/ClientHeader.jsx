@@ -4,6 +4,7 @@ import { Menu, Bell, Sun, Moon, User } from "lucide-react";
 import { useTheme } from "../../context/ThemeContext";
 import profile from "../../assets/profile1.jpg";
 import { getImageUrl } from "../../utils/imageUrl";
+import NotificationDropdown from "../common/NotificationDropdown";
 
 export default function ClientHeader({ onMenuClick }) {
   const { profileDetails } = useSelector(
@@ -93,43 +94,7 @@ export default function ClientHeader({ onMenuClick }) {
         </button>
 
         {/* Notification */}
-        <button
-          type="button"
-          className="
-            relative
-            flex
-            h-9
-            w-9
-            items-center
-            justify-center
-            rounded-lg
-            border
-            border-gray-200
-            bg-white
-            text-gray-600
-            transition
-            hover:border-blue-500
-            hover:text-blue-600
-            dark:border-white/10
-            dark:bg-[#171b23]
-            dark:text-gray-300
-            dark:hover:text-blue-400
-          "
-        >
-          <Bell size={17} />
-
-          <span
-            className="
-              absolute
-              right-2
-              top-2
-              h-1.5
-              w-1.5
-              rounded-full
-              bg-red-500
-            "
-          />
-        </button>
+        <NotificationDropdown />
 
         {/* Profile */}
         <div

@@ -88,7 +88,6 @@ export const getCurrentSubscriptionController = async (req, res) => {
         message: "Client ID is required",
       });
     }
-    console.log("clientId", clientId);
 
     const subscription = await getCurrentSubscription(clientId);
 

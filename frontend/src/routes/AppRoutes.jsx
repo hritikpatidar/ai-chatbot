@@ -58,6 +58,11 @@ const SubscriptionPlanDetails = lazy(
   () => import("../pages/Admin/SubscriptionPlans/SubscriptionPlanDetails"),
 );
 
+import SubscriptionClientPlans from "../pages/Subscription/SubscriptionPlans";
+import SubscriptionCheckout from "../pages/Subscription/SubscriptionCheckout";
+import SubscriptionDetails from "../pages/Subscription/SubscriptionDetails";
+import SubscriptionSuccess from "../pages/Subscription/SubscriptionSuccess";
+
 export default function AppRoutes() {
   return (
     <SocketProvider>
@@ -114,6 +119,19 @@ export default function AppRoutes() {
                 <Route path="chatbot-settings" element={<ChatbotSettings />} />
                 <Route path="client-settings" element={<ClientSettings />} />
                 <Route path="tickets" element={<ClientTickets />} />
+                <Route path="subscription" element={<SubscriptionClientPlans />} />
+                <Route
+                  path="subscription/checkout/:planId"
+                  element={<SubscriptionCheckout />}
+                />
+                <Route
+                  path="subscription/details"
+                  element={<SubscriptionDetails />}
+                />
+                <Route
+                  path="subscription/success"
+                  element={<SubscriptionSuccess />}
+                />
               </Route>
             </Route>
           </Route>

@@ -9,6 +9,7 @@ import {
   LogOut,
   X,
   Ticket,
+  CreditCard,
 } from "lucide-react";
 
 import { handleLogout } from "../../utils/logout";
@@ -50,6 +51,11 @@ export default function ClientSidebar({ mobileOpen, setMobileOpen }) {
       label: "Chatbot Settings",
       path: "/client/chatbot-settings",
       icon: Building2,
+    },
+    {
+      label: "Subscription",
+      path: "/client/subscription",
+      icon: CreditCard,
     },
     {
       label: "Settings",

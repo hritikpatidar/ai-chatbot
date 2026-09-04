@@ -977,7 +977,6 @@ function SectionCard({ icon: Icon, title, description, children, action }) {
   return (
     <section
       className="
-        overflow-hidden
         rounded-2xl
         border border-gray-200
         bg-white

@@ -1,16 +1,17 @@
-import {
-  Check,
-  ArrowRight,
-} from "lucide-react";
+import { Check, ArrowRight } from "lucide-react";
 
-const PlanCard = ({
-  plan,
-  currentPlanId,
-  onSelect,
-}) => {
-  const isCurrent =
-    currentPlanId === plan._id;
+const PlanCard = ({ plan, currentPlanId, currentPlan, onSelect }) => {
+  const isCurrent = currentPlanId === plan.name || currentPlanId === plan._id;
+  const isUpgrade =
+    currentPlan && Number(plan.sortOrder) > Number(currentPlan.sortOrder);
 
+  const actionText = !currentPlan
+    ? "Choose Plan"
+    : isCurrent
+      ? "Current Plan"
+      : isUpgrade
+        ? "Upgrade"
+        : "Downgrade";
   return (
     <div
       className={`
@@ -50,37 +51,27 @@ const PlanCard = ({
       <div className="mt-6">
         <div className="flex items-end gap-1">
           <span className="text-4xl font-bold text-gray-900 dark:text-white">
-            {/* {plan.currency?.toUpperCase()} {plan.amount} */}
-            {plan.currency?.toUpperCase()}{" "}
-                  {(Number(plan.amount) / 100).toFixed(2)}
+            {plan.currency?.toUpperCase()} {plan.amount}
+            {/* {plan.currency?.toUpperCase()}{" "}
+                  {(Number(plan.amount) / 100).toFixed(2)} */}
           </span>
 
-          <span className="mb-1 text-sm text-gray-500">
-            / {plan.interval}
-          </span>
+          <span className="mb-1 text-sm text-gray-500">/ {plan.interval}</span>
         </div>
       </div>
 
       <div className="my-6 h-px bg-gray-200 dark:bg-gray-800" />
 
       <div className="flex-1 space-y-3">
-        {plan.features?.map(
-          (feature, index) => (
-            <div
-              key={index}
-              className="flex items-start gap-3"
-            >
-              <Check
-                size={18}
-                className="mt-0.5 shrink-0 text-indigo-600"
-              />
+        {plan.features?.map((feature, index) => (
+          <div key={index} className="flex items-start gap-3">
+            <Check size={18} className="mt-0.5 shrink-0 text-indigo-600" />
 
-              <span className="text-sm text-gray-600 dark:text-gray-300">
-                {feature}
-              </span>
-            </div>
-          )
-        )}
+            <span className="text-sm text-gray-600 dark:text-gray-300">
+              {feature}
+            </span>
+          </div>
+        ))}
       </div>
 
       <button
@@ -108,13 +99,9 @@ const PlanCard = ({
           dark:disabled:bg-gray-700
         "
       >
-        {isCurrent
-          ? "Current Plan"
-          : "Choose Plan"}
+        {actionText}
 
-        {!isCurrent && (
-          <ArrowRight size={17} />
-        )}
+        {!isCurrent && <ArrowRight size={17} />}
       </button>
     </div>
   );

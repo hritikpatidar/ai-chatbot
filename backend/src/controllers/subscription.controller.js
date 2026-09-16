@@ -180,20 +180,20 @@ export const getSubscriptionDetailsController = async (req, res) => {
 
 export const createSubscriptionController = async (req, res) => {
   try {
-    const { planId, paymentMethodId = null } = req.body;
+    const {
+      planId,
+      paymentMethodId = null,
+      billingDetails
+    } = req.body;
 
     const userId = req.user?._id || req.user?.id;
     const clientId = req.user?.clientId;
-    /*
-     * User information
-     *
-     * If your auth middleware already provides these values,
-     * use them directly.
-     */
 
-    const fullName = req.user?.fullName || req.body?.fullName;
+    const fullName =
+      req.user?.fullName || req.body?.fullName;
 
-    const email = req.user?.email || req.body?.email;
+    const email =
+      req.user?.email || req.body?.email;
 
     if (!clientId) {
       return res.status(400).json({
@@ -229,6 +229,12 @@ export const createSubscriptionController = async (req, res) => {
         message: "Email is required",
       });
     }
+    if (!billingDetails?.address?.line1) {
+      return res.status(400).json({
+        success: false,
+        message: "Billing address is required",
+      });
+    }
 
     const data = await createSubscriptionService({
       clientId,
@@ -237,6 +243,7 @@ export const createSubscriptionController = async (req, res) => {
       email,
       planId,
       paymentMethodId,
+      billingDetails,
     });
 
     return res.status(201).json({
@@ -249,7 +256,8 @@ export const createSubscriptionController = async (req, res) => {
 
     return res.status(error.statusCode || 500).json({
       success: false,
-      message: error.message || "Failed to create subscription",
+      message:
+        error.message || "Failed to create subscription",
     });
   }
 };
@@ -304,7 +312,7 @@ export const previewSubscriptionChangeController = async (req, res) => {
 
 export const changeSubscriptionPlanController = async (req, res) => {
   try {
-    const { subscriptionId, planId } = req.body;
+    const { subscriptionId, planId, paymentMethodId } = req.body;
 
     if (!subscriptionId) {
       return res.status(400).json({
@@ -323,6 +331,7 @@ export const changeSubscriptionPlanController = async (req, res) => {
     const data = await changeSubscriptionPlanService({
       subscriptionId,
       planId,
+      paymentMethodId
     });
 
     return res.status(200).json({

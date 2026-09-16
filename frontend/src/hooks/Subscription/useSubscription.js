@@ -141,11 +141,11 @@ export const useChangeSubscriptionPlan = () => {
    PAYMENT METHODS
 ========================================================= */
 
-export const usePaymentMethods = () => {
+export const usePaymentMethods = (subscriptionId) => {
   return useQuery({
     queryKey: subscriptionKeys.paymentMethods(),
 
-    queryFn: getPaymentMethodsApi,
+    queryFn:  () => getPaymentMethodsApi(subscriptionId),
 
     staleTime: 60 * 1000,
 

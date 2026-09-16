@@ -1,3 +1,5 @@
+import { extractSubscriptionPaymentData } from "../helpers/stripePayment.js";
+import { findClientById, updateClient } from "../repositories/client.repository.js";
 import {
   findSubscriptionByClientId,
   findSubscriptionByUserId,
@@ -30,6 +32,9 @@ import {
   setDefaultStripePaymentMethod,
   getDefaultStripePaymentMethod,
   getStripeInvoice,
+  attachPaymentMethodToCustomer,
+  setCustomerDefaultPaymentMethod,
+  getOrCreateStripeCustomer,
 } from "./stripe.service.js";
 
 /* =========================================================
@@ -47,12 +52,6 @@ const stripeDate = (timestamp) => {
   return new Date(timestamp * 1000);
 };
 
-/**
- * Get Stripe subscription status
- */
-const getSubscriptionStatus = (stripeSubscription) => {
-  return stripeSubscription?.status || "active";
-};
 
 /**
  * Prepare subscription DB data from Stripe subscription
@@ -65,41 +64,26 @@ const buildSubscriptionData = ({
   stripeCustomerId,
 }) => {
   const subscriptionItem = stripeSubscription?.items?.data?.[0];
-
   const stripePrice = subscriptionItem?.price;
-
-  return {
+  let data = {
     clientId,
     userId,
-
     planId: plan._id,
-
     stripeCustomerId,
-
     stripeSubscriptionId: stripeSubscription.id,
-
     stripePriceId: stripePrice?.id || plan.stripePriceId,
-
-    status: getSubscriptionStatus(stripeSubscription),
-
-    amount: stripePrice?.unit_amount ?? plan.amount,
-
-    currency: stripePrice?.currency ?? plan.currency,
-
+    status: stripeSubscription?.status || "active",
+    amount: plan.amount,
+    currency: plan.currency,
     interval: stripePrice?.recurring?.interval ?? plan.interval,
-
-    currentPeriodStart: stripeDate(stripeSubscription.current_period_start),
-
-    currentPeriodEnd: stripeDate(stripeSubscription.current_period_end),
-
+    currentPeriodStart: stripeDate(subscriptionItem.current_period_start),
+    currentPeriodEnd: stripeDate(subscriptionItem.current_period_end),
     cancelAtPeriodEnd: Boolean(stripeSubscription.cancel_at_period_end),
-
     canceledAt: stripeDate(stripeSubscription.canceled_at),
-
     trialStart: stripeDate(stripeSubscription.trial_start),
-
     trialEnd: stripeDate(stripeSubscription.trial_end),
   };
+  return data
 };
 
 /* =========================================================
@@ -148,7 +132,6 @@ export const getUserSubscription = async (userId) => {
  * Get subscription details
  */
 export const getSubscriptionDetails = async (subscriptionId) => {
-  console.log("subscriptionId service1", subscriptionId);
   const subscription = await findSubscriptionById(subscriptionId);
 
   if (!subscription) {
@@ -186,27 +169,31 @@ export const createSubscriptionService = async ({
   email,
   planId,
   paymentMethodId = null,
+  billingDetails,
 }) => {
-  /* -------------------------------------------------------
-     Check existing subscription
-  ------------------------------------------------------- */
+  /*
+   * 1. Existing subscription check
+   */
 
   const existingSubscription = await findSubscriptionByClientId(clientId);
 
   if (
     existingSubscription &&
-    !["canceled", "incomplete_expired"].includes(existingSubscription.status)
+    !["canceled", "incomplete_expired"].includes(
+      existingSubscription.status
+    )
   ) {
-    const error = new Error("Client already has an active subscription");
+    const error = new Error(
+      "Client already has an active or pending subscription"
+    );
 
     error.statusCode = 400;
-
     throw error;
   }
 
-  /* -------------------------------------------------------
-     Find plan
-  ------------------------------------------------------- */
+  /*
+   * 2. Find plan
+   */
 
   const plan = await findSubscriptionPlanById(planId);
 
@@ -214,35 +201,58 @@ export const createSubscriptionService = async ({
     const error = new Error("Subscription plan not found");
 
     error.statusCode = 404;
-
     throw error;
   }
 
-  /* -------------------------------------------------------
-     Stripe Customer
-  ------------------------------------------------------- */
+  if (!plan.stripePriceId) {
+    const error = new Error(
+      "Stripe price ID is missing for this plan"
+    );
 
-  let stripeCustomer;
+    error.statusCode = 400;
+    throw error;
+  }
 
   /*
-   * Future me Client model me stripeCustomerId
-   * save kar sakte ho.
-   *
-   * Abhi new customer create kar rahe hain.
+   * 3. Get client
    */
 
-  stripeCustomer = await createStripeCustomer({
+  const client = await findClientById(clientId);
+
+  /*
+   * 4. Reuse existing Stripe Customer
+   */
+
+  const stripeCustomer = await getOrCreateStripeCustomer({
+    customerId: client?.stripeCustomerId || client?.stripe_customer,
     name: fullName,
     email,
+    address: billingDetails.address,
     metadata: {
       clientId: String(clientId),
       userId: String(userId),
     },
   });
 
-  /* -------------------------------------------------------
-     Stripe Subscription
-  ------------------------------------------------------- */
+  /*
+   * 5. Attach PaymentMethod
+   */
+
+  if (paymentMethodId) {
+    await attachPaymentMethodToCustomer({
+      paymentMethodId,
+      customerId: stripeCustomer.id,
+    });
+
+    await setCustomerDefaultPaymentMethod({
+      customerId: stripeCustomer.id,
+      paymentMethodId,
+    });
+  }
+
+  /*
+   * 6. Create Stripe subscription
+   */
 
   const stripeSubscription = await createStripeSubscription({
     customerId: stripeCustomer.id,
@@ -255,9 +265,29 @@ export const createSubscriptionService = async ({
     },
   });
 
-  /* -------------------------------------------------------
-     Save in MongoDB
-  ------------------------------------------------------- */
+  /*
+   * 7. Extract client secret
+   */
+
+  const paymentData = extractSubscriptionPaymentData(
+    stripeSubscription
+  );
+
+  /*
+   * 8. Save Stripe customer ID only
+   *
+   * Do not activate plan before payment success.
+   */
+
+  await updateClient(clientId, {
+    active_plan: plan?.name,
+    current_plan_id: plan?._id,
+    stripe_customer: stripeCustomer.id,
+  });
+
+  /*
+   * 9. Save subscription in MongoDB
+   */
 
   const subscriptionData = buildSubscriptionData({
     stripeSubscription,
@@ -266,16 +296,32 @@ export const createSubscriptionService = async ({
     plan,
     stripeCustomerId: stripeCustomer.id,
   });
+  console.log("subscriptionData", subscriptionData)
+  const subscription = await createSubscription(
+    subscriptionData
+  );
 
-  const subscription = await createSubscription(subscriptionData);
+  let updateData = {
+    status: "active",
+  };
+  const updatedSubscription = await updateSubscriptionById(
+    subscription?._id,
+    updateData,
+  );
 
+  /*
+   * 10. Return frontend response
+   */
   return {
     subscription,
     stripeCustomer: {
       id: stripeCustomer.id,
     },
-
-    paymentIntent: stripeSubscription?.latest_invoice?.payment_intent || null,
+    invoiceId: paymentData.invoiceId,
+    paymentIntent: null,
+    paymentIntentId: paymentData.paymentIntentId,
+    paymentIntentStatus: paymentData.paymentIntentStatus,
+    clientSecret: paymentData.clientSecret,
   };
 };
 
@@ -333,89 +379,128 @@ export const changeSubscriptionPlanService = async ({
   subscriptionId,
   planId,
 }) => {
-  /* -----------------------------------------------------
-       Find local subscription
-    ----------------------------------------------------- */
-console.log("subscriptionId service2", subscriptionId);
-  const currentSubscription = await findSubscriptionById(subscriptionId);
+  // --------------------------------------------
+  // 1. Find current subscription
+  // --------------------------------------------
 
+  const currentSubscription =
+    await findSubscriptionById(subscriptionId);
   if (!currentSubscription) {
     const error = new Error("Subscription not found");
-
     error.statusCode = 404;
-
     throw error;
   }
 
-  /* -----------------------------------------------------
-       Find new plan
-    ----------------------------------------------------- */
+  // --------------------------------------------
+  // 2. Find new plan
+  // --------------------------------------------
 
-  const newPlan = await findSubscriptionPlanById(planId);
+  const newPlan =
+    await findSubscriptionPlanById(planId);
 
   if (!newPlan) {
     const error = new Error("Subscription plan not found");
-
     error.statusCode = 404;
-
     throw error;
   }
 
-  /* -----------------------------------------------------
-       Already on same plan
-    ----------------------------------------------------- */
+  // --------------------------------------------
+  // 3. Same plan check
+  // --------------------------------------------
 
   if (
     currentSubscription.planId?._id?.toString() === newPlan._id.toString() ||
     currentSubscription.stripePriceId === newPlan.stripePriceId
   ) {
     const error = new Error("You are already subscribed to this plan");
-
     error.statusCode = 400;
-
     throw error;
   }
 
-  /* -----------------------------------------------------
-       Stripe update
-    ----------------------------------------------------- */
+  // --------------------------------------------
+  // 4. Change Stripe subscription + pay invoice
+  // --------------------------------------------
 
-  const stripeSubscription = await changeStripeSubscriptionPlan({
-    subscriptionId: currentSubscription.stripeSubscriptionId,
+  const stripeResult =
+    await changeStripeSubscriptionPlan({
+      subscriptionId: currentSubscription.stripeSubscriptionId,
+      priceId: newPlan.stripePriceId,
+    });
+  const stripeSubscription = stripeResult.subscription;
+  const invoice = stripeResult.invoice;
+  const paymentIntent = stripeResult.paymentIntent;
 
-    priceId: newPlan.stripePriceId,
+  // --------------------------------------------
+  // 5. Check payment
+  // --------------------------------------------
 
-    prorationBehavior: "always_invoice",
+  if (paymentIntent) {
+    if (paymentIntent.status === "requires_action") {
+      const error = new Error("Payment authentication is required");
+      error.statusCode = 402;
+      error.paymentRequired = true;
+      error.requiresAction = true;
+      error.clientSecret = paymentIntent.client_secret;
+      error.paymentIntentId = paymentIntent.id;
+      error.subscriptionId = stripeSubscription.id;
+      throw error;
+    }
+
+    if (paymentIntent.status !== "succeeded") {
+      const error = new Error("Payment was not completed");
+      error.statusCode = 402;
+      error.paymentRequired = true;
+      error.paymentStatus = paymentIntent.status;
+      error.clientSecret = paymentIntent.client_secret;
+      error.paymentIntentId = paymentIntent.id;
+      throw error;
+    }
+  }
+
+  // --------------------------------------------
+  // 6. Make sure invoice is paid
+  // --------------------------------------------
+
+  if (
+    invoice &&
+    invoice.status !== "paid" &&
+    invoice.amount_remaining > 0
+  ) {
+    const error = new Error("Upgrade payment is incomplete");
+    error.statusCode = 402;
+    error.paymentRequired = true;
+    error.invoiceId = invoice.id;
+    error.amountDue = invoice.amount_remaining;
+    throw error;
+  }
+  console.log("newPlan",newPlan)
+  // --------------------------------------------
+  // 7. Only NOW update MongoDB
+  // --------------------------------------------
+  await updateClient(currentSubscription.clientId?._id, {
+    active_plan: newPlan?.name,
+    current_plan_id: newPlan?._id,
   });
-
-  /* -----------------------------------------------------
-       Update MongoDB
-    ----------------------------------------------------- */
 
   const updateData = buildSubscriptionData({
     stripeSubscription,
     clientId: currentSubscription.clientId?._id || currentSubscription.clientId,
-
     userId: currentSubscription.userId,
-
     plan: newPlan,
-
     stripeCustomerId: currentSubscription.stripeCustomerId,
   });
 
-  const updatedSubscription = await updateSubscriptionById(
-    subscriptionId,
-    updateData,
-  );
+  const updatedSubscription =
+    await updateSubscriptionById(
+      subscriptionId,
+      updateData,
+    );
 
   return {
     subscription: updatedSubscription,
-
     stripeSubscription,
-
-    invoice: stripeSubscription?.latest_invoice || null,
-
-    paymentIntent: stripeSubscription?.latest_invoice?.payment_intent || null,
+    invoice,
+    paymentIntent,
   };
 };
 
@@ -435,14 +520,10 @@ export const previewSubscriptionChangeService = async ({
   /* -----------------------------------------------------
        Current subscription
     ----------------------------------------------------- */
-console.log("subscriptionId service3", subscriptionId);
   const currentSubscription = await findSubscriptionById(subscriptionId);
-
   if (!currentSubscription) {
     const error = new Error("Subscription not found");
-
     error.statusCode = 404;
-
     throw error;
   }
 
@@ -451,12 +532,9 @@ console.log("subscriptionId service3", subscriptionId);
     ----------------------------------------------------- */
 
   const newPlan = await findSubscriptionPlanById(planId);
-
   if (!newPlan) {
     const error = new Error("Subscription plan not found");
-
     error.statusCode = 404;
-
     throw error;
   }
 
@@ -466,37 +544,24 @@ console.log("subscriptionId service3", subscriptionId);
 
   const invoice = await previewSubscriptionChange({
     customerId: currentSubscription.stripeCustomerId,
-
     subscriptionId: currentSubscription.stripeSubscriptionId,
-
     priceId: newPlan.stripePriceId,
   });
 
   return {
     subscriptionId,
-
     currentPlan: currentSubscription.planId,
-
     newPlan,
-
     invoice: {
       id: invoice.id,
-
-      subtotal: invoice.subtotal,
-
-      total: invoice.total,
-
-      amountDue: invoice.amount_due,
-
+      subtotal: invoice.subtotal / 100,
+      total: invoice.total / 100,
+      amountDue: invoice.amount_due / 100,
       currency: invoice.currency,
-
       periodStart: stripeDate(invoice.period_start),
-
       periodEnd: stripeDate(invoice.period_end),
     },
-
-    amountDue: invoice.amount_due,
-
+    amountDue: invoice.amount_due / 100,
     currency: invoice.currency,
   };
 };
@@ -509,7 +574,6 @@ console.log("subscriptionId service3", subscriptionId);
  * Cancel subscription immediately
  */
 export const cancelSubscriptionService = async (subscriptionId) => {
-  console.log("subscriptionId service4", subscriptionId);
   const subscription = await findSubscriptionById(subscriptionId);
 
   if (!subscription) {
@@ -539,7 +603,6 @@ export const cancelSubscriptionService = async (subscriptionId) => {
  * Cancel subscription at period end
  */
 export const cancelSubscriptionAtPeriodEndService = async (subscriptionId) => {
-  console.log("subscriptionId service5", subscriptionId);
   const subscription = await findSubscriptionById(subscriptionId);
 
   if (!subscription) {
@@ -570,7 +633,6 @@ export const cancelSubscriptionAtPeriodEndService = async (subscriptionId) => {
  * for cancellation.
  */
 export const resumeSubscriptionService = async (subscriptionId) => {
-  console.log("subscriptionId service6", subscriptionId);
   const subscription = await findSubscriptionById(subscriptionId);
 
   if (!subscription) {
@@ -602,7 +664,6 @@ export const resumeSubscriptionService = async (subscriptionId) => {
  * Get customer's saved cards
  */
 export const getPaymentMethodsService = async (subscriptionId) => {
-  console.log("subscriptionId service7", subscriptionId);
   const subscription = await findSubscriptionById(subscriptionId);
 
   if (!subscription) {
@@ -635,7 +696,6 @@ export const addPaymentMethodService = async ({
   subscriptionId,
   paymentMethodId,
 }) => {
-  console.log("subscriptionId service8", subscriptionId);
   const subscription = await findSubscriptionById(subscriptionId);
 
   if (!subscription) {
@@ -662,7 +722,6 @@ export const setDefaultPaymentMethodService = async ({
   subscriptionId,
   paymentMethodId,
 }) => {
-  console.log("subscriptionId service9", subscriptionId);
   const subscription = await findSubscriptionById(subscriptionId);
 
   if (!subscription) {
@@ -687,7 +746,6 @@ export const removePaymentMethodService = async ({
   subscriptionId,
   paymentMethodId,
 }) => {
-  console.log("subscriptionId service10", subscriptionId);
   const subscription = await findSubscriptionById(subscriptionId);
 
   if (!subscription) {
@@ -709,7 +767,6 @@ export const removePaymentMethodService = async ({
  * Get latest Stripe subscription and update DB
  */
 export const refreshSubscriptionService = async (subscriptionId) => {
-  console.log("subscriptionId service11", subscriptionId);
   const subscription = await findSubscriptionById(subscriptionId);
 
   if (!subscription) {

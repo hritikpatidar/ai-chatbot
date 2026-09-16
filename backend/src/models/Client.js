@@ -173,6 +173,21 @@ const clientSchema = new mongoose.Schema(
       },
     },
 
+    stripe_customer: {
+      type: String,
+      default: null
+    },
+
+    active_plan: {
+      type: String,
+      default: "Free", //Free, Basic, Pro Pro
+    },
+    current_plan_id:{
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "SubscriptionPlan",
+      default: null,
+    },
+
     status: {
       type: String,
       enum: ["active", "inactive"],

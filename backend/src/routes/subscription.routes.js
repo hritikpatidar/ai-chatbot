@@ -1,22 +1,22 @@
 import express from "express";
 
 import {
-  getSubscriptionPlansController,
-  getSubscriptionPlanController,
-  getCurrentSubscriptionController,
-  getUserSubscriptionController,
-  getSubscriptionDetailsController,
-  createSubscriptionController,
-  previewSubscriptionChangeController,
-  changeSubscriptionPlanController,
-  cancelSubscriptionController,
-  cancelSubscriptionAtPeriodEndController,
-  resumeSubscriptionController,
-  getPaymentMethodsController,
-  addPaymentMethodController,
-  setDefaultPaymentMethodController,
-  removePaymentMethodController,
-  refreshSubscriptionController,
+   getSubscriptionPlansController,
+   getSubscriptionPlanController,
+   getCurrentSubscriptionController,
+   getUserSubscriptionController,
+   getSubscriptionDetailsController,
+   createSubscriptionController,
+   previewSubscriptionChangeController,
+   changeSubscriptionPlanController,
+   cancelSubscriptionController,
+   cancelSubscriptionAtPeriodEndController,
+   resumeSubscriptionController,
+   getPaymentMethodsController,
+   addPaymentMethodController,
+   setDefaultPaymentMethodController,
+   removePaymentMethodController,
+   refreshSubscriptionController,
 } from "../controllers/subscription.controller.js";
 
 import authMiddleware from "../middlewares/auth.js";
@@ -41,16 +41,6 @@ router.get("/plans", authMiddleware, getSubscriptionPlansController);
  */
 router.get("/plans/:planId", authMiddleware, getSubscriptionPlanController);
 
-/* =========================================================
-   CURRENT SUBSCRIPTION
-========================================================= */
-
-/**
- * Get logged-in client's current subscription
- *
- * GET /subscription/current
- */
-router.get("/current", authMiddleware, getCurrentSubscriptionController);
 
 /* =========================================================
    CREATE SUBSCRIPTION
@@ -69,23 +59,34 @@ router.get("/current", authMiddleware, getCurrentSubscriptionController);
  */
 router.post("/create", authMiddleware, createSubscriptionController);
 
+/* =========================================================
+   CURRENT SUBSCRIPTION
+========================================================= */
+
 /**
- * Get logged-in user's subscription
+ * Get logged-in client's current subscription
+ *
+ * GET /subscription/current
+ */
+router.get("/current", authMiddleware, getCurrentSubscriptionController);
+
+/**
+ * Get logged-in user's current subscription
  *
  * GET /subscription/user/current
  */
 router.get("/user/current", authMiddleware, getUserSubscriptionController);
 
 /**
- * Get subscription details
+ * Get subscription details by subscription _id
  *
  * GET /subscription/:subscriptionId
  */
-router.get(
-  "/details/:subscriptionId",
-  authMiddleware,
-  getSubscriptionDetailsController,
-);
+// router.get(
+//    "/details/:subscriptionId",
+//    authMiddleware,
+//    getSubscriptionDetailsController,
+// );
 
 /* =========================================================
    PREVIEW SUBSCRIPTION CHANGE
@@ -148,9 +149,9 @@ router.post("/cancel", authMiddleware, cancelSubscriptionController);
  * }
  */
 router.post(
-  "/cancel-at-period-end",
-  authMiddleware,
-  cancelSubscriptionAtPeriodEndController,
+   "/cancel-at-period-end",
+   authMiddleware,
+   cancelSubscriptionAtPeriodEndController,
 );
 
 /* =========================================================
@@ -205,9 +206,9 @@ router.post("/payment-method", authMiddleware, addPaymentMethodController);
  * }
  */
 router.patch(
-  "/payment-method/default",
-  authMiddleware,
-  setDefaultPaymentMethodController,
+   "/payment-method/default",
+   authMiddleware,
+   setDefaultPaymentMethodController,
 );
 
 /**
@@ -216,9 +217,9 @@ router.patch(
  * DELETE /subscription/payment-method/:paymentMethodId?subscriptionId=xxx
  */
 router.delete(
-  "/payment-method/:paymentMethodId",
-  authMiddleware,
-  removePaymentMethodController,
+   "/payment-method/:paymentMethodId",
+   authMiddleware,
+   removePaymentMethodController,
 );
 
 /* =========================================================

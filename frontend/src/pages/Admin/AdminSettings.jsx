@@ -34,10 +34,7 @@ export default function AdminSettings ()  {
   };
 
   const handleSave = () => {
-    console.log("Admin Settings:", settings);
-
     setSuccess(true);
-
     setTimeout(() => {
       setSuccess(false);
     }, 3000);

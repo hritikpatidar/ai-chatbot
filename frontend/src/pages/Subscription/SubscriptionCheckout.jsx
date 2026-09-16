@@ -14,46 +14,48 @@ import PaymentForm from "../../components/Subscription/PaymentForm";
 
 const SubscriptionCheckout = () => {
   const { planId } = useParams();
-
   const navigate = useNavigate();
-
   const [paymentError, setPaymentError] = useState("");
-
   const [loading, setLoading] = useState(false);
-
   const { data, isLoading } = useSubscriptionPlans();
-
   const { data: currentData } = useCurrentSubscription();
-
   const { mutateAsync: createSubscription } = useCreateSubscription();
-
   const plans = data?.data?.data || data?.data || [];
-
   const plan = useMemo(
     () => plans.find((item) => item._id === planId),
     [plans, planId],
   );
-
   const currentSubscription =
     currentData?.data?.data || currentData?.data || null;
 
   const handlePayment = async ({ stripe, cardNumber, cardholderName }) => {
     setPaymentError("");
     setLoading(true);
-
     try {
+      if (!stripe) {
+        throw new Error("Stripe is not initialized.");
+      }
+      if (!cardNumber) {
+        throw new Error("Card details are required.");
+      }
       /* =====================================================
-         1. CREATE PAYMENT METHOD
-      ===================================================== */
+       1. CREATE PAYMENT METHOD
+    ===================================================== */
 
       const { paymentMethod, error: paymentMethodError } =
         await stripe.createPaymentMethod({
           type: "card",
-
           card: cardNumber,
-
           billing_details: {
             name: cardholderName,
+            address: {
+              line1: "ABCS",
+              line2: "ABCD",
+              city: "Indore",
+              state: "Madhya Pradesh",
+              postal_code: "452001",
+              country: "IN",
+            },
           },
         });
 
@@ -61,38 +63,43 @@ const SubscriptionCheckout = () => {
         throw new Error(paymentMethodError.message);
       }
 
+      if (!paymentMethod?.id) {
+        throw new Error("Payment method could not be created.");
+      }
+
       /* =====================================================
-         2. CREATE SUBSCRIPTION
-      ===================================================== */
+       2. CREATE SUBSCRIPTION
+    ===================================================== */
 
-      const payload = {
+      const response = await createSubscription({
         planId: plan._id,
-
         paymentMethodId: paymentMethod.id,
-      };
-
-      /*
-       * If your backend expects customerId
-       * then add it here.
-       *
-       * Normally authenticated backend
-       * should derive user/customer from req.user.
-       */
-
-      const response = await createSubscription(payload);
+        billingDetails: {
+              name: cardholderName,
+              address: {
+                line1: "ABCS",
+                line2: "ABCD",
+                city: "Indore",
+                state: "Madhya Pradesh",
+                postal_code: "452001",
+                country: "IN",
+              },
+            },
+      });
 
       const responseData = response?.data?.data || response?.data || {};
-
+      const subscription = responseData?.subscription || null;
       /* =====================================================
-         3. ALREADY PAID
-      ===================================================== */
+       3. ALREADY PAID
+    ===================================================== */
 
       if (responseData?.alreadyPaid || responseData?.already_paid) {
         navigate("/client/subscription/success", {
           replace: true,
           state: {
             plan,
-            subscription: responseData,
+            subscription,
+            responseData,
           },
         });
 
@@ -100,65 +107,61 @@ const SubscriptionCheckout = () => {
       }
 
       /* =====================================================
-         4. GET CLIENT SECRET
-      ===================================================== */
+       4. GET CLIENT SECRET
+    ===================================================== */
 
-      const clientSecret =
-        responseData?.clientSecret || responseData?.client_secret;
-
+      const clientSecret = responseData?.clientSecret || null;
       if (!clientSecret) {
+        console.error("Subscription API response does not contain client secret:",responseData);
+
         throw new Error("Payment client secret was not generated.");
       }
 
       /* =====================================================
-         5. CONFIRM PAYMENT
-      ===================================================== */
+       5. CONFIRM PAYMENT
+    ===================================================== */
 
-      const result = await stripe.confirmCardPayment(clientSecret, {
-        payment_method: {
-          card: cardNumber,
+      const { paymentIntent, error: confirmError } =
+        await stripe.confirmCardPayment(clientSecret, {
+          payment_method: paymentMethod.id,
+        });
 
-          billing_details: {
-            name: cardholderName,
-          },
-        },
-      });
-
-      if (result.error) {
-        throw new Error(result.error.message);
+      if (confirmError) {
+        throw new Error(confirmError.message);
       }
 
       /* =====================================================
-         6. SUCCESS
-      ===================================================== */
+       6. PAYMENT RESULT
+    ===================================================== */
 
-      if (result.paymentIntent?.status === "succeeded") {
+      if (
+        paymentIntent?.status === "succeeded" ||
+        paymentIntent?.status === "processing"
+      ) {
         navigate("/client/subscription/success", {
           replace: true,
           state: {
             plan,
-            subscription: responseData,
-            paymentIntent: result.paymentIntent,
+            subscription,
+            paymentIntent,
+            responseData,
           },
         });
 
         return;
       }
 
-      if (result.paymentIntent?.status === "processing") {
-        navigate("/client/subscription/success", {
-          replace: true,
-          state: {
-            plan,
-            subscription: responseData,
-            paymentIntent: result.paymentIntent,
-          },
-        });
-
-        return;
+      if (paymentIntent?.status === "requires_action") {
+        throw new Error(
+          "Additional authentication is required to complete payment.",
+        );
       }
 
-      throw new Error("Payment could not be completed.");
+      throw new Error(
+        `Payment could not be completed. Status: ${
+          paymentIntent?.status || "unknown"
+        }`,
+      );
     } catch (error) {
       console.error("Subscription payment error:", error);
 
@@ -263,10 +266,9 @@ const SubscriptionCheckout = () => {
 
             <div className="text-right">
               <span className="text-2xl font-bold text-gray-900 dark:text-white">
+                {plan.currency?.toUpperCase()} {plan.amount}
                 {/* {plan.currency?.toUpperCase()}{" "}
-                  {plan.amount} */}
-                {plan.currency?.toUpperCase()}{" "}
-                {(Number(plan.amount) / 100).toFixed(2)}
+                  {(Number(plan.amount) / 100).toFixed(2)} */}
               </span>
 
               <span className="ml-1 text-sm text-gray-500">

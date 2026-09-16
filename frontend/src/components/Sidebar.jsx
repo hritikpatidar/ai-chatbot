@@ -441,8 +441,6 @@ export default function Sidebar() {
                           type="button"
                           onClick={(e) => {
                             e.stopPropagation();
-
-                            console.log("Pin conversation:", chat._id);
                           }}
                           className="
                             flex

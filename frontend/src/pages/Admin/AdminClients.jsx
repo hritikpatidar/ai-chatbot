@@ -33,7 +33,6 @@ export default function AdminClient() {
   const [selectedClient, setSelectedClient] = useState(null);
   const [isConfirmOpen, setIsConfirmOpen] = useState(false);
   const [isAddClientOpen, setIsAddClientOpen] = useState(false);
-  console.log("selectedClient",selectedClient)
   const { clients, pagination, isLoading, isFetching, error, refetch } =
     useAdminClients({
       page,

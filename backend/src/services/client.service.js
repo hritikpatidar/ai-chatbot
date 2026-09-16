@@ -12,6 +12,7 @@ import Client from "../models/Client.js";
 import { findClientUserByClientId } from "../repositories/user.repository.js";
 import { getProductCountByClientId } from "../repositories/product.repository.js";
 import { getFaqCountByClientId } from "../repositories/faq.repository.js";
+import { stripe } from "./stripe.service.js";
 
 export const getClientConfigService = async (clientKey) => {
   const client = await findClientByKey(clientKey);
@@ -87,6 +88,9 @@ export const getClientByIdService = async (clientId) => {
     email: user.email,
     profileImage: user.profileImage,
     role: user.role,
+    stripe_customer: client.stripe_customer,
+    active_plan: client.active_plan,
+    current_plan_id: client.current_plan_id,
   };
 };
 

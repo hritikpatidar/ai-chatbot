@@ -79,7 +79,8 @@ const SubscriptionDetails = () => {
 
           <div className="text-left sm:text-right">
             <p className="text-3xl font-bold text-gray-900 dark:text-white">
-              {subscription.currency?.toUpperCase()} {subscription.amount}
+              {subscription.currency?.toUpperCase()} {subscription.amount }
+              {/* {subscription.currency?.toUpperCase()} {(subscription.amount / 100).toFixed(2)} */}
             </p>
 
             <p className="text-sm text-gray-500">/ {subscription.interval}</p>

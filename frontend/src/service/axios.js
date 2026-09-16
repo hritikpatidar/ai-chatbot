@@ -100,7 +100,6 @@ axiosInstance.interceptors.response.use(
     /* =====================================================
        NO RESPONSE
     ===================================================== */
-    console.log("error", error);
     if (!error.response) {
       console.log("error", error);
 

@@ -73,12 +73,10 @@ export default function useSpeechRecognition({
       return;
     }
     if (isNewConversation) {
-      console.log("🆕 New conversation - skipping messages fetch");
       dispatch(setConversationLoading(false));
       return;
     }
 
-    console.log("📨 Fetching existing conversation:", conversationId);
     dispatch(setConversationLoading(true));
     dispatch(setActivePage("recentChat"));
     getConversationMessages(conversationId);
@@ -91,7 +89,6 @@ export default function useSpeechRecognition({
     if (!clientKey) {
       return;
     }
-    console.log("🏪 Fetching client config:", clientKey);
     dispatch(fetchClientConfig(clientKey));
   }, [clientKey, isClientChatbot, dispatch]);
 
@@ -121,35 +118,29 @@ export default function useSpeechRecognition({
     };
     if (!enableSocketListeners) return;
     const handleChunk = ({ text }) => {
-      console.log("📥 ai:chunk", text);
       dispatch(setNewMessageLoading(false));
       dispatch(appendAssistantChunk(text));
     };
 
     const handleError = ({ message }) => {
-      console.log("❌ ai:error", message);
       dispatch(setNewMessageLoading(false));
       dispatch(setIsSendDisable(false));
       dispatch(addErrorMessage(message));
     };
     const handleEnd = (data) => {
-      console.log("✅ ai:end", data);
       dispatch(setIsSendDisable(false));
     };
 
     const handleStopeGeneration = (message) => {
-      console.log("🛑 ai:stopped", message);
       dispatch(setNewMessageLoading(false));
       dispatch(setIsSendDisable(false));
     };
 
     const handleMessageList = (data) => {
-      console.log("📨 conversation:messages", data);
       dispatch(setConversationLoading(false));
       dispatch(setMessages(data.messages));
     };
 
-    console.log("Registering socket listeners");
     onAIChunk(handleChunk);
     onAIEnd(handleEnd);
     onAIError(handleError);
@@ -159,7 +150,6 @@ export default function useSpeechRecognition({
     onConversationList(handleConversation);
     onConversationError(handleConversationError);
     return () => {
-      console.log("🔴 Removing AI socket listeners");
       removeAIChunk(handleChunk);
       removeAIEnd(handleEnd);
       removeAIError(handleError);
@@ -288,8 +278,6 @@ export default function useSpeechRecognition({
     }
 
     if (isSendDisable) {
-      console.log("⚠️ Send blocked - AI request already running");
-
       return;
     }
 
@@ -351,7 +339,6 @@ export default function useSpeechRecognition({
   };
 
   const handleFeedback = (type) => {
-    console.log(type); // "up" | "down"
     toast.success("Thank you for message response");
   };
 

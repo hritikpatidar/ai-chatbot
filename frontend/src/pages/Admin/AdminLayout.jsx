@@ -11,16 +11,6 @@ export default function AdminLayout() {
   const [sidebarCollapsed, setSidebarCollapsed] =
     useState(false);
 
-  // Baad me Redux se profile lenge
-  const profile = {
-    fullName: "Admin",
-    email: "admin@example.com",
-  };
-
-  const handleLogout = () => {
-    console.log("Admin logout");
-  };
-
   return (
     <div
       className="

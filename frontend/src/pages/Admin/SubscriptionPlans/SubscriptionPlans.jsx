@@ -943,8 +943,9 @@ const PlanCard = ({ plan, onView, onEdit, onDelete }) => {
                     dark:text-white
                   "
                 >
-                  {plan.currency?.toUpperCase()}{" "}
-                  {(Number(plan.amount) / 100).toFixed(2)}
+                  {plan.currency?.toUpperCase()} {plan.amount}
+                  {/* {plan.currency?.toUpperCase()}{" "}
+                  {(Number(plan.amount) / 100).toFixed(2)} */}
                 </span>
 
                 <span
@@ -1512,8 +1513,9 @@ const PlanDetailsModal = ({ plan, onClose }) => {
                   dark:text-white
                 "
               >
-                {plan.currency?.toUpperCase()}{" "}
-                {(Number(plan.amount) / 100).toFixed(2)}
+                {plan.currency?.toUpperCase()} {plan.amount}
+                  {/* {plan.currency?.toUpperCase()}{" "}
+                  {(Number(plan.amount) / 100).toFixed(2)} */}
               </span>
 
               <span

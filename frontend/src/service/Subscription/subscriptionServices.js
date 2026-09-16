@@ -60,8 +60,8 @@ export const changeSubscriptionPlanApi = async (payload) => {
    PAYMENT METHODS
 ========================================================= */
 
-export const getPaymentMethodsApi = async () => {
-  return httpServices.get("/subscription/payment-methods");
+export const getPaymentMethodsApi = async (subscriptionId) => {
+  return httpServices.get(`/subscription/payment-methods?subscriptionId=${subscriptionId}`);
 };
 
 /* =========================================================

@@ -9,33 +9,49 @@ import PlanCard from "../../components/Subscription/PlanCard";
 
 import { useNavigate } from "react-router-dom";
 import { useMemo, useState } from "react";
+import { useSelector } from "react-redux";
+import ChangePlanModal from "../../components/Subscription/ChangePlanModal";
+import StripeProvider from "../../components/Subscription/StripeProvider";
 
 const SubscriptionPlans = () => {
   const navigate = useNavigate();
-
   // monthly / yearly
   const [billingCycle, setBillingCycle] = useState("month");
-
+  const [changePlanModal, setChangePlanModal] = useState({
+    open: false,
+    plan: null,
+  });
   const { data, isLoading, isFetching, isError, refetch } =
     useSubscriptionPlans();
-
   const { data: currentData } = useCurrentSubscription();
-
+  const { client, loading } = useSelector(
+    (state) => state?.ClientReducer?.clientSlice || {},
+  );
   const plans = data?.data?.data || data?.data || [];
-
-  const currentSubscription =
-    currentData?.data?.data || currentData?.data || null;
-
+  const currentSubscription = currentData?.data?.data || null;
   const currentPlanId =
-    currentSubscription?.planId?._id || currentSubscription?.planId || null;
+    currentSubscription?.planId?._id ||
+    currentSubscription?.planId ||
+    client?.active_plan ||
+    null;
 
-  /**
-   * Filter plans according to selected billing cycle
-   *
-   * Backend example:
-   * interval: "month"
-   * interval: "year"
-   */
+  const currentPlan = useMemo(() => {
+    if (!currentSubscription || !plans.length) {
+      return null;
+    }
+
+    const currentId =
+      currentSubscription?.planId?._id ||
+      currentSubscription?.planId ||
+      client?.active_plan;
+
+    return (
+      plans.find((plan) => plan._id === currentId) ||
+      currentSubscription?.planId ||
+      null
+    );
+  }, [currentSubscription, plans, client?.active_plan]);
+
   const filteredPlans = useMemo(() => {
     return plans.filter(
       (plan) => plan.interval?.toLowerCase() === billingCycle,
@@ -43,7 +59,17 @@ const SubscriptionPlans = () => {
   }, [plans, billingCycle]);
 
   const handleSelectPlan = (plan) => {
-    navigate(`/client/subscription/checkout/${plan._id}`);
+    if (!currentSubscription) {
+      navigate(`/client/subscription/checkout/${plan._id}`);
+      return;
+    }
+    if (plan._id === currentPlanId) {
+      return;
+    }
+    setChangePlanModal({
+      open: true,
+      plan,
+    });
   };
 
   if (isLoading) {
@@ -100,7 +126,7 @@ const SubscriptionPlans = () => {
       <div className="mt-8 flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
         {/* BILLING TOGGLE */}
         <div className="flex justify-center sm:justify-start">
-          <div
+          {/* <div
             className="
                 inline-flex items-center
                 rounded-xl
@@ -166,7 +192,7 @@ const SubscriptionPlans = () => {
             >
               Yearly
             </button>
-          </div>
+          </div> */}
         </div>
 
         {/* REFRESH */}
@@ -210,11 +236,29 @@ const SubscriptionPlans = () => {
               key={plan._id}
               plan={plan}
               currentPlanId={currentPlanId}
+              currentPlan={currentPlan}
               onSelect={handleSelectPlan}
             />
           ))}
         </div>
       )}
+      <StripeProvider>
+        <ChangePlanModal
+          isOpen={changePlanModal.open}
+          onClose={() =>
+            setChangePlanModal({
+              open: false,
+              plan: null,
+            })
+          }
+          currentPlan={currentPlan}
+          selectedPlan={changePlanModal.plan}
+          subscriptionId={currentSubscription?._id}
+          onSuccess={() => {
+            refetch();
+          }}
+        />
+      </StripeProvider>
     </div>
   );
 };

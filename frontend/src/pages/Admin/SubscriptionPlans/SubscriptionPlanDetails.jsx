@@ -5,10 +5,9 @@ import {
   Loader2,
 } from "lucide-react";
 
-import {
-  useSubscriptionPlan,
-} from "../../../hooks/useSubscriptionPlans";
+
 import SubscriptionPlanStatus from "../../../components/AdminComponent/SubscriptionPlans/SubscriptionPlanStatus";
+import { useSubscriptionPlan } from "../../../hooks/Subscription/useSubscriptionPlans";
 
 const SubscriptionPlanDetails = () => {
   const { planId } = useParams();

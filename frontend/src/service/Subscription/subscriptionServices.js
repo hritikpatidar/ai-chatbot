@@ -91,6 +91,16 @@ export const removePaymentMethodApi = async (paymentMethodId) => {
 };
 
 /* =========================================================
+   CANCLE SUBSCRIPTION
+========================================================= */
+
+export const cancleSubscriptionApi = async (subscriptionId) => {
+  return httpServices.post("/subscription/cancel", {
+    subscriptionId,
+  });
+};
+
+/* =========================================================
    REFRESH SUBSCRIPTION
 ========================================================= */
 

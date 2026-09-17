@@ -8,15 +8,18 @@ import {
 import { useState } from "react";
 import { useCurrentSubscription } from "../../hooks/Subscription/useSubscription";
 import ConfirmModal from "../../components/ClientComponent/ConfirmModal";
+import { cancleSubscriptionApi } from "../../service/Subscription/subscriptionServices";
+import toast from "react-hot-toast";
+import { useNavigate } from "react-router-dom";
 
 const SubscriptionDetails = () => {
+  const navigate= useNavigate()
   const { data, isLoading, refetch, isFetching } = useCurrentSubscription();
 
   const [showCancelModal, setShowCancelModal] = useState(false);
   const [isCanceling, setIsCanceling] = useState(false);
 
   const subscription = data?.data?.data || data?.data || null;
-
   if (isLoading) {
     return (
       <div className="flex min-h-100 items-center justify-center">
@@ -31,9 +34,7 @@ const SubscriptionDetails = () => {
         <div className="rounded-2xl border border-gray-200 bg-white p-8 text-center dark:border-gray-800 dark:bg-[#171b23]">
           <CreditCard className="mx-auto text-gray-400" size={40} />
 
-          <h2 className="mt-4 text-lg font-semibold">
-            No Active Subscription
-          </h2>
+          <h2 className="mt-4 text-lg font-semibold">No Active Subscription</h2>
 
           <p className="mt-1 text-sm text-gray-500">
             Choose a plan to get started.
@@ -50,21 +51,28 @@ const SubscriptionDetails = () => {
     setShowCancelModal(true);
   };
 
-  // Confirm cancellation
   const handleConfirmCancel = async () => {
     try {
       setIsCanceling(true);
 
-      // TODO:
-      // Yaha apni cancel subscription API call karo
-      //
-      // await cancelSubscriptionService(subscription._id);
+      const subscriptionId = subscription?._id;
 
-      console.log("Cancel subscription:", subscription._id);
-
-      await refetch();
-
-      setShowCancelModal(false);
+      if (!subscriptionId) {
+        console.error("Subscription ID not found");
+        return;
+      }
+      const response = await cancleSubscriptionApi(subscriptionId);
+      if (response?.data?.success === false) {
+        toast.error(response.data.message);
+        setShowCancelModal(false);
+        await refetch();
+      }
+      if (response?.data?.success) {
+        toast.success(response.data.message);
+        setShowCancelModal(false);
+        await refetch();
+        navigate("/client/subscription")
+      }
     } catch (error) {
       console.error("Cancel subscription error:", error);
     } finally {
@@ -117,46 +125,44 @@ const SubscriptionDetails = () => {
               dark:hover:bg-gray-800
             "
           >
-            <RefreshCw
-              size={16}
-              className={isFetching ? "animate-spin" : ""}
-            />
-
+            <RefreshCw size={16} className={isFetching ? "animate-spin" : ""} />
             Refresh
           </button>
 
           {/* Cancel Subscription */}
-          <button
-            type="button"
-            onClick={handleCancelClick}
-            disabled={isCanceling || isFetching}
-            className="
-              inline-flex
-              items-center
-              justify-center
-              gap-2
-              rounded-xl
-              border
-              border-red-200
-              bg-red-50
-              px-4
-              py-2
-              text-sm
-              font-semibold
-              text-red-600
-              transition
-              hover:bg-red-100
-              disabled:cursor-not-allowed
-              disabled:opacity-50
-              dark:border-red-500/20
-              dark:bg-red-500/10
-              dark:text-red-400
-              dark:hover:bg-red-500/20
-            "
-          >
-            <XCircle size={16} />
-            Cancel Subscription
-          </button>
+          {/* {subscription.status !== "canceled" && (
+            <button
+              type="button"
+              onClick={handleCancelClick}
+              disabled={isCanceling || isFetching}
+              className="
+                inline-flex
+                items-center
+                justify-center
+                gap-2
+                rounded-xl
+                border
+                border-red-200
+                bg-red-50
+                px-4
+                py-2
+                text-sm
+                font-semibold
+                text-red-600
+                transition
+                hover:bg-red-100
+                disabled:cursor-not-allowed
+                disabled:opacity-50
+                dark:border-red-500/20
+                dark:bg-red-500/10
+                dark:text-red-400
+                dark:hover:bg-red-500/20
+              "
+            >
+              <XCircle size={16} />
+              Cancel Subscription
+            </button>
+          )} */}
         </div>
       </div>
 
@@ -184,9 +190,7 @@ const SubscriptionDetails = () => {
               {subscription.currency?.toUpperCase()} {subscription.amount}
             </p>
 
-            <p className="text-sm text-gray-500">
-              / {subscription.interval}
-            </p>
+            <p className="text-sm text-gray-500">/ {subscription.interval}</p>
           </div>
         </div>
 
@@ -202,9 +206,7 @@ const SubscriptionDetails = () => {
 
             <p className="mt-2 text-sm font-semibold text-gray-900 dark:text-white">
               {subscription.currentPeriodStart
-                ? new Date(
-                    subscription.currentPeriodStart
-                  ).toLocaleDateString()
+                ? new Date(subscription.currentPeriodStart).toLocaleDateString()
                 : "-"}
             </p>
           </div>
@@ -217,9 +219,7 @@ const SubscriptionDetails = () => {
 
             <p className="mt-2 text-sm font-semibold text-gray-900 dark:text-white">
               {subscription.currentPeriodEnd
-                ? new Date(
-                    subscription.currentPeriodEnd
-                  ).toLocaleDateString()
+                ? new Date(subscription.currentPeriodEnd).toLocaleDateString()
                 : "-"}
             </p>
           </div>

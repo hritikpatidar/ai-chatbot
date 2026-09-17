@@ -473,7 +473,7 @@ export const changeSubscriptionPlanService = async ({
     error.amountDue = invoice.amount_remaining;
     throw error;
   }
-  console.log("newPlan",newPlan)
+  console.log("newPlan", newPlan)
   // --------------------------------------------
   // 7. Only NOW update MongoDB
   // --------------------------------------------
@@ -578,25 +578,52 @@ export const cancelSubscriptionService = async (subscriptionId) => {
 
   if (!subscription) {
     const error = new Error("Subscription not found");
-
     error.statusCode = 404;
-
     throw error;
   }
 
-  const stripeSubscription = await cancelStripeSubscription(
-    subscription.stripeSubscriptionId,
-  );
+  // Already cancelled check
+  if (
+    subscription.status === "canceled" ||
+    subscription.cancelAtPeriodEnd === false &&
+    subscription.canceledAt
+  ) {
+    const error = new Error("Subscription is already canceled");
+    error.statusCode = 400;
+    throw error;
+  }
 
-  const updatedSubscription = await updateSubscriptionById(subscriptionId, {
-    status: stripeSubscription.status,
+  try {
+    const stripeSubscription = await cancelStripeSubscription(
+      subscription.stripeSubscriptionId
+    );
 
-    cancelAtPeriodEnd: false,
+    const updatedSubscription = await updateSubscriptionById(
+      subscriptionId,
+      {
+        status: stripeSubscription.status,
+        cancelAtPeriodEnd: false,
+        canceledAt: stripeDate(stripeSubscription.canceled_at),
+      }
+    );
 
-    canceledAt: stripeDate(stripeSubscription.canceled_at),
-  });
+    return updatedSubscription;
+  } catch (error) {
+    console.error("Stripe cancel error:", error);
 
-  return updatedSubscription;
+    // Stripe subscription doesn't exist / already cancelled
+    if (
+      error?.statusCode === 404 ||
+      error?.status === 404 ||
+      error?.code === "resource_missing"
+    ) {
+      const stripeError = new Error("Subscription is already canceled");
+      stripeError.statusCode = 400;
+      throw stripeError;
+    }
+
+    throw error;
+  }
 };
 
 /**

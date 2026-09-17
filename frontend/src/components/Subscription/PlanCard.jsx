@@ -1,6 +1,8 @@
 import { Check, ArrowRight } from "lucide-react";
+import { useNavigate } from "react-router-dom";
 
 const PlanCard = ({ plan, currentPlanId, currentPlan, onSelect }) => {
+  const navigate = useNavigate();
   const isCurrent = currentPlanId === plan.name || currentPlanId === plan._id;
   const isUpgrade =
     currentPlan && Number(plan.sortOrder) > Number(currentPlan.sortOrder);
@@ -27,6 +29,7 @@ const PlanCard = ({ plan, currentPlanId, currentPlan, onSelect }) => {
         transition
         hover:-translate-y-1
         hover:shadow-xl
+        courser-pointer
 
         dark:border-gray-800
         dark:bg-[#171b23]
@@ -74,35 +77,56 @@ const PlanCard = ({ plan, currentPlanId, currentPlan, onSelect }) => {
         ))}
       </div>
 
-      <button
-        type="button"
-        disabled={isCurrent}
-        onClick={() => onSelect(plan)}
-        className="
-          mt-8
-          flex
-          w-full
-          items-center
-          justify-center
-          gap-2
-          rounded-xl
-          bg-indigo-600
-          px-4
-          py-3
-          text-sm
-          font-semibold
-          text-white
-          transition
-          hover:bg-indigo-700
-          disabled:cursor-not-allowed
-          disabled:bg-gray-300
-          dark:disabled:bg-gray-700
-        "
-      >
-        {actionText}
+      <div className="mt-8 flex flex-col gap-3 sm:flex-row">
+        {/* Main Action Button */}
+        <button
+          type="button"
+          disabled={isCurrent}
+          onClick={() => onSelect(plan)}
+          className="
+            flex flex-1
+            items-center justify-center gap-2
+            rounded-xl
+            bg-indigo-600
+            px-4 py-3
+            text-sm font-semibold text-white
+            transition
+            hover:bg-indigo-700
+            disabled:cursor-not-allowed
+            disabled:bg-gray-300
+            dark:disabled:bg-gray-700
+          "
+        >
+          {actionText}
 
-        {!isCurrent && <ArrowRight size={17} />}
-      </button>
+          {!isCurrent && <ArrowRight size={17} />}
+        </button>
+
+        {/* View Details Button */}
+        {isCurrent && (
+          <button
+            type="button"
+            onClick={() => {
+              if (isCurrent) {
+                navigate("/client/subscription/details");
+              }
+            }}
+            className="
+              flex flex-1
+              items-center justify-center gap-2
+              rounded-xl
+              bg-indigo-600
+              px-4 py-3
+              text-sm font-semibold text-white
+              transition
+              hover:bg-indigo-700
+            "
+          >
+            View Details
+            {isCurrent && <ArrowRight size={17} />}
+          </button>
+        )}
+      </div>
     </div>
   );
 };

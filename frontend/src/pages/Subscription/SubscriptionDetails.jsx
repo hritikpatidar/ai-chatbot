@@ -3,11 +3,17 @@ import {
   CreditCard,
   RefreshCw,
   CheckCircle2,
+  XCircle,
 } from "lucide-react";
+import { useState } from "react";
 import { useCurrentSubscription } from "../../hooks/Subscription/useSubscription";
+import ConfirmModal from "../../components/ClientComponent/ConfirmModal";
 
 const SubscriptionDetails = () => {
   const { data, isLoading, refetch, isFetching } = useCurrentSubscription();
+
+  const [showCancelModal, setShowCancelModal] = useState(false);
+  const [isCanceling, setIsCanceling] = useState(false);
 
   const subscription = data?.data?.data || data?.data || null;
 
@@ -25,7 +31,9 @@ const SubscriptionDetails = () => {
         <div className="rounded-2xl border border-gray-200 bg-white p-8 text-center dark:border-gray-800 dark:bg-[#171b23]">
           <CreditCard className="mx-auto text-gray-400" size={40} />
 
-          <h2 className="mt-4 text-lg font-semibold">No Active Subscription</h2>
+          <h2 className="mt-4 text-lg font-semibold">
+            No Active Subscription
+          </h2>
 
           <p className="mt-1 text-sm text-gray-500">
             Choose a plan to get started.
@@ -37,8 +45,36 @@ const SubscriptionDetails = () => {
 
   const plan = subscription.planId || {};
 
+  // Open confirmation modal
+  const handleCancelClick = () => {
+    setShowCancelModal(true);
+  };
+
+  // Confirm cancellation
+  const handleConfirmCancel = async () => {
+    try {
+      setIsCanceling(true);
+
+      // TODO:
+      // Yaha apni cancel subscription API call karo
+      //
+      // await cancelSubscriptionService(subscription._id);
+
+      console.log("Cancel subscription:", subscription._id);
+
+      await refetch();
+
+      setShowCancelModal(false);
+    } catch (error) {
+      console.error("Cancel subscription error:", error);
+    } finally {
+      setIsCanceling(false);
+    }
+  };
+
   return (
     <div className="min-h-full">
+      {/* Header */}
       <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
         <div>
           <h1 className="text-2xl font-bold text-gray-900 dark:text-white">
@@ -50,16 +86,81 @@ const SubscriptionDetails = () => {
           </p>
         </div>
 
-        <button
-          onClick={() => refetch()}
-          disabled={isFetching}
-          className="inline-flex items-center justify-center gap-2 rounded-xl border border-gray-200 px-4 py-2 text-sm dark:border-gray-700"
-        >
-          <RefreshCw size={16} className={isFetching ? "animate-spin" : ""} />
-          Refresh
-        </button>
+        {/* Actions */}
+        <div className="flex flex-col gap-2 sm:flex-row">
+          {/* Refresh */}
+          <button
+            type="button"
+            onClick={() => refetch()}
+            disabled={isFetching || isCanceling}
+            className="
+              inline-flex
+              items-center
+              justify-center
+              gap-2
+              rounded-xl
+              border
+              border-gray-200
+              bg-white
+              px-4
+              py-2
+              text-sm
+              font-medium
+              text-gray-700
+              transition
+              hover:bg-gray-50
+              disabled:cursor-not-allowed
+              disabled:opacity-50
+              dark:border-gray-700
+              dark:bg-[#171b23]
+              dark:text-gray-200
+              dark:hover:bg-gray-800
+            "
+          >
+            <RefreshCw
+              size={16}
+              className={isFetching ? "animate-spin" : ""}
+            />
+
+            Refresh
+          </button>
+
+          {/* Cancel Subscription */}
+          <button
+            type="button"
+            onClick={handleCancelClick}
+            disabled={isCanceling || isFetching}
+            className="
+              inline-flex
+              items-center
+              justify-center
+              gap-2
+              rounded-xl
+              border
+              border-red-200
+              bg-red-50
+              px-4
+              py-2
+              text-sm
+              font-semibold
+              text-red-600
+              transition
+              hover:bg-red-100
+              disabled:cursor-not-allowed
+              disabled:opacity-50
+              dark:border-red-500/20
+              dark:bg-red-500/10
+              dark:text-red-400
+              dark:hover:bg-red-500/20
+            "
+          >
+            <XCircle size={16} />
+            Cancel Subscription
+          </button>
+        </div>
       </div>
 
+      {/* Subscription Card */}
       <div className="mt-6 rounded-2xl border border-gray-200 bg-white p-6 shadow-sm dark:border-gray-800 dark:bg-[#171b23]">
         <div className="flex flex-col gap-5 sm:flex-row sm:items-center sm:justify-between">
           <div>
@@ -73,21 +174,25 @@ const SubscriptionDetails = () => {
               </span>
             </div>
 
-            <p className="mt-2 text-sm text-gray-500">{plan.description}</p>
+            <p className="mt-2 text-sm text-gray-500 dark:text-gray-400">
+              {plan.description}
+            </p>
           </div>
 
           <div className="text-left sm:text-right">
             <p className="text-3xl font-bold text-gray-900 dark:text-white">
-              {subscription.currency?.toUpperCase()} {subscription.amount }
-              {/* {subscription.currency?.toUpperCase()} {(subscription.amount / 100).toFixed(2)} */}
+              {subscription.currency?.toUpperCase()} {subscription.amount}
             </p>
 
-            <p className="text-sm text-gray-500">/ {subscription.interval}</p>
+            <p className="text-sm text-gray-500">
+              / {subscription.interval}
+            </p>
           </div>
         </div>
 
         <div className="my-6 h-px bg-gray-200 dark:bg-gray-800" />
 
+        {/* Period */}
         <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
           <div className="rounded-xl bg-gray-50 p-4 dark:bg-gray-950">
             <div className="flex items-center gap-2 text-gray-500">
@@ -97,7 +202,9 @@ const SubscriptionDetails = () => {
 
             <p className="mt-2 text-sm font-semibold text-gray-900 dark:text-white">
               {subscription.currentPeriodStart
-                ? new Date(subscription.currentPeriodStart).toLocaleDateString()
+                ? new Date(
+                    subscription.currentPeriodStart
+                  ).toLocaleDateString()
                 : "-"}
             </p>
           </div>
@@ -110,12 +217,15 @@ const SubscriptionDetails = () => {
 
             <p className="mt-2 text-sm font-semibold text-gray-900 dark:text-white">
               {subscription.currentPeriodEnd
-                ? new Date(subscription.currentPeriodEnd).toLocaleDateString()
+                ? new Date(
+                    subscription.currentPeriodEnd
+                  ).toLocaleDateString()
                 : "-"}
             </p>
           </div>
         </div>
 
+        {/* Features */}
         {plan.features?.length > 0 && (
           <div className="mt-7">
             <h3 className="font-semibold text-gray-900 dark:text-white">
@@ -140,6 +250,23 @@ const SubscriptionDetails = () => {
           </div>
         )}
       </div>
+
+      {/* Cancel Confirmation Modal */}
+      <ConfirmModal
+        isOpen={showCancelModal}
+        onCancel={() => {
+          if (!isCanceling) {
+            setShowCancelModal(false);
+          }
+        }}
+        onConfirm={handleConfirmCancel}
+        title="Cancel Subscription"
+        message={`Are you sure you want to cancel your ${plan.name} subscription?`}
+        confirmText="Yes, Cancel"
+        cancelText="Keep Subscription"
+        loading={isCanceling}
+        danger={true}
+      />
     </div>
   );
 };

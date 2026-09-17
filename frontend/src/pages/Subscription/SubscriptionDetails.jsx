@@ -4,7 +4,6 @@ import {
   RefreshCw,
   CheckCircle2,
 } from "lucide-react";
-
 import { useCurrentSubscription } from "../../hooks/Subscription/useSubscription";
 
 const SubscriptionDetails = () => {

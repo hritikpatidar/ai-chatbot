@@ -8,8 +8,7 @@ import {
 import {
   useSubscriptionPlan,
 } from "../../../hooks/useSubscriptionPlans";
-
-import SubscriptionPlanStatus from "../../../components/Admin/SubscriptionPlans/SubscriptionPlanStatus";
+import SubscriptionPlanStatus from "../../../components/AdminComponent/SubscriptionPlans/SubscriptionPlanStatus";
 
 const SubscriptionPlanDetails = () => {
   const { planId } = useParams();

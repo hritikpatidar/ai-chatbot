@@ -1,5 +1,6 @@
 import z from "zod";
 import { isValidPhoneNumber } from "libphonenumber-js";
+import { COUNTRY_CODES } from "../constants/countries";
 
 const validatePhoneNumber = (value) => {
   if (!value || !value.trim()) {
@@ -674,4 +675,66 @@ export const welcomeUserSchema = z.object({
   email: z.string().trim().email("Please enter a valid email address"),
 
   phone: optionalPhoneField,
+});
+
+const requiredText = (message, min = 2, max = 100) =>
+  z
+    .string()
+    .trim()
+    .min(min, message)
+    .max(max, `Value cannot exceed ${max} characters.`);
+
+export const billingAddressSchema = z.object({
+  line1: z
+    .string()
+    .trim()
+    .min(3, "Address Line 1 must be at least 3 characters.")
+    .max(200, "Address Line 1 cannot exceed 200 characters."),
+
+  line2: z
+    .string()
+    .trim()
+    .max(200, "Address Line 2 cannot exceed 200 characters.")
+    .optional()
+    .or(z.literal("")),
+
+  city: requiredText(
+    "City must be at least 2 characters.",
+    2,
+    100,
+  ),
+
+  state: requiredText(
+    "State / Province must be at least 2 characters.",
+    2,
+    100,
+  ),
+
+  postal_code: z
+    .string()
+    .trim()
+    .min(3, "Please enter a valid postal code.")
+    .max(20, "Postal code cannot exceed 20 characters."),
+
+  country: z
+    .string()
+    .trim()
+    .transform((value) => value.toUpperCase())
+    .refine(
+      (value) => COUNTRY_CODES.includes(value),
+      "Please select a valid country.",
+    ),
+});
+
+export const checkoutSchema = z.object({
+  cardholderName: z
+    .string()
+    .trim()
+    .min(2, "Cardholder name must be at least 2 characters.")
+    .max(
+      100,
+      "Cardholder name cannot exceed 100 characters.",
+    ),
+
+  address: billingAddressSchema,
 });

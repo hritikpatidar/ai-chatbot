@@ -33,7 +33,7 @@ export default function CustomSelect({
     },
 
     md: {
-      button: "h-12 px-3.5 text-sm",
+      button: "h-11 px-3.5 text-sm",
       icon: 17,
       menu: "text-sm",
       menuHeight: 250,

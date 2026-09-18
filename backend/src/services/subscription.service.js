@@ -263,7 +263,7 @@ export const createSubscriptionService = async ({
       planId: String(plan._id),
     },
   });
-
+  console.log("stripeSubscription", stripeSubscription)
   /*
    * 7. Extract client secret
    */

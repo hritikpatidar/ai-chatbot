@@ -174,7 +174,6 @@ export const createSubscriptionService = async ({
   /*
    * 1. Existing subscription check
    */
-
   const existingSubscription = await findSubscriptionByClientId(clientId);
 
   if (

@@ -94,7 +94,7 @@ export const verifyEmailOTPService = async (body) => {
   if (purpose === "register") {
     const user = await verifyUserEmail(email);
     const payload = {
-      id: user?.role === "client" ? user?.clientId : user._id,
+      id: user._id,
       clientId: user?.clientId,
       fullName: user.fullName,
       email: user.email,
@@ -157,7 +157,7 @@ export const loginService = async (body) => {
     throw new Error("Invalid email or password");
   }
   const payload = {
-    id: user?.role === "client" ? user?.clientId : user._id,
+    id: user._id,
     clientId: user?.clientId,
     fullName: user.fullName,
     email: user.email,

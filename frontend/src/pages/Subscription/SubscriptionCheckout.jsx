@@ -11,12 +11,25 @@ import {
 
 import StripeProvider from "../../components/Subscription/StripeProvider";
 import PaymentForm from "../../components/Subscription/PaymentForm";
+import { useSelector } from "react-redux";
 
 const SubscriptionCheckout = () => {
   const { planId } = useParams();
   const navigate = useNavigate();
   const [paymentError, setPaymentError] = useState("");
   const [loading, setLoading] = useState(false);
+  const { client } = useSelector(
+    (state) => state?.ClientReducer?.clientSlice || {},
+  );
+  const address = {
+    line1: client.address.addressLine1,
+    line2: client.address.addressLine2,
+    city: client.address.city,
+    state: client.address.state,
+    postal_code: client.address.postalCode,
+    country: "IN",
+  };
+  
   const { data, isLoading } = useSubscriptionPlans();
   const { data: currentData } = useCurrentSubscription();
   const { mutateAsync: createSubscription } = useCreateSubscription();
@@ -48,14 +61,7 @@ const SubscriptionCheckout = () => {
           card: cardNumber,
           billing_details: {
             name: cardholderName,
-            address: {
-              line1: "ABCS",
-              line2: "ABCD",
-              city: "Indore",
-              state: "Madhya Pradesh",
-              postal_code: "452001",
-              country: "IN",
-            },
+            address: address,
           },
         });
 
@@ -75,16 +81,9 @@ const SubscriptionCheckout = () => {
         planId: plan._id,
         paymentMethodId: paymentMethod.id,
         billingDetails: {
-              name: cardholderName,
-              address: {
-                line1: "ABCS",
-                line2: "ABCD",
-                city: "Indore",
-                state: "Madhya Pradesh",
-                postal_code: "452001",
-                country: "IN",
-              },
-            },
+          name: cardholderName,
+          address: address,
+        },
       });
 
       const responseData = response?.data?.data || response?.data || {};
@@ -105,6 +104,20 @@ const SubscriptionCheckout = () => {
 
         return;
       }
+      if (responseData?.subscription.clientId.active_plan === "Free") {
+        let paymentIntent = null;
+        navigate("/client/subscription/success", {
+          replace: true,
+          state: {
+            plan,
+            subscription,
+            paymentIntent,
+            responseData,
+          },
+        });
+
+        return;
+      }
 
       /* =====================================================
        4. GET CLIENT SECRET
@@ -112,7 +125,10 @@ const SubscriptionCheckout = () => {
 
       const clientSecret = responseData?.clientSecret || null;
       if (!clientSecret) {
-        console.error("Subscription API response does not contain client secret:",responseData);
+        console.error(
+          "Subscription API response does not contain client secret:",
+          responseData,
+        );
 
         throw new Error("Payment client secret was not generated.");
       }

@@ -180,7 +180,7 @@ const clientSchema = new mongoose.Schema(
 
     active_plan: {
       type: String,
-      default: "Free", //Free, Basic, Pro Pro
+      default: "", //Free, Basic, Pro Pro
     },
     current_plan_id:{
       type: mongoose.Schema.Types.ObjectId,

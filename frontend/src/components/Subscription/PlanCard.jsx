@@ -12,8 +12,8 @@ const PlanCard = ({ plan, currentPlanId, currentPlan, onSelect }) => {
     : isCurrent
       ? "Current Plan"
       : isUpgrade
-        ? "Upgrade"
-        : "Downgrade";
+        ? `Upgrade to ${plan.name}`
+        : `Downgrade to ${plan.name}`;
   return (
     <div
       className={`

@@ -23,7 +23,8 @@ const SubscriptionPlans = () => {
   });
   const { data, isLoading, isFetching, isError, refetch } =
     useSubscriptionPlans();
-  const { data: currentData } = useCurrentSubscription();
+  const { data: currentData, refetch: currentSubscriptionRefetch } =
+    useCurrentSubscription();
   const { client, loading } = useSelector(
     (state) => state?.ClientReducer?.clientSlice || {},
   );
@@ -199,7 +200,10 @@ const SubscriptionPlans = () => {
         <div className="flex justify-center sm:justify-end">
           <button
             type="button"
-            onClick={() => refetch()}
+            onClick={() => {
+              refetch();
+              currentSubscriptionRefetch();
+            }}
             disabled={isFetching}
             className="
                 flex items-center justify-center gap-2

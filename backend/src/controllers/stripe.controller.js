@@ -166,8 +166,6 @@ export const stripeWebhook = async (req, res) => {
       case "invoice.paid": {
         const invoice = event.data.object;
 
-        console.log("Stripe invoice paid:", invoice.id);
-
         if (invoice.subscription) {
           const stripeSubscription = await stripe.subscriptions.retrieve(
             invoice.subscription,
@@ -181,9 +179,6 @@ export const stripeWebhook = async (req, res) => {
 
       case "invoice.payment_failed": {
         const invoice = event.data.object;
-
-        console.log("Stripe invoice payment failed:", invoice.id);
-
         if (invoice.subscription) {
           const stripeSubscription = await stripe.subscriptions.retrieve(
             invoice.subscription,
@@ -197,9 +192,6 @@ export const stripeWebhook = async (req, res) => {
 
       case "invoice.payment_action_required": {
         const invoice = event.data.object;
-
-        console.log("Stripe payment action required:", invoice.id);
-
         if (invoice.subscription) {
           const stripeSubscription = await stripe.subscriptions.retrieve(
             invoice.subscription,

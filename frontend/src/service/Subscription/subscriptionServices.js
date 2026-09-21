@@ -57,40 +57,6 @@ export const changeSubscriptionPlanApi = async (payload) => {
 };
 
 /* =========================================================
-   PAYMENT METHODS
-========================================================= */
-
-export const getPaymentMethodsApi = async (subscriptionId) => {
-  return httpServices.get(`/subscription/payment-methods?subscriptionId=${subscriptionId}`);
-};
-
-/* =========================================================
-   ADD PAYMENT METHOD
-========================================================= */
-
-export const addPaymentMethodApi = async (payload) => {
-  return httpServices.post("/subscription/payment-methods", payload);
-};
-
-/* =========================================================
-   SET DEFAULT PAYMENT METHOD
-========================================================= */
-
-export const setDefaultPaymentMethodApi = async (paymentMethodId) => {
-  return httpServices.patch(
-    `/subscription/payment-method/${paymentMethodId}/default`,
-  );
-};
-
-/* =========================================================
-   REMOVE PAYMENT METHOD
-========================================================= */
-
-export const removePaymentMethodApi = async (paymentMethodId) => {
-  return httpServices.delete(`/subscription/payment-method/${paymentMethodId}`);
-};
-
-/* =========================================================
    CANCLE SUBSCRIPTION
 ========================================================= */
 

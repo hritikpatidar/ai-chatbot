@@ -16,6 +16,9 @@ import { useState } from "react";
 import ConfirmModal from "../../components/ClientComponent/ConfirmModal";
 import { getImageUrl } from "../../utils/imageUrl";
 import profile from "../../assets/profile1.jpg";
+import PaymentMethods from "../../components/ClientComponent/PaymentMethods";
+import { useCurrentSubscription } from "../../hooks/Subscription/useSubscription";
+import StripeProvider from "../../components/Subscription/StripeProvider";
 
 export default function ClientSettings() {
   const dispatch = useDispatch();
@@ -26,6 +29,12 @@ export default function ClientSettings() {
   );
   const [deleteModalOpen, setDeleteModalOpen] = useState(false);
   const [loading, setLoading] = useState(false);
+
+  const { data, isLoading, refetch, isFetching } = useCurrentSubscription();
+
+  const subscription = data?.data?.data || data?.data || null;
+
+  const subscriptionId = subscription?._id || subscription?.id || null;
 
   const handleDeleteAccount = async () => {
     try {
@@ -487,6 +496,9 @@ export default function ClientSettings() {
           </div>
         </div>
       </div>
+      <StripeProvider>
+        <PaymentMethods subscriptionId={subscriptionId} />
+      </StripeProvider>
       <div
         className="
             mt-5

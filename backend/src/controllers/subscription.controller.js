@@ -148,7 +148,6 @@ export const getUserSubscriptionController = async (req, res) => {
 export const getSubscriptionDetailsController = async (req, res) => {
   try {
     const { subscriptionId } = req.params;
-    console.log("subscriptionId", subscriptionId);
     if (!subscriptionId) {
       return res.status(400).json({
         success: false,
@@ -456,9 +455,7 @@ export const resumeSubscriptionController = async (req, res) => {
 
 export const getPaymentMethodsController = async (req, res) => {
   try {
-    console.log("req.query", req.query);
     const subscriptionId = req.query.subscriptionId;
-    console.log("subscriptionIds controler", subscriptionId);
     if (!subscriptionId) {
       return res.status(400).json({
         success: false,

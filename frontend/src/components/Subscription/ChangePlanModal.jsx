@@ -14,11 +14,11 @@ import {
 import {
   usePreviewSubscription,
   useChangeSubscriptionPlan,
-  usePaymentMethods,
 } from "../../hooks/Subscription/useSubscription";
 import { useStripe, useElements, CardElement } from "@stripe/react-stripe-js";
 import { useNavigate } from "react-router-dom";
 import { useTheme } from "../../context/ThemeContext";
+import { usePaymentMethods } from "../../hooks/Subscription/usePaymentMethods";
 
 const ChangePlanModal = ({
   isOpen,
@@ -44,9 +44,10 @@ const ChangePlanModal = ({
     isFetching: cardsFetching,
     isError: cardsError,
   } = usePaymentMethods(subscriptionId);
-  const paymentMethods = cardsData?.data?.data?.paymentMethods || [];
+  
+  const paymentMethods = cardsData?.paymentMethods || [];
   const defaultPaymentMethod =
-    cardsData?.data?.data?.defaultPaymentMethod || null;
+    cardsData?.defaultPaymentMethod || null;
 
   const isUpgrade = useMemo(() => {
     if (!currentPlan || !selectedPlan) return false;
@@ -447,15 +448,15 @@ const ChangePlanModal = ({
           {/* PAYMENT METHODS */}
           <div
             className="
-            border-t
-            border-gray-100
+            
             px-4 pb-5
             sm:px-6 sm:pb-6
             dark:border-gray-800
           "
           >
-            <div className="mb-4 flex items-start justify-between gap-3">
-              <div>
+            <div className="mb-4 flex border-t 
+            border-gray-100 dark:border-gray-800 items-start justify-between gap-3">
+              <div className="mt-4">
                 <h3 className="text-sm font-semibold text-gray-900 dark:text-white">
                   Payment Method
                 </h3>
@@ -465,7 +466,7 @@ const ChangePlanModal = ({
                 </p>
               </div>
 
-              <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-indigo-50 dark:bg-indigo-500/10">
+              <div className="flex mt-4 h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-indigo-50 dark:bg-indigo-500/10">
                 <CreditCard
                   size={18}
                   className="text-indigo-600 dark:text-indigo-400"

@@ -11,12 +11,7 @@ import {
   createSubscriptionApi,
   previewSubscriptionApi,
   changeSubscriptionPlanApi,
-  getPaymentMethodsApi,
-  addPaymentMethodApi,
-  setDefaultPaymentMethodApi,
-  removePaymentMethodApi,
 } from "../../service/Subscription/subscriptionServices";
-
 /* =========================================================
    QUERY KEYS
 ========================================================= */
@@ -37,11 +32,6 @@ export const subscriptionKeys = {
   userCurrent: () => [
     ...subscriptionKeys.all,
     "user-current",
-  ],
-
-  paymentMethods: () => [
-    ...subscriptionKeys.all,
-    "payment-methods",
   ],
 };
 
@@ -137,60 +127,3 @@ export const useChangeSubscriptionPlan = () => {
   });
 };
 
-/* =========================================================
-   PAYMENT METHODS
-========================================================= */
-
-export const usePaymentMethods = (subscriptionId) => {
-  return useQuery({
-    queryKey: subscriptionKeys.paymentMethods(),
-
-    queryFn:  () => getPaymentMethodsApi(subscriptionId),
-
-    staleTime: 60 * 1000,
-
-    refetchOnWindowFocus: false,
-  });
-};
-
-export const useAddPaymentMethod = () => {
-  const queryClient = useQueryClient();
-
-  return useMutation({
-    mutationFn: addPaymentMethodApi,
-
-    onSuccess: () => {
-      queryClient.invalidateQueries({
-        queryKey: subscriptionKeys.paymentMethods(),
-      });
-    },
-  });
-};
-
-export const useSetDefaultPaymentMethod = () => {
-  const queryClient = useQueryClient();
-
-  return useMutation({
-    mutationFn: setDefaultPaymentMethodApi,
-
-    onSuccess: () => {
-      queryClient.invalidateQueries({
-        queryKey: subscriptionKeys.paymentMethods(),
-      });
-    },
-  });
-};
-
-export const useRemovePaymentMethod = () => {
-  const queryClient = useQueryClient();
-
-  return useMutation({
-    mutationFn: removePaymentMethodApi,
-
-    onSuccess: () => {
-      queryClient.invalidateQueries({
-        queryKey: subscriptionKeys.paymentMethods(),
-      });
-    },
-  });
-};

@@ -32,7 +32,6 @@ export const findSubscriptionByUserId = async (userId) => {
  * Find subscription by MongoDB ID
  */
 export const findSubscriptionById = async (subscriptionId) => {
-  console.log("subscriptionIds repo", subscriptionId);
   return await Subscription.findById(subscriptionId)
     .populate("planId")
     .populate("clientId")

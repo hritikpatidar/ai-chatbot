@@ -295,7 +295,6 @@ export const createSubscriptionService = async ({
     plan,
     stripeCustomerId: stripeCustomer.id,
   });
-  console.log("subscriptionData", subscriptionData)
   const subscription = await createSubscription(
     subscriptionData
   );
@@ -472,7 +471,6 @@ export const changeSubscriptionPlanService = async ({
     error.amountDue = invoice.amount_remaining;
     throw error;
   }
-  console.log("newPlan", newPlan)
   // --------------------------------------------
   // 7. Only NOW update MongoDB
   // --------------------------------------------
@@ -768,11 +766,30 @@ export const setDefaultPaymentMethodService = async ({
 /**
  * Remove payment method
  */
+// export const removePaymentMethodService = async ({
+//   subscriptionId,
+//   paymentMethodId,
+// }) => {
+//   const subscription = await findSubscriptionById(subscriptionId);
+
+//   if (!subscription) {
+//     const error = new Error("Subscription not found");
+
+//     error.statusCode = 404;
+
+//     throw error;
+//   }
+
+//   return await detachStripePaymentMethod(paymentMethodId);
+// };
+
+
 export const removePaymentMethodService = async ({
   subscriptionId,
   paymentMethodId,
 }) => {
-  const subscription = await findSubscriptionById(subscriptionId);
+  const subscription =
+    await findSubscriptionById(subscriptionId);
 
   if (!subscription) {
     const error = new Error("Subscription not found");
@@ -782,7 +799,89 @@ export const removePaymentMethodService = async ({
     throw error;
   }
 
-  return await detachStripePaymentMethod(paymentMethodId);
+  const customerId =
+    subscription.stripeCustomerId;
+
+  if (!customerId) {
+    const error = new Error("Stripe customer ID not found");
+    error.statusCode = 400;
+    throw error;
+  }
+
+  // --------------------------------------------------
+  // 1. Get all customer's saved card payment methods
+  // --------------------------------------------------
+
+  const paymentMethods = await getStripePaymentMethods(customerId);
+  const remainingPaymentMethods =
+    paymentMethods.data.filter(
+      (paymentMethod) =>
+        paymentMethod.id !== paymentMethodId,
+    );
+
+  // --------------------------------------------------
+  // 2. Check whether payment method exists
+  // --------------------------------------------------
+
+  const paymentMethodExists =
+    paymentMethods.data.some(
+      (paymentMethod) =>
+        paymentMethod.id === paymentMethodId,
+    );
+
+  if (!paymentMethodExists) {
+    const error = new Error("Payment method not found");
+    error.statusCode = 404;
+    throw error;
+  }
+
+  // --------------------------------------------------
+  // 3. If another card exists,
+  //    make it default BEFORE deleting old card
+  // --------------------------------------------------
+
+  let newDefaultPaymentMethod = null;
+  if (remainingPaymentMethods.length > 0) {
+    newDefaultPaymentMethod = remainingPaymentMethods[0];
+
+    await setDefaultStripePaymentMethod({
+      customerId,
+      paymentMethodId: newDefaultPaymentMethod.id,
+    });
+  }
+
+  // --------------------------------------------------
+  // 4. Detach old payment method
+  // --------------------------------------------------
+
+  const detachedPaymentMethod =
+    await detachStripePaymentMethod(
+      paymentMethodId,
+    );
+
+  // --------------------------------------------------
+  // 5. Return useful response
+  // --------------------------------------------------
+
+  return {
+    deletedPaymentMethod:
+      detachedPaymentMethod,
+
+    newDefaultPaymentMethod:
+      newDefaultPaymentMethod
+        ? {
+          id: newDefaultPaymentMethod.id,
+          brand:
+            newDefaultPaymentMethod.card?.brand,
+          last4:
+            newDefaultPaymentMethod.card?.last4,
+          exp_month:
+            newDefaultPaymentMethod.card?.exp_month,
+          exp_year:
+            newDefaultPaymentMethod.card?.exp_year,
+        }
+        : null,
+  };
 };
 
 /* =========================================================

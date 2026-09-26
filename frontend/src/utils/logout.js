@@ -15,6 +15,7 @@ export const handleLogout = async ({
   refreshToken,
 }) => {
   const fcmToken = getItemLocalStorage("fcm_token");
+  const theme = getItemLocalStorage("theme");
 
   try {
     setIsLogoutLoading?.(true);
@@ -40,6 +41,9 @@ export const handleLogout = async ({
 
     if (fcmToken) {
       setItemLocalStorage("fcm_token", fcmToken);
+    }
+    if(theme){
+      setItemLocalStorage("theme", theme);
     }
     navigate("/login");
     // setIsLogoutLoading?.(false);

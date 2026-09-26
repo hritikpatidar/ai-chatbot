@@ -437,7 +437,7 @@ export default function PaymentMethods({ subscriptionId }) {
                 bg-gray-50
                 p-4
                 dark:border-white/10
-                dark:bg-white/[0.03]
+                dark:bg-white/3
               "
             >
               <div className="mb-4 flex items-start gap-3">
@@ -621,7 +621,7 @@ export default function PaymentMethods({ subscriptionId }) {
                       p-4
                       transition
                       dark:border-white/10
-                      dark:bg-white/[0.03]
+                      dark:bg-white/3
                       sm:flex-row
                       sm:items-center
                       sm:justify-between

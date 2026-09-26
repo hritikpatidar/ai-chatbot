@@ -130,6 +130,7 @@ export const createStripeSubscription = async ({
         price: priceId,
       },
     ],
+    collection_method: "charge_automatically",
     payment_behavior: "default_incomplete",
     payment_settings: {
       save_default_payment_method: "on_subscription",

@@ -55,6 +55,7 @@ export const updateWidgetVisitor = async (
 ========================================================= */
 
 export const createWidgetSession = async (data) => {
+  console.log("data",data)
   return await Session.create(data);
 };
 

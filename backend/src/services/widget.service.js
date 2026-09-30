@@ -88,9 +88,10 @@ export const identifyWidgetVisitor = async ({
 
   const sessionToken = generateSessionToken();
   const sessionTokenHash = hashSessionToken(sessionToken);
-  const expiresAt = new Date();
-  expiresAt.setDate(expiresAt.getDate() + env.WIDGET_SESSION_DAYS_EXPIRE);
 
+  const sessionDays = Number(env.WIDGET_SESSION_DAYS_EXPIRE);
+  const expiresAt = new Date();
+  expiresAt.setDate(expiresAt.getDate() + sessionDays);
   await createWidgetSession({
     clientId,
     visitorId: visitor._id,

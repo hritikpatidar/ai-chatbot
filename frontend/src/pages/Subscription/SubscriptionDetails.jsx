@@ -130,7 +130,7 @@ const SubscriptionDetails = () => {
           </button>
 
           {/* Cancel Subscription */}
-          {/* {subscription.status !== "canceled" && (
+          {subscription.status !== "canceled" && (
             <button
               type="button"
               onClick={handleCancelClick}
@@ -162,7 +162,7 @@ const SubscriptionDetails = () => {
               <XCircle size={16} />
               Cancel Subscription
             </button>
-          )} */}
+          )}
         </div>
       </div>
 

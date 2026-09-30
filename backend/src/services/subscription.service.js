@@ -8,6 +8,7 @@ import {
   createSubscription,
   updateSubscriptionById,
   updateSubscriptionByStripeId,
+  deleteSubscriptionById,
 } from "../repositories/subscription.repository.js";
 
 import {
@@ -594,15 +595,13 @@ export const cancelSubscriptionService = async (subscriptionId) => {
     const stripeSubscription = await cancelStripeSubscription(
       subscription.stripeSubscriptionId
     );
-
-    const updatedSubscription = await updateSubscriptionById(
-      subscriptionId,
-      {
-        status: stripeSubscription.status,
-        cancelAtPeriodEnd: false,
-        canceledAt: stripeDate(stripeSubscription.canceled_at),
-      }
-    );
+    const clientId = subscription.clientId
+    await updateClient(clientId, {
+      active_plan: null,
+      current_plan_id: null,
+      stripe_customer: null,
+    });
+    const updatedSubscription = await deleteSubscriptionById(subscriptionId);
 
     return updatedSubscription;
   } catch (error) {

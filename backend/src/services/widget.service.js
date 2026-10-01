@@ -11,6 +11,8 @@ import {
   findWidgetSessionByHash,
   updateWidgetSessionActivity,
   deleteWidgetSession,
+  findWidgetSessionByGuestId,
+  updateWidgetSession,
 } from "../repositories/widget.repository.js";
 import env from "../config/env.js";
 
@@ -93,14 +95,28 @@ export const identifyWidgetVisitor = async ({
   const sessionDays = Number(env.WIDGET_SESSION_DAYS_EXPIRE);
   const expiresAt = new Date();
   expiresAt.setDate(expiresAt.getDate() + sessionDays);
-  
-  await createWidgetSession({
-    clientId,
-    visitorId: visitor._id,
-    guestId,
-    sessionTokenHash,
-    expiresAt,
-  });
+
+  const widgetSession = await findWidgetSessionByGuestId({ clientId, visitorId:visitor._id });
+
+  console.log("widgetSession", widgetSession)
+  if (widgetSession) {
+    await updateWidgetSession(widgetSession._id, {
+      clientId,
+      visitorId: visitor._id,
+      guestId,
+      sessionTokenHash,
+      expiresAt,
+      lastSeenAt: new Date()
+    });
+  } else {
+    await createWidgetSession({
+      clientId,
+      visitorId: visitor._id,
+      guestId,
+      sessionTokenHash,
+      expiresAt,
+    });
+  }
 
   /* =========================================================
      6. RESPONSE

@@ -55,9 +55,23 @@ export const updateWidgetVisitor = async (
 ========================================================= */
 
 export const createWidgetSession = async (data) => {
-  console.log("data",data)
+  console.log("data", data)
   return await Session.create(data);
 };
+
+export const updateWidgetSession = async (sessionId, data) => {
+  return await Session.findByIdAndUpdate(
+    sessionId,
+    {
+      $set: data,
+    },
+    {
+      new: true,
+      runValidators: true,
+    }
+  );
+};
+
 
 export const updateWidgetSessionActivity = async (
   sessionId,
@@ -73,6 +87,16 @@ export const updateWidgetSessionActivity = async (
       new: true,
     },
   );
+};
+
+export const findWidgetSessionByGuestId = async ({
+  clientId,
+  visitorId,
+}) => {
+  return await Session.findOne({
+    clientId,
+    visitorId,
+  });
 };
 
 export const findWidgetSessionByHash = async (

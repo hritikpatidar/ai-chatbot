@@ -68,6 +68,7 @@ export const identifyWidgetVisitor = async ({
 
   if (visitor) {
     visitor = await updateWidgetVisitor(visitor._id, {
+      guestId,
       fullName,
       email,
       phone,

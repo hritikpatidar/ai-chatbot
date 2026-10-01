@@ -253,7 +253,6 @@ export const createSubscriptionService = async ({
   /*
    * 6. Create Stripe subscription
    */
-
   const stripeSubscription = await createStripeSubscription({
     customerId: stripeCustomer.id,
     priceId: plan.stripePriceId,

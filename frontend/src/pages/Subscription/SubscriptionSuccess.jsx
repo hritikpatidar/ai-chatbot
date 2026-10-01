@@ -1,29 +1,17 @@
-import {
-  CheckCircle2,
-  ArrowRight,
-  Receipt,
-} from "lucide-react";
+import { CheckCircle2, ArrowRight, Receipt } from "lucide-react";
 
-import {
-  useLocation,
-  useNavigate,
-} from "react-router-dom";
+import { useLocation, useNavigate } from "react-router-dom";
 
 const SubscriptionSuccess = () => {
   const navigate = useNavigate();
 
   const location = useLocation();
 
-  const {
-    plan,
-    subscription,
-    paymentIntent,
-  } = location.state || {};
+  const { plan, subscription, paymentIntent } = location.state || {};
 
   return (
     <div className="flex min-h-[70vh] items-center justify-center ">
       <div className="w-full max-w-lg rounded-3xl border border-gray-200 bg-white p-7 text-center shadow-xl dark:border-gray-800 dark:bg-[#171b23] sm:p-10">
-
         <div className="mx-auto flex h-20 w-20 items-center justify-center rounded-full bg-emerald-100 dark:bg-emerald-500/10">
           <CheckCircle2
             size={42}
@@ -42,9 +30,7 @@ const SubscriptionSuccess = () => {
         {plan && (
           <div className="mt-7 rounded-2xl bg-gray-50 p-5 text-left dark:bg-gray-950">
             <div className="flex justify-between">
-              <span className="text-sm text-gray-500">
-                Plan
-              </span>
+              <span className="text-sm text-gray-500">Plan</span>
 
               <span className="font-semibold text-gray-900 dark:text-white">
                 {plan.name}
@@ -52,21 +38,19 @@ const SubscriptionSuccess = () => {
             </div>
 
             <div className="mt-3 flex justify-between">
-              <span className="text-sm text-gray-500">
-                Amount
-              </span>
+              <span className="text-sm text-gray-500">Amount</span>
 
               <span className="font-semibold text-gray-900 dark:text-white">
+                {/* {plan.currency?.toUpperCase()}{" "}
+                {plan.amount} */}
                 {plan.currency?.toUpperCase()}{" "}
-                {plan.amount}
+                {(Number(plan.amount) / 100).toFixed(2)}
               </span>
             </div>
 
             {paymentIntent?.id && (
               <div className="mt-3 flex justify-between gap-4">
-                <span className="text-sm text-gray-500">
-                  Payment ID
-                </span>
+                <span className="text-sm text-gray-500">Payment ID</span>
 
                 <span className="truncate text-xs font-medium text-gray-700 dark:text-gray-300">
                   {paymentIntent.id}
@@ -79,9 +63,7 @@ const SubscriptionSuccess = () => {
         <div className="mt-7 grid grid-cols-1 gap-3 sm:grid-cols-2">
           <button
             type="button"
-            onClick={() =>
-              navigate("/client/subscription/details")
-            }
+            onClick={() => navigate("/client/subscription/details")}
             className="inline-flex items-center justify-center gap-2 rounded-xl border border-gray-200 px-4 py-3 text-sm font-semibold text-gray-700 hover:bg-gray-50 dark:border-gray-700 dark:text-gray-300 dark:hover:bg-gray-800"
           >
             <Receipt size={17} />
@@ -90,9 +72,7 @@ const SubscriptionSuccess = () => {
 
           <button
             type="button"
-            onClick={() =>
-              navigate("/client")
-            }
+            onClick={() => navigate("/client")}
             className="inline-flex items-center justify-center gap-2 rounded-xl bg-indigo-600 px-4 py-3 text-sm font-semibold text-white hover:bg-indigo-700"
           >
             Continue

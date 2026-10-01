@@ -537,7 +537,9 @@ const SubscriptionCheckout = () => {
 
             <div className="text-right">
               <span className="text-2xl font-bold text-gray-900 dark:text-white">
-                {plan.currency?.toUpperCase()} {plan.amount}
+                {/* {plan.currency?.toUpperCase()} {plan.amount} */}
+                {plan.currency?.toUpperCase()}{" "}
+                {(Number(plan.amount) / 100).toFixed(2)}
               </span>
 
               <span className="ml-1 text-sm text-gray-500 dark:text-gray-400">

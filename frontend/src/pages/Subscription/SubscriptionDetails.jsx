@@ -13,13 +13,22 @@ import toast from "react-hot-toast";
 import { useNavigate } from "react-router-dom";
 
 const SubscriptionDetails = () => {
-  const navigate= useNavigate()
+  const navigate = useNavigate();
   const { data, isLoading, refetch, isFetching } = useCurrentSubscription();
 
   const [showCancelModal, setShowCancelModal] = useState(false);
   const [isCanceling, setIsCanceling] = useState(false);
 
   const subscription = data?.data?.data || data?.data || null;
+
+  const formattedCancelDate = new Date(
+    subscription?.currentPeriodEnd,
+  ).toLocaleDateString("en-IN", {
+    day: "2-digit",
+    month: "long",
+    year: "numeric",
+  });
+
   if (isLoading) {
     return (
       <div className="flex min-h-100 items-center justify-center">
@@ -71,7 +80,7 @@ const SubscriptionDetails = () => {
         toast.success(response.data.message);
         setShowCancelModal(false);
         await refetch();
-        navigate("/client/subscription")
+        navigate("/client/subscription");
       }
     } catch (error) {
       console.error("Cancel subscription error:", error);
@@ -187,7 +196,9 @@ const SubscriptionDetails = () => {
 
           <div className="text-left sm:text-right">
             <p className="text-3xl font-bold text-gray-900 dark:text-white">
-              {subscription.currency?.toUpperCase()} {subscription.amount}
+              {/* {subscription.currency?.toUpperCase()} {subscription.amount} */}
+              {subscription.currency?.toUpperCase()}{" "}
+              {(Number(subscription.amount) / 100).toFixed(2)}
             </p>
 
             <p className="text-sm text-gray-500">/ {subscription.interval}</p>
@@ -251,7 +262,6 @@ const SubscriptionDetails = () => {
         )}
       </div>
 
-      {/* Cancel Confirmation Modal */}
       <ConfirmModal
         isOpen={showCancelModal}
         onCancel={() => {
@@ -261,8 +271,26 @@ const SubscriptionDetails = () => {
         }}
         onConfirm={handleConfirmCancel}
         title="Cancel Subscription"
-        message={`Are you sure you want to cancel your ${plan.name} subscription?`}
-        confirmText="Yes, Cancel"
+        message={
+          <>
+            <p className="mb-3">
+              We recommend cancelling your subscription on{" "}
+              <strong>{formattedCancelDate}</strong> to make the most of your
+              current plan.
+            </p>
+
+            <p className="mb-3">
+              If you cancel your subscription now, your remaining subscription
+              period will be forfeited, and you will not be eligible for a
+              refund for the unused time, as we do not offer refunds.
+            </p>
+
+            <p className="font-semibold">
+              Are you sure you want to cancel your subscription now?
+            </p>
+          </>
+        }
+        confirmText="Cancel Subscription"
         cancelText="Keep Subscription"
         loading={isCanceling}
         danger={true}

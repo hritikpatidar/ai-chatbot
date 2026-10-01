@@ -44,10 +44,9 @@ const ChangePlanModal = ({
     isFetching: cardsFetching,
     isError: cardsError,
   } = usePaymentMethods(subscriptionId);
-  
+
   const paymentMethods = cardsData?.paymentMethods || [];
-  const defaultPaymentMethod =
-    cardsData?.defaultPaymentMethod || null;
+  const defaultPaymentMethod = cardsData?.defaultPaymentMethod || null;
 
   const isUpgrade = useMemo(() => {
     if (!currentPlan || !selectedPlan) return false;
@@ -75,7 +74,8 @@ const ChangePlanModal = ({
   }, [isOpen, defaultPaymentMethod]);
 
   if (!isOpen) return null;
-  const preview = previewMutation.data?.data?.data || previewMutation.data?.data || null;
+  const preview =
+    previewMutation.data?.data?.data || previewMutation.data?.data || null;
   const amountDue = Number(preview?.amountDue || 0);
   const currentAmount = Number(currentPlan?.amount || 0);
   const newAmount = Number(selectedPlan?.amount || 0);
@@ -285,8 +285,10 @@ const ChangePlanModal = ({
                 </h3>
 
                 <p className="mt-1 text-sm text-gray-500 dark:text-gray-400">
-                  {currentPlan?.currency?.toUpperCase()}{" "}
-                  {currentAmount.toFixed(2)}
+                  {/* {currentPlan?.currency?.toUpperCase()}{" "}
+                  {currentAmount.toFixed(2)} */}
+                  {currentPlan.currency?.toUpperCase()}{" "}
+                  {(Number(currentAmount) / 100).toFixed(2)}
                   {" / "}
                   {currentPlan?.interval}
                 </p>
@@ -304,7 +306,9 @@ const ChangePlanModal = ({
                 </h3>
 
                 <p className="mt-1 text-sm text-gray-500 dark:text-gray-400">
-                  {selectedPlan?.currency?.toUpperCase()} {newAmount.toFixed(2)}
+                  {/* {selectedPlan?.currency?.toUpperCase()} {newAmount.toFixed(2)} */}
+                  {currentPlan.currency?.toUpperCase()}{" "}
+                  {(Number(newAmount) / 100).toFixed(2)}
                   {" / "}
                   {selectedPlan?.interval}
                 </p>
@@ -361,8 +365,10 @@ const ChangePlanModal = ({
                     </span>
 
                     <span className="font-medium text-gray-900 dark:text-white">
-                      {currentPlan?.currency?.toUpperCase()}{" "}
-                      {currentAmount.toFixed(2)}
+                      {/* {currentPlan?.currency?.toUpperCase()}{" "}
+                      {currentAmount.toFixed(2)} */}
+                      {currentPlan.currency?.toUpperCase()}{" "}
+                      {(Number(currentAmount) / 100).toFixed(2)}
                     </span>
                   </div>
 
@@ -372,8 +378,10 @@ const ChangePlanModal = ({
                     </span>
 
                     <span className="font-medium text-gray-900 dark:text-white">
+                      {/* {selectedPlan?.currency?.toUpperCase()}{" "}
+                      {newAmount.toFixed(2)} */}
                       {selectedPlan?.currency?.toUpperCase()}{" "}
-                      {newAmount.toFixed(2)}
+                      {(Number(newAmount) / 100).toFixed(2)}
                     </span>
                   </div>
 
@@ -390,8 +398,10 @@ const ChangePlanModal = ({
                       }
                     >
                       {priceDifference >= 0 ? "+" : ""}
+                      {/* {selectedPlan?.currency?.toUpperCase()}{" "}
+                      {priceDifference.toFixed(2)} */}
                       {selectedPlan?.currency?.toUpperCase()}{" "}
-                      {priceDifference.toFixed(2)}
+                      {(Number(priceDifference) / 100).toFixed(2)}
                     </span>
                   </div>
 
@@ -423,6 +433,8 @@ const ChangePlanModal = ({
                     <div className="text-right">
                       <p className="text-2xl font-bold text-gray-900 dark:text-white">
                         {preview.currency?.toUpperCase()} {amountDue.toFixed(2)}
+                        {/* {preview?.currency?.toUpperCase()}{" "}
+                        {(Number(amountDue) / 100).toFixed(2)} */}
                       </p>
                     </div>
                   </div>
@@ -454,8 +466,10 @@ const ChangePlanModal = ({
             dark:border-gray-800
           "
           >
-            <div className="mb-4 flex border-t 
-            border-gray-100 dark:border-gray-800 items-start justify-between gap-3">
+            <div
+              className="mb-4 flex border-t 
+            border-gray-100 dark:border-gray-800 items-start justify-between gap-3"
+            >
               <div className="mt-4">
                 <h3 className="text-sm font-semibold text-gray-900 dark:text-white">
                   Payment Method

@@ -22,6 +22,24 @@ const ticketSchema = new mongoose.Schema(
       ref: "Message",
       default: null,
     },
+    fullName: {
+      type: String,
+      required: true,
+      trim: true,
+    },
+
+    email: {
+      type: String,
+      required: true,
+      lowercase: true,
+      trim: true,
+    },
+
+    phone: {
+      type: String,
+      default: "",
+      trim: true,
+    },
     subject: {
       type: String,
       required: true,

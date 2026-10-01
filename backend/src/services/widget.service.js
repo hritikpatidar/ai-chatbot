@@ -98,7 +98,6 @@ export const identifyWidgetVisitor = async ({
 
   const widgetSession = await findWidgetSessionByGuestId({ clientId, visitorId:visitor._id });
 
-  console.log("widgetSession", widgetSession)
   if (widgetSession) {
     await updateWidgetSession(widgetSession._id, {
       clientId,

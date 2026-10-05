@@ -12,6 +12,11 @@ const ticketSchema = new mongoose.Schema(
       ref: "Client",
       required: true,
     },
+    guestId: {
+      type: String,
+      ref: "WidgetVisitor",
+      default: null,
+    },
     conversationId: {
       type: mongoose.Schema.Types.ObjectId,
       ref: "Conversation",
@@ -21,24 +26,6 @@ const ticketSchema = new mongoose.Schema(
       type: mongoose.Schema.Types.ObjectId,
       ref: "Message",
       default: null,
-    },
-    fullName: {
-      type: String,
-      required: true,
-      trim: true,
-    },
-
-    email: {
-      type: String,
-      required: true,
-      lowercase: true,
-      trim: true,
-    },
-
-    phone: {
-      type: String,
-      default: "",
-      trim: true,
     },
     subject: {
       type: String,
@@ -60,11 +47,6 @@ const ticketSchema = new mongoose.Schema(
       ],
       default: "open",
     },
-    priority: {
-      type: String,
-      enum: ["low", "medium", "high"],
-      default: "medium",
-    },
     source: {
       type: String,
       enum: ["ai_chat"],
@@ -75,6 +57,17 @@ const ticketSchema = new mongoose.Schema(
     timestamps: true,
   },
 );
+
+
+ticketSchema.virtual("guestKeyId", {
+  ref: "WidgetVisitor",
+  localField: "guestId",
+  foreignField: "guestId",
+  justOne: true,
+});
+
+ticketSchema.set("toJSON", { virtuals: true });
+ticketSchema.set("toObject", { virtuals: true });
 
 const Ticket = mongoose.model("Ticket", ticketSchema);
 

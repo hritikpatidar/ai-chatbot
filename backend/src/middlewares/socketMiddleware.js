@@ -1,5 +1,6 @@
 import { verifyAccessToken } from "../helpers/jwt.js";
 import Client from "../models/Client.js";
+import User from "../models/User.js";
 
 export const socketMiddleware = async (socket, next) => {
   try {
@@ -35,8 +36,18 @@ export const socketMiddleware = async (socket, next) => {
       if (!client) {
         return next(new Error("INVALID_CLIENT"));
       }
+
+      const user = await User.findOne({
+        clientId: client._id,
+      }).select("_id");
+
+      if (!user) {
+        return next(new Error("CLIENT_USER_NOT_FOUND"));
+      }
+
       socket.businessClient = client;
       socket.clientId = client._id.toString();
+      socket.clientUserId = user._id.toString();
       if (!socket.user && guestId) {
         socket.guestId = guestId;
       }

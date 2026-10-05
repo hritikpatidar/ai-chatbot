@@ -50,12 +50,6 @@ const widgetVisitorSchema = new mongoose.Schema(
     versionKey: false,
   },
 );
-
-widgetVisitorSchema.index(
-  { clientId: 1, email: 1 },
-  { unique: true },
-);
-
 widgetVisitorSchema.index(
   { clientId: 1, guestId: 1 },
 );

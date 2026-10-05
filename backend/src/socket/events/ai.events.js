@@ -32,7 +32,7 @@ const activeStreams = new Map();
 export const registerAIEvents = (io, socket) => {
   socket.on("ai:message", async (data) => {
     try {
-      const { conversationId, message } = data;
+      const { conversationId, message} = data;
 
       if (!message || !message.trim()) {
         socket.emit("ai:error", {
@@ -45,6 +45,7 @@ export const registerAIEvents = (io, socket) => {
 
       const userId = socket.user?.id || null;
       const clientId = socket.clientId || null;
+      const clientUserId = socket.clientUserId || null;
       const guestId = socket.guestId || null;
 
       if (!userId && !clientId) {
@@ -164,7 +165,8 @@ export const registerAIEvents = (io, socket) => {
 
           const ticket = await createAITicketService({
             userId: userId || null,
-            clientId,
+            clientId: clientUserId || null,
+            guestId: guestId || null,
             conversationId: conversation._id,
             messageId: userMessage._id,
             userMessage: message,
@@ -197,7 +199,8 @@ export const registerAIEvents = (io, socket) => {
 
           const ticket = await createAITicketService({
             userId: userId || null,
-            clientId,
+            clientId: clientUserId || null,
+            guestId: guestId || null,
             conversationId: conversation._id,
             messageId: userMessage._id,
             userMessage: message,
@@ -234,8 +237,8 @@ export const registerAIEvents = (io, socket) => {
         contents,
         config: client
           ? {
-              systemInstruction,
-            }
+            systemInstruction,
+          }
           : undefined,
       });
 
@@ -275,16 +278,31 @@ export const registerAIEvents = (io, socket) => {
     } catch (error) {
       console.error("❌ AI Message Error:", error);
       activeStreams.delete(socket.id);
-      let errorMessage = "Something went wrong. Please try again.";
+      // let errorMessage = "Something went wrong. Please try again.";
+      // if (error.status === 429) {
+      //   errorMessage =
+      //     "Oops! We’re a bit busy right now. Please give us a moment and try again. 😊";
+      // } else if (error.status === 401) {
+      //   errorMessage = "Invalid Gemini API Key.";
+      // } else if (error.status === 403) {
+      //   errorMessage = "Access denied. Please check your API permissions.";
+      // } else if (error.status === 400) {
+      //   errorMessage = "Invalid request.";
+      // }
+      let errorMessage =
+        "Sorry, something went wrong while processing your request. Please try again.";
       if (error.status === 429) {
         errorMessage =
-          "AI request limit exceeded. Please wait a few seconds and try again.";
+          "The assistant is temporarily unavailable. Messages cannot be processed at the moment. Please try again later.";
       } else if (error.status === 401) {
-        errorMessage = "Invalid Gemini API Key.";
+        errorMessage =
+          "Sorry, we’re unable to process your request right now. Please try again later.";
       } else if (error.status === 403) {
-        errorMessage = "Access denied. Please check your API permissions.";
+        errorMessage =
+          "Sorry, we’re unable to process your request at the moment. Please try again later.";
       } else if (error.status === 400) {
-        errorMessage = "Invalid request.";
+        errorMessage =
+          "Sorry, we couldn’t understand your request. Please try again.";
       }
 
       socket.emit("ai:error", {

@@ -53,16 +53,16 @@ export const identifyWidgetVisitor = async ({
     guestId,
   });
 
-  /* =========================================================
-     3. IF GUEST NOT FOUND, CHECK EMAIL
-  ========================================================= */
+  // /* =========================================================
+  //    3. IF GUEST NOT FOUND, CHECK EMAIL
+  // ========================================================= */
 
-  if (!visitor) {
-    visitor = await findWidgetVisitorByEmail({
-      clientId,
-      email,
-    });
-  }
+  // if (!visitor) {
+  //   visitor = await findWidgetVisitorByEmail({
+  //     clientId,
+  //     email,
+  //   });
+  // }
 
   /* =========================================================
      4. CREATE / UPDATE VISITOR

@@ -59,7 +59,6 @@ export const SocketProvider = ({ children }) => {
         guestId,
       };
 
-      console.log("🔌 Client Chatbot Socket Auth:", clientKey);
     } else if (isAuthenticated) {
       socket.auth = {
         token,

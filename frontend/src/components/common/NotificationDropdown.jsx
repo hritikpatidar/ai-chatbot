@@ -100,7 +100,6 @@ const { profileDetails } = useSelector(
 
   const handleMarkAllRead = () => {
     // API call yahan laga sakte ho
-    console.log("Mark all notifications as read");
   };
 
   return (

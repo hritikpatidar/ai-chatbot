@@ -6,6 +6,7 @@ import {
   getItemLocalStorage,
   setItemLocalStorage,
 } from "./browserServices";
+import { queryClient } from "../lib/queryClient";
 
 export const handleLogout = async ({
   dispatch,
@@ -36,16 +37,17 @@ export const handleLogout = async ({
     dispatch({
       type: "RESET",
     });
-
+    queryClient.clear();
     clearLocalStorage();
 
     if (fcmToken) {
       setItemLocalStorage("fcm_token", fcmToken);
     }
-    if(theme){
+    if (theme) {
       setItemLocalStorage("theme", theme);
     }
-    navigate("/login");
+    window.location.href = "/login";
+    // navigate("/login");
     // setIsLogoutLoading?.(false);
   }
 };

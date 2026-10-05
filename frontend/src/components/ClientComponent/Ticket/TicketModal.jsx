@@ -262,7 +262,7 @@ export default function TicketModal({
                 type="text"
                 placeholder="Enter ticket subject"
                 maxLength={150}
-                disabled={isSaving}
+                disabled={true}
                 className={`
                   ${inputClass}
                   ${
@@ -288,7 +288,7 @@ export default function TicketModal({
             {/* Priority + Status */}
             <div className="grid grid-cols-1 gap-5 sm:grid-cols-2">
               {/* Priority */}
-              <div>
+              {/* <div>
                 <label
                   htmlFor="ticket-priority"
                   className="
@@ -319,7 +319,7 @@ export default function TicketModal({
                     />
                   )}
                 />
-              </div>
+              </div> */}
 
               {/* Status */}
               {isEdit && (
@@ -379,7 +379,7 @@ export default function TicketModal({
                 placeholder="Describe your issue or request..."
                 rows={6}
                 maxLength={2000}
-                disabled={isSaving}
+                disabled={true}
                 className={`
                   ${inputClass}
                   resize-none

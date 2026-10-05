@@ -5,21 +5,31 @@ import {
   CheckCircle2,
   XCircle,
 } from "lucide-react";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useCurrentSubscription } from "../../hooks/Subscription/useSubscription";
 import ConfirmModal from "../../components/ClientComponent/ConfirmModal";
 import { cancleSubscriptionApi } from "../../service/Subscription/subscriptionServices";
 import toast from "react-hot-toast";
 import { useNavigate } from "react-router-dom";
+import { useDispatch, useSelector } from "react-redux";
+import { getClientById } from "../../redux/features/Client/clientSlice";
 
 const SubscriptionDetails = () => {
   const navigate = useNavigate();
+  const dispatch = useDispatch();
   const { data, isLoading, refetch, isFetching } = useCurrentSubscription();
 
   const [showCancelModal, setShowCancelModal] = useState(false);
   const [isCanceling, setIsCanceling] = useState(false);
 
   const subscription = data?.data?.data || data?.data || null;
+  const { profileDetails, refreshToken } = useSelector(
+    (store) => store.authReducer.AuthSlice,
+  );
+
+  useEffect(() => {
+    dispatch(getClientById(profileDetails?.clientId));
+  }, [dispatch]);
 
   const formattedCancelDate = new Date(
     subscription?.currentPeriodEnd,
@@ -80,7 +90,7 @@ const SubscriptionDetails = () => {
         toast.success(response.data.message);
         setShowCancelModal(false);
         await refetch();
-        navigate("/client/subscription");
+        navigate("/client");
       }
     } catch (error) {
       console.error("Cancel subscription error:", error);

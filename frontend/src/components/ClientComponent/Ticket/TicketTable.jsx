@@ -6,14 +6,14 @@ import {
   AlertCircle,
   Inbox,
   Edit2,
+  Eye,
+  Lock,
+  ArrowUpRight,
 } from "lucide-react";
 
 import ActionButton from "../../common/ActionButton";
 import StatusBadge from "../../common/StatusBadge";
-
-/* =========================================================
-   DATE FORMAT
-========================================================= */
+import { useSelector } from "react-redux";
 
 function formatDate(date) {
   if (!date) return "-";
@@ -25,24 +25,18 @@ function formatDate(date) {
   });
 }
 
-/* =========================================================
-   PRIORITY BADGE
-========================================================= */
-
-/* =========================================================
-   TICKET TABLE
-========================================================= */
-
 export default function TicketTable({
   tickets = [],
   loading = false,
   onEdit,
   onDelete,
+  onUpdatePlan,
 }) {
-  /* =======================================================
-     LOADING
-  ======================================================= */
-
+  const { client } = useSelector(
+    (state) => state?.ClientReducer?.clientSlice || {},
+  );
+  const hasActivePlan = Boolean(client?.active_plan);
+  
   if (loading) {
     return (
       <div
@@ -72,10 +66,6 @@ export default function TicketTable({
       </div>
     );
   }
-
-  /* =======================================================
-     EMPTY STATE
-  ======================================================= */
 
   if (!tickets.length) {
     return (
@@ -140,10 +130,6 @@ export default function TicketTable({
     );
   }
 
-  /* =======================================================
-     DATA
-  ======================================================= */
-
   return (
     <div
       className="
@@ -156,10 +142,6 @@ export default function TicketTable({
         dark:bg-[#171b23]
       "
     >
-      {/* ===================================================
-          DESKTOP TABLE
-      =================================================== */}
-
       <div className="hidden overflow-x-auto md:block">
         <table className="w-full min-w-225">
           <thead>
@@ -177,7 +159,11 @@ export default function TicketTable({
               </th>
 
               <th className="px-5 py-4 text-left text-xs font-semibold text-gray-500 dark:text-gray-400">
-                Priority
+                Customer
+              </th>
+
+              <th className="px-5 py-4 text-left text-xs font-semibold text-gray-500 dark:text-gray-400">
+                Contact
               </th>
 
               <th className="px-5 py-4 text-left text-xs font-semibold text-gray-500 dark:text-gray-400">
@@ -258,10 +244,58 @@ export default function TicketTable({
                   </div>
                 </td>
 
-                {/* Priority */}
-
+                {/* Customer */}
                 <td className="px-5 py-4">
-                  <StatusBadge priority={ticket.priority} />
+                  <div className="min-w-0">
+                    <p className="truncate text-sm font-medium text-gray-900 dark:text-white">
+                      {ticket.guestKeyId?.fullName || "-"}
+                    </p>
+
+                    <p className="mt-0.5 truncate text-xs text-gray-500 dark:text-gray-400">
+                      {hasActivePlan
+                        ? ticket.guestKeyId?.email || "-"
+                        : "Contact details locked"}
+                    </p>
+                  </div>
+                </td>
+
+                {/* Contact */}
+                <td className="px-5 py-4">
+                  {hasActivePlan ? (
+                    <div className="space-y-1">
+                      <p className="text-sm text-gray-600 dark:text-gray-300">
+                        {ticket.guestKeyId?.email || "-"}
+                      </p>
+
+                      <p className="text-xs text-gray-500 dark:text-gray-400">
+                        {ticket.guestKeyId?.phone || "-"}
+                      </p>
+                    </div>
+                  ) : (
+                    <div className="flex items-center gap-2">
+                      <Lock size={14} className="shrink-0 text-gray-400" />
+
+                      <div>
+                        <p className="text-xs font-medium text-gray-600 dark:text-gray-300">
+                          Contact details hidden
+                        </p>
+
+                        <button
+                          type="button"
+                          onClick={() => onUpdatePlan?.(client)}
+                          className="
+                            mt-1 inline-flex items-center gap-1
+                            text-xs font-medium
+                            text-blue-600 hover:text-blue-700
+                            dark:text-blue-400 dark:hover:text-blue-300
+                          "
+                        >
+                          Upgrade plan
+                          <ArrowUpRight size={12} />
+                        </button>
+                      </div>
+                    </div>
+                  )}
                 </td>
 
                 {/* Status */}
@@ -298,13 +332,15 @@ export default function TicketTable({
                       label="Edit"
                       onClick={() => onEdit?.(ticket)}
                     />
-
-                    <ActionButton
-                      icon={<Trash2 size={15} />}
-                      label="Delete"
-                      danger
-                      onClick={() => onDelete?.(ticket)}
-                    />
+                    {(ticket.status === "resolved" ||
+                      ticket.status === "closed") && (
+                      <ActionButton
+                        icon={<Trash2 size={15} />}
+                        label="Delete"
+                        danger
+                        onClick={() => onDelete?.(ticket)}
+                      />
+                    )}
                   </div>
                 </td>
               </tr>
@@ -389,7 +425,82 @@ export default function TicketTable({
                 </div>
               </div>
             </div>
+            <p
+              className=" mt-3
+                line-clamp-2
+                text-sm
+                leading-5
+                text-gray-500
+                dark:text-gray-400"
+            >
+              Name - {ticket.guestKeyId?.fullName || "-"}
+            </p>
 
+            {/* Contact Information */}
+            <div className="mt-3 rounded-xl border border-gray-200 bg-white p-3 dark:border-white/10 dark:bg-[#171b23]">
+              <div className="flex items-start gap-3">
+                {hasActivePlan ? (
+                  <div className="min-w-0 flex-1 space-y-2">
+                    <div>
+                      <p className="text-[11px] font-medium uppercase tracking-wide text-gray-400">
+                        Email
+                      </p>
+
+                      <p className="mt-0.5 break-all text-sm text-gray-700 dark:text-gray-200">
+                        {ticket.guestKeyId?.email || "-"}
+                      </p>
+                    </div>
+
+                    <div>
+                      <p className="text-[11px] font-medium uppercase tracking-wide text-gray-400">
+                        Phone
+                      </p>
+
+                      <p className="mt-0.5 text-sm text-gray-700 dark:text-gray-200">
+                        {ticket.guestKeyId?.phone || "-"}
+                      </p>
+                    </div>
+                  </div>
+                ) : (
+                  <>
+                    <div
+                      className="
+                        flex h-9 w-9 shrink-0 items-center justify-center
+                        rounded-lg bg-gray-100 text-gray-500
+                        dark:bg-white/5 dark:text-gray-400
+                      "
+                    >
+                      <Lock size={16} />
+                    </div>
+
+                    <div className="min-w-0 flex-1">
+                      <p className="text-sm font-medium text-gray-800 dark:text-gray-200">
+                        Contact details are hidden
+                      </p>
+
+                      <p className="mt-1 text-xs leading-5 text-gray-500 dark:text-gray-400">
+                        Upgrade your subscription to view customer email and
+                        phone number.
+                      </p>
+
+                      <button
+                        type="button"
+                        onClick={() => onUpdatePlan?.(client)}
+                        className="
+                          mt-2 inline-flex items-center gap-1.5
+                          rounded-lg bg-blue-600 px-3 py-2
+                          text-xs font-medium text-white
+                          transition hover:bg-blue-700
+                        "
+                      >
+                        Upgrade Plan
+                        <ArrowUpRight size={13} />
+                      </button>
+                    </div>
+                  </>
+                )}
+              </div>
+            </div>
             {/* Description */}
 
             <p
@@ -402,7 +513,7 @@ export default function TicketTable({
                 dark:text-gray-400
               "
             >
-              {ticket.description || "No description provided."}
+              Description - {ticket.description || "No description provided."}
             </p>
 
             {/* Meta */}
@@ -416,15 +527,13 @@ export default function TicketTable({
                 gap-2
               "
             >
-              <StatusBadge priority={ticket.priority} />
-
               <span
                 className="
                   text-xs
                   text-gray-400
                 "
               >
-                {formatDate(ticket.createdAt)}
+                Created: {formatDate(ticket.createdAt)}
               </span>
             </div>
 
@@ -447,13 +556,14 @@ export default function TicketTable({
                 label="Edit"
                 onClick={() => onEdit?.(ticket)}
               />
-
-              <ActionButton
-                icon={<Trash2 size={15} />}
-                label="Delete"
-                danger
-                onClick={() => onDelete?.(ticket)}
-              />
+              {(ticket.status === "resolved" || ticket.status === "closed") && (
+                <ActionButton
+                  icon={<Trash2 size={15} />}
+                  label="Delete"
+                  danger
+                  onClick={() => onDelete?.(ticket)}
+                />
+              )}
             </div>
           </div>
         ))}

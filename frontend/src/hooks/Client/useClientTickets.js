@@ -14,7 +14,6 @@ const useClientTickets = ({
   page = 1,
   limit = 10,
   status = "",
-  priority = "",
 } = {}) => {
   const queryClient = useQueryClient();
 
@@ -23,50 +22,27 @@ const useClientTickets = ({
   ========================================================= */
 
   const ticketsQuery = useQuery({
-    queryKey: ["clientTickets", page, limit, status, priority],
+    queryKey: ["clientTickets", page, limit, status],
 
     queryFn: async () => {
       const response = await getClientTicketsService({
         page,
         limit,
         status,
-        priority,
       });
 
       if (response?.data?.success === false) {
         throw new Error(response?.data?.message || "Failed to fetch tickets");
       }
-
-      /*
-        Backend response:
-
-        {
-          success: true,
-          data: {
-            tickets: [],
-            total: 20,
-            page: 1,
-            limit: 10,
-            totalPages: 2
-          }
-        }
-      */
-
       return response?.data?.data;
     },
 
     placeholderData: (previousData) => previousData,
-
     staleTime: 30 * 1000,
-
     retry: 1,
-
     refetchOnWindowFocus: false,
   });
 
-  /* =========================================================
-     UPDATE TICKET
-  ========================================================= */
 
   const updateMutation = useMutation({
     mutationFn: async ({ ticketId, payload }) => {

@@ -9,83 +9,44 @@ import Pagination from "../../components/common/Pagination";
 
 import useClientTickets from "../../hooks/Client/useClientTickets";
 import CustomSelect from "../../components/common/CustomSelect";
+import { useNavigate } from "react-router-dom";
 
 export default function ClientTickets() {
-  /* =========================================================
-     PAGINATION
-  ========================================================= */
-
+  const navigate = useNavigate();
   const [page, setPage] = useState(1);
-
   const [limit] = useState(10);
-
-  /* =========================================================
-     FILTERS
-  ========================================================= */
-
   const [status, setStatus] = useState("");
-
-  const [priority, setPriority] = useState("");
-
   const [search, setSearch] = useState("");
-
-  /* =========================================================
-     MODALS
-  ========================================================= */
-
   const [isModalOpen, setIsModalOpen] = useState(false);
-
   const [selectedTicket, setSelectedTicket] = useState(null);
-
   const [deleteTicketDetails, setDeleteTicketDetails] = useState(null);
-
-  /* =========================================================
-     REACT QUERY
-  ========================================================= */
-
   const {
     tickets,
     pagination,
-
     isLoading,
     isFetching,
     error,
-
     refetch,
-
     updateTicket,
     updateLoading,
-
     deleteTicket,
     deleteLoading,
-
     mutationLoading,
   } = useClientTickets({
     page,
     limit,
     status,
-    priority,
   });
-
-  /* =========================================================
-     RESET PAGE WHEN FILTER CHANGES
-  ========================================================= */
 
   useEffect(() => {
     setPage(1);
-  }, [status, priority]);
-
-  /* =========================================================
-     SEARCH
-  ========================================================= */
+  }, [status]);
 
   const filteredTickets = tickets.filter((ticket) => {
     if (!search.trim()) {
       return true;
     }
-
     const value = search.toLowerCase().trim();
-
     return (
       ticket.subject?.toLowerCase().includes(value) ||
       ticket.description?.toLowerCase().includes(value) ||
@@ -94,27 +55,11 @@ export default function ClientTickets() {
     );
   });
 
-  /* =========================================================
-     ADD TICKET
-  ========================================================= */
-
-  const handleAddTicket = () => {
-    setSelectedTicket(null);
-    setIsModalOpen(true);
-  };
-
-  /* =========================================================
-     EDIT TICKET
-  ========================================================= */
-
+  
   const handleEditTicket = (ticket) => {
     setSelectedTicket(ticket);
     setIsModalOpen(true);
   };
-
-  /* =========================================================
-     CLOSE MODAL
-  ========================================================= */
 
   const handleCloseModal = () => {
     if (updateLoading) {
@@ -125,21 +70,15 @@ export default function ClientTickets() {
     setSelectedTicket(null);
   };
 
-  /* =========================================================
-     UPDATE TICKET
-  ========================================================= */
-
   const handleSubmit = async (payload) => {
     if (!selectedTicket?._id) {
       return;
     }
-
     try {
       await updateTicket({
         ticketId: selectedTicket._id,
         payload,
       });
-
       setIsModalOpen(false);
       setSelectedTicket(null);
     } catch (error) {
@@ -147,34 +86,17 @@ export default function ClientTickets() {
     }
   };
 
-  /* =========================================================
-     DELETE CLICK
-  ========================================================= */
-
   const handleDeleteTicket = (ticket) => {
     setDeleteTicketDetails(ticket);
   };
-
-  /* =========================================================
-     CONFIRM DELETE
-  ========================================================= */
 
   const handleConfirmDelete = async () => {
     if (!deleteTicketDetails?._id) {
       return;
     }
-
     try {
       await deleteTicket(deleteTicketDetails._id);
-
       setDeleteTicketDetails(null);
-
-      /*
-       * Agar current page ka last ticket delete ho gaya
-       * aur page empty hone wala hai to previous page par
-       * move karenge.
-       */
-
       if (tickets.length === 1 && page > 1) {
         setPage((previousPage) => previousPage - 1);
       }
@@ -182,10 +104,6 @@ export default function ClientTickets() {
       console.error("Ticket delete error:", error);
     }
   };
-
-  /* =========================================================
-     PREVIOUS PAGE
-  ========================================================= */
 
   const handlePreviousPage = () => {
     if (page <= 1 || isFetching) {
@@ -195,52 +113,23 @@ export default function ClientTickets() {
     setPage((previousPage) => previousPage - 1);
   };
 
-  /* =========================================================
-     NEXT PAGE
-  ========================================================= */
-
   const handleNextPage = () => {
     if (page >= pagination.totalPages || isFetching) {
       return;
     }
-
     setPage((previousPage) => previousPage + 1);
   };
-
-  /* =========================================================
-     REFRESH
-  ========================================================= */
 
   const handleRefresh = async () => {
     await refetch();
   };
 
-  /* =========================================================
-     STATUS FILTER
-  ========================================================= */
-
   const handleStatusChange = (e) => {
     setStatus(e.target.value);
   };
 
-  /* =========================================================
-     PRIORITY FILTER
-  ========================================================= */
-
-  const handlePriorityChange = (e) => {
-    setPriority(e.target.value);
-  };
-
-  /* =========================================================
-     ERROR
-  ========================================================= */
-
   const errorMessage =
     error?.message || "Something went wrong while fetching tickets.";
-
-  /* =========================================================
-     RENDER
-  ========================================================= */
 
   return (
     <div className="min-h-full w-full">
@@ -277,29 +166,6 @@ export default function ClientTickets() {
             Manage your support tickets
           </p>
         </div>
-
-        <button
-          type="button"
-          onClick={handleAddTicket}
-          className="
-              inline-flex
-              items-center
-              justify-center
-              gap-2
-              rounded-lg
-              bg-blue-600
-              px-4
-              py-2.5
-              text-sm
-              font-medium
-              text-white
-              transition
-              hover:bg-blue-700
-            "
-        >
-          <Plus size={17} />
-          Create Ticket
-        </button>
       </div>
 
       <div
@@ -387,55 +253,6 @@ export default function ClientTickets() {
               "
           />
 
-          {/* Priority */}
-          {/* <select
-              value={priority}
-              onChange={handlePriorityChange}
-              className="
-                w-full
-                rounded-lg
-                border border-gray-200
-                bg-gray-50
-                px-3
-                py-2.5
-                text-sm
-                text-gray-700
-                outline-none
-                transition
-                focus:border-blue-500
-                sm:w-auto
-                dark:border-white/10
-                dark:bg-[#0f131a]
-                dark:text-gray-300
-              "
-            >
-              <option value="">All Priority</option>
-              <option value="low">Low</option>
-              <option value="medium">Medium</option>
-              <option value="high">High</option>
-            </select> */}
-          <CustomSelect
-            size="sm"
-            rounded="rounded-lg"
-            value={priority}
-            onChange={handlePriorityChange}
-            placeholder="All Priority"
-            options={[
-              { value: "", label: "All Priority" },
-              { value: "low", label: "Low" },
-              { value: "medium", label: "Medium" },
-              { value: "high", label: "High" },
-              { value: "urgent", label: "Urgent" },
-            ]}
-            className="
-                w-full
-                sm:w-auto
-                dark:border-white/10
-                dark:bg-[#0f131a]
-                dark:text-gray-300
-              "
-          />
-
           {/* Refresh */}
           <button
             type="button"
@@ -498,9 +315,10 @@ export default function ClientTickets() {
       <div className="mt-4">
         <TicketTable
           tickets={filteredTickets}
-          loading={isLoading && !tickets.length}
+          loading={isLoading}
           onEdit={handleEditTicket}
           onDelete={handleDeleteTicket}
+          onUpdatePlan={() => navigate("/client/subscription")}
         />
       </div>
 

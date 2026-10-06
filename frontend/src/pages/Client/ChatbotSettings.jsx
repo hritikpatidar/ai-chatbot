@@ -62,7 +62,7 @@ const defaultValues = {
     predefinedQuestions: [],
   },
 
-  status: "active",
+  status: "inactive",
 };
 
 export default function ClientChatbotSettings() {
@@ -149,7 +149,7 @@ export default function ClientChatbotSettings() {
         aiInstructions: client.chatbot?.aiInstructions || "",
         predefinedQuestions: client.chatbot?.predefinedQuestions || [],
       },
-      status: client.status || "active",
+      status: client.status || "inactive",
     });
   }, [client, reset]);
 
@@ -633,6 +633,7 @@ export default function ClientChatbotSettings() {
                     placeholder="Select status"
                     error={errors.status?.message}
                     required
+                    disabled={true}
                   />
                 )}
               />

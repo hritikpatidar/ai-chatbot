@@ -1,5 +1,5 @@
 import { extractSubscriptionPaymentData } from "../helpers/stripePayment.js";
-import { findClientById, updateClient } from "../repositories/client.repository.js";
+import { findClientById, updateClientById } from "../repositories/client.repository.js";
 import {
   findSubscriptionByClientId,
   findSubscriptionByUserId,
@@ -278,10 +278,11 @@ export const createSubscriptionService = async ({
    * Do not activate plan before payment success.
    */
 
-  await updateClient(clientId, {
+  await updateClientById(clientId, {
     active_plan: plan?.name,
     current_plan_id: plan?._id,
     stripe_customer: stripeCustomer.id,
+    status: "active"
   });
 
   /*
@@ -297,14 +298,6 @@ export const createSubscriptionService = async ({
   });
   const subscription = await createSubscription(
     subscriptionData
-  );
-
-  let updateData = {
-    status: "active",
-  };
-  const updatedSubscription = await updateSubscriptionById(
-    subscription?._id,
-    updateData,
   );
 
   /*
@@ -474,7 +467,7 @@ export const changeSubscriptionPlanService = async ({
   // --------------------------------------------
   // 7. Only NOW update MongoDB
   // --------------------------------------------
-  await updateClient(currentSubscription.clientId?._id, {
+  await updateClientById(currentSubscription.clientId?._id, {
     active_plan: newPlan?.name,
     current_plan_id: newPlan?._id,
   });
@@ -595,10 +588,11 @@ export const cancelSubscriptionService = async (subscriptionId) => {
       subscription.stripeSubscriptionId
     );
     const clientId = subscription.clientId
-    await updateClient(clientId, {
+    await updateClientById(clientId, {
       active_plan: null,
       current_plan_id: null,
       stripe_customer: null,
+      status: "inactive"
     });
     const updatedSubscription = await deleteSubscriptionById(subscriptionId);
 

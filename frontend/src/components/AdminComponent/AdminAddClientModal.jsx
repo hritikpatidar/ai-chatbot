@@ -35,7 +35,7 @@ const defaultValues = {
   fullName: "",
   email: "",
   password: "",
-  status: "active",
+  status: "inactive",
   accountStatus: "active",
   businessName: "",
   businessType: "",
@@ -128,7 +128,7 @@ export default function AdminAddClientModal({
         email: client?.user?.email || "",
         password: "",
 
-        status: client?.status || "active",
+        status: client?.status || "inactive",
         accountStatus: client?.user?.accountStatus || "active",
 
         businessName: client?.businessName || "",
@@ -987,6 +987,7 @@ export default function AdminAddClientModal({
                               placeholder="Select status"
                               error={errors.status?.message}
                               required
+                              disabled={true}
                             />
                           )}
                         />

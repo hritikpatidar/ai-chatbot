@@ -94,7 +94,7 @@ export const createClientService = async (data) => {
             aiInstructions: chatbot.aiInstructions?.trim() || "",
             predefinedQuestions: chatbot.predefinedQuestions || [],
           },
-          status: "active",
+          status: "inactive",
         },
       ],
       {
@@ -204,18 +204,18 @@ export const getAllClientsService = async ({
     return {
       ...client,
       user: user
-      ? {
-            _id: user._id,
-            fullName: user.fullName,
-            email: user.email,
-            profileImage: user.profileImage,
-            role: user.role,
-            accountStatus: user?.accountStatus || "active",
-            clientId: user.clientId,
-            status: user.status,
-            createdAt: user.createdAt,
-            lastLogin: user.lastLogin || null,
-          }
+        ? {
+          _id: user._id,
+          fullName: user.fullName,
+          email: user.email,
+          profileImage: user.profileImage,
+          role: user.role,
+          accountStatus: user?.accountStatus || "active",
+          clientId: user.clientId,
+          status: user.status,
+          createdAt: user.createdAt,
+          lastLogin: user.lastLogin || null,
+        }
         : null,
     };
   });
@@ -255,18 +255,18 @@ export const getClientByIdService = async (clientId) => {
     client,
     user: user
       ? {
-          _id: user._id,
-          fullName: user.fullName,
-          email: user.email,
-          profileImage: user.profileImage,
-          role: user.role,
-          accountStatus: user?.accountStatus || "active",
-          clientId: user.clientId,
-          status: user.status,
-          createdAt: user.createdAt,
-          lastLogin: user.lastLogin || null,
-          profileImage: user.profileImage || "",
-        }
+        _id: user._id,
+        fullName: user.fullName,
+        email: user.email,
+        profileImage: user.profileImage,
+        role: user.role,
+        accountStatus: user?.accountStatus || "active",
+        clientId: user.clientId,
+        status: user.status,
+        createdAt: user.createdAt,
+        lastLogin: user.lastLogin || null,
+        profileImage: user.profileImage || "",
+      }
       : null,
   };
 };

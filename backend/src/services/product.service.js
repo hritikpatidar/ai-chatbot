@@ -45,7 +45,7 @@ export const updateProduct = async (productId, data, user) => {
 
   if (
     user?.role === "client" &&
-    product.clientId?.toString() !== user.id?.toString()
+    product.clientId?.toString() !== user.clientId?.toString()
   ) {
     throw new Error("You are not authorized to update this product");
   }

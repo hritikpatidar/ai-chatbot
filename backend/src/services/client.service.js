@@ -5,7 +5,7 @@ import {
   createClient,
   findClientByKey,
   findClientById,
-  updateClient,
+  updateClientById,
 } from "../repositories/client.repository.js";
 import User from "../models/User.js";
 import Client from "../models/Client.js";
@@ -184,15 +184,8 @@ export const updateClientService = async (clientId, updateData) => {
     allowedData.chatbot = updateData.chatbot;
   }
 
-  // ==========================================
-  // STATUS
-  // ==========================================
 
-  if (updateData.status !== undefined) {
-    allowedData.status = updateData.status;
-  }
-
-  const client = await updateClient(clientId, allowedData);
+  const client = await updateClientById(clientId, allowedData);
 
   if (!client) {
     const error = new Error("Client not found");

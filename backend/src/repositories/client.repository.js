@@ -22,7 +22,7 @@ export const findClientBySlug = async (slug) => {
   }).lean();
 };
 
-export const updateClient = async (clientId, updateData) => {
+export const updateClientById = async (clientId, updateData) => {
   const $set = {};
 
   Object.entries(updateData).forEach(([key, value]) => {

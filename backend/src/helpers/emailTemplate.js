@@ -1204,3 +1204,1140 @@ export const ticketStatusUpdateEmailTemplate = ({
     `,
   };
 };
+
+
+export const subscriptionPurchaseEmailTemplate = ({
+  fullName,
+  businessName,
+  planName,
+  amount,
+  currency = "GBP",
+  billingInterval = "month",
+  subscriptionId,
+  invoiceId,
+  invoiceUrl,
+  invoicePdf,
+}) => {
+  return {
+    subject: `Subscription Activated - ${planName} | AI Chatbot`,
+
+    html: `
+      <!DOCTYPE html>
+      <html>
+      <head>
+        <meta charset="UTF-8" />
+
+        <meta
+          name="viewport"
+          content="width=device-width, initial-scale=1.0"
+        />
+
+        <title>Subscription Activated</title>
+      </head>
+
+      <body
+        style="
+          margin: 0;
+          padding: 0;
+          background-color: #f4f6f8;
+          font-family: Arial, Helvetica, sans-serif;
+          color: #333333;
+        "
+      >
+
+        <div
+          style="
+            max-width: 700px;
+            margin: 30px auto;
+            background: #ffffff;
+            border-radius: 12px;
+            overflow: hidden;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.08);
+          "
+        >
+
+          <!-- Header -->
+          <div
+            style="
+              background: #111827;
+              padding: 30px;
+              text-align: center;
+            "
+          >
+
+            <h1
+              style="
+                margin: 0;
+                color: #ffffff;
+                font-size: 28px;
+              "
+            >
+              AI Chatbot
+            </h1>
+
+            <p
+              style="
+                margin: 10px 0 0;
+                color: #d1d5db;
+                font-size: 15px;
+              "
+            >
+              Subscription Confirmation
+            </p>
+
+          </div>
+
+          <!-- Main Content -->
+          <div style="padding: 35px;">
+
+            <h2
+              style="
+                margin-top: 0;
+                color: #111827;
+                font-size: 24px;
+              "
+            >
+              Hello ${fullName} 👋
+            </h2>
+
+            <p
+              style="
+                font-size: 16px;
+                line-height: 1.7;
+              "
+            >
+              Your AI Chatbot subscription has been successfully
+              activated.
+              Thank you for choosing AI Chatbot for your business.
+            </p>
+
+            <!-- Success Message -->
+            <div
+              style="
+                margin: 25px 0;
+                padding: 20px;
+                background: #ecfdf5;
+                border-left: 4px solid #10b981;
+                border-radius: 6px;
+              "
+            >
+
+              <h3
+                style="
+                  margin-top: 0;
+                  color: #065f46;
+                  font-size: 18px;
+                "
+              >
+                ✅ Subscription Activated Successfully
+              </h3>
+
+              <p
+                style="
+                  margin-bottom: 0;
+                  font-size: 14px;
+                  line-height: 1.6;
+                  color: #064e3b;
+                "
+              >
+                Your subscription is now active and you can start
+                using the features included in your selected plan.
+              </p>
+
+            </div>
+
+            <!-- Subscription Details -->
+            <div
+              style="
+                margin: 25px 0;
+                padding: 22px;
+                background: #f9fafb;
+                border: 1px solid #e5e7eb;
+                border-radius: 10px;
+              "
+            >
+
+              <h3
+                style="
+                  margin-top: 0;
+                  color: #111827;
+                  font-size: 18px;
+                "
+              >
+                💳 Subscription Details
+              </h3>
+
+              <p style="margin: 10px 0;">
+                <strong>Business:</strong>
+                ${businessName || "N/A"}
+              </p>
+
+              <p style="margin: 10px 0;">
+                <strong>Plan:</strong>
+                ${planName}
+              </p>
+
+              <p style="margin: 10px 0;">
+                <strong>Amount:</strong>
+                ${currency} ${amount}
+              </p>
+
+              <p style="margin: 10px 0;">
+                <strong>Billing:</strong>
+                ${billingInterval}
+              </p>
+
+              ${subscriptionId
+                ? `
+                            <p style="margin: 10px 0;">
+                              <strong>Subscription ID:</strong>
+                              ${subscriptionId}
+                            </p>
+                          `
+                : ""
+              }
+
+              ${invoiceId
+                ? `
+                            <p style="margin: 10px 0;">
+                              <strong>Invoice ID:</strong>
+                              ${invoiceId}
+                            </p>
+                          `
+                : ""
+              }
+
+            </div>
+
+            ${
+              invoiceUrl
+                ? `
+                  <div
+                    style="
+                      margin: 30px 0;
+                      text-align: center;
+                    "
+                  >
+                    <a
+                      href="${invoiceUrl}"
+                      target="_blank"
+                      style="
+                        display: inline-block;
+                        padding: 13px 25px;
+                        background-color: #111827;
+                        color: #ffffff;
+                        text-decoration: none;
+                        border-radius: 7px;
+                        font-size: 15px;
+                        font-weight: bold;
+                      "
+                    >
+                      View Invoice
+                    </a>
+                  </div>
+                `
+                : ""
+            }
+
+            ${
+              invoicePdf
+                ? `
+                  <div
+                    style="
+                      margin: 15px 0;
+                      text-align: center;
+                    "
+                  >
+                    <a
+                      href="${invoicePdf}"
+                      target="_blank"
+                      style="
+                        display: inline-block;
+                        padding: 13px 25px;
+                        background-color: #2563eb;
+                        color: #ffffff;
+                        text-decoration: none;
+                        border-radius: 7px;
+                        font-size: 15px;
+                        font-weight: bold;
+                      "
+                    >
+                      Download Invoice PDF
+                    </a>
+                  </div>
+                `
+                : ""
+            }
+
+            <!-- Features -->
+            <div
+              style="
+                margin: 25px 0;
+                padding: 20px;
+                background: #eff6ff;
+                border-left: 4px solid #2563eb;
+                border-radius: 6px;
+              "
+            >
+
+              <h3
+                style="
+                  margin-top: 0;
+                  color: #1e3a8a;
+                  font-size: 18px;
+                "
+              >
+                🚀 What's Next?
+              </h3>
+
+              <ol
+                style="
+                  padding-left: 20px;
+                  margin-bottom: 0;
+                  line-height: 1.8;
+                  color: #374151;
+                "
+              >
+
+                <li>
+                  Login to your AI Chatbot dashboard.
+                </li>
+
+                <li>
+                  Configure your chatbot according to your business.
+                </li>
+
+                <li>
+                  Add your FAQs, products and services.
+                </li>
+
+                <li>
+                  Start using the features available in your plan.
+                </li>
+
+              </ol>
+
+            </div>
+
+            <p
+              style="
+                font-size: 15px;
+                line-height: 1.6;
+              "
+            >
+              If you have any questions regarding your subscription,
+              billing, or plan features, please contact our support team.
+            </p>
+
+            <p
+              style="
+                margin-top: 30px;
+                margin-bottom: 0;
+              "
+            >
+              Regards,<br />
+              <strong>AI Chatbot Team</strong>
+            </p>
+
+          </div>
+
+          <!-- Footer -->
+          <div
+            style="
+              background: #f9fafb;
+              padding: 20px;
+              text-align: center;
+              border-top: 1px solid #e5e7eb;
+            "
+          >
+
+            <p
+              style="
+                margin: 0;
+                font-size: 13px;
+                color: #6b7280;
+              "
+            >
+              This is an automated email. Please do not reply directly
+              to this email.
+            </p>
+
+          </div>
+
+        </div>
+
+      </body>
+      </html>
+    `,
+  };
+};
+
+
+export const subscriptionPlanChangedEmailTemplate = ({
+  fullName,
+  oldPlanName,
+  newPlanName,
+  changeType,
+  amount,
+  currency = "GBP",
+  billingInterval = "month",
+  subscriptionId,
+  invoiceId,
+  invoiceUrl,
+  invoicePdf,
+}) => {
+  const isUpgrade = changeType === "upgrade";
+
+  const changeTitle = isUpgrade
+    ? "Subscription Upgraded Successfully"
+    : "Subscription Downgraded Successfully";
+
+  const changeIcon = isUpgrade ? "🚀" : "🔄";
+
+  return {
+    subject: `${changeTitle} - ${newPlanName} | AI Chatbot`,
+
+    html: `
+      <!DOCTYPE html>
+      <html>
+      <head>
+        <meta charset="UTF-8" />
+        <meta
+          name="viewport"
+          content="width=device-width, initial-scale=1.0"
+        />
+        <title>${changeTitle}</title>
+      </head>
+
+      <body
+        style="
+          margin: 0;
+          padding: 0;
+          background-color: #f4f6f8;
+          font-family: Arial, Helvetica, sans-serif;
+          color: #333333;
+        "
+      >
+
+        <div
+          style="
+            max-width: 700px;
+            margin: 30px auto;
+            background: #ffffff;
+            border-radius: 12px;
+            overflow: hidden;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.08);
+          "
+        >
+
+          <!-- Header -->
+          <div
+            style="
+              background: #111827;
+              padding: 30px;
+              text-align: center;
+            "
+          >
+            <h1
+              style="
+                margin: 0;
+                color: #ffffff;
+                font-size: 28px;
+              "
+            >
+              AI Chatbot
+            </h1>
+
+            <p
+              style="
+                margin: 10px 0 0;
+                color: #d1d5db;
+                font-size: 15px;
+              "
+            >
+              Subscription Plan Update
+            </p>
+          </div>
+
+          <!-- Main Content -->
+          <div style="padding: 35px;">
+
+            <h2
+              style="
+                margin-top: 0;
+                color: #111827;
+                font-size: 24px;
+              "
+            >
+              Hello ${fullName} 👋
+            </h2>
+
+            <p
+              style="
+                font-size: 16px;
+                line-height: 1.7;
+              "
+            >
+              Your AI Chatbot subscription plan has been successfully
+              changed.
+            </p>
+
+            <!-- Success -->
+            <div
+              style="
+                margin: 25px 0;
+                padding: 20px;
+                background: ${
+                  isUpgrade ? "#ecfdf5" : "#eff6ff"
+                };
+                border-left: 4px solid ${
+                  isUpgrade ? "#10b981" : "#2563eb"
+                };
+                border-radius: 6px;
+              "
+            >
+
+              <h3
+                style="
+                  margin-top: 0;
+                  color: ${
+                    isUpgrade ? "#065f46" : "#1e3a8a"
+                  };
+                  font-size: 18px;
+                "
+              >
+                ${changeIcon} ${changeTitle}
+              </h3>
+
+              <p
+                style="
+                  margin-bottom: 0;
+                  font-size: 14px;
+                  line-height: 1.6;
+                  color: #374151;
+                "
+              >
+                Your subscription has been changed from
+                <strong>${oldPlanName}</strong>
+                to
+                <strong>${newPlanName}</strong>.
+              </p>
+
+            </div>
+
+            <!-- Plan Change -->
+            <div
+              style="
+                margin: 25px 0;
+                padding: 22px;
+                background: #f9fafb;
+                border: 1px solid #e5e7eb;
+                border-radius: 10px;
+              "
+            >
+
+              <h3
+                style="
+                  margin-top: 0;
+                  color: #111827;
+                  font-size: 18px;
+                "
+              >
+                📋 Plan Change Details
+              </h3>
+
+              <p style="margin: 10px 0;">
+                <strong>Previous Plan:</strong>
+                ${oldPlanName}
+              </p>
+
+              <p style="margin: 10px 0;">
+                <strong>New Plan:</strong>
+                ${newPlanName}
+              </p>
+
+              <p style="margin: 10px 0;">
+                <strong>Change Type:</strong>
+
+                <span
+                  style="
+                    display: inline-block;
+                    margin-left: 5px;
+                    padding: 5px 12px;
+                    background: ${
+                      isUpgrade ? "#dcfce7" : "#dbeafe"
+                    };
+                    color: ${
+                      isUpgrade ? "#166534" : "#1e40af"
+                    };
+                    border-radius: 20px;
+                    font-size: 13px;
+                    font-weight: bold;
+                  "
+                >
+                  ${
+                    isUpgrade
+                      ? "Upgrade"
+                      : "Downgrade"
+                  }
+                </span>
+              </p>
+
+              <p style="margin: 10px 0;">
+                <strong>Amount:</strong>
+                ${currency} ${amount}
+              </p>
+
+              <p style="margin: 10px 0;">
+                <strong>Billing:</strong>
+                ${billingInterval}
+              </p>
+
+            </div>
+
+            <!-- Payment Details -->
+            ${
+              invoiceId || subscriptionId
+                ? `
+                  <div
+                    style="
+                      margin: 25px 0;
+                      padding: 22px;
+                      background: #f9fafb;
+                      border: 1px solid #e5e7eb;
+                      border-radius: 10px;
+                    "
+                  >
+
+                    <h3
+                      style="
+                        margin-top: 0;
+                        color: #111827;
+                        font-size: 18px;
+                      "
+                    >
+                      💳 Payment Details
+                    </h3>
+
+                    ${
+                      subscriptionId
+                        ? `
+                          <p style="margin: 10px 0;">
+                            <strong>Subscription ID:</strong>
+                            ${subscriptionId}
+                          </p>
+                        `
+                        : ""
+                    }
+
+                    ${
+                      invoiceId
+                        ? `
+                          <p style="margin: 10px 0;">
+                            <strong>Invoice ID:</strong>
+                            ${invoiceId}
+                          </p>
+                        `
+                        : ""
+                    }
+
+                  </div>
+                `
+                : ""
+            }
+
+            <!-- Invoice -->
+            ${
+              invoiceUrl
+                ? `
+                  <div
+                    style="
+                      margin: 30px 0;
+                      text-align: center;
+                    "
+                  >
+                    <a
+                      href="${invoiceUrl}"
+                      target="_blank"
+                      style="
+                        display: inline-block;
+                        padding: 13px 25px;
+                        background-color: #111827;
+                        color: #ffffff;
+                        text-decoration: none;
+                        border-radius: 7px;
+                        font-size: 15px;
+                        font-weight: bold;
+                      "
+                    >
+                      View Invoice
+                    </a>
+                  </div>
+                `
+                : ""
+            }
+
+            ${
+              invoicePdf
+                ? `
+                  <div
+                    style="
+                      margin: 15px 0 30px;
+                      text-align: center;
+                    "
+                  >
+                    <a
+                      href="${invoicePdf}"
+                      target="_blank"
+                      style="
+                        display: inline-block;
+                        padding: 13px 25px;
+                        background-color: #2563eb;
+                        color: #ffffff;
+                        text-decoration: none;
+                        border-radius: 7px;
+                        font-size: 15px;
+                        font-weight: bold;
+                      "
+                    >
+                      Download Invoice PDF
+                    </a>
+                  </div>
+                `
+                : ""
+            }
+
+            <!-- Next Steps -->
+            <div
+              style="
+                margin: 25px 0;
+                padding: 20px;
+                background: #eff6ff;
+                border-left: 4px solid #2563eb;
+                border-radius: 6px;
+              "
+            >
+
+              <h3
+                style="
+                  margin-top: 0;
+                  color: #1e3a8a;
+                  font-size: 18px;
+                "
+              >
+                📌 What's Next?
+              </h3>
+
+              <p
+                style="
+                  margin-bottom: 0;
+                  font-size: 14px;
+                  line-height: 1.6;
+                  color: #374151;
+                "
+              >
+                ${
+                  isUpgrade
+                    ? "Your new plan features are now available. You can continue using your AI Chatbot with the upgraded limits and features."
+                    : "Your subscription has been moved to the new plan. Your account will continue according to the features and limits of the selected plan."
+                }
+              </p>
+
+            </div>
+
+            <p
+              style="
+                font-size: 15px;
+                line-height: 1.6;
+              "
+            >
+              If you have any questions regarding your subscription
+              or billing, please contact our support team.
+            </p>
+
+            <p
+              style="
+                margin-top: 30px;
+                margin-bottom: 0;
+              "
+            >
+              Regards,<br />
+              <strong>AI Chatbot Team</strong>
+            </p>
+
+          </div>
+
+          <!-- Footer -->
+          <div
+            style="
+              background: #f9fafb;
+              padding: 20px;
+              text-align: center;
+              border-top: 1px solid #e5e7eb;
+            "
+          >
+
+            <p
+              style="
+                margin: 0;
+                font-size: 13px;
+                color: #6b7280;
+              "
+            >
+              This is an automated email. Please do not reply directly
+              to this email.
+            </p>
+
+          </div>
+
+        </div>
+
+      </body>
+      </html>
+    `,
+  };
+};
+
+
+export const subscriptionCancellationEmailTemplate = ({
+  fullName,
+  businessName,
+  planName,
+  subscriptionId,
+  cancellationDate,
+  amount,
+  currency = "GBP",
+  billingInterval = "Monthly",
+}) => {
+  return {
+    subject: `Subscription Cancelled - ${planName} | AI Chatbot`,
+
+    html: `
+      <!DOCTYPE html>
+      <html>
+      <head>
+        <meta charset="UTF-8" />
+
+        <meta
+          name="viewport"
+          content="width=device-width, initial-scale=1.0"
+        />
+
+        <title>Subscription Cancelled</title>
+      </head>
+
+      <body
+        style="
+          margin: 0;
+          padding: 0;
+          background-color: #f4f6f8;
+          font-family: Arial, Helvetica, sans-serif;
+          color: #333333;
+        "
+      >
+
+        <div
+          style="
+            max-width: 700px;
+            margin: 30px auto;
+            background: #ffffff;
+            border-radius: 12px;
+            overflow: hidden;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.08);
+          "
+        >
+
+          <!-- Header -->
+          <div
+            style="
+              background: #111827;
+              padding: 30px;
+              text-align: center;
+            "
+          >
+
+            <h1
+              style="
+                margin: 0;
+                color: #ffffff;
+                font-size: 28px;
+              "
+            >
+              AI Chatbot
+            </h1>
+
+            <p
+              style="
+                margin: 10px 0 0;
+                color: #d1d5db;
+                font-size: 15px;
+              "
+            >
+              Subscription Cancellation
+            </p>
+
+          </div>
+
+          <!-- Main Content -->
+          <div style="padding: 35px;">
+
+            <h2
+              style="
+                margin-top: 0;
+                color: #111827;
+                font-size: 24px;
+              "
+            >
+              Hello ${fullName} 👋
+            </h2>
+
+            <p
+              style="
+                font-size: 16px;
+                line-height: 1.7;
+              "
+            >
+              We're confirming that your AI Chatbot subscription
+              has been successfully cancelled.
+            </p>
+
+            <!-- Cancellation Success -->
+            <div
+              style="
+                margin: 25px 0;
+                padding: 20px;
+                background: #fef2f2;
+                border-left: 4px solid #ef4444;
+                border-radius: 6px;
+              "
+            >
+
+              <h3
+                style="
+                  margin-top: 0;
+                  color: #991b1b;
+                  font-size: 18px;
+                "
+              >
+                ❌ Subscription Cancelled
+              </h3>
+
+              <p
+                style="
+                  margin-bottom: 0;
+                  font-size: 14px;
+                  line-height: 1.6;
+                  color: #7f1d1d;
+                "
+              >
+                Your subscription has been cancelled successfully.
+                Your account will no longer have access to the
+                subscription plan features.
+              </p>
+
+            </div>
+
+            <!-- Subscription Details -->
+            <div
+              style="
+                margin: 25px 0;
+                padding: 22px;
+                background: #f9fafb;
+                border: 1px solid #e5e7eb;
+                border-radius: 10px;
+              "
+            >
+
+              <h3
+                style="
+                  margin-top: 0;
+                  color: #111827;
+                  font-size: 18px;
+                "
+              >
+                📋 Cancelled Subscription Details
+              </h3>
+
+              <p style="margin: 10px 0;">
+                <strong>Business:</strong>
+                ${businessName || "N/A"}
+              </p>
+
+              <p style="margin: 10px 0;">
+                <strong>Plan:</strong>
+                ${planName || "N/A"}
+              </p>
+
+              <p style="margin: 10px 0;">
+                <strong>Amount:</strong>
+                ${currency} ${amount || 0}
+              </p>
+
+              <p style="margin: 10px 0;">
+                <strong>Billing:</strong>
+                ${billingInterval}
+              </p>
+
+              ${
+                subscriptionId
+                  ? `
+                    <p style="margin: 10px 0;">
+                      <strong>Subscription ID:</strong>
+                      ${subscriptionId}
+                    </p>
+                  `
+                  : ""
+              }
+
+              ${
+                cancellationDate
+                  ? `
+                    <p style="margin: 10px 0;">
+                      <strong>Cancellation Date:</strong>
+                      ${cancellationDate}
+                    </p>
+                  `
+                  : ""
+              }
+
+            </div>
+
+            <!-- Account Information -->
+            <div
+              style="
+                margin: 25px 0;
+                padding: 20px;
+                background: #eff6ff;
+                border-left: 4px solid #2563eb;
+                border-radius: 6px;
+              "
+            >
+
+              <h3
+                style="
+                  margin-top: 0;
+                  color: #1e3a8a;
+                  font-size: 18px;
+                "
+              >
+                ℹ️ What Happens Next?
+              </h3>
+
+              <ul
+                style="
+                  padding-left: 20px;
+                  margin-bottom: 0;
+                  line-height: 1.8;
+                  color: #374151;
+                "
+              >
+
+                <li>
+                  Your current subscription has been cancelled.
+                </li>
+
+                <li>
+                  Your subscription plan has been removed from your account.
+                </li>
+
+                <li>
+                  You can purchase a new subscription whenever you need.
+                </li>
+
+                <li>
+                  Your account can continue using features available
+                  without an active subscription.
+                </li>
+
+              </ul>
+
+            </div>
+
+            <!-- Re-subscribe -->
+            <div
+              style="
+                margin: 25px 0;
+                padding: 20px;
+                background: #f9fafb;
+                border: 1px solid #e5e7eb;
+                border-radius: 10px;
+                text-align: center;
+              "
+            >
+
+              <h3
+                style="
+                  margin-top: 0;
+                  color: #111827;
+                  font-size: 18px;
+                "
+              >
+                🔄 Changed Your Mind?
+              </h3>
+
+              <p
+                style="
+                  font-size: 14px;
+                  line-height: 1.6;
+                  color: #4b5563;
+                "
+              >
+                You can subscribe to a new AI Chatbot plan anytime
+                from your dashboard.
+              </p>
+
+            </div>
+
+            <p
+              style="
+                font-size: 15px;
+                line-height: 1.6;
+              "
+            >
+              If you cancelled your subscription by mistake or have
+              any questions regarding your billing, please contact
+              our support team.
+            </p>
+
+            <p
+              style="
+                margin-top: 30px;
+                margin-bottom: 0;
+              "
+            >
+              Regards,<br />
+              <strong>AI Chatbot Team</strong>
+            </p>
+
+          </div>
+
+          <!-- Footer -->
+          <div
+            style="
+              background: #f9fafb;
+              padding: 20px;
+              text-align: center;
+              border-top: 1px solid #e5e7eb;
+            "
+          >
+
+            <p
+              style="
+                margin: 0;
+                font-size: 13px;
+                color: #6b7280;
+              "
+            >
+              This is an automated email. Please do not reply directly
+              to this email.
+            </p>
+
+          </div>
+
+        </div>
+
+      </body>
+      </html>
+    `,
+  };
+};

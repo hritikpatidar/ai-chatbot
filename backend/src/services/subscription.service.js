@@ -1,3 +1,6 @@
+import env from "../config/env.js";
+import transporter from "../config/mail.js";
+import { subscriptionCancellationEmailTemplate, subscriptionPlanChangedEmailTemplate, subscriptionPurchaseEmailTemplate } from "../helpers/emailTemplate.js";
 import { extractSubscriptionPaymentData } from "../helpers/stripePayment.js";
 import { findClientById, updateClientById } from "../repositories/client.repository.js";
 import {
@@ -300,6 +303,41 @@ export const createSubscriptionService = async ({
     subscriptionData
   );
 
+  try {
+    const emailTemplate = subscriptionPurchaseEmailTemplate({
+      fullName,
+      businessName: client?.businessName,
+      planName: plan.name,
+      amount: (Number(plan.amount) / 100).toFixed(2),
+      currency: plan.currency || "GBP",
+      billingInterval:
+        plan.interval === "year"
+          ? "Yearly"
+          : "Monthly",
+      subscriptionId: stripeSubscription.id,
+      invoiceId: paymentData.invoiceId,
+      invoiceUrl: stripeSubscription.latest_invoice.hosted_invoice_url,
+      invoicePdf: stripeSubscription.latest_invoice.invoice_pdf,
+    });
+
+    const info = await transporter.sendMail({
+      from: `"AI Chatbot" <${env.MAIL_USER}>`,
+      to: email,
+      subject: emailTemplate.subject,
+      html: emailTemplate.html,
+    });
+
+    console.log(
+      `✅ Subscription purchase email sent to ${email}`,
+      info.messageId
+    );
+  } catch (error) {
+    console.error(
+      `❌ Failed to send subscription purchase email to ${email}`,
+      error
+    );
+  }
+
   /*
    * 10. Return frontend response
    */
@@ -369,6 +407,8 @@ export const syncSubscriptionFromStripe = async (stripeSubscription) => {
 export const changeSubscriptionPlanService = async ({
   subscriptionId,
   planId,
+  fullName,
+  email
 }) => {
   // --------------------------------------------
   // 1. Find current subscription
@@ -407,6 +447,23 @@ export const changeSubscriptionPlanService = async ({
     error.statusCode = 400;
     throw error;
   }
+  // --------------------------------------------
+  // 3. Same plan check
+  // --------------------------------------------
+  const oldPlanName =
+    currentSubscription.planId?.name ||
+    "Previous Plan";
+
+  const oldPlanAmount =
+    (Number(currentSubscription.planId?.amount || 0) / 100).toFixed(2);
+
+  const newPlanAmount =
+    (Number(newPlan.amount || 0) / 100).toFixed(2);
+
+  const changeType =
+    newPlanAmount > oldPlanAmount
+      ? "upgrade"
+      : "downgrade";
 
   // --------------------------------------------
   // 4. Change Stripe subscription + pay invoice
@@ -486,11 +543,55 @@ export const changeSubscriptionPlanService = async ({
       updateData,
     );
 
+  try {
+    const emailTemplate =
+      subscriptionPlanChangedEmailTemplate({
+        fullName,
+        oldPlanName,
+        newPlanName: newPlan.name,
+        changeType,
+        amount: (Number(newPlan.amount) / 100).toFixed(2),
+        currency: newPlan.currency || "GBP",
+        billingInterval:
+          newPlan.interval === "year"
+            ? "Yearly"
+            : "Monthly",
+        subscriptionId: stripeSubscription.id,
+        invoiceId: invoice?.id || null,
+        invoiceUrl: stripeSubscription.latest_invoice.hosted_invoice_url,
+        invoicePdf: stripeSubscription.latest_invoice.invoice_pdf,
+      });
+
+    const info =
+      await transporter.sendMail({
+        from: `"AI Chatbot" <${env.MAIL_USER}>`,
+        to: email,
+        subject: emailTemplate.subject,
+        html: emailTemplate.html,
+      });
+
+    console.log(
+      `✅ Subscription ${changeType} email sent to ${email}`,
+      info.messageId
+    );
+
+  } catch (error) {
+
+    console.error(
+      `❌ Failed to send subscription ${changeType} email to ${email}`,
+      error
+    );
+
+  }
+
   return {
     subscription: updatedSubscription,
     stripeSubscription,
     invoice,
+    invoiceUrl: stripeSubscription.latest_invoice.hosted_invoice_url,
+    invoicePdf: stripeSubscription.latest_invoice.invoice_pdf,
     paymentIntent,
+    changeType
   };
 };
 
@@ -563,7 +664,7 @@ export const previewSubscriptionChangeService = async ({
 /**
  * Cancel subscription immediately
  */
-export const cancelSubscriptionService = async (subscriptionId) => {
+export const cancelSubscriptionService = async (subscriptionId, fullName, email) => {
   const subscription = await findSubscriptionById(subscriptionId);
 
   if (!subscription) {
@@ -583,9 +684,29 @@ export const cancelSubscriptionService = async (subscriptionId) => {
     throw error;
   }
 
+  const oldPlanName =
+    subscription.planId?.name ||
+    subscription.planName ||
+    "Subscription Plan";
+
+  const oldPlanAmount =
+    subscription.planId?.amount ||
+    subscription.amount ||
+    0;
+
+  const oldCurrency =
+    subscription.planId?.currency ||
+    subscription.currency ||
+    "GBP";
+
+  const oldBillingInterval =
+    subscription.planId?.interval === "year"
+      ? "Yearly"
+      : "Monthly";
+  const stripeSubscriptionId = subscription.stripeSubscriptionId;
   try {
     const stripeSubscription = await cancelStripeSubscription(
-      subscription.stripeSubscriptionId
+      stripeSubscriptionId
     );
     const clientId = subscription.clientId
     await updateClientById(clientId, {
@@ -595,7 +716,45 @@ export const cancelSubscriptionService = async (subscriptionId) => {
       status: "inactive"
     });
     const updatedSubscription = await deleteSubscriptionById(subscriptionId);
+    try {
+      const emailTemplate = subscriptionCancellationEmailTemplate({
+        fullName,
+        businessName: subscription.clientId?.businessName,
+        planName: oldPlanName,
+        subscriptionId: stripeSubscriptionId,
+        cancellationDate:
+          new Date().toLocaleDateString(
+            "en-GB",
+            {
+              day: "2-digit",
+              month: "short",
+              year: "numeric",
+            }
+          ),
+        amount: (Number(oldPlanAmount) / 100).toFixed(2),
+        currency: oldCurrency,
+        billingInterval: oldBillingInterval,
+      });
 
+      const info =
+        await transporter.sendMail({
+          from: `"AI Chatbot" <${env.MAIL_USER}>`,
+          to: email,
+          subject: emailTemplate.subject,
+          html: emailTemplate.html,
+        });
+
+      console.log(
+        `✅ Subscription cancellation email sent to ${email}`,
+        info.messageId
+      );
+
+    } catch (emailError) {
+      console.error(
+        `❌ Failed to send cancellation email to ${email}`,
+        emailError
+      );
+    }
     return updatedSubscription;
   } catch (error) {
     console.error("Stripe cancel error:", error);

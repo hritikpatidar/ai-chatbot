@@ -189,10 +189,10 @@ export const createSubscriptionController = async (req, res) => {
     const clientId = req.user?.clientId;
 
     const fullName =
-      req.user?.fullName || req.body?.fullName;
+      req.user?.fullName || null;
 
     const email =
-      req.user?.email || req.body?.email;
+      req.user?.email || null;
 
     if (!clientId) {
       return res.status(400).json({
@@ -312,6 +312,11 @@ export const previewSubscriptionChangeController = async (req, res) => {
 export const changeSubscriptionPlanController = async (req, res) => {
   try {
     const { subscriptionId, planId, paymentMethodId } = req.body;
+    const fullName =
+      req.user?.fullName || null;
+
+    const email =
+      req.user?.email || null;
 
     if (!subscriptionId) {
       return res.status(400).json({
@@ -330,7 +335,9 @@ export const changeSubscriptionPlanController = async (req, res) => {
     const data = await changeSubscriptionPlanService({
       subscriptionId,
       planId,
-      paymentMethodId
+      paymentMethodId,
+      fullName,
+      email
     });
 
     return res.status(200).json({
@@ -356,6 +363,11 @@ export const changeSubscriptionPlanController = async (req, res) => {
 export const cancelSubscriptionController = async (req, res) => {
   try {
     const { subscriptionId } = req.body;
+    const fullName =
+      req.user?.fullName || null;
+
+    const email =
+      req.user?.email || null;
 
     if (!subscriptionId) {
       return res.status(400).json({
@@ -364,7 +376,7 @@ export const cancelSubscriptionController = async (req, res) => {
       });
     }
 
-    const subscription = await cancelSubscriptionService(subscriptionId);
+    const subscription = await cancelSubscriptionService(subscriptionId, fullName, email);
 
     return res.status(200).json({
       success: true,

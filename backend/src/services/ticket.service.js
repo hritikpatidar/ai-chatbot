@@ -1,3 +1,6 @@
+import env from "../config/env.js";
+import transporter from "../config/mail.js";
+import { ticketCreatedEmailTemplate, ticketStatusUpdateEmailTemplate } from "../helpers/emailTemplate.js";
 import {
   createTicket,
   findOpenTicketByConversation,
@@ -32,6 +35,37 @@ export const createAITicketService = async ({
     status: "open",
     source: "ai_chat",
   });
+
+  try {
+
+    const emailTemplate = ticketCreatedEmailTemplate({
+      fullName: ticket.guestKeyId.fullName,
+      ticketId: ticket.id?.slice(-8) || ticket._id,
+      subject: ticket.subject,
+      description: ticket.description,
+      status: ticket.status,
+    });
+
+    const info = await transporter.sendMail({
+      from: `"AI Chatbot" <${env.MAIL_USER}>`,
+      to: ticket.guestKeyId.email,
+      subject: emailTemplate.subject,
+      html: emailTemplate.html,
+    });
+
+    console.log(
+      `✅ Ticket creation email sent to ${ticket.guestKeyId.email}`,
+      info.messageId
+    );
+
+  } catch (error) {
+
+    console.error(
+      `❌ Failed to send ticket creation email to ${ticket.guestKeyId.email}`,
+      error
+    );
+
+  }
 
   return ticket;
 };
@@ -68,8 +102,46 @@ export const updateClientTicketService = async ({
   if (data.status !== undefined) {
     allowedData.status = data.status;
   }
+  const previousStatus = ticket.status;
+  // Update ticket
+  const updatedTicket = await updateTicketById(
+    ticketId,
+    allowedData
+  );
+  // Send email only when status is actually changed
+  if (
+    data.status !== undefined &&
+    previousStatus !== data.status
+  ) {
+    const emailTemplate = ticketStatusUpdateEmailTemplate({
+      fullName: updatedTicket.guestKeyId.fullName,
+      ticketId: updatedTicket.id?.slice(-8) || updatedTicket._id,
+      subject: updatedTicket.subject,
+      status: data.status,
+      previousStatus,
+    });
 
-  return await updateTicketById(ticketId, allowedData);
+    try {
+      const info = await transporter.sendMail({
+        from: `"AI Chatbot" <${env.MAIL_USER}>`,
+        to: updatedTicket.guestKeyId.email,
+        subject: emailTemplate.subject,
+        html: emailTemplate.html,
+      });
+
+      console.log(
+        `✅ Ticket status update email sent to ${updatedTicket.guestKeyId.email}`,
+        info.messageId
+      );
+    } catch (error) {
+      console.error(
+        `❌ Failed to send ticket status email to ${updatedTicket.guestKeyId.email}`,
+        error
+      );
+    }
+  }
+
+  return updatedTicket;
 };
 
 

@@ -1,7 +1,14 @@
 import Ticket from "../models/Ticket.js";
 
 export const createTicket = async (data) => {
-  return await Ticket.create(data);
+  const ticket = await Ticket.create(data);
+
+  return await Ticket.findById(ticket._id)
+    .populate("userId", "fullName email")
+    .populate("guestKeyId", "fullName email phone")
+    .populate("clientId", "businessName clientKey")
+    .populate("conversationId")
+    .populate("messageId");
 };
 
 export const findOpenTicketByConversation = async (conversationId) => {

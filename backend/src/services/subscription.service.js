@@ -69,6 +69,20 @@ const buildSubscriptionData = ({
 }) => {
   const subscriptionItem = stripeSubscription?.items?.data?.[0];
   const stripePrice = subscriptionItem?.price;
+
+  const currentPeriodStart =
+    subscriptionItem.current_period_start
+      ? new Date(
+        subscriptionItem.current_period_start * 1000
+      )
+      : null;
+
+  const currentPeriodEnd =
+    subscriptionItem.current_period_end
+      ? new Date(
+        subscriptionItem.current_period_end * 1000
+      )
+      : null;
   let data = {
     clientId,
     userId,
@@ -82,6 +96,7 @@ const buildSubscriptionData = ({
     interval: stripePrice?.recurring?.interval ?? plan.interval,
     currentPeriodStart: stripeDate(subscriptionItem.current_period_start),
     currentPeriodEnd: stripeDate(subscriptionItem.current_period_end),
+    expiresAt: currentPeriodEnd,
     cancelAtPeriodEnd: Boolean(stripeSubscription.cancel_at_period_end),
     canceledAt: stripeDate(stripeSubscription.canceled_at),
     trialStart: stripeDate(stripeSubscription.trial_start),

@@ -84,6 +84,16 @@ const subscriptionSchema = new mongoose.Schema(
       type: Date,
     },
 
+    expiresAt: {
+      type: Date,
+      default: null,
+    },
+
+    expiryEmailSent: {
+      type: Boolean,
+      default: false,
+    },
+
     cancelAtPeriodEnd: {
       type: Boolean,
       default: false,

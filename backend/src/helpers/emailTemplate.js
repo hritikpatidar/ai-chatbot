@@ -2341,3 +2341,263 @@ export const subscriptionCancellationEmailTemplate = ({
     `,
   };
 };
+
+
+export const subscriptionExpiredEmailTemplate = ({
+  fullName,
+  businessName,
+  planName,
+  expiredDate,
+}) => {
+  return {
+    subject: `Your AI Chatbot Subscription Has Expired`,
+
+    html: `
+      <!DOCTYPE html>
+      <html>
+
+      <head>
+        <meta charset="UTF-8" />
+
+        <meta
+          name="viewport"
+          content="width=device-width, initial-scale=1.0"
+        />
+
+        <title>Subscription Expired</title>
+      </head>
+
+      <body
+        style="
+          margin: 0;
+          padding: 0;
+          background-color: #f4f6f8;
+          font-family: Arial, Helvetica, sans-serif;
+          color: #333333;
+        "
+      >
+
+        <div
+          style="
+            max-width: 700px;
+            margin: 30px auto;
+            background: #ffffff;
+            border-radius: 12px;
+            overflow: hidden;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.08);
+          "
+        >
+
+          <!-- Header -->
+          <div
+            style="
+              background: #111827;
+              padding: 30px;
+              text-align: center;
+            "
+          >
+
+            <h1
+              style="
+                margin: 0;
+                color: #ffffff;
+                font-size: 28px;
+              "
+            >
+              AI Chatbot
+            </h1>
+
+            <p
+              style="
+                margin: 10px 0 0;
+                color: #d1d5db;
+                font-size: 15px;
+              "
+            >
+              Subscription Expiration
+            </p>
+
+          </div>
+
+          <!-- Main -->
+          <div style="padding: 35px;">
+
+            <h2
+              style="
+                margin-top: 0;
+                color: #111827;
+                font-size: 24px;
+              "
+            >
+              Hello ${fullName} 👋
+            </h2>
+
+            <p
+              style="
+                font-size: 16px;
+                line-height: 1.7;
+              "
+            >
+              Your AI Chatbot subscription has expired.
+            </p>
+
+            <!-- Expired -->
+            <div
+              style="
+                margin: 25px 0;
+                padding: 20px;
+                background: #fef2f2;
+                border-left: 4px solid #ef4444;
+                border-radius: 6px;
+              "
+            >
+
+              <h3
+                style="
+                  margin-top: 0;
+                  color: #991b1b;
+                  font-size: 18px;
+                "
+              >
+                ⏰ Subscription Expired
+              </h3>
+
+              <p
+                style="
+                  margin-bottom: 0;
+                  font-size: 14px;
+                  line-height: 1.6;
+                  color: #7f1d1d;
+                "
+              >
+                Your subscription period has ended and your
+                subscription is no longer active.
+              </p>
+
+            </div>
+
+            <!-- Details -->
+            <div
+              style="
+                margin: 25px 0;
+                padding: 22px;
+                background: #f9fafb;
+                border: 1px solid #e5e7eb;
+                border-radius: 10px;
+              "
+            >
+
+              <h3
+                style="
+                  margin-top: 0;
+                  color: #111827;
+                  font-size: 18px;
+                "
+              >
+                📋 Subscription Details
+              </h3>
+
+              <p style="margin: 10px 0;">
+                <strong>Business:</strong>
+                ${businessName || "N/A"}
+              </p>
+
+              <p style="margin: 10px 0;">
+                <strong>Plan:</strong>
+                ${planName || "N/A"}
+              </p>
+
+              <p style="margin: 10px 0;">
+                <strong>Expired On:</strong>
+                ${expiredDate}
+              </p>
+
+            </div>
+
+            <!-- CTA -->
+            <div
+              style="
+                margin: 25px 0;
+                padding: 20px;
+                background: #eff6ff;
+                border-left: 4px solid #2563eb;
+                border-radius: 6px;
+              "
+            >
+
+              <h3
+                style="
+                  margin-top: 0;
+                  color: #1e3a8a;
+                  font-size: 18px;
+                "
+              >
+                🔄 Want to Continue?
+              </h3>
+
+              <p
+                style="
+                  font-size: 14px;
+                  line-height: 1.6;
+                  color: #374151;
+                "
+              >
+                You can purchase a new subscription from your
+                AI Chatbot dashboard and continue using our
+                services.
+              </p>
+
+            </div>
+
+            <p
+              style="
+                font-size: 15px;
+                line-height: 1.6;
+              "
+            >
+              If you have any questions regarding your subscription,
+              billing, or plan, please contact our support team.
+            </p>
+
+            <p
+              style="
+                margin-top: 30px;
+                margin-bottom: 0;
+              "
+            >
+              Regards,<br />
+              <strong>AI Chatbot Team</strong>
+            </p>
+
+          </div>
+
+          <!-- Footer -->
+          <div
+            style="
+              background: #f9fafb;
+              padding: 20px;
+              text-align: center;
+              border-top: 1px solid #e5e7eb;
+            "
+          >
+
+            <p
+              style="
+                margin: 0;
+                font-size: 13px;
+                color: #6b7280;
+              "
+            >
+              This is an automated email. Please do not reply directly
+              to this email.
+            </p>
+
+          </div>
+
+        </div>
+
+      </body>
+      </html>
+    `,
+  };
+};

@@ -6,6 +6,7 @@ import { connectRedis } from "./config/redis.js";
 import env from "./config/env.js";
 import { socketHandler } from "./socket/socketHandler.js";
 import { initializeSocket } from "./config/socket.js";
+import { startSubscriptionExpiryJob } from "./jobs/subscriptionExpiry.job.js";
 
 
 const PORT = env.PORT || 5000;
@@ -21,6 +22,7 @@ const startServer = async () => {
     await connectRedis();
     server.listen(PORT, () => {
       console.log(`🚀 Server running on port ${PORT}`);
+      startSubscriptionExpiryJob();
     });
   } catch (error) {
     console.error("❌ Failed to start server:", error.message);

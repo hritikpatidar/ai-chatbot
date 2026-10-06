@@ -20,7 +20,6 @@ export const getClientById = createAsyncThunk(
   async (clientId, { rejectWithValue }) => {
     try {
       const response = await getClientByIdService(clientId);
-      debugger
       return response.data;
     } catch (error) {
       return rejectWithValue(
@@ -74,12 +73,10 @@ const clientSlice = createSlice({
   extraReducers: (builder) => {
     builder
       .addCase(getClientById.pending, (state) => {
-        debugger
         state.clientLoading = true;
         state.clientError = "";
       })
       .addCase(getClientById.fulfilled, (state, action) => {
-        debugger
         state.clientLoading = false;
         state.client = action.payload?.client || null;
         state.clientError = "";

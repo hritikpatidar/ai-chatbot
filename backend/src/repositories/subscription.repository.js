@@ -138,3 +138,43 @@ export const hasSubscription = async (clientId) => {
 
   return Boolean(subscription);
 };
+
+
+export const findExpiredSubscriptions = async () => {
+  return await Subscription.find({
+    expiresAt: {
+      $lte: new Date(),
+    },
+    status: {
+      $nin: ["expired", "canceled"],
+    },
+    expiryEmailSent: false,
+  })
+    .populate(
+      "userId",
+      "fullName email"
+    )
+    .populate(
+      "clientId",
+      "businessName"
+    )
+    .populate(
+      "planId",
+      "name amount currency interval"
+    );
+};
+
+export const markSubscriptionExpired = async (
+  subscriptionId
+) => {
+  return await Subscription.findByIdAndUpdate(
+    subscriptionId,
+    {
+      status: "expired",
+      expiryEmailSent: true,
+    },
+    {
+      new: true,
+    }
+  );
+};

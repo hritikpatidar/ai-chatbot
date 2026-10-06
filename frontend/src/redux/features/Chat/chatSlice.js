@@ -24,7 +24,7 @@ export const fetchClientConfig = createAsyncThunk(
   async (clientKey, { rejectWithValue }) => {
     try {
       const response = await getClientConfig(clientKey);
-
+      debugger
       if (!response?.data?.success) {
         return rejectWithValue(
           response?.data?.message || "Failed to fetch client configuration",
@@ -115,6 +115,7 @@ const chatSlice = createSlice({
       })
 
       .addCase(fetchClientConfig.fulfilled, (state, action) => {
+        debugger
         state.clientConfigLoading = false;
         state.clientConfig = action.payload;
         state.clientConfigError = null;

@@ -1,6 +1,7 @@
 import httpServices from "../httpServices";
 
 export const getClientByIdService = async (clientId) => {
+  
   return httpServices.get(`/client/${clientId}`);
 };
 

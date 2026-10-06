@@ -130,7 +130,7 @@ const WelcomeUserModal = ({
       "
       >
         {/* Close Button */}
-        <button
+        {/* <button
           type="button"
           onClick={onClose}
           disabled={isSubmitting}
@@ -164,7 +164,7 @@ const WelcomeUserModal = ({
           aria-label="Close"
         >
           <X size={18} />
-        </button>
+        </button> */}
 
         {/* Header */}
         <div
@@ -500,7 +500,7 @@ const WelcomeUserModal = ({
               sm:text-xs
 
               leading-5
-              break-words
+              wrap-break-word
 
               text-red-600
 

@@ -10,6 +10,9 @@ import Subscription from "../models/Subscription.js";
 export const findSubscriptionByClientId = async (clientId) => {
   return await Subscription.findOne({
     clientId,
+    status: {
+      $nin: ["expired", "canceled"],
+    },
   })
     .populate("planId")
     .populate("clientId")
@@ -22,6 +25,9 @@ export const findSubscriptionByClientId = async (clientId) => {
 export const findSubscriptionByUserId = async (userId) => {
   return await Subscription.findOne({
     userId,
+    status: {
+      $nin: ["expired", "canceled"],
+    },
   })
     .populate("planId")
     .populate("clientId")
@@ -32,18 +38,25 @@ export const findSubscriptionByUserId = async (userId) => {
  * Find subscription by MongoDB ID
  */
 export const findSubscriptionById = async (subscriptionId) => {
-  return await Subscription.findById(subscriptionId)
+  return await Subscription.findOne({
+    _id: subscriptionId,
+    status: {
+      $nin: ["expired", "canceled"],
+    },
+  })
     .populate("planId")
     .populate("clientId")
     .lean();
 };
-
 /**
  * Find subscription by Stripe Subscription ID
  */
 export const findSubscriptionByStripeId = async (stripeSubscriptionId) => {
   return await Subscription.findOne({
     stripeSubscriptionId,
+    status: {
+      $nin: ["expired", "canceled"],
+    },
   })
     .populate("planId")
     .populate("clientId")

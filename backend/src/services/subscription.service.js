@@ -730,7 +730,7 @@ export const cancelSubscriptionService = async (subscriptionId, fullName, email)
       stripe_customer: null,
       status: "inactive"
     });
-    const updatedSubscription = await deleteSubscriptionById(subscriptionId);
+    // const updatedSubscription = await deleteSubscriptionById(subscriptionId);
     try {
       const emailTemplate = subscriptionCancellationEmailTemplate({
         fullName,

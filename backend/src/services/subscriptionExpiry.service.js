@@ -2,6 +2,7 @@ import transporter from "../config/mail.js";
 import env from "../config/env.js";
 import { findExpiredSubscriptions, markSubscriptionExpired } from "../repositories/subscription.repository.js";
 import { subscriptionExpiredEmailTemplate } from "../helpers/emailTemplate.js";
+import { updateClientById } from "../repositories/client.repository.js";
 
 export const processExpiredSubscriptions = async () => {
     const expiredSubscriptions = await findExpiredSubscriptions();
@@ -27,6 +28,19 @@ export const processExpiredSubscriptions = async () => {
                     )
                     : "N/A";
 
+
+            await markSubscriptionExpired(
+                subscription._id
+            );
+
+            const clientId = client._id
+            await updateClientById(clientId, {
+                active_plan: null,
+                current_plan_id: null,
+                stripe_customer: null,
+                status: "inactive"
+            });
+
             const emailTemplate =
                 subscriptionExpiredEmailTemplate({
                     fullName: userId.fullName,
@@ -44,9 +58,7 @@ export const processExpiredSubscriptions = async () => {
                 });
 
             console.log(`✅ Expiry email sent to ${userId.email}`, info.messageId);
-            await markSubscriptionExpired(
-                subscription._id
-            );
+
 
             console.log(`✅ Subscription marked expired: ${subscription._id}`);
         } catch (error) {

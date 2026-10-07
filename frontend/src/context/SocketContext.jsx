@@ -95,11 +95,11 @@ export const SocketProvider = ({ children }) => {
 
       if (isClientChatbot) {
         if (err.message === "INVALID_CLIENT") {
-          toast.error("Invalid or inactive client.");
+          // toast.error("Invalid or inactive client.");
         } else if (err.message === "AUTH_OR_CLIENT_REQUIRED") {
-          toast.error("Client configuration is missing.");
+          // toast.error("Client configuration is missing.");
         } else {
-          toast.error(err.message || "Client chatbot connection failed.");
+          // toast.error(err.message || "Client chatbot connection failed.");
         }
         return;
       }

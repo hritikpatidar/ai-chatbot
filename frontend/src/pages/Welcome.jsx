@@ -36,6 +36,7 @@ import {
   setItemLocalStorage,
 } from "../utils/browserServices";
 import { verifyWidgetSessionService } from "../service/Widget/WidgetServices";
+import ClientNotFound from "../components/ClientNotFound";
 
 export default function Welcome() {
   const {
@@ -115,8 +116,14 @@ export default function Welcome() {
   }, []);
 
   useEffect(() => {
+    if (clientConfig) setShowWelcomeModal(true);
+    else if(clientConfig === null) setShowWelcomeModal(false);
+  }, [clientConfig]);
+
+    useEffect(() => {
     getConversations();
   }, []);
+
 
   const getGreeting = () => {
     const hour = new Date().getHours();
@@ -172,23 +179,27 @@ export default function Welcome() {
       const sessionToken = getItemLocalStorage(`widgetSession:${clientKey}`);
       // 3. No session
       if (!sessionToken) {
-        setShowWelcomeModal(true);
+        console.log("No session found, showing welcome modal");
+        if (clientConfig) setShowWelcomeModal(true);
         return;
       }
       // 4. Verify existing session
       try {
         const response = await verifyWidgetSessionService(sessionToken);
         if (response?.data?.success && response?.data?.data?.valid) {
-          setShowWelcomeModal(false);
+          console.log("Valid session found, hiding welcome modal");
+          if (clientConfig) setShowWelcomeModal(false);
           return;
         }
         // Invalid session
         removeItemLocalStorage(`widgetSession:${clientKey}`);
-        setShowWelcomeModal(true);
+        console.log("Invalid session, showing welcome modal");
+        if (clientConfig) setShowWelcomeModal(true);
       } catch (error) {
         if (error?.response?.status === 401) {
           removeItemLocalStorage(`widgetSession:${clientKey}`);
-          setShowWelcomeModal(true);
+          console.log("Session expired, showing welcome modal");
+          if (clientConfig) setShowWelcomeModal(true);
         }
       }
     } finally {
@@ -226,12 +237,7 @@ export default function Welcome() {
       `}
     >
       {clientConfig === null ? (
-        <div className="mt-8 w-full max-w-4xl px-3 sm:mt-10 sm:px-4">
-          <p className="text-center text-gray-500 dark:text-gray-400">
-            client not found or inactive. Please check the client key or contact
-            the administrator.
-          </p>
-        </div>
+        <ClientNotFound />
       ) : (
         <>
           {isClientChatbot ? (

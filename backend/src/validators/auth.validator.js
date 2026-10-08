@@ -35,6 +35,7 @@ export const verifyEmailValidation = Joi.object({
 export const loginValidation = Joi.object({
   email: Joi.string().email().required(),
   password: Joi.string().required(),
+  fcmToken: Joi.optional(),
 });
 
 export const resendOTPValidation = Joi.object({

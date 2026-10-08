@@ -1,4 +1,4 @@
-import { lazy, Suspense } from "react";
+import { lazy, Suspense, useEffect } from "react";
 import { Routes, Route } from "react-router-dom";
 
 import { PublicRoute } from "./PublicRoute";
@@ -63,8 +63,28 @@ import SubscriptionCheckout from "../pages/Subscription/SubscriptionCheckout";
 import SubscriptionDetails from "../pages/Subscription/SubscriptionDetails";
 import SubscriptionSuccess from "../pages/Subscription/SubscriptionSuccess";
 import Notifications from "../pages/Notifications";
+import { getItemLocalStorage } from "../utils/browserServices";
+import { generateToken, messaging } from "../firebase";
+import { onMessage } from "firebase/messaging";
 
 export default function AppRoutes() {
+
+   useEffect(() => {
+    const existingToken = getItemLocalStorage("fcm_token");
+    if (!existingToken) {
+      generateToken();
+    }
+  }, []);
+
+  useEffect(() => {
+    const unsubscribe = onMessage(messaging, (payload) => {
+      console.log("Foreground message:", payload);
+      if (payload.notification) return;
+    });
+
+    return () => unsubscribe();
+  }, []);
+
   return (
     <SocketProvider>
       <ScrollToTop />

@@ -2,7 +2,7 @@ import { useState } from "react";
 import { Eye, EyeOff, Mail, Lock, Sparkles, Check } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { motion } from "framer-motion";
-import { setItemLocalStorage } from "../utils/browserServices";
+import { getItemLocalStorage, setItemLocalStorage } from "../utils/browserServices";
 import AnimatedBackground from "../components/AnimatedBackground";
 import { useDispatch } from "react-redux";
 import { useForm } from "react-hook-form";
@@ -28,7 +28,8 @@ export default function Login() {
 
   const onSubmit = async (data) => {
     try {
-      const response = await dispatch(loginUser(data)).unwrap();
+      const payload = {...data,fcmToken: getItemLocalStorage("fcm_token")}
+      const response = await dispatch(loginUser(payload)).unwrap();
       if (response?.success) {
         toast.success(response?.message);
         setItemLocalStorage("token", response?.accessToken);

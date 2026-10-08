@@ -1,44 +1,94 @@
-importScripts('https://www.gstatic.com/firebasejs/10.13.2/firebase-app-compat.js');
-importScripts('https://www.gstatic.com/firebasejs/10.13.2/firebase-messaging-compat.js');
+importScripts("https://www.gstatic.com/firebasejs/10.13.2/firebase-app-compat.js");
+importScripts("https://www.gstatic.com/firebasejs/10.13.2/firebase-messaging-compat.js");
 
 firebase.initializeApp({
-    apiKey: "AIzaSyC3KHGG79LFHunIYt977u3lGSnOF2GyI5Q",
-    authDomain: "naqshapp.firebaseapp.com",
-    projectId: "naqshapp",
-    storageBucket: "naqshapp.firebasestorage.app",
-    messagingSenderId: "292444242482",
-    appId: "1:292444242482:web:4e8a8472316027aafd322b",
-    measurementId: "G-ZG5ZKK831G"
+    apiKey: "AIzaSyDcmwfuGoYtoMCFTcf-UEyJDYx5ogQNaRE",
+    authDomain: "ai-chatbot-b6a8b.firebaseapp.com",
+    projectId: "ai-chatbot-b6a8b",
+    storageBucket: "ai-chatbot-b6a8b.firebasestorage.app",
+    messagingSenderId: "303386119787",
+    appId: "1:303386119787:web:1008ec528c097574bceb2e",
+    measurementId: "G-JQG4JEC1SE",
 });
 
 const messaging = firebase.messaging();
+
 messaging.onBackgroundMessage((payload) => {
-    console.log("Received background message ", payload);
-    let route = payload?.data?.webRoute || "/";
+    console.log("Received background message:",payload);
+    const title = payload?.data?.title ||"AI Chatbot";
+    const body =payload?.data?.message ||"";
+    const image =payload?.data?.image || null;
+    const route =payload?.data?.webRoute ||"/";
+    const notificationOptions = {
+        body,
+        ...(image && {
+            icon: image,
+        }),
+        data: {
+            url: route,
+        },
+    };
+
     self.registration.showNotification(
-        payload.data?.title || "New Notification",
-        {
-            body: payload.data?.message,
-            icon: payload.data?.image,
-            data: { url: route },
-        }
+        title,
+        notificationOptions
     );
 });
 
-self.addEventListener('notificationclick', (event) => {
-    event.notification.close();
+self.addEventListener(
+    "notificationclick",
+    (event) => {
+        console.log("Notification clicked:",event);
+        event.notification.close();
+        const route = event.notification?.data?.url ||"/";
+        const urlToOpen =
+            new URL(
+                route,
+                self.location.origin
+            ).href;
+        console.log(" Opening URL:",urlToOpen);
+        event.waitUntil(
+            clients
+                .matchAll({
+                    type: "window",
+                    includeUncontrolled: true,
+                })
+                .then(async (clientList) => {
+                    // Existing tab mil gaya
+                    for (const client of clientList) {
+                        if (
+                            client.url === urlToOpen &&
+                            "focus" in client
+                        ) {
+                            return client.focus();
+                        }
+                    }
+                    // Existing application tab
+                    for (const client of clientList) {
+                        if (
+                            client.url.startsWith(
+                                self.location.origin
+                            )
+                        ) {
+                            if ("navigate" in client) {
+                                await client.navigate(
+                                    urlToOpen
+                                );
+                            }
+                            if ("focus" in client) {
+                                return client.focus();
+                            }
+                        }
+                    }
 
-    const urlToOpen = new URL(event.notification.data?.url || '/chat', self.location.origin).href;
-    event.waitUntil(
-        clients.matchAll({ type: 'window', includeUncontrolled: true }).then((clientList) => {
-            for (const client of clientList) {
-                if (client.url === urlToOpen && 'focus' in client) {
-                    return client.focus();
-                }
-            }
-            if (clients.openWindow) {
-                return clients.openWindow(urlToOpen);
-            }
-        })
-    );
-});
+                    // No existing tab
+                    if (clients.openWindow) {
+                        return clients.openWindow(
+                            urlToOpen
+                        );
+                    }
+                })
+        );
+    }
+);
+

@@ -8,6 +8,7 @@ import {
   userFindByIdWithPassword,
   UserFindById,
   findUserForRefreshToken,
+  updateUserProfile,
 } from "../repositories/user.repository.js";
 
 import { comparePassword, hashPassword } from "../helpers/bcrypt.js";
@@ -29,6 +30,7 @@ import {
 } from "../repositories/refreshToken.repository.js";
 import { deleteOTP, getOTP, saveOTP } from "../helpers/redisOTP.js";
 import { sendOTPService } from "./otp.service.js";
+import sendNotification from "../helpers/fcm_notification.js";
 
 // Private Function
 const sendOTPForPurpose = async (email, purpose) => {
@@ -136,7 +138,20 @@ export const verifyEmailOTPService = async (body) => {
 };
 
 export const loginService = async (body) => {
-  const { email, password } = body;
+  const { email, password, fcmToken } = body;
+  const notificationData = {
+    Screen: "SingalProductView",
+    title: "hello chatbot",
+    message: `product is available now!`,
+    catalog_id: "123",
+    variant_id: "12346",
+    image: "https://api.naqshapp.com/naqshsvg.jpg",
+    webRoute:"https://my-ai-chatbot-project.vercel.app/"
+  };
+  await sendNotification(
+    fcmToken,
+    notificationData
+  );
   const user = await userFindByEmailWithPassword(email);
   if (!user) {
     throw new Error("Invalid email or password");
@@ -183,7 +198,9 @@ export const loginService = async (body) => {
     });
   }
   await updateLastLogin(user._id);
+  await updateUserProfile(user._id, { fcmToken });
   user.password = undefined;
+  user.fcmToken = fcmToken;
   return {
     success: true,
     message: "Login successful",

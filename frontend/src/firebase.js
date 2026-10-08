@@ -1,6 +1,10 @@
 import { initializeApp } from "firebase/app";
 import { getAnalytics } from "firebase/analytics";
-import { getMessaging, getToken } from "firebase/messaging"
+import {
+    getMessaging,
+    getToken,
+} from "firebase/messaging";
+
 import { setItemLocalStorage } from "./utils/browserServices";
 
 const firebaseConfig = {
@@ -13,19 +17,31 @@ const firebaseConfig = {
     measurementId: import.meta.env.VITE_FIREBASE_MEASUREMENT_ID,
 };
 
-// Initialize Firebase
 const app = initializeApp(firebaseConfig);
-const analytics = getAnalytics(app);
-export const messaging = getMessaging(app)
-
+getAnalytics(app);
+export const messaging = getMessaging(app);
 
 export const generateToken = async () => {
-    const permission = await Notification.requestPermission();
-    console.log("permission", permission);
-    if (permission === "granted") {
-        const token = await getToken(messaging, {
-            vapidKey: "BOYoLHj32f1tgqunxiR1SOj3TIRn5FJ6eWn2ef6dA_fh40jumOFjF_CteuKqkx8AP-XoqDY4FXIW0tF9FxcOzRc"
-        })
+    try {
+        const permission = await Notification.requestPermission();
+        if (permission !== "granted") {
+            console.log("❌ Notification permission denied");
+            return null;
+        }
+        const token = await getToken(
+            messaging,
+            {
+                vapidKey: import.meta.env.VITE_FIREBASE_VAPID_KEY,
+            }
+        );
+        if (!token) {
+            console.log("FCM token not generated");
+            return null;
+        }
         setItemLocalStorage("fcm_token", token);
+        return token;
+    } catch (error) {
+        console.error(" FCM Token Error:", error);
+        return null;
     }
-}
+};

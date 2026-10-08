@@ -21,6 +21,7 @@ import errorHandler from "./middlewares/errorHandler.js";
 import { redisClient } from "./config/redis.js";
 import env from "./config/env.js";
 import path from "path";
+import sendNotification from "./helpers/fcm_notification.js";
 
 const app = express();
 // Middlewares
@@ -74,3 +75,23 @@ app.use(errorHandler);
 // Health Check
 
 export default app;
+
+
+// if (customer.fcm_token) {
+
+//   const notificationData = {
+//     Screen: "SingalProductView",
+//     title: "",
+//     message: `${getCatalog.catalog_name} is available now!`,
+//     catalog_id: catalog_id,
+//     variant_id: variantId,
+//     image:
+//       catalogVariantData.catalog_img?.[0] ||
+//       "https://api.naqshapp.com/naqshsvg.jpg",
+//   };
+
+//   await sendNotification(
+//     customer.fcm_token,
+//     notificationData
+//   );
+// }

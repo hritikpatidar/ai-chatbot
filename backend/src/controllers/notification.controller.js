@@ -29,15 +29,17 @@ export const markNotificationReadController = async (
   res
 ) => {
   try {
+    console.log("req.params",req.params.id)
+    console.log("req.user.id",req.user.id)
     const notification = await markMyNotificationRead(
       req.params.id,
-      req.user._id
+      req.user.id
     );
 
     if (!notification) {
       return res.status(404).json({
         success: false,
-        message: "Notification not found",
+        message: "Notifications not found",
       });
     }
 
@@ -59,7 +61,7 @@ export const markAllNotificationsReadController = async (
   res
 ) => {
   try {
-    await markMyAllNotificationsRead(req.user._id);
+    await markMyAllNotificationsRead(req.user.id);
 
     return res.status(200).json({
       success: true,

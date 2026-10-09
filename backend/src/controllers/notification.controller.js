@@ -29,8 +29,6 @@ export const markNotificationReadController = async (
   res
 ) => {
   try {
-    console.log("req.params",req.params.id)
-    console.log("req.user.id",req.user.id)
     const notification = await markMyNotificationRead(
       req.params.id,
       req.user.id

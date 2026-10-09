@@ -26,13 +26,15 @@ import {
 } from "../../services/knowledge.service.js";
 import { createAITicketService } from "../../services/ticket.service.js";
 import { findOrCreateGuestConversation } from "../../services/conversation.service.js";
+import { findClientUserFcmTokenByClientId } from "../../repositories/user.repository.js";
+import { createAndSendNotification } from "../../services/notification.service.js";
 
 const activeStreams = new Map();
 
 export const registerAIEvents = (io, socket) => {
   socket.on("ai:message", async (data) => {
     try {
-      const { conversationId, message} = data;
+      const { conversationId, message } = data;
 
       if (!message || !message.trim()) {
         socket.emit("ai:error", {
@@ -172,6 +174,19 @@ export const registerAIEvents = (io, socket) => {
             userMessage: message,
           });
 
+          await createAndSendNotification({
+            clientId: clientId,
+            title: "New Support Ticket Created by User",
+            message: `A new support ticket has been created for query.`,
+            webRoute: "/client/tickets",
+            screen: "",
+            image: "https://api.naqshapp.com/naqshsvg.jpg",
+            metadata: {
+              conversationId: conversation._id,
+              expiryDate: null,
+            },
+          });
+
           socket.emit("ai:chunk", {
             text: fallbackMessage,
           });
@@ -205,6 +220,20 @@ export const registerAIEvents = (io, socket) => {
             messageId: userMessage._id,
             userMessage: message,
           });
+
+          await createAndSendNotification({
+            clientId: clientId,
+            title: "New Support Ticket Created by User",
+            message: `A new support ticket has been created for query.`,
+            webRoute: "/client/tickets",
+            screen: "",
+            image: "https://api.naqshapp.com/naqshsvg.jpg",
+            metadata: {
+              conversationId: conversation._id,
+              expiryDate: null,
+            },
+          });
+
           socket.emit("ai:chunk", {
             text: fallbackMessage,
           });

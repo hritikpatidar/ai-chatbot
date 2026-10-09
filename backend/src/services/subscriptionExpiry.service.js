@@ -1,8 +1,10 @@
 import transporter from "../config/mail.js";
 import env from "../config/env.js";
-import { findExpiredSubscriptions, markSubscriptionExpired } from "../repositories/subscription.repository.js";
+import { findExpiredSubscriptions, markSubscriptionExpired, updateSubscriptionById } from "../repositories/subscription.repository.js";
 import { subscriptionExpiredEmailTemplate } from "../helpers/emailTemplate.js";
 import { updateClientById } from "../repositories/client.repository.js";
+import { findClientUserFcmTokenByClientId } from "../repositories/user.repository.js";
+import { createAndSendNotification } from "./notification.service.js";
 
 export const processExpiredSubscriptions = async () => {
     const expiredSubscriptions = await findExpiredSubscriptions();
@@ -41,24 +43,37 @@ export const processExpiredSubscriptions = async () => {
                 status: "inactive"
             });
 
-            const emailTemplate =
-                subscriptionExpiredEmailTemplate({
-                    fullName: userId.fullName,
-                    businessName: client.businessName,
-                    planName: subscription.planId?.name,
-                    expiredDate,
-                });
+            await updateSubscriptionById(subscription._id, {
+                status: "expired",
+                expiryEmailSent: true,
+            });
 
-            const info =
-                await transporter.sendMail({
-                    from: `"AI Chatbot" <${env.MAIL_USER}>`,
-                    to: userId.email,
-                    subject: emailTemplate.subject,
-                    html: emailTemplate.html,
-                });
+            const emailTemplate = subscriptionExpiredEmailTemplate({
+                fullName: userId.fullName,
+                businessName: client.businessName,
+                planName: subscription.planId?.name,
+                expiredDate,
+            });
 
-            console.log(`✅ Expiry email sent to ${userId.email}`, info.messageId);
+            const info = await transporter.sendMail({
+                from: `"AI Chatbot" <${env.MAIL_USER}>`,
+                to: userId.email,
+                subject: emailTemplate.subject,
+                html: emailTemplate.html,
+            });
 
+            await createAndSendNotification({
+                clientId: clientId,
+                title: "Subscription Expired",
+                message: `Your current subscription (${subscription.planId?.name}) plan has expired. Please purchase a new plan to continue using our services.`,
+                webRoute: "/client/subscription",
+                screen: "",
+                image: "https://api.naqshapp.com/naqshsvg.jpg",
+                metadata: {
+                    subscriptionId: null,
+                    expiryDate: null,
+                },
+            });
 
             console.log(`✅ Subscription marked expired: ${subscription._id}`);
         } catch (error) {

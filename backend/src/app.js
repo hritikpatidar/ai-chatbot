@@ -13,6 +13,7 @@ import ticketRoutes from "./routes/ticket.routes.js";
 import adminRoutes from "./routes/admin.route.js";
 import widgetRoutes from "./routes/widget.routes.js";
 import subscriptionRoutes from "./routes/subscription.routes.js";
+import notificationRoutes from "./routes/notification.routes.js"
 import stripeRoutes from "./routes/stripe.routes.js";
 import { stripeWebhook } from "./controllers/stripe.controller.js";
 
@@ -21,7 +22,6 @@ import errorHandler from "./middlewares/errorHandler.js";
 import { redisClient } from "./config/redis.js";
 import env from "./config/env.js";
 import path from "path";
-import sendNotification from "./helpers/fcm_notification.js";
 
 const app = express();
 // Middlewares
@@ -62,6 +62,7 @@ app.use("/api/tickets", ticketRoutes);
 app.use("/api/admin", adminRoutes);
 app.use("/api/subscription", subscriptionRoutes);
 app.use("/api/stripe", stripeRoutes);
+app.use("/api/notifications", notificationRoutes);
 app.use("/api/widget", widgetRoutes);
 app.use("/uploads", express.static(path.join(process.cwd(), "src/uploads")));
 app.get("/", (req, res) => {
@@ -75,23 +76,3 @@ app.use(errorHandler);
 // Health Check
 
 export default app;
-
-
-// if (customer.fcm_token) {
-
-//   const notificationData = {
-//     Screen: "SingalProductView",
-//     title: "",
-//     message: `${getCatalog.catalog_name} is available now!`,
-//     catalog_id: catalog_id,
-//     variant_id: variantId,
-//     image:
-//       catalogVariantData.catalog_img?.[0] ||
-//       "https://api.naqshapp.com/naqshsvg.jpg",
-//   };
-
-//   await sendNotification(
-//     customer.fcm_token,
-//     notificationData
-//   );
-// }

@@ -9,10 +9,11 @@ import {
 } from "../repositories/client.repository.js";
 import User from "../models/User.js";
 import Client from "../models/Client.js";
-import { findClientUserByClientId } from "../repositories/user.repository.js";
+import { findClientUserByClientId, findClientUserFcmTokenByClientId } from "../repositories/user.repository.js";
 import { getProductCountByClientId } from "../repositories/product.repository.js";
 import { getFaqCountByClientId } from "../repositories/faq.repository.js";
 import { stripe } from "./stripe.service.js";
+import { createAndSendNotification } from "./notification.service.js";
 
 export const getClientConfigService = async (clientKey) => {
   const client = await findClientByKey(clientKey);
@@ -205,6 +206,19 @@ export const updateClientService = async (clientId, updateData) => {
     getProductCountByClientId(client._id),
     getFaqCountByClientId(client._id),
   ]);
+
+  await createAndSendNotification({
+    clientId: clientId,
+    title: "Client Chatbot Configuration Updated",
+    message: `Your chatbot configuration has been updated successfully. Please check the details in your account.`,
+    webRoute: "/client/chatbot-settings",
+    screen: "",
+    image: "https://api.naqshapp.com/naqshsvg.jpg",
+    metadata: {
+      subscriptionId: null,
+      expiryDate: null,
+    },
+  });
 
   return {
     productCount,

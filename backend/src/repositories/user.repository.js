@@ -104,3 +104,14 @@ export const deleteUserByClientId = async (clientId, session) => {
     clientId,
   }).session(session);
 };
+
+
+export const findClientUserFcmTokenByClientId = async (clientId) => {
+  return await User.findOne({
+    clientId,
+    role: "client",
+    accountStatus: "active",
+  })
+    .select("_id email fullName fcmToken")
+    .lean();
+};

@@ -1388,30 +1388,29 @@ export const subscriptionPurchaseEmailTemplate = ({
               </p>
 
               ${subscriptionId
-                ? `
+        ? `
                             <p style="margin: 10px 0;">
                               <strong>Subscription ID:</strong>
                               ${subscriptionId}
                             </p>
                           `
-                : ""
-              }
+        : ""
+      }
 
               ${invoiceId
-                ? `
+        ? `
                             <p style="margin: 10px 0;">
                               <strong>Invoice ID:</strong>
                               ${invoiceId}
                             </p>
                           `
-                : ""
-              }
+        : ""
+      }
 
             </div>
 
-            ${
-              invoiceUrl
-                ? `
+            ${invoiceUrl
+        ? `
                   <div
                     style="
                       margin: 30px 0;
@@ -1436,12 +1435,11 @@ export const subscriptionPurchaseEmailTemplate = ({
                     </a>
                   </div>
                 `
-                : ""
-            }
+        : ""
+      }
 
-            ${
-              invoicePdf
-                ? `
+            ${invoicePdf
+        ? `
                   <div
                     style="
                       margin: 15px 0;
@@ -1466,8 +1464,8 @@ export const subscriptionPurchaseEmailTemplate = ({
                     </a>
                   </div>
                 `
-                : ""
-            }
+        : ""
+      }
 
             <!-- Features -->
             <div
@@ -1687,12 +1685,10 @@ export const subscriptionPlanChangedEmailTemplate = ({
               style="
                 margin: 25px 0;
                 padding: 20px;
-                background: ${
-                  isUpgrade ? "#ecfdf5" : "#eff6ff"
-                };
-                border-left: 4px solid ${
-                  isUpgrade ? "#10b981" : "#2563eb"
-                };
+                background: ${isUpgrade ? "#ecfdf5" : "#eff6ff"
+      };
+                border-left: 4px solid ${isUpgrade ? "#10b981" : "#2563eb"
+      };
                 border-radius: 6px;
               "
             >
@@ -1700,9 +1696,8 @@ export const subscriptionPlanChangedEmailTemplate = ({
               <h3
                 style="
                   margin-top: 0;
-                  color: ${
-                    isUpgrade ? "#065f46" : "#1e3a8a"
-                  };
+                  color: ${isUpgrade ? "#065f46" : "#1e3a8a"
+      };
                   font-size: 18px;
                 "
               >
@@ -1764,22 +1759,19 @@ export const subscriptionPlanChangedEmailTemplate = ({
                     display: inline-block;
                     margin-left: 5px;
                     padding: 5px 12px;
-                    background: ${
-                      isUpgrade ? "#dcfce7" : "#dbeafe"
-                    };
-                    color: ${
-                      isUpgrade ? "#166534" : "#1e40af"
-                    };
+                    background: ${isUpgrade ? "#dcfce7" : "#dbeafe"
+      };
+                    color: ${isUpgrade ? "#166534" : "#1e40af"
+      };
                     border-radius: 20px;
                     font-size: 13px;
                     font-weight: bold;
                   "
                 >
-                  ${
-                    isUpgrade
-                      ? "Upgrade"
-                      : "Downgrade"
-                  }
+                  ${isUpgrade
+        ? "Upgrade"
+        : "Downgrade"
+      }
                 </span>
               </p>
 
@@ -1796,9 +1788,8 @@ export const subscriptionPlanChangedEmailTemplate = ({
             </div>
 
             <!-- Payment Details -->
-            ${
-              invoiceId || subscriptionId
-                ? `
+            ${invoiceId || subscriptionId
+        ? `
                   <div
                     style="
                       margin: 25px 0;
@@ -1819,37 +1810,34 @@ export const subscriptionPlanChangedEmailTemplate = ({
                       💳 Payment Details
                     </h3>
 
-                    ${
-                      subscriptionId
-                        ? `
+                    ${subscriptionId
+          ? `
                           <p style="margin: 10px 0;">
                             <strong>Subscription ID:</strong>
                             ${subscriptionId}
                           </p>
                         `
-                        : ""
-                    }
+          : ""
+        }
 
-                    ${
-                      invoiceId
-                        ? `
+                    ${invoiceId
+          ? `
                           <p style="margin: 10px 0;">
                             <strong>Invoice ID:</strong>
                             ${invoiceId}
                           </p>
                         `
-                        : ""
-                    }
+          : ""
+        }
 
                   </div>
                 `
-                : ""
-            }
+        : ""
+      }
 
             <!-- Invoice -->
-            ${
-              invoiceUrl
-                ? `
+            ${invoiceUrl
+        ? `
                   <div
                     style="
                       margin: 30px 0;
@@ -1874,12 +1862,11 @@ export const subscriptionPlanChangedEmailTemplate = ({
                     </a>
                   </div>
                 `
-                : ""
-            }
+        : ""
+      }
 
-            ${
-              invoicePdf
-                ? `
+            ${invoicePdf
+        ? `
                   <div
                     style="
                       margin: 15px 0 30px;
@@ -1904,8 +1891,8 @@ export const subscriptionPlanChangedEmailTemplate = ({
                     </a>
                   </div>
                 `
-                : ""
-            }
+        : ""
+      }
 
             <!-- Next Steps -->
             <div
@@ -1936,11 +1923,10 @@ export const subscriptionPlanChangedEmailTemplate = ({
                   color: #374151;
                 "
               >
-                ${
-                  isUpgrade
-                    ? "Your new plan features are now available. You can continue using your AI Chatbot with the upgraded limits and features."
-                    : "Your subscription has been moved to the new plan. Your account will continue according to the features and limits of the selected plan."
-                }
+                ${isUpgrade
+        ? "Your new plan features are now available. You can continue using your AI Chatbot with the upgraded limits and features."
+        : "Your subscription has been moved to the new plan. Your account will continue according to the features and limits of the selected plan."
+      }
               </p>
 
             </div>
@@ -2178,27 +2164,25 @@ export const subscriptionCancellationEmailTemplate = ({
                 ${billingInterval}
               </p>
 
-              ${
-                subscriptionId
-                  ? `
+              ${subscriptionId
+        ? `
                     <p style="margin: 10px 0;">
                       <strong>Subscription ID:</strong>
                       ${subscriptionId}
                     </p>
                   `
-                  : ""
-              }
+        : ""
+      }
 
-              ${
-                cancellationDate
-                  ? `
+              ${cancellationDate
+        ? `
                     <p style="margin: 10px 0;">
                       <strong>Cancellation Date:</strong>
                       ${cancellationDate}
                     </p>
                   `
-                  : ""
-              }
+        : ""
+      }
 
             </div>
 
@@ -2599,5 +2583,253 @@ export const subscriptionExpiredEmailTemplate = ({
       </body>
       </html>
     `,
+  };
+};
+
+export const subscriptionExpiryReminderEmailTemplate = ({
+  fullName,
+  businessName,
+  planName,
+  expiryDate,
+}) => {
+  const subscriptionUrl =
+    "https://my-ai-chatbot-project.vercel.app/client/subscription";
+
+  return {
+    subject: "Reminder: Your AI Chatbot Subscription Expires in 1 Days",
+
+    html: `
+  < !DOCTYPE html >
+    <html>
+      <head>
+        <meta charset="UTF-8" />
+        <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+        <title>Subscription Expiry Reminder</title>
+      </head>
+
+      <body style="
+        margin: 0;
+        padding: 0;
+        background-color: #f4f6f8;
+        font-family: Arial, Helvetica, sans-serif;
+        color: #333333;
+      ">
+
+        <div style="
+          max-width: 700px;
+          margin: 30px auto;
+          background: #ffffff;
+          border-radius: 12px;
+          overflow: hidden;
+          box-shadow: 0 4px 15px rgba(0,0,0,0.08);
+        ">
+
+          <!-- Header -->
+          <div style="
+            background: #111827;
+            padding: 30px;
+            text-align: center;
+          ">
+            <h1 style="
+              margin: 0;
+              color: #ffffff;
+              font-size: 28px;
+            ">
+              AI Chatbot
+            </h1>
+
+            <p style="
+              margin: 10px 0 0;
+              color: #d1d5db;
+              font-size: 15px;
+            ">
+              Subscription Expiry Reminder
+            </p>
+          </div>
+
+          <!-- Main Content -->
+          <div style="padding: 35px;">
+
+            <h2 style="
+              margin-top: 0;
+              color: #111827;
+              font-size: 24px;
+            ">
+              Hello ${fullName || "User"} 👋
+            </h2>
+
+            <p style="
+              font-size: 16px;
+              line-height: 1.7;
+            ">
+              We wanted to remind you that your AI Chatbot
+              subscription is expiring in <strong>2 days</strong>.
+              Renew your plan in advance to continue enjoying
+              our services without interruption.
+            </p>
+
+            <!-- Reminder Alert -->
+            <div style="
+              margin: 25px 0;
+              padding: 20px;
+              background: #fffbeb;
+              border-left: 4px solid #f59e0b;
+              border-radius: 6px;
+            ">
+              <h3 style="
+                margin-top: 0;
+                color: #92400e;
+                font-size: 18px;
+              ">
+                ⏰ Your Subscription Is Expiring Soon
+              </h3>
+
+              <p style="
+                margin-bottom: 0;
+                font-size: 14px;
+                line-height: 1.7;
+                color: #78350f;
+              ">
+                Your current subscription is still active.
+                Please renew it before the expiry date to avoid
+                any interruption to your services.
+              </p>
+            </div>
+
+            <!-- Subscription Details -->
+            <div style="
+              margin: 25px 0;
+              padding: 22px;
+              background: #f9fafb;
+              border: 1px solid #e5e7eb;
+              border-radius: 10px;
+            ">
+              <h3 style="
+                margin-top: 0;
+                color: #111827;
+                font-size: 18px;
+              ">
+                📋 Subscription Details
+              </h3>
+
+              <p style="margin: 12px 0; font-size: 15px;">
+                <strong>Business:</strong>
+                ${businessName || "N/A"}
+              </p>
+
+              <p style="margin: 12px 0; font-size: 15px;">
+                <strong>Current Plan:</strong>
+                ${planName || "N/A"}
+              </p>
+
+              <p style="margin: 12px 0; font-size: 15px;">
+                <strong>Expires On:</strong>
+                ${expiryDate || "N/A"}
+              </p>
+
+              <p style="
+                margin: 12px 0 0;
+                font-size: 15px;
+                color: #b45309;
+              ">
+                <strong>Time Remaining:</strong> 2 Days
+              </p>
+            </div>
+
+            <!-- Renewal CTA -->
+            <div style="
+              margin: 25px 0;
+              padding: 24px;
+              background: #eff6ff;
+              border-left: 4px solid #2563eb;
+              border-radius: 6px;
+              text-align: center;
+            ">
+              <h3 style="
+                margin-top: 0;
+                color: #1e3a8a;
+                font-size: 20px;
+              ">
+                🔄 Don't Lose Access!
+              </h3>
+
+              <p style="
+                font-size: 14px;
+                line-height: 1.7;
+                color: #374151;
+                margin-bottom: 22px;
+              ">
+                Renew your subscription today and continue
+                using your AI Chatbot services seamlessly.
+              </p>
+
+              <a
+                href="${subscriptionUrl}"
+                target="_blank"
+                style="
+                  display: inline-block;
+                  padding: 14px 28px;
+                  background: #2563eb;
+                  color: #ffffff;
+                  text-decoration: none;
+                  font-size: 15px;
+                  font-weight: bold;
+                  border-radius: 8px;
+                "
+              >
+                Renew Subscription →
+              </a>
+            </div>
+
+            <p style="
+              font-size: 15px;
+              line-height: 1.7;
+            ">
+              If you have already renewed your subscription,
+              please disregard this reminder.
+            </p>
+
+            <p style="
+              font-size: 15px;
+              line-height: 1.7;
+            ">
+              If you have any questions about your subscription
+              or billing, please contact our support team.
+            </p>
+
+            <p style="
+              margin-top: 30px;
+              margin-bottom: 0;
+              line-height: 1.7;
+            ">
+              Regards,<br />
+              <strong>AI Chatbot Team</strong>
+            </p>
+
+          </div>
+
+          <!-- Footer -->
+          <div style="
+            background: #f9fafb;
+            padding: 20px;
+            text-align: center;
+            border-top: 1px solid #e5e7eb;
+          ">
+            <p style="
+              margin: 0;
+              font-size: 13px;
+              line-height: 1.6;
+              color: #6b7280;
+            ">
+              This is an automated email. Please do not reply
+              directly to this email.
+            </p>
+          </div>
+
+        </div>
+
+      </body>
+    </html>
+`,
   };
 };

@@ -19,6 +19,8 @@ import {
   findSubscriptionPlanById,
   findSubscriptionPlanByStripePriceId,
 } from "../repositories/subscriptionPlan.repository.js";
+import { findClientUserFcmTokenByClientId } from "../repositories/user.repository.js";
+import { createAndSendNotification } from "./notification.service.js";
 
 import {
   createStripeCustomer,
@@ -236,7 +238,6 @@ export const createSubscriptionService = async ({
    */
 
   const client = await findClientById(clientId);
-
   /*
    * 4. Reuse existing Stripe Customer
    */
@@ -340,6 +341,19 @@ export const createSubscriptionService = async ({
       to: email,
       subject: emailTemplate.subject,
       html: emailTemplate.html,
+    });
+
+    await createAndSendNotification({
+      clientId: clientId,
+      title: "subscription purchase",
+      message: `You have successfully purchased the ${plan.name} plan. Your subscription and chatbot is now active.`,
+      webRoute: "/client/subscription",
+      screen: "",
+      image: "https://api.naqshapp.com/naqshsvg.jpg",
+      metadata: {
+        subscriptionId: stripeSubscription.id,
+        expiryDate: null,
+      },
     });
 
     console.log(
@@ -470,16 +484,14 @@ export const changeSubscriptionPlanService = async ({
     "Previous Plan";
 
   const oldPlanAmount =
-    (Number(currentSubscription.planId?.amount || 0) / 100).toFixed(2);
+    (Number(currentSubscription.planId?.amount || 0) / 100);
 
   const newPlanAmount =
-    (Number(newPlan.amount || 0) / 100).toFixed(2);
-
+    (Number(newPlan.amount || 0) / 100);
   const changeType =
     newPlanAmount > oldPlanAmount
       ? "upgrade"
       : "downgrade";
-
   // --------------------------------------------
   // 4. Change Stripe subscription + pay invoice
   // --------------------------------------------
@@ -584,6 +596,19 @@ export const changeSubscriptionPlanService = async ({
         subject: emailTemplate.subject,
         html: emailTemplate.html,
       });
+
+    await createAndSendNotification({
+      clientId: currentSubscription.clientId?._id,
+      title: `subscription ${changeType}`,
+      message: `You have successfully ${changeType}d your subscription to the ${newPlan.name} plan. Your subscription is now active.`,
+      webRoute: "/client/subscription",
+      screen: "",
+      image: "https://api.naqshapp.com/naqshsvg.jpg",
+      metadata: {
+        subscriptionId: stripeSubscription.id,
+        expiryDate: null,
+      },
+    });
 
     console.log(
       `✅ Subscription ${changeType} email sent to ${email}`,
@@ -730,6 +755,11 @@ export const cancelSubscriptionService = async (subscriptionId, fullName, email)
       stripe_customer: null,
       status: "inactive"
     });
+    await updateSubscriptionById(subscriptionId, {
+      status: "canceled",
+      expiryEmailSent: true,
+      canceledAt: new Date(),
+    });
     // const updatedSubscription = await deleteSubscriptionById(subscriptionId);
     try {
       const emailTemplate = subscriptionCancellationEmailTemplate({
@@ -764,13 +794,26 @@ export const cancelSubscriptionService = async (subscriptionId, fullName, email)
         info.messageId
       );
 
+      await createAndSendNotification({
+        clientId: clientId,
+        title: `Subscription Cancelled`,
+        message: `Your subscription has been successfully cancelled. We hope to see you back soon!`,
+        webRoute: "/client/subscription",
+        screen: "",
+        image: "https://api.naqshapp.com/naqshsvg.jpg",
+        metadata: {
+          subscriptionId: null,
+          expiryDate: null,
+        },
+      });
+
     } catch (emailError) {
       console.error(
         `❌ Failed to send cancellation email to ${email}`,
         emailError
       );
     }
-    return updatedSubscription;
+    return {};
   } catch (error) {
     console.error("Stripe cancel error:", error);
 

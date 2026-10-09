@@ -93,6 +93,10 @@ const subscriptionSchema = new mongoose.Schema(
       type: Boolean,
       default: false,
     },
+    expiryReminderSent: {
+      type: Boolean,
+      default: false,
+    },
 
     cancelAtPeriodEnd: {
       type: Boolean,

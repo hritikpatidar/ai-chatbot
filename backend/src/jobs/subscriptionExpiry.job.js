@@ -5,7 +5,7 @@ import { processExpiredSubscriptions } from "../services/subscriptionExpiry.serv
 export const startSubscriptionExpiryJob = () => {
 
   cron.schedule(
-    "32 17 * * *",
+    "0 * * * *",
     async () => {
       try {
         await processExpiredSubscriptions();

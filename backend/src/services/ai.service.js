@@ -320,11 +320,9 @@ ${message}
       businessRelated: Boolean(
         classification.businessRelated,
       ),
-
       canAnswer: Boolean(
         classification.canAnswer,
       ),
-
       reason: classification.reason || "",
     };
   } catch (error) {
@@ -340,8 +338,8 @@ ${message}
       Normal Gemini ko answer attempt karne do.
     */
     return {
-      businessRelated: true,
-      canAnswer: true,
+      businessRelated: false,
+      canAnswer: false,
       reason: "Classification failed",
     };
   }

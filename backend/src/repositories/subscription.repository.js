@@ -177,6 +177,24 @@ export const findExpiredSubscriptions = async () => {
     );
 };
 
+export const findSubscriptionsForExpiryReminder = async (
+  startDate,
+  endDate
+) => {
+  return await Subscription.find({
+    status: "active",
+    expiresAt: {
+      $gte: startDate,
+      $lt: endDate,
+    },
+    expiryReminderSent: false,
+  })
+    .populate("planId")
+    .populate("clientId")
+    .populate("userId")
+    .lean();
+};
+
 export const markSubscriptionExpired = async (
   subscriptionId
 ) => {

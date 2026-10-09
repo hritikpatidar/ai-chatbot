@@ -8,7 +8,8 @@ import {
   deleteClientById,
   findClientById,
 } from "../repositories/client.repository.js";
-import { deleteUserByClientId } from "../repositories/user.repository.js";
+import { deleteUserByClientId, findClientUserFcmTokenByClientId } from "../repositories/user.repository.js";
+import { createAndSendNotification } from "./notification.service.js";
 
 export const createClientService = async (data) => {
   const session = await mongoose.startSession();
@@ -436,6 +437,19 @@ export const updateAdminClientService = async (clientId, payload) => {
   };
 
   await client.save();
+
+  await createAndSendNotification({
+    clientId: client._id,
+    title: "Client Chatbot Configuration Updated by Admin",
+    message: `Your chatbot configuration has been updated successfully by Admin. Please check the details in your account.`,
+    webRoute: "/client/chatbot-settings",
+    screen: "",
+    image: "https://api.naqshapp.com/naqshsvg.jpg",
+    metadata: {
+      subscriptionId: null,
+      expiryDate: null,
+    },
+  });
 
   return {
     client,

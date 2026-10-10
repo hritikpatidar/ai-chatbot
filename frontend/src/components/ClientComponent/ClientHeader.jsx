@@ -5,12 +5,13 @@ import { useTheme } from "../../context/ThemeContext";
 import profile from "../../assets/profile1.jpg";
 import { getImageUrl } from "../../utils/imageUrl";
 import NotificationDropdown from "../common/NotificationDropdown";
+import { useNotifications } from "../../hooks/useNotifications";
 
 export default function ClientHeader({ onMenuClick }) {
   const { profileDetails } = useSelector(
     (state) => state?.authReducer?.AuthSlice,
   );
-
+  
   const { isDarkMode, toggleTheme } = useTheme();
 
   return (

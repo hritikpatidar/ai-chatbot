@@ -4,6 +4,7 @@ import {
   markNotificationRead,
   markAllNotificationsRead,
   updateNotificationDelivery,
+  deleteNotification,
 } from "../repositories/notification.repository.js";
 
 import {
@@ -11,8 +12,11 @@ import {
 } from "../repositories/user.repository.js";
 
 import sendNotification from "../helpers/fcm_notification.js";
+import { getIO } from "../config/socket.js";
+import { emitNotificationCreated } from "../socket/events/notification.event.js";
 
 export const createAndSendNotification = async ({
+  type = "general",
   clientId = null,
   title,
   message,
@@ -26,7 +30,7 @@ export const createAndSendNotification = async ({
     const clientUser = clientId
       ? await findClientUserFcmTokenByClientId(clientId)
       : null;
-    console.log("clientUser",clientUser)
+
     let notification = await createNotification({
       userId: clientUser?._id,
       clientId,
@@ -36,19 +40,36 @@ export const createAndSendNotification = async ({
       screen,
       image,
       metadata,
+      type,
     });
+    //notification socket emit
+    try {
+      const io = getIO();
+      emitNotificationCreated(io, notification);
+    } catch (socketError) {
+      console.error("Notification socket emit failed:", socketError.message);
+    }
 
-    const result = await sendNotification(
-      clientUser.fcmToken,
-      {
-        title,
-        message,
-        image: image || "",
-        webRoute,
-        screen,
-        notificationId: notification._id.toString(),
+    if (clientUser?.fcmToken) {
+      try {
+        const result = await sendNotification(clientUser.fcmToken, {
+          title,
+          message,
+          image: image || "",
+          webRoute,
+          screen,
+          notificationId: notification._id.toString(),
+          metadata,
+          type,
+        });
+
+        // If your helper returns a message ID/status,
+        // updateNotificationDelivery can be used here.
+      } catch (fcmError) {
+        console.error("FCM notification failed:", fcmError.message);
       }
-    );
+    }
+
 
     return {
       success: true,
@@ -83,4 +104,11 @@ export const markMyNotificationRead = async (
 
 export const markMyAllNotificationsRead = async (userId) => {
   return markAllNotificationsRead(userId);
+};
+
+export const deleteNotifications = async (
+  notificationId,
+  userId
+) => {
+  return deleteNotification(notificationId,userId);
 };

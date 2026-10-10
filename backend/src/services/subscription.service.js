@@ -344,6 +344,7 @@ export const createSubscriptionService = async ({
     });
 
     await createAndSendNotification({
+      type: "subscription",
       clientId: clientId,
       title: "subscription purchase",
       message: `You have successfully purchased the ${plan.name} plan. Your subscription and chatbot is now active.`,
@@ -598,6 +599,7 @@ export const changeSubscriptionPlanService = async ({
       });
 
     await createAndSendNotification({
+      type: "subscription",
       clientId: currentSubscription.clientId?._id,
       title: `subscription ${changeType}`,
       message: `You have successfully ${changeType}d your subscription to the ${newPlan.name} plan. Your subscription is now active.`,
@@ -795,6 +797,7 @@ export const cancelSubscriptionService = async (subscriptionId, fullName, email)
       );
 
       await createAndSendNotification({
+        type: "subscription",
         clientId: clientId,
         title: `Subscription Cancelled`,
         message: `Your subscription has been successfully cancelled. We hope to see you back soon!`,

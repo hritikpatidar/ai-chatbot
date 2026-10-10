@@ -63,6 +63,7 @@ export const processExpiredSubscriptions = async () => {
             });
 
             await createAndSendNotification({
+                type: "subscription",
                 clientId: clientId,
                 title: "Subscription Expired",
                 message: `Your current subscription (${subscription.planId?.name}) plan has expired. Please purchase a new plan to continue using our services.`,

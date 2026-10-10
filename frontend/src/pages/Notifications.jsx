@@ -5,83 +5,88 @@ import {
   CreditCard,
   MessageSquare,
   Settings,
+  Ticket,
+  LoaderCircle,
   Trash2,
-  XCircle,
 } from "lucide-react";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
+import {
+  notificationKeys,
+  useDeleteNotifications,
+  useMarkAllNotificationsRead,
+  useMarkNotificationRead,
+  useNotifications,
+} from "../hooks/useNotifications";
+import { useNavigate } from "react-router-dom";
+import Pagination from "../components/common/Pagination";
 
 const Notifications = () => {
+  const navigate = useNavigate();
   const [filter, setFilter] = useState("all");
+  const [page, setPage] = useState(1);
+  const limit = 10;
+  const [deletingNotificationId, setDeletingNotificationId] = useState(null);
+  const { data, isPending, isError, error, isFetching } = useNotifications(
+    page,
+    limit,
+  );
 
-  const [notifications, setNotifications] = useState([
-    {
-      id: 1,
-      type: "subscription",
-      title: "Subscription Activated",
-      message:
-        "Your Pro subscription has been activated successfully.",
-      time: "5 min ago",
-      unread: true,
-    },
-    {
-      id: 2,
-      type: "message",
-      title: "New Conversation",
-      message:
-        "You have received a new conversation from a visitor.",
-      time: "20 min ago",
-      unread: true,
-    },
-    {
-      id: 3,
-      type: "alert",
-      title: "Usage Alert",
-      message:
-        "You have used 80% of your monthly message limit.",
-      time: "1 hour ago",
-      unread: true,
-    },
-    {
-      id: 4,
-      type: "payment",
-      title: "Payment Successful",
-      message:
-        "Your subscription payment of $49 has been processed successfully.",
-      time: "3 hours ago",
-      unread: false,
-    },
-    {
-      id: 5,
-      type: "settings",
-      title: "Chatbot Configuration Updated",
-      message:
-        "Your chatbot configuration has been updated successfully.",
-      time: "Yesterday",
-      unread: false,
-    },
-    {
-      id: 6,
-      type: "alert",
-      title: "Subscription Expiring Soon",
-      message:
-        "Your subscription will expire in 5 days. Renew your plan to continue using the service.",
-      time: "Yesterday",
-      unread: false,
-    },
-  ]);
+  
 
-  const unreadCount = notifications.filter(
-    (notification) => notification.unread
-  ).length;
+  const markReadMutation = useMarkNotificationRead();
+  const markAllMutation = useMarkAllNotificationsRead();
+  const deleteMutation = useDeleteNotifications();
+
+  // API response structure ke hisaab se mapping adjust karna.
+  const notifications = Array.isArray(data?.data.notifications)
+    ? data?.data?.notifications
+    : [];
+
+  const pagination = data?.data?.pagination || {
+    page: 1,
+    limit: 10,
+    total: 0,
+    totalPages: 0,
+  };
+
+  const handlePreviousPage = () => {
+    setPage((prev) => Math.max(1, prev - 1));
+  };
+
+  const handleNextPage = () => {
+    setPage((prev) => Math.min(pagination.totalPages, prev + 1));
+  };
+
+  const unreadCount =
+    data?.data?.unreadCount ??
+    notifications.filter((notification) => !notification.isRead).length;
 
   const filteredNotifications =
     filter === "unread"
-      ? notifications.filter(
-          (notification) => notification.unread
-        )
+      ? notifications.filter((notification) => !notification.isRead)
       : notifications;
 
+  const markAsRead = (notification) => {
+    markReadMutation.mutate(notification.id);
+    navigate(notification.webRoute);
+  };
+
+  const markAllAsRead = () => {
+    if (unreadCount > 0) {
+      markAllMutation.mutate();
+    }
+  };
+
+  const deleteNotification = (id) => {
+    setDeletingNotificationId(id);
+
+    deleteMutation.mutate(id, {
+      onSettled: () => {
+        setDeletingNotificationId(null);
+      },
+    });
+  };
   const getNotificationIcon = (type) => {
     switch (type) {
       case "subscription":
@@ -118,7 +123,7 @@ const Notifications = () => {
           </div>
         );
 
-      case "payment":
+      case "ticket":
         return (
           <div
             className="
@@ -131,7 +136,7 @@ const Notifications = () => {
               dark:text-green-400
             "
           >
-            <CheckCheck size={20} />
+            <Ticket size={20} />
           </div>
         );
 
@@ -188,40 +193,9 @@ const Notifications = () => {
     }
   };
 
-  const markAsRead = (id) => {
-    setNotifications((prev) =>
-      prev.map((notification) =>
-        notification.id === id
-          ? {
-              ...notification,
-              unread: false,
-            }
-          : notification
-      )
-    );
-  };
-
-  const markAllAsRead = () => {
-    setNotifications((prev) =>
-      prev.map((notification) => ({
-        ...notification,
-        unread: false,
-      }))
-    );
-  };
-
-  const deleteNotification = (id) => {
-    setNotifications((prev) =>
-      prev.filter(
-        (notification) => notification.id !== id
-      )
-    );
-  };
-
   return (
     <div className="min-h-full">
       <div className="mx-auto ">
-
         {/* PAGE HEADER */}
         <div
           className="
@@ -305,7 +279,6 @@ const Notifications = () => {
               "
             >
               <CheckCheck size={17} />
-
               Mark all as read
             </button>
           )}
@@ -358,10 +331,7 @@ const Notifications = () => {
               `}
             >
               All
-
-              <span className="ml-1.5 text-xs">
-                {notifications.length}
-              </span>
+              <span className="ml-1.5 text-xs">{notifications.length}</span>
             </button>
 
             <button
@@ -397,7 +367,6 @@ const Notifications = () => {
               `}
             >
               Unread
-
               {unreadCount > 0 && (
                 <span
                   className="
@@ -435,72 +404,40 @@ const Notifications = () => {
         </div>
 
         {/* NOTIFICATIONS */}
-        <div className="mt-5 space-y-3">
-          {filteredNotifications.length === 0 ? (
-            <div
-              className="
-                rounded-2xl
-                border
-                border-gray-200
-                bg-white
-                px-6
-                py-14
-                text-center
-                dark:border-white/10
-                dark:bg-[#171b23]
-              "
+
+        {isPending ? (
+          <div className="flex min-h-62.5 flex-col items-center justify-center gap-3">
+            <LoaderCircle size={32} className="animate-spin text-blue-600" />
+            <p className="text-sm text-gray-500 dark:text-gray-400">
+              Loading notifications...
+            </p>
+          </div>
+        ) : isError ? (
+          <div className="flex min-h-62.5 flex-col items-center justify-center gap-2">
+            <p className="text-sm text-red-500">
+              {error?.message || "Failed to load notifications."}
+            </p>
+            <button
+              type="button"
+              onClick={() => window.location.reload()}
+              className="text-sm font-medium text-blue-600 hover:underline"
             >
+              Try again
+            </button>
+          </div>
+        ) : notifications.length === 0 ? (
+          <div className="flex min-h-62.5 items-center justify-center">
+            <p className="text-sm text-gray-500 dark:text-gray-400">
+              No notifications found.
+            </p>
+          </div>
+        ) : (
+          <div className="space-y-3">
+            {notifications.map((notification) => (
               <div
-                className="
-                  mx-auto
-                  flex h-14 w-14
-                  items-center justify-center
-                  rounded-2xl
-                  bg-gray-100
-                  dark:bg-white/5
-                "
-              >
-                <Bell
-                  size={25}
-                  className="
-                    text-gray-400
-                    dark:text-gray-500
-                  "
-                />
-              </div>
-
-              <h3
-                className="
-                  mt-4
-                  text-sm
-                  font-semibold
-                  text-gray-800
-                  dark:text-gray-200
-                "
-              >
-                No notifications
-              </h3>
-
-              <p
-                className="
-                  mt-1
-                  text-xs
-                  text-gray-500
-                  dark:text-gray-500
-                "
-              >
-                You're all caught up.
-              </p>
-            </div>
-          ) : (
-            filteredNotifications.map(
-              (notification) => (
-                <div
-                  key={notification.id}
-                  onClick={() =>
-                    markAsRead(notification.id)
-                  }
-                  className={`
+                key={notification.id}
+                onClick={() => markAsRead(notification)}
+                className={`
                     group
                     flex
                     gap-3
@@ -515,7 +452,7 @@ const Notifications = () => {
                           border-indigo-100
                           bg-indigo-50/40
                           dark:border-indigo-500/10
-                          dark:bg-indigo-500/[0.04]
+                          dark:bg-indigo-500/4
                         `
                         : `
                           border-gray-200
@@ -528,99 +465,107 @@ const Notifications = () => {
                     hover:shadow-sm
                     dark:hover:border-indigo-500/20
                   `}
-                >
-                  {/* ICON */}
-                  {getNotificationIcon(
-                    notification.type
-                  )}
+              >
+                {/* ICON */}
+                {getNotificationIcon(notification.type)}
 
-                  {/* CONTENT */}
-                  <div className="min-w-0 flex-1">
-                    <div className="flex items-start justify-between gap-3">
-                      <div className="flex min-w-0 items-center gap-2">
-                        <h3
-                          className={`
+                {/* CONTENT */}
+                <div className="min-w-0 flex-1">
+                  <div className="flex items-start justify-between gap-3">
+                    <div className="flex min-w-0 items-center gap-2">
+                      <h3
+                        className={`
                             truncate
                             text-sm
                             ${
-                              notification.unread
+                              !notification.isRead
                                 ? "font-bold text-gray-900 dark:text-white"
                                 : "font-semibold text-gray-800 dark:text-gray-200"
                             }
                           `}
-                        >
-                          {notification.title}
-                        </h3>
+                      >
+                        {notification.title}
+                      </h3>
 
-                        {notification.unread && (
-                          <span
-                            className="
+                      {!notification.isRead && (
+                        <span
+                          className="
                               h-2
                               w-2
                               shrink-0
                               rounded-full
                               bg-indigo-500
                             "
-                          />
-                        )}
-                      </div>
-
-                      {/* DELETE */}
-                      <button
-                        type="button"
-                        onClick={(event) => {
-                          event.stopPropagation();
-                          deleteNotification(
-                            notification.id
-                          );
-                        }}
-                        className="
-                          shrink-0
-                          rounded-lg
-                          p-1.5
-                          text-gray-400
-                          opacity-100
-                          transition
-                          hover:bg-red-50
-                          hover:text-red-500
-                          sm:opacity-0
-                          sm:group-hover:opacity-100
-                          dark:hover:bg-red-500/10
-                        "
-                        aria-label="Delete notification"
-                      >
-                        <Trash2 size={15} />
-                      </button>
+                        />
+                      )}
                     </div>
 
-                    <p
+                    {/* DELETE */}
+                    <button
+                      type="button"
+                      onClick={(event) => {
+                        event.stopPropagation();
+                        deleteNotification(notification.id);
+                      }}
+                      disabled={
+                        deleteMutation.isPending &&
+                        deletingNotificationId === notification.id
+                      }
                       className="
+                        shrink-0 rounded-lg p-1.5
+                        text-gray-400 transition
+                        hover:bg-red-50 hover:text-red-500
+                        disabled:cursor-not-allowed disabled:opacity-50
+                        dark:hover:bg-red-500/10
+                      "
+                      aria-label="Delete notification"
+                    >
+                      {deleteMutation.isPending &&
+                      deletingNotificationId === notification.id ? (
+                        <LoaderCircle size={16} className="animate-spin" />
+                      ) : (
+                        <Trash2 size={16} />
+                      )}
+                    </button>
+                  </div>
+
+                  <p
+                    className="
                         mt-1.5
                         text-sm
                         leading-5
                         text-gray-500
                         dark:text-gray-400
                       "
-                    >
-                      {notification.message}
-                    </p>
+                  >
+                    {notification.message}
+                  </p>
 
-                    <p
-                      className="
+                  <p
+                    className="
                         mt-2
                         text-xs
                         text-gray-400
                         dark:text-gray-500
                       "
-                    >
-                      {notification.time}
-                    </p>
-                  </div>
+                  >
+                    {notification.time}
+                  </p>
                 </div>
-              )
-            )
-          )}
-        </div>
+              </div>
+            ))}
+          </div>
+        )}
+
+        <Pagination
+          page={pagination.page || page}
+          totalPages={pagination.totalPages}
+          total={pagination.total}
+          currentCount={notifications.length}
+          isFetching={isFetching}
+          onPrevious={handlePreviousPage}
+          onNext={handleNextPage}
+        />
       </div>
     </div>
   );

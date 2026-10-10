@@ -2,6 +2,7 @@ import {
   getMyNotifications,
   markMyNotificationRead,
   markMyAllNotificationsRead,
+  deleteNotifications,
 } from "../services/notification.service.js";
 
 export const getNotificationsController = async (req, res) => {
@@ -69,6 +70,25 @@ export const markAllNotificationsReadController = async (
     return res.status(500).json({
       success: false,
       message: "Failed to update notifications",
+    });
+  }
+};
+
+export const deleteNotificationController = async (
+  req,
+  res
+) => {
+  try {
+    await deleteNotifications(req.params.id,req.user.id);
+
+    return res.status(200).json({
+      success: true,
+      message: "Notification delete successfully",
+    });
+  } catch (error) {
+    return res.status(500).json({
+      success: false,
+      message: "Failed to delete notifications",
     });
   }
 };

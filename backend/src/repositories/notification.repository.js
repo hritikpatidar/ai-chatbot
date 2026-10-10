@@ -14,7 +14,7 @@ export const findNotificationsByUser = async (
   const [notifications, total, unreadCount] =
     await Promise.all([
       Notification.find({ userId })
-        .populate("userId","_id fullName email profileImage role")
+        .populate("userId", "_id fullName email profileImage role")
         .populate("clientId", "_id businessName contact clientKey")
         .sort({ createdAt: -1 })
         .skip(skip)
@@ -87,4 +87,14 @@ export const updateNotificationDelivery = async (
     { $set: update },
     { new: true }
   );
+};
+
+export const deleteNotification = async (
+  notificationId,
+  userId
+) => {
+  return Notification.findOneAndDelete({
+    _id: notificationId,
+    userId,
+  });
 };

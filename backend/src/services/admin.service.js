@@ -439,6 +439,7 @@ export const updateAdminClientService = async (clientId, payload) => {
   await client.save();
 
   await createAndSendNotification({
+    type:"settings",
     clientId: client._id,
     title: "Client Chatbot Configuration Updated by Admin",
     message: `Your chatbot configuration has been updated successfully by Admin. Please check the details in your account.`,

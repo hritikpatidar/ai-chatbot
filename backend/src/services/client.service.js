@@ -208,6 +208,7 @@ export const updateClientService = async (clientId, updateData) => {
   ]);
 
   await createAndSendNotification({
+    type:"settings",
     clientId: clientId,
     title: "Client Chatbot Configuration Updated",
     message: `Your chatbot configuration has been updated successfully. Please check the details in your account.`,

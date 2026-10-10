@@ -67,3 +67,12 @@ export const onAIStopped = (callback) => {
 export const removeAIStopped = (callback) => {
   socket.off("ai:stopped", callback);
 };
+
+//notification 
+export const onNotification = (callback) => {
+  socket.on("notification:created", callback);
+};
+
+export const removeNotification = (callback) => {
+  socket.off("notification:created", callback);
+};

@@ -76,6 +76,7 @@ export const processSubscriptionExpiryReminders = async () => {
             });
 
             await createAndSendNotification({
+                type: "subscription",
                 clientId: client._id,
                 title: "Subscription Expiring Soon",
                 message: `Your ${plan?.name || "subscription"} plan expires on ${expiryDate}. Renew it to continue using our services.`,

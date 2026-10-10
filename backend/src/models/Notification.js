@@ -48,17 +48,20 @@ const notificationSchema = new mongoose.Schema(
     },
 
     // subscription_expiry, ticket_assigned, etc.
-    // type: {
-    //   type: String,
-    //   enum: [
-    //     "subscription",
-    //     "ticket",
-    //     "system",
-    //     "general",
-    //   ],
-    //   default: "general",
-    //   index: true,
-    // },
+    type: {
+      type: String,
+      enum: [
+        "subscription",
+        "message",
+        "settings",
+        "alert",
+        "ticket",
+        "system",
+        "general",
+      ],
+      default: "general",
+      index: true,
+    },
 
     // Read/unread state
     isRead: {

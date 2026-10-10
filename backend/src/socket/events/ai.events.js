@@ -175,6 +175,7 @@ export const registerAIEvents = (io, socket) => {
           });
 
           await createAndSendNotification({
+            type: "ticket",
             clientId: clientId,
             title: "New Support Ticket Created by User",
             message: `A new support ticket has been created for query.`,
@@ -222,6 +223,7 @@ export const registerAIEvents = (io, socket) => {
           });
 
           await createAndSendNotification({
+            type: "ticket",
             clientId: clientId,
             title: "New Support Ticket Created by User",
             message: `A new support ticket has been created for query.`,

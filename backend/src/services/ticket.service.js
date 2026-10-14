@@ -18,14 +18,6 @@ export const createAITicketService = async ({
   messageId,
   userMessage,
 }) => {
-  console.log("createAITicketService", {
-    userId,
-    clientId,
-    guestId,
-    conversationId,
-    messageId,
-    userMessage,
-  })
   const existingTicket = await findOpenTicketByConversation(conversationId);
 
   if (existingTicket) {

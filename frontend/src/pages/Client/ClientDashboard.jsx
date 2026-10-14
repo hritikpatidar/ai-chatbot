@@ -20,7 +20,10 @@ import ClientOverview from "../../components/ClientComponent/Client/ClientOvervi
 export default function ClientDashboard() {
   const dispatch = useDispatch();
   const navigate = useNavigate();
-
+  const {
+    clientConfigLoading
+  } = useSelector((store) => store.chatSlice);
+  
   const { client, loading } = useSelector(
     (state) => state?.ClientReducer?.clientSlice || {},
   );
@@ -32,7 +35,7 @@ export default function ClientDashboard() {
     dispatch(getClientById(profileDetails?.clientId));
   }, [dispatch]);
 
-  if (loading && !client) {
+  if (loading && !client && clientConfigLoading) {
     return <PageLoader />;
   }
 

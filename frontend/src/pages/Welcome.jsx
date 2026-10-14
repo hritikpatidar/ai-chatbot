@@ -67,7 +67,7 @@ export default function Welcome() {
   } = useSpeechRecognition({
     enableSocketListeners: false,
   });
-const { socket } = useSocket();
+  const { socket } = useSocket();
   const [tags, setTags] = useState([]);
   const dispatch = useDispatch();
   const navigate = useNavigate();
@@ -81,7 +81,7 @@ const { socket } = useSocket();
 
   useEffect(() => {
     const handleError = ({ message }) => {
-      toast.error(message)
+      toast.error(message);
       dispatch(setNewMessageLoading(false));
       dispatch(setIsSendDisable(false));
       dispatch(addErrorMessage(message));
@@ -136,10 +136,10 @@ const { socket } = useSocket();
     };
   }, []);
 
-  useEffect(() => {
-    if (clientConfig) setShowWelcomeModal(true);
-    else if (clientConfig === null) setShowWelcomeModal(false);
-  }, [clientConfig]);
+  // useEffect(() => {
+  //   if (clientConfig) setShowWelcomeModal(true);
+  //   else if (clientConfig === null) setShowWelcomeModal(false);
+  // }, [clientConfig]);
 
   useEffect(() => {
     getConversations();
@@ -184,59 +184,88 @@ const { socket } = useSocket();
   };
 
   useEffect(() => {
-    if (!clientKey) {
-      setIsSessionChecking(false);
-      return;
-    }
-    initializeWidget();
-  }, [clientKey]);
+    let cancelled = false;
 
-  const initializeWidget = async () => {
-    try {
-      setIsSessionChecking(true);
-      const id = getGuestId(clientKey);
-      setGuestId(id);
-      const sessionToken = getItemLocalStorage(`widgetSession:${clientKey}`);
-      // 3. No session
-      if (!sessionToken) {
-        console.log("No session found, showing welcome modal");
-        if (clientConfig) setShowWelcomeModal(true);
+    const initializeWidget = async () => {
+      // Wait until client configuration has loaded
+      if (clientConfigLoading) {
+        setIsSessionChecking(true);
         return;
       }
-      // 4. Verify existing session
+
+      // Client configuration unavailable
+      if (!clientConfig) {
+        setShowWelcomeModal(false);
+        setIsSessionChecking(false);
+        return;
+      }
+
+      // Normal chatbot without widget session
+      if (!clientKey) {
+        setShowWelcomeModal(true);
+        setIsSessionChecking(false);
+        return;
+      }
+
+      setIsSessionChecking(true);
+
+      const storageKey = `widgetSession:${clientKey}`;
+      const id = getGuestId(clientKey);
+
+      setGuestId(id);
+
       try {
-        const response = await verifyWidgetSessionService(sessionToken);
-        if (response?.data?.success && response?.data?.data?.valid) {
-          console.log("Valid session found, hiding welcome modal");
-          if (clientConfig) setShowWelcomeModal(false);
+        const sessionToken = getItemLocalStorage(storageKey);
+
+        // First-time visitor: open modal
+        if (!sessionToken) {
+          if (!cancelled) {
+            setShowWelcomeModal(true);
+          }
           return;
         }
-        // Invalid session
-        removeItemLocalStorage(`widgetSession:${clientKey}`);
-        console.log("Invalid session, showing welcome modal");
-        if (clientConfig) setShowWelcomeModal(true);
+
+        // Verify existing session
+        const response = await verifyWidgetSessionService(sessionToken);
+
+        if (cancelled) return;
+
+        const isValid = response?.data?.success && response?.data?.data?.valid;
+
+        if (isValid) {
+          setShowWelcomeModal(false);
+        } else {
+          removeItemLocalStorage(storageKey);
+          setShowWelcomeModal(true);
+        }
       } catch (error) {
-        if (error?.response?.status === 401) {
-          removeItemLocalStorage(`widgetSession:${clientKey}`);
-          console.log("Session expired, showing welcome modal");
-          if (clientConfig) setShowWelcomeModal(true);
+        if (cancelled) return;
+
+        // Invalid or expired session
+        removeItemLocalStorage(storageKey);
+        setShowWelcomeModal(true);
+      } finally {
+        if (!cancelled) {
+          setIsSessionChecking(false);
         }
       }
-    } finally {
-      setIsSessionChecking(false);
-    }
-  };
+    };
+
+    initializeWidget();
+
+    return () => {
+      cancelled = true;
+    };
+  }, [clientKey, clientConfig, clientConfigLoading]);
 
   const handleUserSuccess = (data) => {
-    if (data?.sessionToken) {
+    if (data?.sessionToken && clientKey) {
       setItemLocalStorage(`widgetSession:${clientKey}`, data.sessionToken);
     }
+
     setShowWelcomeModal(false);
   };
 
-  if (isSessionChecking) {
-    return null;
-  }
   return (
     <div
       className={`
@@ -959,7 +988,23 @@ const { socket } = useSocket();
                 className="hidden"
                 onChange={handleFileSelect}
               />
+              {/* <div className="mt-2 flex items-center justify-between border-t border-gray-200/80 pt-2 dark:border-white/10">
+                <span className="text-xs text-gray-400 dark:text-gray-500">
+                  Maximum 200 characters
+                </span>
 
+                <span
+                  className={`text-xs font-medium tabular-nums transition-colors ${
+                    message.length >= 200
+                      ? "text-red-500 dark:text-red-400"
+                      : message.length >= 180
+                        ? "text-amber-500 dark:text-amber-400"
+                        : "text-gray-500 dark:text-gray-400"
+                  }`}
+                >
+                  {message.length}/200
+                </span>
+              </div> */}
               {/* Bottom */}
 
               <div className="mt-4 flex items-center justify-between gap-2 sm:mt-5 sm:gap-3">
@@ -1116,6 +1161,23 @@ const { socket } = useSocket();
                 </div>
               </div>
             </form>
+            <div className="mt-2 flex items-center justify-between dark:border-white/10">
+              <span className="text-xs text-gray-400 dark:text-gray-500">
+                Maximum 500 characters
+              </span>
+
+              <span
+                className={`text-xs font-medium tabular-nums transition-colors ${
+                  message.length > 500
+                    ? "text-red-500 dark:text-red-400"
+                    : message.length >= 450
+                      ? "text-amber-500 dark:text-amber-400"
+                      : "text-gray-500 dark:text-gray-400"
+                }`}
+              >
+                {message.length}/500
+              </span>
+            </div>
           </div>
 
           <div className="mt-6 w-full max-w-4xl px-4">

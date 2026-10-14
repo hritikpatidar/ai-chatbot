@@ -330,6 +330,7 @@ export default function useSpeechRecognition({
   };
 
   const handleMessageChange = (e) => {
+    if (e.target.value.length > 500) return
     setMessage(e.target.value);
 
     const textarea = textareaRef.current;

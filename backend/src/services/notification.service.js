@@ -25,7 +25,6 @@ export const createAndSendNotification = async ({
   image = null,
   metadata = {},
 }) => {
-
   try {
     const clientUser = clientId
       ? await findClientUserFcmTokenByClientId(clientId)
@@ -110,5 +109,5 @@ export const deleteNotifications = async (
   notificationId,
   userId
 ) => {
-  return deleteNotification(notificationId,userId);
+  return deleteNotification(notificationId, userId);
 };

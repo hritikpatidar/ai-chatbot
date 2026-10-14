@@ -116,17 +116,18 @@ export default function useSpeechRecognition({
         id: "conversation-error",
       });
     };
+    const handleError = ({ message }) => {
+      dispatch(setNewMessageLoading(false));
+      dispatch(setIsSendDisable(false));
+      dispatch(addErrorMessage(message));
+    };
     if (!enableSocketListeners) return;
     const handleChunk = ({ text }) => {
       dispatch(setNewMessageLoading(false));
       dispatch(appendAssistantChunk(text));
     };
 
-    const handleError = ({ message }) => {
-      dispatch(setNewMessageLoading(false));
-      dispatch(setIsSendDisable(false));
-      dispatch(addErrorMessage(message));
-    };
+
     const handleEnd = (data) => {
       dispatch(setIsSendDisable(false));
     };

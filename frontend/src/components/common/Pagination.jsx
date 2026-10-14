@@ -18,14 +18,25 @@ export default function Pagination({
       className="
         mt-5
         flex
-        flex-col
-        gap-3
-        sm:flex-row
-        sm:items-center
-        sm:justify-between
+        flex-row
+        items-center
+        justify-between
+        gap-2
+        w-full
+        min-w-0
       "
     >
-      <p className="text-sm text-gray-500 dark:text-gray-400">
+      {/* Showing Count */}
+      <p
+        className="
+          min-w-0
+          text-xs
+          sm:text-sm
+          text-gray-500
+          dark:text-gray-400
+          whitespace-nowrap
+        "
+      >
         Showing{" "}
         <span className="font-medium text-gray-900 dark:text-white">
           {currentCount}
@@ -33,26 +44,40 @@ export default function Pagination({
         of{" "}
         <span className="font-medium text-gray-900 dark:text-white">
           {total}
-        </span>{" "}
-        items
+        </span>
       </p>
 
-      <div className="flex items-center gap-2">
+      {/* Pagination Buttons */}
+      <div
+        className="
+          flex
+          shrink-0
+          items-center
+          gap-1
+          sm:gap-2
+          whitespace-nowrap
+        "
+      >
         <button
           type="button"
           onClick={onPrevious}
           disabled={page <= 1 || isFetching}
           className="
             inline-flex
+            shrink-0
             items-center
+            justify-center
             gap-1
             rounded-lg
             border
             border-gray-200
             bg-white
-            px-3
-            py-2
-            text-sm
+            px-2
+            py-1.5
+            sm:px-3
+            sm:py-2
+            text-xs
+            sm:text-sm
             font-medium
             text-gray-700
             hover:border-blue-500
@@ -64,17 +89,25 @@ export default function Pagination({
             dark:text-gray-200
           "
         >
-          <ChevronLeft size={16} />
+          <ChevronLeft size={14} className="shrink-0 sm:hidden" />
+          <ChevronLeft size={16} className="hidden shrink-0 sm:block" />
           Previous
         </button>
 
         <span
           className="
+            inline-flex
+            shrink-0
+            items-center
+            justify-center
             rounded-lg
             bg-blue-600
-            px-3
-            py-2
-            text-sm
+            px-2.5
+            py-1.5
+            sm:px-3
+            sm:py-2
+            text-xs
+            sm:text-sm
             font-medium
             text-white
           "
@@ -88,15 +121,20 @@ export default function Pagination({
           disabled={page >= totalPages || isFetching}
           className="
             inline-flex
+            shrink-0
             items-center
+            justify-center
             gap-1
             rounded-lg
             border
             border-gray-200
             bg-white
-            px-3
-            py-2
-            text-sm
+            px-2
+            py-1.5
+            sm:px-3
+            sm:py-2
+            text-xs
+            sm:text-sm
             font-medium
             text-gray-700
             hover:border-blue-500
@@ -109,7 +147,8 @@ export default function Pagination({
           "
         >
           Next
-          <ChevronRight size={16} />
+          <ChevronRight size={14} className="shrink-0 sm:hidden" />
+          <ChevronRight size={16} className="hidden shrink-0 sm:block" />
         </button>
       </div>
     </div>

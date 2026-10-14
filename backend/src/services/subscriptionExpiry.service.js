@@ -5,6 +5,7 @@ import { subscriptionExpiredEmailTemplate } from "../helpers/emailTemplate.js";
 import { updateClientById } from "../repositories/client.repository.js";
 import { findClientUserFcmTokenByClientId } from "../repositories/user.repository.js";
 import { createAndSendNotification } from "./notification.service.js";
+import SubscriptionUsage from "../models/SubscriptionUsage.js";
 
 export const processExpiredSubscriptions = async () => {
     const expiredSubscriptions = await findExpiredSubscriptions();
@@ -41,6 +42,10 @@ export const processExpiredSubscriptions = async () => {
                 current_plan_id: null,
                 stripe_customer: null,
                 status: "inactive"
+            });
+            await SubscriptionUsage.deleteOne({
+                subscriptionId: subscription._id,
+                clientId
             });
 
             await updateSubscriptionById(subscription._id, {

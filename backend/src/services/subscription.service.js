@@ -2,6 +2,7 @@ import env from "../config/env.js";
 import transporter from "../config/mail.js";
 import { subscriptionCancellationEmailTemplate, subscriptionPlanChangedEmailTemplate, subscriptionPurchaseEmailTemplate } from "../helpers/emailTemplate.js";
 import { extractSubscriptionPaymentData } from "../helpers/stripePayment.js";
+import SubscriptionUsage from "../models/SubscriptionUsage.js";
 import { findClientById, updateClientById } from "../repositories/client.repository.js";
 import {
   findSubscriptionByClientId,
@@ -761,6 +762,11 @@ export const cancelSubscriptionService = async (subscriptionId, fullName, email)
       status: "canceled",
       expiryEmailSent: true,
       canceledAt: new Date(),
+    });
+
+    await SubscriptionUsage.deleteOne({
+      subscriptionId,
+      clientId
     });
     // const updatedSubscription = await deleteSubscriptionById(subscriptionId);
     try {

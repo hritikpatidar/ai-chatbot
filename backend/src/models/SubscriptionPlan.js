@@ -55,6 +55,39 @@ const subscriptionPlanSchema = new mongoose.Schema(
       },
     ],
 
+    limits: {
+      monthlyResponses: {
+        type: Number,
+        required: true,
+        min: 1,
+      },
+      monthlyConversations: {
+        type: Number,
+        required: true,
+        min: 1,
+      },
+      maxInputTokens: {
+        type: Number,
+        required: true,
+        min: 1,
+      },
+      maxOutputTokens: {
+        type: Number,
+        required: true,
+        min: 1,
+      },
+      monthlyTokenBudget: {
+        type: Number,
+        required: true,
+        min: 1,
+      },
+      requestsPerMinute: {
+        type: Number,
+        default: 10,
+        min: 1,
+      },
+    },
+
     // Plan hierarchy
     // Example:
     // beginner = 1

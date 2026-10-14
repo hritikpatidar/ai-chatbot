@@ -38,6 +38,7 @@ const env = {
 
   // Gemini API
   GEMINI_API_KEY: process.env.GEMINI_API_KEY,
+  GEMINI_MODEL:process.env.GEMINI_MODEL,
 
   // ChatGPT API
   VITE_OPENAI_API_KEY: process.env.VITE_OPENAI_API_KEY,

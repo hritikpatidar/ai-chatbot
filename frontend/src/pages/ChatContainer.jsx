@@ -8,7 +8,6 @@ import {
   Copy,
   ThumbsUp,
   ThumbsDown,
-  MessageSquarePlus,
   MoreHorizontal,
 } from "lucide-react";
 import { useEffect, useRef } from "react";

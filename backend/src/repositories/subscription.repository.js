@@ -209,3 +209,39 @@ export const markSubscriptionExpired = async (
     }
   );
 };
+
+
+export const getActiveSubscriptionWithPlan = async (clientId) => {
+  const now = new Date();
+  console.log("clientId", clientId)
+  const subscription = await Subscription.findOne({
+    clientId,
+    status: { $in: ["incomplete", "active", "trialing"] },
+    $or: [
+      { currentPeriodEnd: null },
+      { currentPeriodEnd: { $exists: false } },
+      { currentPeriodEnd: { $gt: now } },
+    ],
+  })
+    .populate("planId")
+    .sort({ createdAt: -1 })
+    .lean();
+  if (!subscription || !subscription.planId) {
+    return { subscription: {}, plan: {} };
+  }
+
+  const plan = subscription.planId;
+  const limits = plan.limits;
+  // Missing limits ko unlimited mat samajhna.
+  if (
+    !limits ||
+    !Number.isFinite(limits.maxInputTokens) ||
+    !Number.isFinite(limits.maxOutputTokens) ||
+    !Number.isFinite(limits.monthlyResponses) ||
+    !Number.isFinite(limits.monthlyTokenBudget)
+  ) {
+    return { subscription: {}, plan: {} };
+  }
+
+  return { subscription, plan };
+};

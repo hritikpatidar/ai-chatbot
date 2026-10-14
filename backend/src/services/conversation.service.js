@@ -147,7 +147,10 @@ export const findOrCreateGuestConversation = async ({
 }) => {
   let conversation = await findGuestConversation(clientId, guestId);
   if (conversation) {
-    return conversation;
+    return {
+      conversation,
+      created: false,
+    };
   }
 
   conversation = await createConversation({
@@ -157,6 +160,8 @@ export const findOrCreateGuestConversation = async ({
     lastMessage,
     lastMessageAt: new Date(),
   });
-
-  return conversation;
+  return {
+    conversation,
+    created: true,
+  };
 };

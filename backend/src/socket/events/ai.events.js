@@ -1,3 +1,446 @@
+// import ai from "../../config/gemini.js";
+
+// import {
+//   buildClientSystemInstruction,
+//   buildConversationContents,
+//   classifyUserMessage,
+// } from "../../services/ai.service.js";
+
+// import { findClientById } from "../../repositories/client.repository.js";
+
+// import {
+//   createConversation,
+//   findConversationById,
+//   findConversationByIdAndClient,
+//   updateConversation,
+// } from "../../repositories/conversation.repository.js";
+
+// import {
+//   createMessage,
+//   getRecentConversationMessages,
+// } from "../../repositories/message.repository.js";
+
+// import {
+//   getRelevantClientKnowledge,
+//   buildKnowledgeContext,
+// } from "../../services/knowledge.service.js";
+// import { createAITicketService } from "../../services/ticket.service.js";
+// import { findOrCreateGuestConversation } from "../../services/conversation.service.js";
+// import { findClientUserFcmTokenByClientId } from "../../repositories/user.repository.js";
+// import { createAndSendNotification } from "../../services/notification.service.js";
+// import { getActiveSubscriptionWithPlan } from "../../repositories/subscription.repository.js";
+// import { completeAIUsage, releaseAIUsage, reserveAIUsage } from "../../services/aiUsage.service.js";
+
+// const activeStreams = new Map();
+
+// export const registerAIEvents = (io, socket) => {
+//   socket.on("ai:message", async (data) => {
+//     try {
+//       const { conversationId, message } = data;
+
+//       if (!message || !message.trim()) {
+//         socket.emit("ai:error", {
+//           success: false,
+//           message: "Message is required",
+//         });
+
+//         return;
+//       }
+
+//       const userId = socket.user?.id || null;
+//       const clientId = socket.clientId || null;
+//       const clientUserId = socket.clientUserId || null;
+//       const guestId = socket.guestId || null;
+
+//       if (!userId && !clientId) {
+//         socket.emit("ai:error", {
+//           success: false,
+//           message: "User or client is required",
+//         });
+
+//         return;
+//       }
+
+//       let client = null;
+//       if (clientId) {
+//         client = await findClientById(clientId);
+//         if (!client) {
+//           socket.emit("ai:error", {
+//             success: false,
+//             message: "Client not found",
+//           });
+//           return;
+//         }
+
+//         if (client.status !== "active") {
+//           socket.emit("ai:error", {
+//             success: false,
+//             message: "Client is inactive",
+//           });
+//           return;
+//         }
+//       }
+
+//       let subscription = null;
+//       let plan = null;
+//       let usageReservation = null;
+//       let usageSettled = false;
+//       let totalGeminiTokens = 0;
+
+//       if (clientId) {
+//         try {
+//           const result = await getActiveSubscriptionWithPlan(clientId);
+
+//           subscription = result.subscription;
+//           plan = result.plan;
+//           usageReservation = await reserveAIUsage({
+//             subscription,
+//             plan,
+//             clientId,
+//           });
+//         } catch (error) {
+//           if (usageReservation && !usageSettled) {
+//             try {
+//               await releaseAIUsage({
+//                 usageId: usageReservation?.usageId,
+//                 reservedTokens: usageReservation?.reservedTokens,
+//               });
+
+//               usageSettled = true;
+//             } catch (releaseError) {
+//               console.error("Failed to release AI quota:", releaseError);
+//             }
+//           }
+//           const quotaErrors = {
+//             ACTIVE_SUBSCRIPTION_NOT_FOUND: {
+//               message: "Please purchase a subscription to continue.",
+//               code: "SUBSCRIPTION_REQUIRED",
+//             },
+//             MONTHLY_RESPONSE_LIMIT_REACHED: {
+//               message: "Your monthly response limit has been reached.",
+//               code: "RESPONSE_LIMIT_REACHED",
+//             },
+//             MONTHLY_TOKEN_LIMIT_REACHED: {
+//               message: "Your monthly AI token limit has been reached.",
+//               code: "TOKEN_LIMIT_REACHED",
+//             },
+//             SUBSCRIPTION_PLAN_LIMITS_NOT_CONFIGURED: {
+//               message: "Subscription limits are not configured.",
+//               code: "PLAN_LIMITS_NOT_CONFIGURED",
+//             },
+//           };
+
+//           const knownError = quotaErrors[error.message];
+
+//           if (knownError) {
+//             socket.emit("ai:error", knownError);
+//             return;
+//           }
+
+//           console.error("AI quota reservation failed:", error);
+
+//           socket.emit("ai:error", {
+//             message: "Unable to verify AI usage limits. Please try again.",
+//             code: "USAGE_VALIDATION_FAILED",
+//           });
+
+//           return;
+//         }
+//       }
+
+
+//       let conversation;
+//       if (conversationId) {
+//         if (clientId) {
+//           conversation = await findConversationByIdAndClient(
+//             conversationId,
+//             clientId,
+//           );
+//         } else if (userId) {
+//           conversation = await findConversationById(conversationId);
+//           if (
+//             !conversation ||
+//             conversation.userId?.toString() !== userId.toString()
+//           ) {
+//             socket.emit("ai:error", {
+//               success: false,
+//               message: "Unauthorized access to conversation",
+//             });
+//             return;
+//           }
+//         }
+
+//         if (!conversation) {
+//           socket.emit("ai:error", {
+//             success: false,
+//             message: "Conversation not found",
+//           });
+
+//           return;
+//         }
+//       } else {
+//         const conversationData = {
+//           title: message.substring(0, 40),
+//           lastMessage: message,
+//           lastMessageAt: new Date(),
+//         };
+//         if (userId) {
+//           conversationData.userId = userId;
+//         }
+
+//         if (clientId) {
+//           conversationData.clientId = clientId;
+//         }
+
+//         if (guestId) {
+//           conversation = await findOrCreateGuestConversation({
+//             clientId,
+//             guestId,
+//             title: message.substring(0, 40),
+//             lastMessage: message,
+//           });
+//         } else {
+//           conversation = await createConversation(conversationData);
+//         }
+//         socket.emit("conversation:created", {
+//           conversation,
+//         });
+//       }
+
+//       const userMessage = await createMessage({
+//         conversationId: conversation._id,
+//         role: "user",
+//         text: message,
+//       });
+
+//       const history = await getRecentConversationMessages(conversation._id, 20);
+//       let knowledgeContext = "";
+//       if (clientId) {
+//         const knowledge = await getRelevantClientKnowledge(clientId, message);
+//         knowledgeContext = buildKnowledgeContext(knowledge);
+//         const classification = await classifyUserMessage({
+//           message,
+//           knowledgeContext,
+//           client,
+//         });
+
+//         // NOT BUSINESS RELATED
+//         if (!classification.businessRelated) {
+//           const fallbackMessage =
+//             "I'm sorry, I can only help with questions related to our business and services. I've created a support ticket for you.";
+
+//           await createMessage({
+//             conversationId: conversation._id,
+//             role: "assistant",
+//             text: fallbackMessage,
+//           });
+
+//           const ticket = await createAITicketService({
+//             userId: userId || null,
+//             clientId: clientUserId || null,
+//             guestId: guestId || null,
+//             conversationId: conversation._id,
+//             messageId: userMessage._id,
+//             userMessage: message,
+//           });
+
+//           await createAndSendNotification({
+//             type: "ticket",
+//             clientId: clientId,
+//             title: "New Support Ticket Created by User",
+//             message: `A new support ticket has been created for query.`,
+//             webRoute: "/client/tickets",
+//             screen: "",
+//             image: "https://api.naqshapp.com/naqshsvg.jpg",
+//             metadata: {
+//               conversationId: conversation._id,
+//               expiryDate: null,
+//             },
+//           });
+
+//           socket.emit("ai:chunk", {
+//             text: fallbackMessage,
+//           });
+
+//           socket.emit("ai:end", {
+//             success: true,
+//             conversationId: conversation._id,
+//             response: fallbackMessage,
+//             ticketCreated: true,
+//             ticketId: ticket._id,
+//           });
+
+//           return;
+//         }
+//         // BUSINESS RELATED BUT AI DOES NOT KNOW
+//         if (classification.businessRelated && !classification.canAnswer) {
+//           const fallbackMessage =
+//             "I'm sorry, I don't have enough information to answer that. I've created a support ticket for you.";
+
+//           await createMessage({
+//             conversationId: conversation._id,
+//             role: "assistant",
+//             text: fallbackMessage,
+//           });
+
+//           const ticket = await createAITicketService({
+//             userId: userId || null,
+//             clientId: clientUserId || null,
+//             guestId: guestId || null,
+//             conversationId: conversation._id,
+//             messageId: userMessage._id,
+//             userMessage: message,
+//           });
+
+//           await createAndSendNotification({
+//             type: "ticket",
+//             clientId: clientId,
+//             title: "New Support Ticket Created by User",
+//             message: `A new support ticket has been created for query.`,
+//             webRoute: "/client/tickets",
+//             screen: "",
+//             image: "https://api.naqshapp.com/naqshsvg.jpg",
+//             metadata: {
+//               conversationId: conversation._id,
+//               expiryDate: null,
+//             },
+//           });
+
+//           socket.emit("ai:chunk", {
+//             text: fallbackMessage,
+//           });
+
+//           socket.emit("ai:end", {
+//             success: true,
+//             conversationId: conversation._id,
+//             response: fallbackMessage,
+//             ticketCreated: true,
+//             ticketId: ticket._id,
+//           });
+
+//           return;
+//         }
+//       }
+//       let systemInstruction = "";
+
+//       if (client) {
+//         systemInstruction = buildClientSystemInstruction(
+//           client,
+//           knowledgeContext,
+//         );
+//       }
+
+//       const contents = buildConversationContents(history, message);
+
+//       activeStreams.set(socket.id, false);
+//       const stream = await ai.models.generateContentStream({
+//         model: env.GEMINI_MODEL,
+//         contents,
+//         config: {
+//           ...(client
+//             ? {
+//               systemInstruction,
+//               maxOutputTokens: plan.limits.maxOutputTokens,
+//             }
+//             : {}),
+//         },
+//       });
+
+//       let fullResponse = "";
+//       let chatUsageMetadata = null;
+//       for await (const chunk of stream) {
+//         const text = chunk.text || "";
+//         if (activeStreams.get(socket.id)) {
+//           console.log("⛔ Stream Stopped");
+//           break;
+//         }
+//         if (chunk.usageMetadata) {
+//           chatUsageMetadata = chunk.usageMetadata;
+//         }
+//         fullResponse += text;
+//         socket.emit("ai:chunk", {
+//           text,
+//         });
+//       }
+//       activeStreams.delete(socket.id);
+
+//       if (fullResponse) {
+//         await createMessage({
+//           conversationId: conversation._id,
+//           role: "assistant",
+//           text: fullResponse,
+//         });
+
+//         await updateConversation(conversation._id, {
+//           lastMessage: fullResponse,
+//           lastMessageAt: new Date(),
+//         });
+//       }
+
+//       if (usageReservation && !usageSettled) {
+//         await completeAIUsage({
+//           usageId: usageReservation.usageId,
+//           reservedTokens: usageReservation.reservedTokens,
+//           actualTokens: totalGeminiTokens,
+//         });
+
+//         usageSettled = true;
+//       }
+
+//       socket.emit("ai:end", {
+//         success: true,
+//         message: "Response completed",
+//         conversationId: conversation._id,
+//         response: fullResponse,
+//       });
+//     } catch (error) {
+//       console.error("❌ AI Message Error:", error);
+//       activeStreams.delete(socket.id);
+//       // let errorMessage = "Something went wrong. Please try again.";
+//       // if (error.status === 429) {
+//       //   errorMessage =
+//       //     "Oops! We’re a bit busy right now. Please give us a moment and try again. 😊";
+//       // } else if (error.status === 401) {
+//       //   errorMessage = "Invalid Gemini API Key.";
+//       // } else if (error.status === 403) {
+//       //   errorMessage = "Access denied. Please check your API permissions.";
+//       // } else if (error.status === 400) {
+//       //   errorMessage = "Invalid request.";
+//       // }
+//       let errorMessage =
+//         "Sorry, something went wrong while processing your request. Please try again.";
+//       if (error.status === 429) {
+//         errorMessage =
+//           "The assistant is temporarily unavailable. Messages cannot be processed at the moment. Please try again later.";
+//       } else if (error.status === 401) {
+//         errorMessage =
+//           "Sorry, we’re unable to process your request right now. Please try again later.";
+//       } else if (error.status === 403) {
+//         errorMessage =
+//           "Sorry, we’re unable to process your request at the moment. Please try again later.";
+//       } else if (error.status === 400) {
+//         errorMessage =
+//           "Sorry, we couldn’t understand your request. Please try again.";
+//       }
+
+//       socket.emit("ai:error", {
+//         success: false,
+//         status: error.status || 500,
+//         message: errorMessage,
+//       });
+//     }
+//   });
+
+//   socket.on("ai:stop", () => {
+//     console.log("🛑 Stop Requested", socket.id);
+//     activeStreams.set(socket.id, true);
+//     socket.emit("ai:stopped", {
+//       success: true,
+//       message: "Generation stopped",
+//     });
+//   });
+// };
+
 import ai from "../../config/gemini.js";
 
 import {
@@ -24,26 +467,112 @@ import {
   getRelevantClientKnowledge,
   buildKnowledgeContext,
 } from "../../services/knowledge.service.js";
+
 import { createAITicketService } from "../../services/ticket.service.js";
 import { findOrCreateGuestConversation } from "../../services/conversation.service.js";
-import { findClientUserFcmTokenByClientId } from "../../repositories/user.repository.js";
 import { createAndSendNotification } from "../../services/notification.service.js";
+
+import { getActiveSubscriptionWithPlan } from "../../repositories/subscription.repository.js";
+
+import {
+  reserveAIUsage,
+  completeAIUsage,
+  releaseAIUsage,
+  reserveConversationCreation,
+  completeConversationCreation,
+  releaseConversationCreation,
+} from "../../services/aiUsage.service.js";
+
+import env from "../../config/env.js";
 
 const activeStreams = new Map();
 
+const estimateTokens = (value = "") => {
+  // Fallback estimate only; this is not Google's exact token count.
+  return Math.ceil(String(value).length / 4);
+};
+
 export const registerAIEvents = (io, socket) => {
-  socket.on("ai:message", async (data) => {
-    try {
-      const { conversationId, message } = data;
+  socket.on("ai:message", async (data = {}) => {
+    let usageReservation = null;
+    let usageSettled = false;
+    let subscription = null;
+    let plan = null;
+    let totalGeminiTokens = 0;
+    let conversationReservation = null;
+    let conversationReservationSettled = false;
 
-      if (!message || !message.trim()) {
-        socket.emit("ai:error", {
-          success: false,
-          message: "Message is required",
-        });
+    const settleUsage = async (actualTokens) => {
+      if (!usageReservation || usageSettled) return;
 
+      await completeAIUsage({
+        usageId: usageReservation.usageId,
+        reservedTokens: usageReservation.reservedTokens,
+        actualTokens,
+      });
+
+      usageSettled = true;
+    };
+
+    const releaseUsage = async () => {
+      if (!usageReservation || usageSettled) return;
+
+      await releaseAIUsage({
+        usageId: usageReservation.usageId,
+        reservedTokens: usageReservation.reservedTokens,
+      });
+
+      usageSettled = true;
+    };
+
+    const settleConversationReservation = async (created) => {
+      if (
+        !conversationReservation ||
+        conversationReservationSettled
+      ) {
         return;
       }
+
+      if (created) {
+        await completeConversationCreation({
+          usageId: conversationReservation.usageId,
+        });
+      } else {
+        await releaseConversationCreation({
+          usageId: conversationReservation.usageId,
+        });
+      }
+
+      conversationReservationSettled = true;
+    };
+
+    const releaseConversationReservationIfNeeded = async () => {
+      if (
+        !conversationReservation ||
+        conversationReservationSettled
+      ) {
+        return;
+      }
+
+      await releaseConversationCreation({
+        usageId: conversationReservation.usageId,
+      });
+
+      conversationReservationSettled = true;
+    };
+
+    try {
+      const { conversationId, message } = data;
+      if (typeof message !== "string" || !message.trim()) {
+        socket.emit("ai:error", {
+          success: false,
+          code: "MESSAGE_REQUIRED",
+          message: "Message is required.",
+        });
+        return;
+      }
+
+      const cleanMessage = message.trim();
 
       const userId = socket.user?.id || null;
       const clientId = socket.clientId || null;
@@ -53,19 +582,22 @@ export const registerAIEvents = (io, socket) => {
       if (!userId && !clientId) {
         socket.emit("ai:error", {
           success: false,
-          message: "User or client is required",
+          code: "IDENTITY_REQUIRED",
+          message: "User or client is required.",
         });
-
         return;
       }
 
+      // 1. Validate client account.
       let client = null;
+
       if (clientId) {
         client = await findClientById(clientId);
         if (!client) {
           socket.emit("ai:error", {
             success: false,
-            message: "Client not found",
+            code: "CLIENT_NOT_FOUND",
+            message: "Client not found.",
           });
           return;
         }
@@ -73,91 +605,222 @@ export const registerAIEvents = (io, socket) => {
         if (client.status !== "active") {
           socket.emit("ai:error", {
             success: false,
-            message: "Client is inactive",
+            code: "CLIENT_INACTIVE",
+            message: "Client is inactive.",
           });
           return;
         }
       }
 
-      let conversation;
+      // 2. Validate an existing conversation before reserving quota.
+      let conversation = null;
+
       if (conversationId) {
         if (clientId) {
           conversation = await findConversationByIdAndClient(
             conversationId,
-            clientId,
+            clientId
           );
         } else if (userId) {
           conversation = await findConversationById(conversationId);
+
           if (
             !conversation ||
             conversation.userId?.toString() !== userId.toString()
           ) {
             socket.emit("ai:error", {
               success: false,
-              message: "Unauthorized access to conversation",
+              code: "CONVERSATION_FORBIDDEN",
+              message: "Unauthorized access to conversation.",
             });
             return;
           }
         }
+        console.log("conversation", conversation)
 
         if (!conversation) {
           socket.emit("ai:error", {
             success: false,
-            message: "Conversation not found",
+            code: "CONVERSATION_NOT_FOUND",
+            message: "Conversation not found.",
           });
-
           return;
         }
-      } else {
-        const conversationData = {
-          title: message.substring(0, 40),
-          lastMessage: message,
-          lastMessageAt: new Date(),
-        };
-        if (userId) {
-          conversationData.userId = userId;
-        }
-
-        if (clientId) {
-          conversationData.clientId = clientId;
-        }
-
-        if (guestId) {
-          conversation = await findOrCreateGuestConversation({
-            clientId,
-            guestId,
-            title: message.substring(0, 40),
-            lastMessage: message,
-          });
-        } else {
-          conversation = await createConversation(conversationData);
-        }
-        socket.emit("conversation:created", {
-          conversation,
-        });
       }
 
+      // 3. Get the active subscription and reserve usage.
+      if (clientId) {
+        try {
+          const result = await getActiveSubscriptionWithPlan(clientId);
+          if (!result?.subscription || !result?.plan) {
+            socket.emit("ai:error", {
+              success: false,
+              code: "USAGE_VALIDATION_FAILED",
+              message: "Client subscription not found. Please try again.",
+            });
+            return;
+          }
+          subscription = result.subscription;
+          plan = result.plan;
+
+          if (!conversation) {
+            conversationReservation =
+              await reserveConversationCreation({
+                subscription,
+                plan,
+                clientId,
+              });
+          }
+
+          usageReservation = await reserveAIUsage({
+            subscription,
+            plan,
+            clientId,
+          });
+        } catch (error) {
+          await releaseConversationReservationIfNeeded();
+          const quotaErrors = {
+            ACTIVE_SUBSCRIPTION_NOT_FOUND: {
+              code: "SUBSCRIPTION_REQUIRED",
+              message:
+                "This chatbot is currently unavailable. Please try again later.",
+            },
+
+            MONTHLY_RESPONSE_LIMIT_REACHED: {
+              code: "RESPONSE_LIMIT_REACHED",
+              message:
+                "This chatbot has reached its usage limit for now. Please try again later.",
+            },
+
+            MONTHLY_TOKEN_LIMIT_REACHED: {
+              code: "TOKEN_LIMIT_REACHED",
+              message:
+                "This chatbot has reached its usage limit for now. Please try again later.",
+            },
+
+            SUBSCRIPTION_PLAN_LIMITS_NOT_CONFIGURED: {
+              code: "PLAN_LIMITS_NOT_CONFIGURED",
+              message:
+                "We're unable to process your request right now. Please try again later.",
+            },
+
+            MONTHLY_CONVERSATION_LIMIT_REACHED: {
+              code: "CONVERSATION_LIMIT_REACHED",
+              message:
+                "This chatbot has reached its conversation limit for now. Please try again later.",
+            },
+          };
+
+          const knownError = quotaErrors[error.message];
+          console.log("knownError", knownError)
+          if (knownError) {
+            socket.emit("ai:error", {
+              success: false,
+              ...knownError,
+            });
+            return;
+          }
+
+          console.error("AI usage reservation failed:", error);
+
+          socket.emit("ai:error", {
+            success: false,
+            code: "USAGE_VALIDATION_FAILED",
+            message: "Unable to verify usage limits. Please try again.",
+          });
+          return;
+        }
+      }
+
+      // 4. Create a conversation only after subscription/quota validation.
+      if (!conversation) {
+        const conversationData = {
+          title: cleanMessage.substring(0, 40),
+          lastMessage: cleanMessage,
+          lastMessageAt: new Date(),
+        };
+
+        if (userId) conversationData.userId = userId;
+        if (clientId) conversationData.clientId = clientId;
+
+        if (guestId) {
+          const guestResult = await findOrCreateGuestConversation({
+            clientId,
+            guestId,
+            title: cleanMessage.substring(0, 40),
+            lastMessage: cleanMessage,
+          });
+          console.log("guestResult", guestResult)
+          // The helper must return { conversation, created }.
+          conversation = guestResult.conversation;
+
+          // Count only if a genuinely new conversation was created.
+          await settleConversationReservation(
+            Boolean(guestResult.created)
+          );
+        } else {
+          conversation = await createConversation(conversationData);
+          await settleConversationReservation(true);
+        }
+        socket.emit("conversation:created", { conversation });
+      }
+
+      // 5. Save user message and fetch recent history.
       const userMessage = await createMessage({
         conversationId: conversation._id,
         role: "user",
-        text: message,
+        text: cleanMessage,
       });
 
-      const history = await getRecentConversationMessages(conversation._id, 20);
+      const history = await getRecentConversationMessages(
+        conversation._id,
+        20
+      );
+
       let knowledgeContext = "";
+      let systemInstruction = "";
+
+      // 6. Client chatbot: knowledge + classification.
       if (clientId) {
-        const knowledge = await getRelevantClientKnowledge(clientId, message);
+        const knowledge = await getRelevantClientKnowledge(
+          clientId,
+          cleanMessage
+        );
+
         knowledgeContext = buildKnowledgeContext(knowledge);
+
         const classification = await classifyUserMessage({
-          message,
+          message: cleanMessage,
           knowledgeContext,
           client,
         });
 
-        // NOT BUSINESS RELATED
-        if (!classification.businessRelated) {
-          const fallbackMessage =
-            "I'm sorry, I can only help with questions related to our business and services. I've created a support ticket for you.";
+        // Use actual metadata where available.
+        // ai.service.js must return usageMetadata for this to work.
+        const classificationTokens =
+          classification?.usageMetadata?.totalTokenCount ??
+          estimateTokens(
+            JSON.stringify(client) +
+            cleanMessage +
+            knowledgeContext
+          );
+
+        totalGeminiTokens += classificationTokens;
+
+        const needsTicket =
+          !classification.classificationFailed &&
+          (
+            !classification.businessRelated ||
+            !classification.canAnswer
+          );
+
+        if (needsTicket) {
+          const fallbackMessage = !classification?.businessRelated
+            ? "I'm sorry, I can only help with questions related to our business and services. I've created a support ticket for you."
+            : "I'm sorry, I don't have enough information to answer that. I've created a support ticket for you.";
+
+          // The classifier has already consumed tokens, so count this request.
+          await settleUsage(totalGeminiTokens);
 
           await createMessage({
             conversationId: conversation._id,
@@ -171,14 +834,14 @@ export const registerAIEvents = (io, socket) => {
             guestId: guestId || null,
             conversationId: conversation._id,
             messageId: userMessage._id,
-            userMessage: message,
+            userMessage: cleanMessage,
           });
 
           await createAndSendNotification({
             type: "ticket",
-            clientId: clientId,
+            clientId,
             title: "New Support Ticket Created by User",
-            message: `A new support ticket has been created for query.`,
+            message: "A new support ticket has been created for a query.",
             webRoute: "/client/tickets",
             screen: "",
             image: "https://api.naqshapp.com/naqshsvg.jpg",
@@ -188,9 +851,7 @@ export const registerAIEvents = (io, socket) => {
             },
           });
 
-          socket.emit("ai:chunk", {
-            text: fallbackMessage,
-          });
+          socket.emit("ai:chunk", { text: fallbackMessage });
 
           socket.emit("ai:end", {
             success: true,
@@ -202,90 +863,64 @@ export const registerAIEvents = (io, socket) => {
 
           return;
         }
-        // BUSINESS RELATED BUT AI DOES NOT KNOW
-        if (classification.businessRelated && !classification.canAnswer) {
-          const fallbackMessage =
-            "I'm sorry, I don't have enough information to answer that. I've created a support ticket for you.";
 
-          await createMessage({
-            conversationId: conversation._id,
-            role: "assistant",
-            text: fallbackMessage,
-          });
-
-          const ticket = await createAITicketService({
-            userId: userId || null,
-            clientId: clientUserId || null,
-            guestId: guestId || null,
-            conversationId: conversation._id,
-            messageId: userMessage._id,
-            userMessage: message,
-          });
-
-          await createAndSendNotification({
-            type: "ticket",
-            clientId: clientId,
-            title: "New Support Ticket Created by User",
-            message: `A new support ticket has been created for query.`,
-            webRoute: "/client/tickets",
-            screen: "",
-            image: "https://api.naqshapp.com/naqshsvg.jpg",
-            metadata: {
-              conversationId: conversation._id,
-              expiryDate: null,
-            },
-          });
-
-          socket.emit("ai:chunk", {
-            text: fallbackMessage,
-          });
-
-          socket.emit("ai:end", {
-            success: true,
-            conversationId: conversation._id,
-            response: fallbackMessage,
-            ticketCreated: true,
-            ticketId: ticket._id,
-          });
-
-          return;
-        }
-      }
-      let systemInstruction = "";
-
-      if (client) {
         systemInstruction = buildClientSystemInstruction(
           client,
-          knowledgeContext,
+          knowledgeContext
         );
       }
 
-      const contents = buildConversationContents(history, message);
+      // 7. Build conversation content.
+      const contents = buildConversationContents(history, cleanMessage);
+      const maxOutputTokens = plan?.limits?.maxOutputTokens;
 
+      // 8. Generate final answer.
       activeStreams.set(socket.id, false);
       const stream = await ai.models.generateContentStream({
-        model: "gemini-3.6-flash",
+        model: env.GEMINI_MODEL,
         contents,
-        config: client
+        config: clientId
           ? {
             systemInstruction,
+            maxOutputTokens,
+            temperature: 0.4
           }
           : undefined,
       });
 
       let fullResponse = "";
+      let chatUsageMetadata = null;
+      let wasStopped = false;
+
       for await (const chunk of stream) {
-        const text = chunk.text || "";
         if (activeStreams.get(socket.id)) {
-          console.log("⛔ Stream Stopped");
+          wasStopped = true;
           break;
         }
-        fullResponse += text;
-        socket.emit("ai:chunk", {
-          text,
-        });
+
+        if (chunk.usageMetadata) {
+          chatUsageMetadata = chunk.usageMetadata;
+        }
+
+        const chunkText = chunk.text || "";
+        fullResponse += chunkText;
+
+        if (chunkText) {
+          socket.emit("ai:chunk", { text: chunkText });
+        }
       }
+
       activeStreams.delete(socket.id);
+
+      const chatTokens =
+        chatUsageMetadata?.totalTokenCount ??
+        estimateTokens(
+          JSON.stringify(contents) +
+          systemInstruction +
+          fullResponse
+        );
+
+      totalGeminiTokens += chatTokens;
 
       if (fullResponse) {
         await createMessage({
@@ -300,56 +935,62 @@ export const registerAIEvents = (io, socket) => {
         });
       }
 
+      // 9. Finalize quota once. Stopped streams are counted too.
+      await settleUsage(totalGeminiTokens);
       socket.emit("ai:end", {
         success: true,
-        message: "Response completed",
+        message: wasStopped
+          ? "Generation stopped."
+          : "Response completed.",
         conversationId: conversation._id,
         response: fullResponse,
+        stopped: wasStopped,
       });
     } catch (error) {
-      console.error("❌ AI Message Error:", error);
+      console.error("AI Message Error:", error);
       activeStreams.delete(socket.id);
-      // let errorMessage = "Something went wrong. Please try again.";
-      // if (error.status === 429) {
-      //   errorMessage =
-      //     "Oops! We’re a bit busy right now. Please give us a moment and try again. 😊";
-      // } else if (error.status === 401) {
-      //   errorMessage = "Invalid Gemini API Key.";
-      // } else if (error.status === 403) {
-      //   errorMessage = "Access denied. Please check your API permissions.";
-      // } else if (error.status === 400) {
-      //   errorMessage = "Invalid request.";
-      // }
+      // Release quota if the request failed before being finalized.
+      try {
+        await releaseUsage();
+      } catch (releaseError) {
+        console.error("Failed to release AI quota:", releaseError);
+      }
+
+      try {
+        await releaseConversationReservationIfNeeded();
+      } catch (releaseError) {
+        console.error("Failed to release conversation quota:", releaseError);
+      }
+
       let errorMessage =
         "Sorry, something went wrong while processing your request. Please try again.";
+
       if (error.status === 429) {
         errorMessage =
-          "The assistant is temporarily unavailable. Messages cannot be processed at the moment. Please try again later.";
-      } else if (error.status === 401) {
+          "The assistant is temporarily unavailable. Please try again later.";
+      } else if (error.status === 401 || error.status === 403) {
         errorMessage =
-          "Sorry, we’re unable to process your request right now. Please try again later.";
-      } else if (error.status === 403) {
-        errorMessage =
-          "Sorry, we’re unable to process your request at the moment. Please try again later.";
+          "We are unable to process your request right now. Please try again later.";
       } else if (error.status === 400) {
         errorMessage =
-          "Sorry, we couldn’t understand your request. Please try again.";
+          "We could not understand your request. Please try again.";
       }
 
       socket.emit("ai:error", {
         success: false,
         status: error.status || 500,
+        code: "AI_REQUEST_FAILED",
         message: errorMessage,
       });
     }
   });
 
   socket.on("ai:stop", () => {
-    console.log("🛑 Stop Requested", socket.id);
     activeStreams.set(socket.id, true);
+
     socket.emit("ai:stopped", {
       success: true,
-      message: "Generation stopped",
+      message: "Generation stop requested.",
     });
   });
 };

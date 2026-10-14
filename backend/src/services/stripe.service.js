@@ -560,8 +560,11 @@ export const addAndSetDefaultPaymentMethod =
     return paymentMethod;
   };
 
+
 /* =========================================================
    EXPORT STRIPE INSTANCE
 ========================================================= */
 
 export { stripe };
+
+

@@ -76,44 +76,36 @@ export default function ClientSettings() {
         dark:text-white
       "
     >
-      <div>
-        <div className="flex items-center gap-3">
-          <div
-            className="
-                flex
-                h-10
-                w-10
-                items-center
-                justify-center
+      <div className="flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between mb-6">
+        <div>
+          <div className="flex items-center gap-3">
+            <div
+              className="
+                flex h-10 w-10
+                items-center justify-center
                 rounded-xl
                 bg-blue-500/10
-                text-blue-600
-                dark:text-blue-400
+                text-blue-500
               "
-          >
-            <Settings size={20} />
-          </div>
-          <div>
-            <h1
-              className="
-                  text-2xl
-                  font-semibold
+            >
+              <Settings size={21} />
+            </div>
+
+            <div>
+              <h1
+                className="
+                  text-xl font-semibold
                   text-gray-900
                   dark:text-white
                 "
-            >
-              Settings
-            </h1>
-            <p
-              className="
-                  mt-1
-                  text-sm
-                  text-gray-500
-                  dark:text-gray-400
-                "
-            >
-              Manage your administrator account and preferences.
-            </p>
+              >
+                Settings
+              </h1>
+
+              <p className="text-xs text-gray-500 dark:text-gray-400">
+                Manage your administrator account and preferences.
+              </p>
+            </div>
           </div>
         </div>
       </div>

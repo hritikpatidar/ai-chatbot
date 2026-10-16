@@ -7,6 +7,7 @@ import {
 } from "lucide-react";
 import ActionButton from "../../common/ActionButton";
 import StatusBadge from "../../common/StatusBadge";
+import { useSelector } from "react-redux";
 
 export default function FAQTable({
   faqs = [],
@@ -14,6 +15,9 @@ export default function FAQTable({
   onDelete,
   loading = false,
 }) {
+  const { client } = useSelector(
+    (state) => state?.ClientReducer?.clientSlice || {},
+  );
   if (loading) {
     return (
       <div className="flex min-h-75 items-center justify-center">
@@ -98,10 +102,11 @@ export default function FAQTable({
               <th className="px-5 py-4 text-left text-xs font-semibold text-gray-500 dark:text-gray-400">
                 Status
               </th>
-
-              <th className="px-5 py-4 text-right text-xs font-semibold text-gray-500 dark:text-gray-400">
-                Actions
-              </th>
+              {client?.active_plan && (
+                <th className="px-5 py-4 text-right text-xs font-semibold text-gray-500 dark:text-gray-400">
+                  Actions
+                </th>
+              )}
             </tr>
           </thead>
 
@@ -153,23 +158,24 @@ export default function FAQTable({
                 <td className="px-5 py-4">
                   <StatusBadge status={faq.status} />
                 </td>
+                {client?.active_plan && (
+                  <td className="px-5 py-4">
+                    <div className="flex justify-end gap-2">
+                      <ActionButton
+                        icon={<Edit2 size={15} />}
+                        title="Edit FAQ"
+                        onClick={() => onEdit(faq)}
+                      />
 
-                <td className="px-5 py-4">
-                  <div className="flex justify-end gap-2">
-                    <ActionButton
-                      icon={<Edit2 size={15} />}
-                      title="Edit FAQ"
-                      onClick={() => onEdit(faq)}
-                    />
-
-                    <ActionButton
-                      danger
-                      icon={<Trash2 size={15} />}
-                      title="Delete FAQ"
-                      onClick={() => onDelete(faq)}
-                    />
-                  </div>
-                </td>
+                      <ActionButton
+                        danger
+                        icon={<Trash2 size={15} />}
+                        title="Delete FAQ"
+                        onClick={() => onDelete(faq)}
+                      />
+                    </div>
+                  </td>
+                )}
               </tr>
             ))}
           </tbody>
@@ -246,6 +252,3 @@ export default function FAQTable({
     </div>
   );
 }
-
-
-

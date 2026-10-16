@@ -403,7 +403,7 @@ export const formSchema = z.object({
     tone: z.enum(["friendly", "professional", "casual", "formal"]),
     aiInstructions: z
       .string()
-      .max(10000, "AI instructions cannot exceed 3000 characters")
+      .max(10000, "AI instructions cannot exceed 10000 characters")
       .optional()
       .or(z.literal("")),
     predefinedQuestions: z.array(predefinedQuestionSchema),

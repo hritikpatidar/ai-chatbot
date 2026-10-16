@@ -66,6 +66,9 @@ import Notifications from "../pages/Notifications";
 import { getItemLocalStorage } from "../utils/browserServices";
 import { generateToken, messaging } from "../firebase";
 import { onMessage } from "firebase/messaging";
+import ClientAnalytices from "../pages/Client/ClientAnalytices";
+import NotFound from "../components/NotFound";
+import ClientSupport from "../pages/Client/ClientSupport";
 
 export default function AppRoutes() {
 
@@ -135,6 +138,7 @@ export default function AppRoutes() {
             <Route element={<ClientLayout />}>
               <Route path="/client">
                 <Route index element={<ClientDashboard />} />
+                <Route path="analytics" element={<ClientAnalytices />} />
                 <Route path="products" element={<ClientProducts />} />
                 <Route path="faqs" element={<ClientFAQs />} />
                 <Route path="chatbot-settings" element={<ChatbotSettings />} />
@@ -156,6 +160,10 @@ export default function AppRoutes() {
                 <Route
                   path="subscription/success"
                   element={<SubscriptionSuccess />}
+                />
+                <Route
+                  path="Support"
+                  element={<ClientSupport />}
                 />
               </Route>
             </Route>
@@ -191,7 +199,7 @@ export default function AppRoutes() {
               </Route>
             </Route>
           </Route>
-          <Route path="*" element={<Welcome />} />
+          <Route path="*" element={<NotFound />} />
         </Routes>
       </Suspense>
     </SocketProvider>

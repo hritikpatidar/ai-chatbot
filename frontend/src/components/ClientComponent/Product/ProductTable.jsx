@@ -3,6 +3,7 @@ import ActionButton from "../../common/ActionButton";
 import StatusBadge from "../../common/StatusBadge";
 import { getImageUrl } from "../../../utils/imageUrl";
 import profile from "../../../assets/profile1.jpg";
+import { useSelector } from "react-redux";
 
 export default function ProductTable({
   products = [],
@@ -10,6 +11,9 @@ export default function ProductTable({
   onEdit,
   onDelete,
 }) {
+  const { client } = useSelector(
+    (state) => state?.ClientReducer?.clientSlice || {},
+  );
   if (loading) {
     return (
       <div
@@ -99,10 +103,11 @@ export default function ProductTable({
               <th className="px-5 py-3 text-left text-xs font-semibold text-gray-500 dark:text-gray-400">
                 Status
               </th>
-
-              <th className="px-5 py-3 text-right text-xs font-semibold text-gray-500 dark:text-gray-400">
-                Action
-              </th>
+              {client?.active_plan && (
+                <th className="px-5 py-3 text-right text-xs font-semibold text-gray-500 dark:text-gray-400">
+                  Action
+                </th>
+              )}
             </tr>
           </thead>
 
@@ -178,22 +183,24 @@ export default function ProductTable({
                   <StatusBadge status={product.status} />
                 </td>
                 {/* Actions */}
-                <td className="px-5 py-4">
-                  <div className="flex items-center justify-end gap-2">
-                    <ActionButton
-                      icon={<Edit2 size={15} />}
-                      title="Edit FAQ"
-                      onClick={() => onEdit(product)}
-                    />
+                {client?.active_plan && (
+                  <td className="px-5 py-4">
+                    <div className="flex items-center justify-end gap-2">
+                      <ActionButton
+                        icon={<Edit2 size={15} />}
+                        title="Edit FAQ"
+                        onClick={() => onEdit(product)}
+                      />
 
-                    <ActionButton
-                      danger
-                      icon={<Trash2 size={15} />}
-                      title="Delete FAQ"
-                      onClick={() => onDelete(product)}
-                    />
-                  </div>
-                </td>
+                      <ActionButton
+                        danger
+                        icon={<Trash2 size={15} />}
+                        title="Delete FAQ"
+                        onClick={() => onDelete(product)}
+                      />
+                    </div>
+                  </td>
+                )}
               </tr>
             ))}
           </tbody>
@@ -311,4 +318,3 @@ function AvailabilityBadge({ availability }) {
     </span>
   );
 }
-

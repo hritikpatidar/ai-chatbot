@@ -15,7 +15,12 @@ export default function GuestHeader() {
     clientConfigLoading,
     clientConfigError,
   } = useSelector((store) => store.chatSlice);
-  const chatbotName = `${clientConfig?.businessName || "AI"} Assistant`;
+
+  const { client, loading } = useSelector(
+    (state) => state?.ClientReducer?.clientSlice || {},
+  );
+  
+  const chatbotName = `${client?.active_plan === "Pro" ? clientConfig?.businessName || "AI" : "Saviesa AI"} Assistant`;
 
   const handleLogin = () => {
     setIsMenuOpen(false);

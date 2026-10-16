@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 
-import { Plus, RefreshCw, Search } from "lucide-react";
+import { Plus, RefreshCw, Search, Ticket, UserCog } from "lucide-react";
 
 import TicketTable from "../../components/ClientComponent/Ticket/TicketTable";
 import TicketModal from "../../components/ClientComponent/Ticket/TicketModal";
@@ -55,7 +55,6 @@ export default function ClientTickets() {
     );
   });
 
-  
   const handleEditTicket = (ticket) => {
     setSelectedTicket(ticket);
     setIsModalOpen(true);
@@ -133,41 +132,39 @@ export default function ClientTickets() {
 
   return (
     <div className="min-h-full w-full">
-      <div
-        className="
-            flex
-            flex-col
-            gap-4
-            lg:flex-row
-            lg:items-center
-            lg:justify-between
-          "
-      >
+      <div className="flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between mb-6">
         <div>
-          <h1
-            className="
-                text-xl
-                font-semibold
-                text-gray-900
-                dark:text-white
-              "
-          >
-            Support Tickets
-          </h1>
+          <div className="flex items-center gap-3">
+            <div
+              className="
+                  flex h-10 w-10
+                  items-center justify-center
+                  rounded-xl
+                  bg-blue-500/10
+                  text-blue-500
+                "
+            >
+              <Ticket size={21} />
+            </div>
 
-          <p
-            className="
-                mt-1
-                text-xs
-                text-gray-500
-                dark:text-gray-400
-              "
-          >
-            Manage your support tickets
-          </p>
+            <div>
+              <h1
+                className="
+                    text-xl font-semibold
+                    text-gray-900
+                    dark:text-white
+                  "
+              >
+                Support Tickets
+              </h1>
+
+              <p className="text-xs text-gray-500 dark:text-gray-400">
+                Manage your support tickets
+              </p>
+            </div>
+          </div>
         </div>
       </div>
-
       <div
         className="
             mt-6

@@ -16,6 +16,7 @@ import {
   CheckCircle2,
   AlertCircle,
   Loader2,
+  UserCog,
 } from "lucide-react";
 
 import { useForm, useFieldArray, Controller } from "react-hook-form";
@@ -84,12 +85,16 @@ export default function ClientChatbotSettings() {
     control,
     handleSubmit,
     reset,
+    watch,
     formState: { errors, isDirty },
   } = useForm({
     resolver: zodResolver(formSchema),
     defaultValues,
     mode: "onChange",
   });
+  const aiInstructions = watch("chatbot.aiInstructions") || "";
+
+  const questionLimit = 10;
 
   const { fields, append, remove, move } = useFieldArray({
     control,
@@ -261,20 +266,38 @@ export default function ClientChatbotSettings() {
 
   return (
     <div className="min-h-full w-full bg-transparent text-gray-900 dark:text-white">
-      <div className="mb-6 flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
+      <div className="flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between mb-6">
         <div>
-          <div className="flex items-center gap-2">
-            <Bot size={25} className="text-blue-600 dark:text-blue-400" />
+          <div className="flex items-center gap-3">
+            <div
+              className="
+                  flex h-10 w-10
+                  items-center justify-center
+                  rounded-xl
+                  bg-blue-500/10
+                  text-blue-500
+                "
+            >
+              <UserCog size={21} />
+            </div>
 
-            <h1 className="text-2xl font-semibold tracking-tight">
-              Chatbot Settings
-            </h1>
+            <div>
+              <h1
+                className="
+                    text-xl font-semibold
+                    text-gray-900
+                    dark:text-white
+                  "
+              >
+                Chatbot Settings
+              </h1>
+
+              <p className="text-xs text-gray-500 dark:text-gray-400">
+                Manage your business information, contact details, chatbot
+                configuration and AI instructions.
+              </p>
+            </div>
           </div>
-
-          <p className="mt-1 text-sm text-gray-500 dark:text-gray-400">
-            Manage your business information, contact details, chatbot
-            configuration and AI instructions.
-          </p>
         </div>
 
         <div className="flex items-center gap-3">
@@ -569,6 +592,7 @@ export default function ClientChatbotSettings() {
                     placeholder="Select language"
                     error={errors.chatbot?.language?.message}
                     required
+                    disabled={client?.active_plan === "Pro" ? false : true}
                   />
                 )}
               />
@@ -605,6 +629,7 @@ export default function ClientChatbotSettings() {
                     placeholder="Select tone"
                     error={errors.chatbot?.tone?.message}
                     required
+                    disabled={client?.active_plan === "Pro" ? false : true}
                   />
                 )}
               />
@@ -658,8 +683,7 @@ export default function ClientChatbotSettings() {
                 />
 
                 <p className="mt-1.5 text-xs text-gray-500 dark:text-gray-400">
-                  These instructions guide the chatbot's behavior for this
-                  business.
+                  {aiInstructions.length}/3000 characters
                 </p>
               </div>
             </div>
@@ -826,7 +850,7 @@ export default function ClientChatbotSettings() {
                 ))}
 
                 {/* Bottum add button */}
-                {fields.length > 0 && (
+                {fields.length < questionLimit && (
                   <div className="flex justify-end">
                     <button
                       type="button"
@@ -837,7 +861,8 @@ export default function ClientChatbotSettings() {
                           sortOrder: fields.length + 1,
                         })
                       }
-                      className="
+                      disabled={fields.length >= questionLimit}
+                      className={`
                         inline-flex
                         items-center
                         gap-2
@@ -850,7 +875,7 @@ export default function ClientChatbotSettings() {
                         text-white
                         transition
                         hover:bg-blue-700
-                      "
+                      `}
                     >
                       <Plus size={15} />
                       Add Question

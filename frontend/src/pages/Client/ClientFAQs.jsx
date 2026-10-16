@@ -15,24 +15,21 @@ import Pagination from "../../components/common/Pagination";
 
 import useFAQs from "../../hooks/Client/useFAQs";
 import { useSelector } from "react-redux";
+import { useNavigate } from "react-router-dom";
 
 export default function ClientFAQs() {
+  const navigate = useNavigate();
   const [page, setPage] = useState(1);
-
   const [limit] = useState(5);
-
   const [search, setSearch] = useState("");
-
   const [isModalOpen, setIsModalOpen] = useState(false);
-
   const [selectedFAQ, setSelectedFAQ] = useState(null);
-
   const [deleteFAQDetails, setDeleteFAQDetails] = useState(null);
   const [successMessage, setSuccessMessage] = useState("");
-
   const { client } = useSelector(
     (state) => state?.ClientReducer?.clientSlice || {},
   );
+
   const {
     faqs,
     pagination,
@@ -83,8 +80,12 @@ export default function ClientFAQs() {
   ========================================================= */
 
   const handleAddFAQ = () => {
-    setSelectedFAQ(null);
-    setIsModalOpen(true);
+    if (!client?.active_plan) {
+      navigate("/client/subscription");
+    } else {
+      setSelectedFAQ(null);
+      setIsModalOpen(true);
+    }
   };
 
   /* =========================================================

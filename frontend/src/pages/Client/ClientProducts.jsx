@@ -15,8 +15,10 @@ import ConfirmModal from "../../components/ClientComponent/ConfirmModal";
 import Pagination from "../../components/common/Pagination";
 
 import useProducts from "../../hooks/Client/useProducts";
+import { useNavigate } from "react-router-dom";
 
 export default function ClientProducts() {
+  const navigate = useNavigate();
   const { client } = useSelector(
     (state) => state?.ClientReducer?.clientSlice || {},
   );
@@ -76,8 +78,12 @@ export default function ClientProducts() {
   }, [products, search]);
 
   const handleAddProduct = () => {
-    setSelectedProduct(null);
-    setIsModalOpen(true);
+    if (!client?.active_plan) {
+      navigate("/client/subscription");
+    } else {
+      setSelectedProduct(null);
+      setIsModalOpen(true);
+    }
   };
 
   const handleEditProduct = (product) => {

@@ -10,6 +10,10 @@ import {
   X,
   Ticket,
   CreditCard,
+  Activity,
+  HandFist,
+  Settings,
+  UserCog,
 } from "lucide-react";
 
 import { handleLogout } from "../../utils/logout";
@@ -26,11 +30,21 @@ export default function ClientSidebar({ mobileOpen, setMobileOpen }) {
     (state) => state?.authReducer?.AuthSlice,
   );
 
+  const { client, loading } = useSelector(
+    (state) => state?.ClientReducer?.clientSlice || {},
+  );
+
   const menuItems = [
     {
       label: "Dashboard",
       path: "/client",
       icon: LayoutDashboard,
+    },
+    {
+      label: "Analytics",
+      path: "/client/analytics",
+      icon: Activity,
+      show: client?.active_plan === "Pro" ? true : false,
     },
     {
       label: "Products",
@@ -50,7 +64,7 @@ export default function ClientSidebar({ mobileOpen, setMobileOpen }) {
     {
       label: "Chatbot Settings",
       path: "/client/chatbot-settings",
-      icon: Building2,
+      icon: UserCog,
     },
     {
       label: "Subscription",
@@ -58,9 +72,15 @@ export default function ClientSidebar({ mobileOpen, setMobileOpen }) {
       icon: CreditCard,
     },
     {
+      label: "Email Support",
+      path: "/client/support",
+      icon: HandFist,
+      show: !!client?.active_plan,
+    },
+    {
       label: "Settings",
       path: "/client/client-settings",
-      icon: Building2,
+      icon: Settings,
     },
   ];
 
@@ -236,17 +256,19 @@ export default function ClientSidebar({ mobileOpen, setMobileOpen }) {
           </p>
 
           <div className="space-y-1">
-            {menuItems.map((item) => {
-              const Icon = item.icon;
+            {menuItems
+              .filter((item) => item.show !== false)
+              .map((item) => {
+                const Icon = item.icon;
 
-              return (
-                <NavLink
-                  key={item.path}
-                  to={item.path}
-                  end={item.path === "/client"}
-                  onClick={() => setMobileOpen(false)}
-                  className={({ isActive }) =>
-                    `
+                return (
+                  <NavLink
+                    key={item.path}
+                    to={item.path}
+                    end={item.path === "/client"}
+                    onClick={() => setMobileOpen(false)}
+                    className={({ isActive }) =>
+                      `
                     group
                     flex
                     items-center
@@ -276,13 +298,13 @@ export default function ClientSidebar({ mobileOpen, setMobileOpen }) {
                         `
                     }
                     `
-                  }
-                >
-                  <Icon size={18} />
-                  <span className="flex-1">{item.label}</span>
-                </NavLink>
-              );
-            })}
+                    }
+                  >
+                    <Icon size={18} />
+                    <span className="flex-1">{item.label}</span>
+                  </NavLink>
+                );
+              })}
           </div>
         </nav>
 

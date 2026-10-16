@@ -10,7 +10,7 @@ export const registerConversationEvents = (io, socket) => {
   socket.on("conversation:list", async () => {
     try {
       const userId = socket.user?.id || null;
-      const clientId = socket.clientId || null;
+      const clientId = socket.user.clientId || null;
       const guestId = socket.guestId || null;
 
       if (!userId && !clientId) {
@@ -67,7 +67,7 @@ export const registerConversationEvents = (io, socket) => {
       }
 
       const userId = socket.user?.id || null;
-      const clientId = socket.clientId || null;
+      const clientId = socket.user.clientId || null;
       if (!userId && !clientId) {
         socket.emit("conversation:error", {
           success: false,

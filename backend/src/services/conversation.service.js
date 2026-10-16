@@ -24,9 +24,9 @@ export const getConversationListService = async ({
     return await getGuestConversations(guestId, clientId);
   }
 
-  // if (clientId) {
-  //   return await getClientConversations(clientId);
-  // }
+  if (clientId) {
+    return await getClientConversations(clientId);
+  }
 
   if (userId) {
     return await getUserConversations(userId);
@@ -51,29 +51,12 @@ export const getConversationMessagesService = async ({
     );
   } else if (userId) {
     conversation = await findConversationById(conversationId);
-
     if (conversation && conversation.userId?.toString() !== userId.toString()) {
       throw new Error("Unauthorized access to conversation");
     }
   } else {
     throw new Error("User or client is required");
   }
-
-  // if (userId) {
-  //   conversation = await findConversationById(conversationId);
-
-  //   if (conversation && conversation.userId?.toString() !== userId.toString()) {
-  //     throw new Error("Unauthorized access to conversation");
-  //   }
-  // } else if (guestId && clientId) {
-  //   conversation = await findConversationByIdAndClient(
-  //     conversationId,
-  //     clientId,
-  //     guestId,
-  //   );
-  // } else {
-  //   throw new Error("guestId, User or client is required");
-  // }
 
   if (!conversation) {
     throw new Error("Conversation not found");

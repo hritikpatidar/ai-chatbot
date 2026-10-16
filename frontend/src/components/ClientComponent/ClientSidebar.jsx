@@ -14,6 +14,7 @@ import {
   HandFist,
   Settings,
   UserCog,
+  MessagesSquare,
 } from "lucide-react";
 
 import { handleLogout } from "../../utils/logout";
@@ -60,6 +61,11 @@ export default function ClientSidebar({ mobileOpen, setMobileOpen }) {
       label: "Tickets",
       path: "/client/tickets",
       icon: Ticket,
+    },
+    {
+      label: "Conversations History",
+      path: "/client/user/conversation",
+      icon: MessagesSquare,
     },
     {
       label: "Chatbot Settings",

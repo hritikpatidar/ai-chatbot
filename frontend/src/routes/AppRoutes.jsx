@@ -69,10 +69,10 @@ import { onMessage } from "firebase/messaging";
 import ClientAnalytices from "../pages/Client/ClientAnalytices";
 import NotFound from "../components/NotFound";
 import ClientSupport from "../pages/Client/ClientSupport";
+import ConversationHistory from "../components/ClientComponent/ConversationHistory";
 
 export default function AppRoutes() {
-
-   useEffect(() => {
+  useEffect(() => {
     const existingToken = getItemLocalStorage("fcm_token");
     if (!existingToken) {
       generateToken();
@@ -138,6 +138,10 @@ export default function AppRoutes() {
             <Route element={<ClientLayout />}>
               <Route path="/client">
                 <Route index element={<ClientDashboard />} />
+                <Route
+                  path="user/conversation"
+                  element={<ConversationHistory />}
+                />
                 <Route path="analytics" element={<ClientAnalytices />} />
                 <Route path="products" element={<ClientProducts />} />
                 <Route path="faqs" element={<ClientFAQs />} />
@@ -161,10 +165,7 @@ export default function AppRoutes() {
                   path="subscription/success"
                   element={<SubscriptionSuccess />}
                 />
-                <Route
-                  path="Support"
-                  element={<ClientSupport />}
-                />
+                <Route path="Support" element={<ClientSupport />} />
               </Route>
             </Route>
           </Route>

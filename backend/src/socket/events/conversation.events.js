@@ -116,8 +116,8 @@ export const registerConversationEvents = (io, socket) => {
         return;
       }
 
-      const userId = socket.user?.id || null;
-      const clientId = socket.clientId || null;
+      const userId = socket?.user?.id || null;
+      const clientId = socket?.user?.clientId || null;
       if (!userId && !clientId) {
         socket.emit("conversation:error", {
           success: false,
@@ -130,7 +130,8 @@ export const registerConversationEvents = (io, socket) => {
         userId,
         clientId,
         conversationId,
-      });
+      }); 
+      console.log("result",result)
 
       socket.emit("conversation:deleted:response", {
         success: true,

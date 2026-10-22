@@ -66,11 +66,13 @@ export default function ClientSidebar({ mobileOpen, setMobileOpen }) {
       label: "Conversations History",
       path: "/client/user/conversation",
       icon: MessagesSquare,
+      show: client?.active_plan === "Pro" ? true : false,
     },
     {
       label: "Chatbot Settings",
       path: "/client/chatbot-settings",
       icon: UserCog,
+      // show: !!client?.active_plan,
     },
     {
       label: "Subscription",

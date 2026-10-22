@@ -62,9 +62,13 @@ export const getClientConversations = async (clientId) => {
   return await Conversation.find({
     clientId,
     isArchived: false,
-  }).sort({
-    updatedAt: -1,
-  });
+  })
+    .populate({
+      path: "visitor",
+      match: { clientId },
+      select: "fullName email phone accountStatus lastSeenAt",
+    })
+    .sort({ updatedAt: -1 });
 };
 
 // Update Conversation

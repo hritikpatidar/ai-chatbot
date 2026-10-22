@@ -397,7 +397,7 @@ export const registerAIEvents = (io, socket) => {
           await createAndSendNotification({
             type: "ticket",
             clientId,
-            title: "New Support Ticket Created by User",
+            title: `New Support Ticket Created by ${ticket.guestKeyId.fullName}`,
             message: "A new support ticket has been created for a query.",
             webRoute: "/client/tickets",
             screen: "",

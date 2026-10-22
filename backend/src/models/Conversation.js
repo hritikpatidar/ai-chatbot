@@ -53,4 +53,14 @@ const conversationSchema = new mongoose.Schema(
   },
 );
 
+conversationSchema.virtual("visitor", {
+  ref: "WidgetVisitor",
+  localField: "guestId",
+  foreignField: "guestId",
+  justOne: true,
+});
+
+conversationSchema.set("toJSON", { virtuals: true });
+conversationSchema.set("toObject", { virtuals: true });
+
 export default mongoose.model("Conversation", conversationSchema);

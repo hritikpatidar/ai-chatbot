@@ -142,7 +142,7 @@ export default function Welcome() {
   // }, [clientConfig]);
 
   useEffect(() => {
-    getConversations();
+    if (!clientKey) getConversations();
   }, []);
 
   const getGreeting = () => {

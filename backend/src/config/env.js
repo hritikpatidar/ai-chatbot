@@ -36,9 +36,12 @@ const env = {
   MAIL_PASSWORD: process.env.MAIL_PASSWORD,
   MAIL_FROM: process.env.MAIL_FROM,
 
+  //Admin Support Email
+  ADMIN_SUPPORT_EMAIL: process.env.ADMIN_SUPPORT_EMAIL,
+
   // Gemini API
   GEMINI_API_KEY: process.env.GEMINI_API_KEY,
-  GEMINI_MODEL:process.env.GEMINI_MODEL,
+  GEMINI_MODEL: process.env.GEMINI_MODEL,
 
   // ChatGPT API
   VITE_OPENAI_API_KEY: process.env.VITE_OPENAI_API_KEY,

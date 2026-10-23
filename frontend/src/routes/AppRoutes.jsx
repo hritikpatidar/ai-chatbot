@@ -70,6 +70,7 @@ import ClientAnalytices from "../pages/Client/ClientAnalytices";
 import NotFound from "../components/NotFound";
 import ClientSupport from "../pages/Client/ClientSupport";
 import ConversationHistory from "../components/ClientComponent/ConversationHistory";
+import SupportTickets from "../pages/Admin/SupportTickets";
 
 export default function AppRoutes() {
   useEffect(() => {
@@ -196,6 +197,10 @@ export default function AppRoutes() {
                 <Route
                   path="/admin/subscription-plans/:planId"
                   element={<SubscriptionPlanDetails />}
+                />
+                <Route
+                  path="/admin/support-tickets"
+                  element={<SupportTickets />}
                 />
               </Route>
             </Route>

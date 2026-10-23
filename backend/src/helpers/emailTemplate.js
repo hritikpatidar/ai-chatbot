@@ -2833,3 +2833,132 @@ export const subscriptionExpiryReminderEmailTemplate = ({
 `,
   };
 };
+
+
+// Support ticket mail template
+// const escapeHtml = (value = "") =>
+//   String(value).replace(/[&<>"']/g, (character) => {
+//     const entities = {
+//       "&": "&amp;",
+//       "<": "&lt;",
+//       ">": "&gt;",
+//       '"': "&quot;",
+//       "'": "&#39;",
+//     };
+
+//     return entities[character];
+//   });
+
+const emailLayout = ({ heading, subtitle, content }) => ({
+  html: `
+    <!DOCTYPE html>
+    <html>
+      <head>
+        <meta charset="UTF-8" />
+        <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+        <title>${escapeHtml(heading)}</title>
+      </head>
+      <body style="margin:0;padding:0;background:#f4f6f8;font-family:Arial,Helvetica,sans-serif;color:#333">
+        <div style="max-width:700px;margin:30px auto;background:#fff;border-radius:12px;overflow:hidden">
+          <div style="background:#111827;padding:28px;text-align:center">
+            <h1 style="margin:0;color:#fff;font-size:27px">AI Chatbot</h1>
+            <p style="margin:10px 0 0;color:#d1d5db;font-size:14px">
+              ${escapeHtml(subtitle)}
+            </p>
+          </div>
+          <div style="padding:30px">
+            <h2 style="margin-top:0;color:#111827">${escapeHtml(heading)}</h2>
+            ${content}
+            <p style="margin-top:30px;line-height:1.7">
+              Regards,<br /><strong>AI Chatbot Team</strong>
+            </p>
+          </div>
+          <div style="background:#f9fafb;padding:18px;text-align:center;border-top:1px solid #e5e7eb">
+            <p style="margin:0;font-size:12px;color:#6b7280">
+              AI Chatbot Support
+            </p>
+          </div>
+        </div>
+      </body>
+    </html>
+  `,
+});
+
+export const supportTicketCreatedEmailTemplate = ({
+  ticketNumber,
+  clientName,
+  clientEmail,
+  subject,
+  description,
+  planName,
+  priority,
+}) => ({
+  subject: `[${ticketNumber}] New ${priority} Priority Support Ticket`,
+  ...emailLayout({
+    heading: "New Support Ticket",
+    subtitle: "A client has contacted support",
+    content: `
+      <p>Hello Admin,</p>
+      <p>A new support ticket has been submitted.</p>
+      <div style="padding:20px;background:#f9fafb;border:1px solid #e5e7eb;border-radius:10px">
+        <p><strong>Ticket:</strong> ${escapeHtml(ticketNumber)}</p>
+        <p><strong>Client:</strong> ${escapeHtml(clientName || "Client")}</p>
+        <p><strong>Email:</strong> ${escapeHtml(clientEmail)}</p>
+        <p><strong>Plan:</strong> ${escapeHtml(planName)}</p>
+        <p><strong>Priority:</strong> ${escapeHtml(priority)}</p>
+        <p><strong>Subject:</strong> ${escapeHtml(subject)}</p>
+        <p><strong>Description:</strong></p>
+        <div style="white-space:pre-wrap;overflow-wrap:anywhere;line-height:1.7">${escapeHtml(description)}</div>
+      </div>
+    `,
+  }),
+});
+
+export const supportTicketConfirmationEmailTemplate = ({
+  ticketNumber,
+  clientName,
+  subject,
+  planName,
+  priority,
+}) => ({
+  subject: `Support Ticket Received: ${ticketNumber}`,
+  ...emailLayout({
+    heading: `Hello ${clientName || "there"}!`,
+    subtitle: "Support ticket confirmation",
+    content: `
+      <p>We have received your support request. Our team will review it and respond by email.</p>
+      <div style="padding:20px;background:#f9fafb;border:1px solid #e5e7eb;border-radius:10px">
+        <p><strong>Ticket Number:</strong> ${escapeHtml(ticketNumber)}</p>
+        <p><strong>Subject:</strong> ${escapeHtml(subject)}</p>
+        <p><strong>Plan:</strong> ${escapeHtml(planName)}</p>
+        <p><strong>Priority:</strong> ${escapeHtml(priority)}</p>
+      </div>
+      <p>Please keep your ticket number for future reference.</p>
+    `,
+  }),
+});
+
+export const supportTicketReplyEmailTemplate = ({
+  ticketNumber,
+  clientName,
+  subject,
+  reply,
+  status,
+}) => ({
+  subject: `Support Reply [${ticketNumber}]: ${subject}`,
+  ...emailLayout({
+    heading: `Hello ${clientName || "there"}!`,
+    subtitle: "Update from our support team",
+    content: `
+      <p>Our support team has replied to your ticket.</p>
+      <div style="padding:20px;background:#eff6ff;border-left:4px solid #2563eb;border-radius:6px">
+        <p><strong>Ticket:</strong> ${escapeHtml(ticketNumber)}</p>
+        <p><strong>Subject:</strong> ${escapeHtml(subject)}</p>
+        <p><strong>Status:</strong> ${escapeHtml(status)}</p>
+        <p><strong>Reply:</strong></p>
+        <div style="white-space:pre-wrap;overflow-wrap:anywhere;line-height:1.7">${escapeHtml(reply)}</div>
+      </div>
+      <p>If you need further assistance, you can reply through your support portal.</p>
+    `,
+  }),
+});

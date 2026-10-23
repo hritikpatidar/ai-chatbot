@@ -14,6 +14,7 @@ import adminRoutes from "./routes/admin.route.js";
 import widgetRoutes from "./routes/widget.routes.js";
 import subscriptionRoutes from "./routes/subscription.routes.js";
 import notificationRoutes from "./routes/notification.routes.js"
+import supportTicketRoutes from "./routes/supportTicket.routes.js"
 import stripeRoutes from "./routes/stripe.routes.js";
 import { stripeWebhook } from "./controllers/stripe.controller.js";
 
@@ -64,6 +65,7 @@ app.use("/api/subscription", subscriptionRoutes);
 app.use("/api/stripe", stripeRoutes);
 app.use("/api/notifications", notificationRoutes);
 app.use("/api/widget", widgetRoutes);
+app.use("/api/support-tickets", supportTicketRoutes);
 app.use("/uploads", express.static(path.join(process.cwd(), "src/uploads")));
 app.get("/", (req, res) => {
   res.status(200).json({
@@ -76,3 +78,4 @@ app.use(errorHandler);
 // Health Check
 
 export default app;
+console.log(35000*18/100)

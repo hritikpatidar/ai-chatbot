@@ -10,6 +10,7 @@ import {
   Bot,
   ChevronLeft,
   ChevronRight,
+  Ticket,
 } from "lucide-react";
 
 const menuItems = [
@@ -40,6 +41,12 @@ const menuItems = [
     label: "Analytics",
     path: "/admin/analytics",
     icon: BarChart3,
+    end: true,
+  },
+  {
+    label: "Support Ticket",
+    path: "/admin/support-tickets",
+    icon: Ticket,
     end: true,
   },
   {

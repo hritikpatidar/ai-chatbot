@@ -11,7 +11,9 @@ export default function ClientHeader({ onMenuClick }) {
   const { profileDetails } = useSelector(
     (state) => state?.authReducer?.AuthSlice,
   );
-  
+  const { client } = useSelector(
+    (state) => state?.ClientReducer?.clientSlice || {},
+  );
   const { isDarkMode, toggleTheme } = useTheme();
 
   return (
@@ -100,40 +102,24 @@ export default function ClientHeader({ onMenuClick }) {
         {/* Profile */}
         <div
           className="
-            ml-1
-            hidden
-            items-center
-            gap-2
-            rounded-lg
-            border
-            border-gray-200
-            bg-white
-            px-2
-            py-1.5
-            dark:border-white/10
-            dark:bg-[#171b23]
-            sm:flex
-          "
+    ml-1 hidden items-center gap-2 rounded-lg
+    border border-gray-200 bg-white px-2 py-1.5
+    dark:border-white/10 dark:bg-[#171b23]
+    sm:flex
+  "
         >
+          {/* Profile Image */}
           <div
             className="
-              flex
-              h-7
-              w-7
-              items-center
-              justify-center
-              overflow-hidden
-              rounded-full
-              bg-blue-500/10
-              text-xs
-              font-semibold
-              text-blue-600
-              dark:text-blue-400
-            "
+      flex h-7 w-7 items-center justify-center
+      overflow-hidden rounded-full bg-blue-500/10
+      text-xs font-semibold text-blue-600
+      dark:text-blue-400
+    "
           >
             {profileDetails?.profileImage ? (
               <img
-                src={getImageUrl(profileDetails?.profileImage, profile)}
+                src={getImageUrl(profileDetails.profileImage, profile)}
                 alt="Profile"
                 className="h-full w-full object-cover"
               />
@@ -142,9 +128,15 @@ export default function ClientHeader({ onMenuClick }) {
             )}
           </div>
 
-          <div className="max-w-30">
+          {/* Profile Name & Plan */}
+          <div className="max-w-36 min-w-0">
             <p className="truncate text-xs font-medium">
               {profileDetails?.fullName || "Admin"}
+            </p>
+
+            <p className="truncate text-[10px] text-gray-500 dark:text-gray-400">
+              {`${client?.active_plan} Plan` ||
+                "Free Plan"}
             </p>
           </div>
         </div>

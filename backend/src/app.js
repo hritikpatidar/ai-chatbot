@@ -78,4 +78,3 @@ app.use(errorHandler);
 // Health Check
 
 export default app;
-console.log(35000*18/100)

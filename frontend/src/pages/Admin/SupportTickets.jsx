@@ -281,7 +281,6 @@ export default function SupportTickets() {
               label: "Closed",
             },
           ]}
-          className="w-full sm:w-auto dark:border-white/10 dark:bg-[#0f131a] dark:text-gray-300"
         />
 
         <CustomSelect
@@ -304,7 +303,6 @@ export default function SupportTickets() {
               label: "High",
             },
           ]}
-          className="w-full sm:w-auto dark:border-white/10 dark:bg-[#0f131a] dark:text-gray-300"
         />
         {/* <p className="flex items-center text-sm text-gray-500 dark:text-gray-400">
           {pagination.total} ticket(s) found
@@ -500,7 +498,7 @@ export default function SupportTickets() {
                         No replies yet.
                       </p>
                     ) : (
-                      <div className="space-y-3">
+                      <div className="max-h-100 space-y-3 overflow-y-auto pr-2">
                         {selectedTicket.replies.map((item) => (
                           <div
                             key={item._id || item.sentAt}
@@ -518,6 +516,7 @@ export default function SupportTickets() {
                                 {formatDate(item.sentAt)}
                               </span>
                             </div>
+
                             <p className="mt-2 whitespace-pre-wrap wrap-break-word text-sm leading-6">
                               {item.message}
                             </p>

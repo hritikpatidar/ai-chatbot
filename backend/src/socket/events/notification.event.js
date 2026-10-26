@@ -7,7 +7,6 @@ export const emitNotificationCreated = (io, notification) => {
 
   const userId = notification.userId.toString();
   const room = `user:${userId}`;
-
   // Get all socket IDs connected to this user
   const socketIds = [
     ...(io.sockets.adapter.rooms.get(room) || []),

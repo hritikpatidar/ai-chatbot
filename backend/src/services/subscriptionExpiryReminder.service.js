@@ -44,9 +44,6 @@ export const processSubscriptionExpiryReminders = async () => {
             const plan = subscription.planId;
 
             if (!client?._id || !user?.email) {
-                console.log(
-                    `⚠️ Client/email missing for subscription ${subscription._id}`
-                );
                 continue;
             }
 

@@ -82,7 +82,7 @@ export default function AppRoutes() {
 
   useEffect(() => {
     const unsubscribe = onMessage(messaging, (payload) => {
-      console.log("Foreground message:", payload);
+      // console.log("Foreground message:", payload);
       if (payload.notification) return;
     });
 

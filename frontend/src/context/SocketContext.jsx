@@ -65,7 +65,6 @@ export const SocketProvider = ({ children }) => {
         clientKey,
       };
 
-      console.log("🔐 User Socket Auth");
     } else {
       //  No user + no clientKey
       if (socket.connected) {

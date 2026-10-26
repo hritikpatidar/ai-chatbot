@@ -58,6 +58,7 @@ const notificationSchema = new mongoose.Schema(
         "ticket",
         "system",
         "general",
+        "supportTicket",
       ],
       default: "general",
       index: true,

@@ -81,10 +81,7 @@ export const updateProfileService = async (userId, body, file) => {
         "src",
         oldImagePath.replace(/^\/uploads\//, "uploads/"),
       );
-
       await fs.unlink(oldFilePath);
-
-      console.log("✅ Old profile image deleted:", oldFilePath);
     } catch (error) {
       if (error.code !== "ENOENT") {
         console.error("❌ Old profile image delete failed:", error);

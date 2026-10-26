@@ -115,3 +115,10 @@ export const findClientUserFcmTokenByClientId = async (clientId) => {
     .select("_id email fullName fcmToken")
     .lean();
 };
+
+export const findAdminUserFcmTokenByAdminId = async (adminId) => {
+  return User.findOne({
+    _id: adminId,
+    role: "admin",
+  }).select("_id fcmToken");
+};

@@ -213,7 +213,6 @@ export const markSubscriptionExpired = async (
 
 export const getActiveSubscriptionWithPlan = async (clientId) => {
   const now = new Date();
-  console.log("clientId", clientId)
   const subscription = await Subscription.findOne({
     clientId,
     status: { $in: ["incomplete", "active", "trialing"] },

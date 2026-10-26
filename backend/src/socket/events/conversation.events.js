@@ -131,7 +131,6 @@ export const registerConversationEvents = (io, socket) => {
         clientId,
         conversationId,
       }); 
-      console.log("result",result)
 
       socket.emit("conversation:deleted:response", {
         success: true,

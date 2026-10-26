@@ -91,6 +91,11 @@ const supportTicketSchema = new mongoose.Schema(
       type: Date,
       default: Date.now,
     },
+    
+    clientConfirmationMessageId: {
+      type: String,
+      default: null,
+    },
   },
   { timestamps: true }
 );

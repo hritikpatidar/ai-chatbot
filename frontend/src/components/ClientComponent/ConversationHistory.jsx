@@ -83,7 +83,6 @@
 
 //   // useEffect(() => {
 //   //   selectedIdRef.current = selectedId;
-//   //   debugger;
 //   //   if (conversationList.length > 0 && selectedId) {
 //   //     const selectedConversations = conversationList.find(
 //   //       (conversation) => conversation?._id === selectedId,
@@ -161,7 +160,6 @@
 //   }, [conversationList, search]);
 
 //   const selectConversation = (conversation) => {
-//     debugger;
 //     setSelectedConversation(conversation);
 //     setSelectedId(conversation?._id);
 //     setMobileSidebarOpen(false);

@@ -94,7 +94,6 @@ export const deleteConversationService = async ({
     throw new Error("User or client is required");
   }
 
-  console.log("conversation", conversation)
   // if (userId) {
   //   conversation = await findConversationById(conversationId);
 

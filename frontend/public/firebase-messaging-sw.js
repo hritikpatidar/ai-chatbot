@@ -14,7 +14,6 @@ firebase.initializeApp({
 const messaging = firebase.messaging();
 
 messaging.onBackgroundMessage((payload) => {
-    console.log("Received background message:",payload);
     const title = payload?.data?.title ||"AI Chatbot";
     const body =payload?.data?.message ||"";
     const image =payload?.data?.image || null;
@@ -38,7 +37,6 @@ messaging.onBackgroundMessage((payload) => {
 self.addEventListener(
     "notificationclick",
     (event) => {
-        console.log("Notification clicked:",event);
         event.notification.close();
         const route = event.notification?.data?.url ||"/";
         const urlToOpen =
@@ -46,7 +44,6 @@ self.addEventListener(
                 route,
                 self.location.origin
             ).href;
-        console.log(" Opening URL:",urlToOpen);
         event.waitUntil(
             clients
                 .matchAll({

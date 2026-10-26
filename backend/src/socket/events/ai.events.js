@@ -193,8 +193,6 @@ export const registerAIEvents = (io, socket) => {
             return;
           }
         }
-        console.log("conversation", conversation)
-
         if (!conversation) {
           socket.emit("ai:error", {
             success: false,
@@ -269,7 +267,6 @@ export const registerAIEvents = (io, socket) => {
           };
 
           const knownError = quotaErrors[error.message];
-          console.log("knownError", knownError)
           if (knownError) {
             socket.emit("ai:error", {
               success: false,
@@ -307,7 +304,6 @@ export const registerAIEvents = (io, socket) => {
             title: cleanMessage.substring(0, 40),
             lastMessage: cleanMessage,
           });
-          console.log("guestResult", guestResult)
           // The helper must return { conversation, created }.
           conversation = guestResult.conversation;
 

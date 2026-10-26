@@ -738,3 +738,24 @@ export const checkoutSchema = z.object({
 
   address: billingAddressSchema,
 });
+
+export const clientSupportSchema = z.object({
+  email: z
+    .string()
+    .trim()
+    .min(1, "Email address is required.")
+    .email("Please enter a valid email address.")
+    .max(254, "Email cannot exceed 254 characters."),
+
+  subject: z
+    .string()
+    .trim()
+    .min(3, "Subject must contain at least 3 characters.")
+    .max(150, "Subject cannot exceed 150 characters."),
+
+  description: z
+    .string()
+    .trim()
+    .min(10, "Message must contain at least 10 characters.")
+    .max(10000, "Message cannot exceed 10000 characters."),
+});

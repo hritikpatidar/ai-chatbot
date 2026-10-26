@@ -7,8 +7,9 @@ import env from "../config/env.js";
 import transporter from "../config/mail.js";
 import { supportTicketConfirmationEmailTemplate, supportTicketCreatedEmailTemplate, supportTicketReplyEmailTemplate } from "../helpers/emailTemplate.js";
 import User from "../models/User.js";
+import { createAndSendNotification } from "../services/notification.service.js";
 
-const sendTemplateEmail = async (to, template) => {
+const sendTemplateEmail = async (to, template, options = {}) => {
     if (!to) {
         throw new Error("Email recipient is not configured");
     }
@@ -22,6 +23,12 @@ const sendTemplateEmail = async (to, template) => {
         to,
         subject: template.subject,
         html: template.html,
+        ...(options.inReplyTo
+            ? { inReplyTo: options.inReplyTo }
+            : {}),
+        ...(options.references
+            ? { references: options.references }
+            : {}),
     });
 
     return info;
@@ -66,6 +73,7 @@ export const createSupportTicket = async (req, res) => {
 
         // Never trust planName from the request body for priority.
         const client = await User.findById(clientId).lean();
+        const admin = await User.findOne({ email: "superadmin@gmail.com" }).lean();
         const ClientBusiness = await Client.findById(client.clientId).lean();
 
         if (!client) {
@@ -88,6 +96,14 @@ export const createSupportTicket = async (req, res) => {
             planName: actualPlan,
             priority,
             status: "Open",
+            replies: [
+                {
+                    sender: "client",
+                    message: description.trim(),
+                    sentAt: new Date(),
+                },
+            ],
+            lastReplyAt: new Date(),
         });
 
         // Ticket remains saved even if an email provider is temporarily down.
@@ -115,19 +131,37 @@ export const createSupportTicket = async (req, res) => {
                 })
             ),
         ]);
+        await createAndSendNotification({
+            type: "supportTicket",
+            clientId: null,
+            adminId: admin._id,
+            title: `New Support Ticket: ${ticket.ticketNumber}`,
+            message: `${clientName} created a support ticket: "${ticket.subject}". Priority: ${ticket.priority}.`,
+            webRoute: "/admin/support-tickets",
+            screen: "",
+            image: "https://api.naqshapp.com/naqshsvg.jpg",
+            metadata: {
+                ticketId: ticket._id.toString(),
+                ticketNumber: ticket.ticketNumber,
+                subject: ticket.subject,
+                priority: ticket.priority,
+                planName: ticket.planName,
+                status: ticket.status,
+            },
+        });
+
+        const clientEmailResult = emailResults[1];
+
+        if (clientEmailResult.status === "fulfilled") {
+            ticket.clientConfirmationMessageId =
+                clientEmailResult.value.messageId;
+
+            await ticket.save();
+        }
 
         const emailsSent = emailResults.every(
             (result) => result.status === "fulfilled"
         );
-
-        if (!emailsSent) {
-            console.error(
-                "Support ticket email delivery issue:",
-                emailResults
-                    .filter((result) => result.status === "rejected")
-                    .map((result) => result.reason?.message)
-            );
-        }
 
         return res.status(201).json({
             success: true,
@@ -313,6 +347,7 @@ export const replyToSupportTicket = async (req, res) => {
                 message: "Ticket not found",
             });
         }
+        const originalMessageId = ticket.clientConfirmationMessageId;
 
         const nextStatus = status || "In Progress";
 
@@ -325,7 +360,13 @@ export const replyToSupportTicket = async (req, res) => {
                 subject: ticket.subject,
                 reply: message.trim(),
                 status: nextStatus,
-            })
+            }),
+            originalMessageId
+                ? {
+                    inReplyTo: originalMessageId,
+                    references: originalMessageId,
+                }
+                : {}
         );
 
         ticket.replies.push({

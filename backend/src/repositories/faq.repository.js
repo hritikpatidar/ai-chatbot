@@ -9,11 +9,13 @@ export const findFAQById = async (faqId) => {
 };
 
 export const getClientFAQs = async ({
+  client,
   clientId,
   page = 1,
-  limit = 10,
+  limit = 5,
   search = "",
 }) => {
+  //client faq list service
   const filter = {
     clientId,
   };
@@ -40,19 +42,28 @@ export const getClientFAQs = async ({
       },
     ];
   }
-
+  const isBasicPlan = client?.active_plan === "Basic";
   const skip = (page - 1) * limit;
 
-  const [faqs, total] = await Promise.all([
+  const [faqs, totalCount] = await Promise.all([
     FAQ.find(filter)
-      .sort({
-        createdAt: -1,
-      })
-      .skip(skip)
-      .limit(limit),
+      // .sort({
+      //   createdAt: -1,
+      // })
+      // .skip(skip)
+      // .limit(limit),
+      .sort({ createdAt: isBasicPlan ? 1 : -1 })
+      .skip(isBasicPlan ? 0 : skip)
+      .limit(isBasicPlan ? 5 : limit),
 
     FAQ.countDocuments(filter),
   ]);
+
+  const total = isBasicPlan
+    ? Math.min(totalCount, 5)
+    : totalCount;
+
+  const totalPages = Math.ceil(total / (isBasicPlan ? 5 : limit));
 
   return {
     faqs,
@@ -64,10 +75,10 @@ export const getClientFAQs = async ({
 };
 
 export const searchClientFAQs = async (clientId, searchText, limit = 5) => {
-  return await FAQ.find(
+  //ai faq service
+  const query = FAQ.find(
     {
       clientId,
-      // status: "active",
       $text: {
         $search: searchText,
       },
@@ -76,14 +87,19 @@ export const searchClientFAQs = async (clientId, searchText, limit = 5) => {
       score: {
         $meta: "textScore",
       },
+    }
+  ).sort({
+    score: {
+      $meta: "textScore",
     },
-  )
-    .sort({
-      score: {
-        $meta: "textScore",
-      },
-    })
-    .limit(limit);
+  });
+
+  // null means no limit
+  if (limit !== null) {
+    query.limit(limit);
+  }
+
+  return await query;
 };
 
 export const updateFAQ = async (faqId, data) => {

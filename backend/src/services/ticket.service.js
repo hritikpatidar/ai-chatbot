@@ -76,12 +76,14 @@ export const getClientTicketsService = async ({
   page,
   limit,
   status,
+  search
 }) => {
   return await findTicketsByClient({
     clientId,
     page,
     limit,
     status,
+    search
   });
 };
 

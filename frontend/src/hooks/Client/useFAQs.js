@@ -6,6 +6,7 @@ import {
   updateFAQService,
   deleteFAQService,
 } from "../../service/Client/faqServices";
+import { useEffect, useState } from "react";
 
 const useFAQs = ({ clientId, page = 1, limit = 10, search = "" } = {}) => {
   const queryClient = useQueryClient();
@@ -13,15 +14,24 @@ const useFAQs = ({ clientId, page = 1, limit = 10, search = "" } = {}) => {
   /* =========================================================
      GET FAQs
   ========================================================= */
+  const [debouncedSearch, setDebouncedSearch] = useState(search);
+
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      setDebouncedSearch(search.trim());
+    }, 500);
+
+    return () => clearTimeout(timer);
+  }, [search]);
 
   const faqsQuery = useQuery({
-    queryKey: ["clientFAQs", clientId, page, limit, search],
+    queryKey: ["clientFAQs", clientId, page, limit, debouncedSearch],
 
     queryFn: async () => {
       const response = await getFAQsService(clientId, {
         page,
         limit,
-        search,
+        search: debouncedSearch,
       });
 
       if (response?.data?.success === false) {

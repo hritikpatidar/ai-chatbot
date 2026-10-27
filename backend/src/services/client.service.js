@@ -32,12 +32,30 @@ export const getClientConfigService = async (clientKey) => {
     throw error;
   }
 
+  const isBasicPlan = client.active_plan === "Basic";
+
+  const chatbotData =
+    typeof client.chatbot?.toObject === "function"
+      ? client.chatbot.toObject()
+      : { ...client.chatbot };
+
+  const predefinedQuestions = Array.isArray(
+    chatbotData?.predefinedQuestions
+  )
+    ? chatbotData.predefinedQuestions
+    : [];
+
   return {
     businessId: client._id,
     businessName: client.businessName,
     businessType: client.businessType,
     businessDescription: client.businessDescription,
-    chatbot: client.chatbot,
+    chatbot: {
+      ...chatbotData,
+      predefinedQuestions: isBasicPlan
+        ? predefinedQuestions.slice(0, 5)
+        : predefinedQuestions,
+    },
     clientKey: user.clientKey,
     clientId: user?._id,
     fullName: user?.fullName,
@@ -49,26 +67,50 @@ export const getClientConfigService = async (clientKey) => {
 
 export const getClientByIdService = async (clientId) => {
   const client = await findClientById(clientId);
+
   if (!client) {
     const error = new Error("Client not found");
     error.statusCode = 404;
     throw error;
   }
+
   const user = await findClientUserByClientId(client._id);
+
+  if (!user) {
+    const error = new Error("Client user not found or blocked");
+    error.statusCode = 404;
+    throw error;
+  }
+
+  const isBasicPlan = client.active_plan === "Basic";
+  const limit = isBasicPlan ? 5 : null;
+
   const [productCount, faqCount] = await Promise.all([
     getProductCountByClientId(client._id),
     getFaqCountByClientId(client._id),
   ]);
 
-  if (!user) {
-    const error = new Error("client user is block");
-    error.statusCode = 404;
-    throw error;
-  }
+  // Basic plan par maximum 5 count return karo
+  const limitedProductCount =
+    limit !== null ? Math.min(productCount, limit) : productCount;
+
+  const limitedFaqCount =
+    limit !== null ? Math.min(faqCount, limit) : faqCount;
+
+  // Predefined questions ko oldest-first order mein lo
+  const predefinedQuestions = Array.isArray(client.chatbot?.predefinedQuestions)
+    ? client.chatbot.predefinedQuestions
+    : [];
+
+  const limitedPredefinedQuestions =
+    limit !== null
+      ? predefinedQuestions.slice(0, limit)
+      : predefinedQuestions;
 
   return {
-    productCount,
-    faqCount,
+    productCount: limitedProductCount,
+    faqCount: limitedFaqCount,
+
     businessName: client.businessName,
     businessType: client.businessType,
     businessDescription: client.businessDescription,
@@ -76,15 +118,17 @@ export const getClientByIdService = async (clientId) => {
     contact: client.contact,
     slug: client.slug,
     status: client.status,
-    chatbot: client.chatbot,
+
+    chatbot: {
+      ...client.chatbot?.toObject?.() ?? client.chatbot,
+      predefinedQuestions: limitedPredefinedQuestions,
+    },
+
     clientKey: client.clientKey,
-    slug: client.slug,
-    chatbot: client.chatbot,
-    status: client.status,
     clientCreatedAt: client.createdAt,
     clientUpdatedAt: client.updatedAt,
     businessId: client._id,
-    clientId: user?._id,
+    clientId: user._id,
     fullName: user.fullName,
     email: user.email,
     profileImage: user.profileImage,
@@ -208,7 +252,7 @@ export const updateClientService = async (clientId, updateData) => {
   ]);
 
   await createAndSendNotification({
-    type:"settings",
+    type: "settings",
     clientId: clientId,
     title: "Client Chatbot Configuration Updated",
     message: `Your chatbot configuration has been updated successfully. Please check the details in your account.`,

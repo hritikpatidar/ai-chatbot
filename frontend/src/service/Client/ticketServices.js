@@ -5,7 +5,7 @@ export const getClientTicketsService = async ({
   page = 1,
   limit = 10,
   status = "",
-  priority = "",
+  search = "",
 } = {}) => {
   const params = new URLSearchParams();
 
@@ -14,8 +14,8 @@ export const getClientTicketsService = async ({
   if (status) {
     params.append("status", status);
   }
-  if (priority) {
-    params.append("priority", priority);
+  if (search) {
+    params.append("search", search);
   }
   return httpServices.get(`/tickets/client/all?${params.toString()}`);
 };

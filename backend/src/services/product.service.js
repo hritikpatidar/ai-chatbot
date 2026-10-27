@@ -2,7 +2,7 @@ import fs from "fs/promises";
 import path from "path";
 import {
   createProduct as createProductRepository,
-  getClientProducts as getClientProductsRepository,
+  getClientProductsByClientId,
   updateProduct as updateProductRepository,
   deleteProduct as deleteProductRepository,
   findProductById,
@@ -20,7 +20,7 @@ export const createProduct = async (productData) => {
   return await createProductRepository(productData);
 };
 
-export const getClientProducts = async ({ clientId, page = 1, limit = 10 }) => {
+export const getClientProducts = async ({ clientId, page = 1, limit = 10, search }) => {
   const client = await findClientById(clientId);
 
   if (!client) {
@@ -29,10 +29,12 @@ export const getClientProducts = async ({ clientId, page = 1, limit = 10 }) => {
     throw error;
   }
 
-  return await getClientProductsRepository({
+  return await getClientProductsByClientId({
+    client,
     clientId,
     page,
     limit,
+    search
   });
 };
 

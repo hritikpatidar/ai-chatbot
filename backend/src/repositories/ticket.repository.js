@@ -26,6 +26,7 @@ export const findTicketsByClient = async ({
   page = 1,
   limit = 10,
   status,
+  search = ""
 }) => {
   const filter = {
     clientId,
@@ -33,6 +34,28 @@ export const findTicketsByClient = async ({
 
   if (status) {
     filter.status = status;
+  }
+  if (search?.trim()) {
+    filter.$or = [
+      {
+        subject: {
+          $regex: search.trim(),
+          $options: "i",
+        },
+      },
+      {
+        description: {
+          $regex: search.trim(),
+          $options: "i",
+        },
+      },
+      {
+        category: {
+          $regex: search.trim(),
+          $options: "i",
+        },
+      },
+    ];
   }
 
   const skip = (page - 1) * limit;

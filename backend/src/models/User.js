@@ -23,7 +23,6 @@ const userSchema = new mongoose.Schema(
       unique: true,
       lowercase: true,
       trim: true,
-      index: true,
     },
 
     password: {
@@ -88,7 +87,6 @@ const userSchema = new mongoose.Schema(
 );
 
 // Indexes
-userSchema.index({ email: 1 });
 userSchema.index({ accountStatus: 1 });
 userSchema.index({ role: 1 });
 

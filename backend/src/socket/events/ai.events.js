@@ -336,6 +336,7 @@ export const registerAIEvents = (io, socket) => {
       // 6. Client chatbot: knowledge + classification.
       if (clientId) {
         const knowledge = await getRelevantClientKnowledge(
+          client,
           clientId,
           cleanMessage
         );

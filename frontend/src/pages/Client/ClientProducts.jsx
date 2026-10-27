@@ -16,6 +16,7 @@ import Pagination from "../../components/common/Pagination";
 
 import useProducts from "../../hooks/Client/useProducts";
 import { useNavigate } from "react-router-dom";
+import toast from "react-hot-toast";
 
 export default function ClientProducts() {
   const navigate = useNavigate();
@@ -51,6 +52,7 @@ export default function ClientProducts() {
     clientId: client?.businessId,
     page,
     limit,
+    search,
   });
 
   useEffect(() => {
@@ -63,27 +65,28 @@ export default function ClientProducts() {
     return () => clearTimeout(timer);
   }, [successMessage]);
 
-  const filteredProducts = useMemo(() => {
-    if (!search.trim()) {
-      return products;
-    }
-    const value = search.toLowerCase();
-    return products.filter((product) => {
-      return (
-        product?.name?.toLowerCase().includes(value) ||
-        product?.category?.toLowerCase().includes(value) ||
-        product?.description?.toLowerCase().includes(value)
-      );
-    });
-  }, [products, search]);
-
   const handleAddProduct = () => {
     if (!client?.active_plan) {
       navigate("/client/subscription");
-    } else {
-      setSelectedProduct(null);
-      setIsModalOpen(true);
+      return;
     }
+    const isBasicPlan = client.active_plan.trim().toLowerCase() === "basic";
+    const isProPlan = client.active_plan.trim().toLowerCase() === "pro";
+    debugger
+    if (isBasicPlan && pagination.total >= 5) {
+      toast.error(
+        "Basic plan allows a maximum of 5 products. Upgrade to Pro to add more.",
+      );
+      return;
+    }
+
+    if (isProPlan && pagination.total >= 20) {
+      toast.error("Pro plan allows a maximum of 20 products.");
+      return;
+    }
+
+    setSelectedProduct(null);
+    setIsModalOpen(true);
   };
 
   const handleEditProduct = (product) => {
@@ -183,6 +186,11 @@ export default function ClientProducts() {
 
   const handleRefresh = () => {
     refetch();
+  };
+
+  const handleSearch = (e) => {
+    setSearch(e.target.value);
+    setPage(1);
   };
 
   const errorMessage = error?.response?.data?.message || error?.message || "";
@@ -343,7 +351,7 @@ export default function ClientProducts() {
           <input
             type="text"
             value={search}
-            onChange={(e) => setSearch(e.target.value)}
+            onChange={handleSearch}
             placeholder="Search products..."
             className="
                 w-full rounded-lg border
@@ -398,7 +406,7 @@ export default function ClientProducts() {
 
       <div className="mt-4">
         <ProductTable
-          products={filteredProducts}
+          products={products}
           loading={isLoading}
           onEdit={handleEditProduct}
           onDelete={handleDelete}

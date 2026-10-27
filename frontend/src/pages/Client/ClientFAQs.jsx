@@ -16,6 +16,7 @@ import Pagination from "../../components/common/Pagination";
 import useFAQs from "../../hooks/Client/useFAQs";
 import { useSelector } from "react-redux";
 import { useNavigate } from "react-router-dom";
+import toast from "react-hot-toast";
 
 export default function ClientFAQs() {
   const navigate = useNavigate();
@@ -82,10 +83,23 @@ export default function ClientFAQs() {
   const handleAddFAQ = () => {
     if (!client?.active_plan) {
       navigate("/client/subscription");
-    } else {
-      setSelectedFAQ(null);
-      setIsModalOpen(true);
     }
+    const isBasicPlan = client.active_plan.trim().toLowerCase() === "basic";
+    const isProPlan = client.active_plan.trim().toLowerCase() === "pro";
+    if (isBasicPlan && pagination.total >= 5) {
+      toast.error(
+        "Basic plan allows a maximum of 5 FAQs. Upgrade to Pro to add more.",
+      );
+      return;
+    }
+    if (isProPlan && pagination.total >= 20) {
+      toast.error(
+        "Pro plan allows a maximum of 20 FAQs.",
+      );
+      return;
+    }
+    setSelectedFAQ(null);
+    setIsModalOpen(true);
   };
 
   /* =========================================================

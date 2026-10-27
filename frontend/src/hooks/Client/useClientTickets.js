@@ -5,6 +5,7 @@ import {
   updateClientTicketService,
   deleteClientTicketService,
 } from "../../service/Client/ticketServices";
+import { useEffect, useState } from "react";
 
 /* =========================================================
    CLIENT TICKETS
@@ -14,21 +15,31 @@ const useClientTickets = ({
   page = 1,
   limit = 10,
   status = "",
+  search = "",
 } = {}) => {
   const queryClient = useQueryClient();
+  const [debouncedSearch, setDebouncedSearch] = useState(search);
 
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      setDebouncedSearch(search.trim());
+    }, 500);
+
+    return () => clearTimeout(timer);
+  }, [search]);
   /* =========================================================
      GET TICKETS
   ========================================================= */
 
   const ticketsQuery = useQuery({
-    queryKey: ["clientTickets", page, limit, status],
+    queryKey: ["clientTickets", page, limit, status, debouncedSearch],
 
     queryFn: async () => {
       const response = await getClientTicketsService({
         page,
         limit,
         status,
+        search: debouncedSearch
       });
 
       if (response?.data?.success === false) {

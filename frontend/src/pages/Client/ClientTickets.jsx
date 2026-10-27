@@ -36,24 +36,12 @@ export default function ClientTickets() {
     page,
     limit,
     status,
+    search
   });
 
   useEffect(() => {
     setPage(1);
   }, [status]);
-
-  const filteredTickets = tickets.filter((ticket) => {
-    if (!search.trim()) {
-      return true;
-    }
-    const value = search.toLowerCase().trim();
-    return (
-      ticket.subject?.toLowerCase().includes(value) ||
-      ticket.description?.toLowerCase().includes(value) ||
-      ticket.category?.toLowerCase().includes(value) ||
-      ticket._id?.toLowerCase().includes(value)
-    );
-  });
 
   const handleEditTicket = (ticket) => {
     setSelectedTicket(ticket);
@@ -311,7 +299,7 @@ export default function ClientTickets() {
 
       <div className="mt-4">
         <TicketTable
-          tickets={filteredTickets}
+          tickets={tickets}
           loading={isLoading}
           onEdit={handleEditTicket}
           onDelete={handleDeleteTicket}
@@ -327,7 +315,7 @@ export default function ClientTickets() {
         page={pagination.page}
         totalPages={pagination.totalPages}
         total={pagination.total}
-        currentCount={filteredTickets.length}
+        currentCount={tickets.length}
         isFetching={isFetching}
         onPrevious={handlePreviousPage}
         onNext={handleNextPage}

@@ -6,15 +6,15 @@ export const createProductService = async (clientId, data) => {
 
 export const getProductsService = async (
   clientId,
-  { page = 1, limit = 10, status = "" } = {},
+  { page = 1, limit = 10, search = "" } = {},
 ) => {
   const params = new URLSearchParams();
 
   params.append("page", page);
   params.append("limit", limit);
 
-  if (status) {
-    params.append("status", status);
+  if (search) {
+    params.append("search", search);
   }
 
   return httpServices.get(`/products/client/${clientId}?${params.toString()}`);

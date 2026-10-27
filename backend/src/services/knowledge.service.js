@@ -2,7 +2,7 @@ import { searchClientProducts } from "../repositories/product.repository.js";
 
 import { searchClientFAQs } from "../repositories/faq.repository.js";
 
-export const getRelevantClientKnowledge = async (clientId, userMessage) => {
+export const getRelevantClientKnowledge = async (client, clientId, userMessage) => {
   if (!clientId || !userMessage) {
     return {
       products: [],
@@ -10,9 +10,11 @@ export const getRelevantClientKnowledge = async (clientId, userMessage) => {
     };
   }
 
+  const isBasicPlan = client?.active_plan === "Basic";
+  const limit = isBasicPlan ? 5 : null;
   const [products, faqs] = await Promise.all([
-    searchClientProducts(clientId, userMessage, 5),
-    searchClientFAQs(clientId, userMessage, 5),
+    searchClientProducts(clientId, userMessage, limit),
+    searchClientFAQs(clientId, userMessage, limit),
   ]);
 
   return {
@@ -31,16 +33,14 @@ export const buildKnowledgeContext = ({ products = [], faqs = [] }) => {
           Product Name: ${product.name}
           Description: ${product.description || "N/A"}
           Category: ${product.category || "N/A"}
-          Price: ${
-            product.price !== null && product.price !== undefined
-              ? `${product.currency} ${product.price}`
-              : "Not available"
+          Price: ${product.price !== null && product.price !== undefined
+            ? `${product.currency} ${product.price}`
+            : "Not available"
           }
           Availability: ${product.availability}
-          Stock: ${
-            product.stock !== null && product.stock !== undefined
-              ? product.stock
-              : "Not available"
+          Stock: ${product.stock !== null && product.stock !== undefined
+            ? product.stock
+            : "Not available"
           }
           `;
       })

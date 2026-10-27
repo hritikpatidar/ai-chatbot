@@ -351,7 +351,7 @@ const ClientSupport = () => {
                       ? "Ticket Created Successfully"
                       : "Unable to Create Ticket"}
                   </p>
-                  <p className="mt-1 break-words text-xs leading-5">
+                  <p className="mt-1 wrap-break-word text-xs leading-5">
                     {apiStatus.message}
                   </p>
                 </div>
@@ -360,7 +360,7 @@ const ClientSupport = () => {
           </div>
 
           {/* Actions */}
-          <div className="flex flex-col-reverse gap-3 border-t border-gray-200 bg-gray-50/70 p-5 dark:border-white/10 dark:bg-white/[0.02] sm:flex-row sm:items-center sm:justify-between sm:px-7">
+          <div className="flex flex-col-reverse gap-3 border-t border-gray-200 bg-gray-50/70 p-5 dark:border-white/10 dark:bg-white/2 sm:flex-row sm:items-center sm:justify-between sm:px-7">
             <button
               type="button"
               onClick={handleReset}

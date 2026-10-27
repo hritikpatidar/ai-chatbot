@@ -10,14 +10,24 @@ import {
   updateProductService,
   deleteProductService,
 } from "../../service/Client/productServices";
+import { useEffect, useState } from "react";
 
 const useProducts = ({
   clientId,
   page = 1,
   limit = 10,
-  status = "",
+  search = "",
 } = {}) => {
   const queryClient = useQueryClient();
+  const [debouncedSearch, setDebouncedSearch] = useState(search);
+
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      setDebouncedSearch(search.trim());
+    }, 500);
+
+    return () => clearTimeout(timer);
+  }, [search]);
 
   const productsQuery = useQuery({
     queryKey: [
@@ -25,20 +35,20 @@ const useProducts = ({
       clientId,
       page,
       limit,
-      status,
+      debouncedSearch,
     ],
 
     queryFn: async () => {
       const response = await getProductsService(clientId, {
         page,
         limit,
-        status,
+        search: debouncedSearch,
       });
 
       if (response?.data?.success === false) {
         throw new Error(
           response?.data?.message ||
-            "Failed to fetch products",
+          "Failed to fetch products",
         );
       }
 

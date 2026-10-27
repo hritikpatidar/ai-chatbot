@@ -8,24 +8,57 @@ export const findProductById = async (productId) => {
   return await Product.findById(productId);
 };
 
-export const getClientProducts = async ({ clientId, page = 1, limit = 10 }) => {
+export const getClientProductsByClientId = async ({ client, clientId, page = 1, limit = 5, search = "" }) => {
+  //client product list service
   const filter = {
     clientId,
     // status: "active",
   };
 
+  if (search?.trim()) {
+    filter.$or = [
+      {
+        name: {
+          $regex: search.trim(),
+          $options: "i",
+        },
+      },
+      {
+        category: {
+          $regex: search.trim(),
+          $options: "i",
+        },
+      },
+      {
+        description: {
+          $regex: search.trim(),
+          $options: "i",
+        },
+      },
+    ];
+  }
+  const isBasicPlan = client?.active_plan === "Basic";
   const skip = (page - 1) * limit;
 
-  const [products, total] = await Promise.all([
+  const [products, totalCount] = await Promise.all([
     Product.find(filter)
-      .sort({
-        createdAt: -1,
-      })
-      .skip(skip)
-      .limit(limit),
+      // .sort({
+      //   createdAt: -1,
+      // })
+      // .skip(skip)
+      // .limit(limit),
+      .sort({ createdAt: isBasicPlan ? 1 : -1 })
+      .skip(isBasicPlan ? 0 : skip)
+      .limit(isBasicPlan ? 5 : limit),
 
     Product.countDocuments(filter),
   ]);
+
+  const total = isBasicPlan
+    ? Math.min(totalCount, 5)
+    : totalCount;
+
+  const totalPages = Math.ceil(total / (isBasicPlan ? 5 : limit));
 
   return {
     products,
@@ -37,7 +70,8 @@ export const getClientProducts = async ({ clientId, page = 1, limit = 10 }) => {
 };
 
 export const searchClientProducts = async (clientId, searchText, limit = 5) => {
-  return await Product.find(
+  //ai product service
+  const query = Product.find(
     {
       clientId,
       status: "active",
@@ -49,14 +83,19 @@ export const searchClientProducts = async (clientId, searchText, limit = 5) => {
       score: {
         $meta: "textScore",
       },
+    }
+  ).sort({
+    score: {
+      $meta: "textScore",
     },
-  )
-    .sort({
-      score: {
-        $meta: "textScore",
-      },
-    })
-    .limit(limit);
+  });
+
+  // null means no limit
+  if (limit !== null) {
+    query.limit(limit);
+  }
+
+  return await query;
 };
 
 export const updateProduct = async (productId, data) => {

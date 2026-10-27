@@ -17,13 +17,14 @@ export const getClientTickets = async (req, res, next) => {
 
     const limit = Math.min(Math.max(Number(req.query.limit) || 10, 1), 100);
 
-    const { status } = req.query;
+    const { status, search } = req.query;
 
     const result = await ticketService.getClientTicketsService({
       clientId,
       page,
       limit,
       status,
+      search
     });
 
     return res.status(200).json({

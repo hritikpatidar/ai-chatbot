@@ -69,12 +69,13 @@ export const getProductsController = async (req, res, next) => {
   try {
     const { clientId } = req.params;
 
-    const { page = 1, limit = 10 } = req.query;
+    const { page = 1, limit = 10, search = "" } = req.query;
 
     const result = await getClientProducts({
       clientId,
       page: Number(page),
       limit: Number(limit),
+      search,
     });
 
     return res.status(200).json({

@@ -2,22 +2,22 @@ importScripts("https://www.gstatic.com/firebasejs/10.13.2/firebase-app-compat.js
 importScripts("https://www.gstatic.com/firebasejs/10.13.2/firebase-messaging-compat.js");
 
 firebase.initializeApp({
-    apiKey: "AIzaSyDcmwfuGoYtoMCFTcf-UEyJDYx5ogQNaRE",
-    authDomain: "ai-chatbot-b6a8b.firebaseapp.com",
-    projectId: "ai-chatbot-b6a8b",
-    storageBucket: "ai-chatbot-b6a8b.firebasestorage.app",
-    messagingSenderId: "303386119787",
-    appId: "1:303386119787:web:1008ec528c097574bceb2e",
-    measurementId: "G-JQG4JEC1SE",
+    apiKey: import.meta.env.VITE_FIREBASE_API_KEY,
+    authDomain: import.meta.env.VITE_FIREBASE_AUTH_DOMAIN,
+    projectId: import.meta.env.VITE_FIREBASE_PROJECT_ID,
+    storageBucket: import.meta.env.VITE_FIREBASE_STORAGE_BUCKET,
+    messagingSenderId: import.meta.env.VITE_FIREBASE_MESSAGING_SENDER_ID,
+    appId: import.meta.env.VITE_FIREBASE_APP_ID,
+    measurementId: import.meta.env.VITE_FIREBASE_MEASUREMENT_ID
 });
 
 const messaging = firebase.messaging();
 
 messaging.onBackgroundMessage((payload) => {
-    const title = payload?.data?.title ||"AI Chatbot";
-    const body =payload?.data?.message ||"";
-    const image =payload?.data?.image || null;
-    const route =payload?.data?.webRoute ||"/";
+    const title = payload?.data?.title || "AI Chatbot";
+    const body = payload?.data?.message || "";
+    const image = payload?.data?.image || null;
+    const route = payload?.data?.webRoute || "/";
     const notificationOptions = {
         body,
         ...(image && {
@@ -38,7 +38,7 @@ self.addEventListener(
     "notificationclick",
     (event) => {
         event.notification.close();
-        const route = event.notification?.data?.url ||"/";
+        const route = event.notification?.data?.url || "/";
         const urlToOpen =
             new URL(
                 route,

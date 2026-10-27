@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from "react";
-import { Check, ChevronDown } from "lucide-react";
+import { CalendarDays, Check, ChevronDown } from "lucide-react";
 
 export default function CustomSelect({
   label,
@@ -15,6 +15,7 @@ export default function CustomSelect({
   size = "md",
   className = "",
   labelClassName = "",
+  icon = false,
 }) {
   const [isOpen, setIsOpen] = useState(false);
   const [openDirection, setOpenDirection] = useState("bottom");
@@ -125,10 +126,7 @@ export default function CustomSelect({
    */
   useEffect(() => {
     const handleClickOutside = (event) => {
-      if (
-        wrapperRef.current &&
-        !wrapperRef.current.contains(event.target)
-      ) {
+      if (wrapperRef.current && !wrapperRef.current.contains(event.target)) {
         setIsOpen(false);
       }
     };
@@ -159,11 +157,7 @@ export default function CustomSelect({
     return () => {
       window.removeEventListener("resize", handlePositionChange);
 
-      window.removeEventListener(
-        "scroll",
-        handlePositionChange,
-        true,
-      );
+      window.removeEventListener("scroll", handlePositionChange, true);
     };
   }, [isOpen, options.length]);
 
@@ -184,10 +178,7 @@ export default function CustomSelect({
   };
 
   return (
-    <div
-      ref={wrapperRef}
-      className={`relative w-full ${className}`}
-    >
+    <div ref={wrapperRef} className={`relative w-full ${className}`}>
       {/* Label */}
       {label && (
         <label
@@ -204,9 +195,7 @@ export default function CustomSelect({
         >
           {label}
 
-          {required && (
-            <span className="ml-1 text-red-500">*</span>
-          )}
+          {required && <span className="ml-1 text-red-500">*</span>}
         </label>
       )}
 
@@ -272,6 +261,12 @@ export default function CustomSelect({
             dark:disabled:bg-white/5
           `}
         >
+          {icon && (
+            <CalendarDays
+              size={17}
+              className="shrink-0 text-gray-500 dark:text-gray-400"
+            />
+          )}
           {/* Selected Value */}
           <span
             className={`
@@ -285,9 +280,7 @@ export default function CustomSelect({
               }
             `}
           >
-            {selectedOption
-              ? selectedOption.label
-              : placeholder}
+            {selectedOption ? selectedOption.label : placeholder}
           </span>
 
           {/* Arrow */}
@@ -360,17 +353,14 @@ export default function CustomSelect({
                 </div>
               ) : (
                 options.map((option) => {
-                  const isSelected =
-                    option.value === value;
+                  const isSelected = option.value === value;
 
                   return (
                     <button
                       key={option.value}
                       type="button"
                       disabled={option.disabled}
-                      onClick={() =>
-                        handleSelect(option)
-                      }
+                      onClick={() => handleSelect(option)}
                       className={`
                         flex
                         w-full
@@ -412,9 +402,7 @@ export default function CustomSelect({
                         }
                       `}
                     >
-                      <span className="truncate">
-                        {option.label}
-                      </span>
+                      <span className="truncate">{option.label}</span>
 
                       {isSelected && (
                         <Check

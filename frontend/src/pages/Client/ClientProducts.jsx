@@ -72,7 +72,6 @@ export default function ClientProducts() {
     }
     const isBasicPlan = client.active_plan.trim().toLowerCase() === "basic";
     const isProPlan = client.active_plan.trim().toLowerCase() === "pro";
-    debugger
     if (isBasicPlan && pagination.total >= 5) {
       toast.error(
         "Basic plan allows a maximum of 5 products. Upgrade to Pro to add more.",

@@ -1200,10 +1200,7 @@ export default function AdminDashboard() {
                     client?.contact?.email ||
                     client?.user?.email ||
                     "-";
-                  const plan =
-                    client?.plan?.name ||
-                    client?.subscription?.planName ||
-                    client?.plan ||
+                  const plan = client.active_plan ||
                     "-";
                   const status =
                     client?.status || client?.accountStatus || "inactive";

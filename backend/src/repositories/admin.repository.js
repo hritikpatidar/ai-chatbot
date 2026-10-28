@@ -1,9 +1,7 @@
 import Client from "../models/Client.js";
 import User from "../models/User.js";
 
-/* =========================================================
-   DASHBOARD STATS
-========================================================= */
+// DASHBOARD STATS
 
 export const getDashboardStats = async () => {
   const startOfMonth = new Date();
@@ -42,9 +40,7 @@ export const getDashboardStats = async () => {
   };
 };
 
-/* =========================================================
-   CLIENT ACTIVITY
-========================================================= */
+// CLIENT ACTIVITY
 
 export const getClientActivity = async () => {
   const now = new Date();
@@ -122,9 +118,7 @@ export const getClientActivity = async () => {
   return result;
 };
 
-/* =========================================================
-   RECENT CLIENTS
-========================================================= */
+//  RECENT CLIENTS
 
 export const getRecentClients = async () => {
   const clients = await Client.find({})
@@ -164,29 +158,22 @@ export const getRecentClients = async () => {
 
     return {
       _id: client._id,
-
       businessName: client.businessName,
-
       businessType: client.businessType,
-
       status: client.status,
-
       clientKey: client.clientKey,
-
       slug: client.slug,
-
       createdAt: client.createdAt,
-
       updatedAt: client.updatedAt,
-
+      active_plan: client.active_plan,
       user: user
         ? {
-            _id: user._id,
-            fullName: user.fullName,
-            email: user.email,
-            profileImage: user.profileImage,
-            lastLogin: user.lastLogin,
-          }
+          _id: user._id,
+          fullName: user.fullName,
+          email: user.email,
+          profileImage: user.profileImage,
+          lastLogin: user.lastLogin,
+        }
         : null,
     };
   });

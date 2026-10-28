@@ -389,7 +389,7 @@ export default function Analytics() {
         </header>
 
         {/* Informational banner */}
-        <div className="flex items-start gap-3 rounded-2xl border border-indigo-100 bg-gradient-to-r from-indigo-50 to-violet-50 p-4 dark:border-indigo-500/20 dark:from-indigo-500/10 dark:to-violet-500/10">
+        <div className="flex items-start gap-3 rounded-2xl border border-indigo-100 bg-linear-to-r from-indigo-50 to-violet-50 p-4 dark:border-indigo-500/20 dark:from-indigo-500/10 dark:to-violet-500/10">
           <Sparkles
             size={20}
             className="mt-0.5 shrink-0 text-blue-600 dark:text-blue-400"
@@ -462,7 +462,7 @@ export default function Analytics() {
               </span>
             </div>
 
-            <div className="h-[280px] w-full">
+            <div className="h-70 w-full">
               <ResponsiveContainer width="100%" height="100%">
                 <AreaChart
                   data={chartData}
@@ -567,7 +567,7 @@ export default function Analytics() {
               </span>
             </div>
 
-            <div className="h-[280px] w-full">
+            <div className="h-70 w-full">
               <ResponsiveContainer width="100%" height="100%">
                 <BarChart
                   data={
@@ -666,7 +666,7 @@ export default function Analytics() {
           <Card>
             <SectionHeading icon={Globe} title="Conversation Sources" />
 
-            <div className="relative h-[210px]">
+            <div className="relative h-52.5">
               <ResponsiveContainer width="100%" height="100%">
                 <PieChart>
                   <Pie
@@ -795,7 +795,7 @@ export default function Analytics() {
           </div>
 
           <div className="overflow-x-auto">
-            <table className="w-full min-w-[760px] text-left">
+            <table className="w-full min-w-190 text-left">
               <thead>
                 <tr className="border-y border-gray-200 bg-gray-50 text-xs font-semibold uppercase tracking-wide text-gray-500 dark:border-white/10 dark:bg-[#0f131a] dark:text-gray-400">
                   <th className="px-4 py-3">User</th>
@@ -814,7 +814,7 @@ export default function Analytics() {
                   >
                     <td className="px-4 py-4">
                       <div className="flex items-center gap-3">
-                        <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-gradient-to-br from-indigo-100 to-violet-100 text-xs font-bold text-blue-700 dark:from-indigo-500/20 dark:to-violet-500/20 dark:text-blue-300">
+                        <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-linear-to-br from-indigo-100 to-violet-100 text-xs font-bold text-blue-700 dark:from-indigo-500/20 dark:to-violet-500/20 dark:text-blue-300">
                           {item.initials}
                         </div>
                         <div>
@@ -828,7 +828,7 @@ export default function Analytics() {
                       </div>
                     </td>
 
-                    <td className="max-w-[240px] truncate px-4 py-4 text-sm text-gray-600 dark:text-gray-400">
+                    <td className="max-w-60 truncate px-4 py-4 text-sm text-gray-600 dark:text-gray-400">
                       {item.message}
                     </td>
 

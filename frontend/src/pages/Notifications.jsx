@@ -62,10 +62,6 @@ const Notifications = () => {
     notifications.filter((notification) => !notification.isRead).length;
   const readCount = data?.data?.allCount ?? notifications.length;
 
-  const filteredNotifications =
-    filter === "unread"
-      ? notifications.filter((notification) => !notification.isRead)
-      : notifications;
 
   const markAsRead = (notification) => {
     markReadMutation.mutate(notification.id);

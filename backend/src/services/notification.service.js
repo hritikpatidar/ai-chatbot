@@ -197,12 +197,15 @@ export const createAndSendNotification = async ({
 export const getMyNotifications = async (
   userId,
   page = 1,
-  limit = 10
+  limit = 10,
+  filter = "all"
 ) => {
+  console.log("filter",filter)
   return findNotificationsByUser(
     userId,
     Math.max(1, Number(page) || 1),
-    Math.min(100, Math.max(1, Number(limit) || 10))
+    Math.min(100, Math.max(1, Number(limit) || 10)),
+    filter
   );
 };
 

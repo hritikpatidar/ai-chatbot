@@ -10,7 +10,8 @@ export const getNotificationsController = async (req, res) => {
     const result = await getMyNotifications(
       req.user.id,
       req.query.page,
-      req.query.limit
+      req.query.limit,
+      req.query.filter
     );
 
     return res.status(200).json({

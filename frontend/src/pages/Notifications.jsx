@@ -30,9 +30,8 @@ const Notifications = () => {
   const { data, isPending, isError, error, isFetching } = useNotifications(
     page,
     limit,
+    filter,
   );
-
-  
 
   const markReadMutation = useMarkNotificationRead();
   const markAllMutation = useMarkAllNotificationsRead();
@@ -61,6 +60,7 @@ const Notifications = () => {
   const unreadCount =
     data?.data?.unreadCount ??
     notifications.filter((notification) => !notification.isRead).length;
+  const readCount = data?.data?.allCount ?? notifications.length;
 
   const filteredNotifications =
     filter === "unread"
@@ -288,6 +288,7 @@ const Notifications = () => {
         <div
           className="
             mt-6
+            mb-6
             flex
             items-center
             justify-between
@@ -331,7 +332,7 @@ const Notifications = () => {
               `}
             >
               All
-              <span className="ml-1.5 text-xs">{notifications.length}</span>
+              <span className="ml-1.5 text-xs">{readCount}</span>
             </button>
 
             <button

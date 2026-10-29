@@ -1,7 +1,7 @@
 import httpServices from "../httpServices";
 
-export const getNotificationsApi = async ({ page = 1, limit = 10, } = {}) => {
-    return httpServices.get(`/notifications?page=${page}&limit=${limit}`);
+export const getNotificationsApi = async ({ page = 1, limit = 5, filter } = {}) => {
+    return httpServices.get(`/notifications?page=${page}&limit=${limit}&filter=${filter}`);
 };
 
 export const markAllNotificationsReadApi = async () => {

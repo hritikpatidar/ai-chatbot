@@ -7,14 +7,14 @@ import { deleteNotificationsApi, getNotificationsApi, markAllNotificationsReadAp
 
 export const notificationKeys = {
   all: ["notifications"],
-  list: (page, limit) => ["notifications", page, limit],
+  list: (page, limit, filter) => ["notifications", page, limit, filter],
 };
 
 // Fetch notifications
-export const useNotifications = (page = 1, limit = 10) => {
+export const useNotifications = (page, limit, filter = "all") => {
   return useQuery({
-    queryKey: notificationKeys.list(page, limit),
-    queryFn: () => getNotificationsApi({ page, limit }),
+    queryKey: notificationKeys.list(page, limit, filter),
+    queryFn: () => getNotificationsApi({ page, limit, filter }),
   });
 };
 

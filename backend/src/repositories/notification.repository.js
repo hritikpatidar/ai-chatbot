@@ -7,13 +7,21 @@ export const createNotification = async (data) => {
 export const findNotificationsByUser = async (
   userId,
   page = 1,
-  limit = 10
+  limit = 10,
+  filter
 ) => {
   const skip = (page - 1) * limit;
+  const query = { userId };
 
-  const [notifications, total, unreadCount] =
+  if (filter === "unread") {
+    query.isRead = false;
+  } else if (filter === "read") {
+    query.isRead = true;
+  }
+
+  const [notifications, allCount, total, unreadCount] =
     await Promise.all([
-      Notification.find({ userId })
+      Notification.find(query)
         .populate("userId", "_id fullName email profileImage role")
         .populate("clientId", "_id businessName contact clientKey")
         .sort({ createdAt: -1 })
@@ -22,6 +30,7 @@ export const findNotificationsByUser = async (
         .lean(),
 
       Notification.countDocuments({ userId }),
+      Notification.countDocuments(query),
 
       Notification.countDocuments({
         userId,
@@ -40,6 +49,7 @@ export const findNotificationsByUser = async (
       total,
       totalPages: Math.ceil(total / limit),
     },
+    allCount,
     unreadCount,
   };
 };

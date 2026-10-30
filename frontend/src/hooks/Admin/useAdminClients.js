@@ -1,4 +1,4 @@
-import {useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import {
   getAdminClientDetailsService,
   getAdminClientsService,
@@ -33,7 +33,7 @@ export const useAdminClients = ({
     placeholderData: (previousData) => previousData,
 
     staleTime: 30 * 1000,
-
+    gcTime: 5 * 60 * 1000,
     retry: 1,
 
     refetchOnWindowFocus: false,
@@ -98,7 +98,7 @@ export const useDeleteAdminClient = () => {
       if (response?.data?.success === false) {
         throw new Error(
           response?.data?.message ||
-            "Failed to delete client",
+          "Failed to delete client",
         );
       }
 

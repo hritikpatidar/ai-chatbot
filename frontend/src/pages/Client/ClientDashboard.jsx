@@ -20,6 +20,10 @@ import PageLoader from "../../components/common/PageLoader";
 import { getClientById } from "../../redux/features/Client/clientSlice";
 import StatCard from "../../components/ClientComponent/StatCard";
 import ClientOverview from "../../components/ClientComponent/Client/ClientOverview";
+import {
+  useClientById,
+  useUsageAnalytics,
+} from "../../hooks/Client/useUsageAnalytics";
 
 const UsageCard = ({
   title,
@@ -149,33 +153,39 @@ export default function ClientDashboard() {
     (store) => store.authReducer.AuthSlice,
   );
 
-  const usage = {
-    tokens: {
-      used: 325000,
-      limit: 1000000,
-    },
-    conversations: {
-      used: 12,
-      limit: 20,
-    },
-    aiResponses: {
-      used: 286,
-      limit: 500,
-    },
-  };
+  // Client Details API
+  const {
+    data: clientResponse,
+    isLoading: clientLoading,
+    isError: clientError,
+    error: clientErrorMessage,
+    refetch: refetchClient,
+  } = useClientById(dispatch, profileDetails?.clientId);
 
-  const totalUsage =
-    usage.tokens.limit + usage.conversations.limit + usage.aiResponses.limit;
+  // Adjust this path according to your actual API response
+  const clientDetails = clientResponse?.payload?.client || {};
 
-  useEffect(() => {
-    dispatch(getClientById(profileDetails?.clientId));
-  }, [dispatch]);
+  const {
+    data: usageAnalyticsResponse,
+    isLoading,
+    isFetching,
+    isError,
+    error,
+    status,
+    fetchStatus,
+  } = useUsageAnalytics(Boolean(client?.active_plan));
 
-  if (loading && !client && clientConfigLoading) {
+  const usage = usageAnalyticsResponse?.data?.data?.usage || {};
+
+  // useEffect(() => {
+  //   dispatch(getClientById(profileDetails?.clientId));
+  // }, [dispatch]);
+
+  if (loading && !clientDetails && clientConfigLoading) {
     return <PageLoader />;
   }
 
-  const chatbot = client?.chatbot || {};
+  const chatbot = clientDetails?.chatbot || {};
 
   return (
     <div className="min-h-full w-full bg-transparent text-gray-900 dark:text-white">
@@ -243,9 +253,9 @@ export default function ClientDashboard() {
       <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-4">
         <StatCard
           title="Client"
-          value={client?.businessName || "Not configured"}
+          value={clientDetails?.businessName || "Not configured"}
           icon={Building2}
-          description={client?.status || "inactive"}
+          description={clientDetails?.status || "inactive"}
         />
 
         <StatCard
@@ -279,7 +289,7 @@ export default function ClientDashboard() {
           <ClientOverview />
         </div>
 
-        {client?.active_plan ? (
+        {clientDetails?.active_plan ? (
           <div
             className="
               rounded-2xl
@@ -303,8 +313,8 @@ export default function ClientDashboard() {
                 title="Gemini Tokens"
                 description="Total token consumption"
                 icon={Zap}
-                used={usage.tokens.used}
-                limit={usage.tokens.limit}
+                used={usage?.tokens?.used}
+                limit={usage?.tokens?.limit}
                 unit="tokens"
                 color="blue"
               />
@@ -313,8 +323,8 @@ export default function ClientDashboard() {
                 title="Conversations"
                 description="Conversations created"
                 icon={MessageSquare}
-                used={usage.conversations.used}
-                limit={usage.conversations.limit}
+                used={usage?.conversations?.used}
+                limit={usage?.conversations?.limit}
                 unit="conversations"
                 color="violet"
               />
@@ -323,8 +333,8 @@ export default function ClientDashboard() {
                 title="AI Responses"
                 description="Responses generated"
                 icon={Bot}
-                used={usage.aiResponses.used}
-                limit={usage.aiResponses.limit}
+                used={usage?.aiResponses?.used}
+                limit={usage?.aiResponses?.limit}
                 unit="responses"
                 color="emerald"
               />
@@ -350,22 +360,24 @@ export default function ClientDashboard() {
 
                 <p className="mt-1 text-xs leading-5 text-gray-500 dark:text-gray-400">
                   You have used{" "}
-                  {usage.tokens.limit > 0
-                    ? ((usage.tokens.used / usage.tokens.limit) * 100).toFixed(
-                        1,
-                      )
+                  {usage?.tokens?.limit > 0
+                    ? (
+                        (usage?.tokens?.used / usage?.tokens?.limit) *
+                        100
+                      ).toFixed(1)
                     : "0.0"}
                   % of your token quota,{" "}
-                  {usage.conversations.limit > 0
+                  {usage?.conversations?.limit > 0
                     ? (
-                        (usage.conversations.used / usage.conversations.limit) *
+                        (usage?.conversations?.used /
+                          usage?.conversations?.limit) *
                         100
                       ).toFixed(0)
                     : "0"}
                   % of your conversation quota and{" "}
-                  {usage.aiResponses.limit > 0
+                  {usage?.aiResponses?.limit > 0
                     ? (
-                        (usage.aiResponses.used / usage.aiResponses.limit) *
+                        (usage?.aiResponses?.used / usage?.aiResponses?.limit) *
                         100
                       ).toFixed(0)
                     : "0"}
@@ -482,7 +494,7 @@ export default function ClientDashboard() {
           <InfoItem label="Bot Name" value={chatbot?.name || "AI Assistant"} />
           <InfoItem label="Language" value={chatbot?.language || "English"} />
           <InfoItem label="Tone" value={chatbot?.tone || "Friendly"} />
-          <InfoItem label="Status" value={client?.status || "inactive"} />
+          <InfoItem label="Status" value={clientDetails?.status || "inactive"} />
         </div>
 
         {chatbot?.welcomeMessage && (

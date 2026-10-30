@@ -1,7 +1,7 @@
 import httpServices from "../httpServices";
 
 export const getClientByIdService = async (clientId) => {
-  
+
   return httpServices.get(`/client/${clientId}`);
 };
 
@@ -15,4 +15,8 @@ export const updateClientService = async (clientId, payload) => {
 
 export const getClientConfig = async (clientKey) => {
   return httpServices.get(`/client/config/${clientKey}`);
+};
+
+export const getUsageAnalyticsService = async () => {
+  return httpServices.get("/client/usage-analytics");
 };

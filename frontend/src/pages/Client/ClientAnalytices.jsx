@@ -36,8 +36,11 @@ import {
   Bot,
   RefreshCw,
   Activity,
+  Zap,
 } from "lucide-react";
 import CustomSelect from "../../components/common/CustomSelect";
+import { useUsageAnalytics } from "../../hooks/Client/useUsageAnalytics";
+import { useSelector } from "react-redux";
 
 // Demo data: replace with your analytics API response.
 const conversationData = {
@@ -137,6 +140,121 @@ function Card({ children, className = "" }) {
   );
 }
 
+const UsageCard = ({
+  title,
+  description,
+  icon: Icon,
+  used,
+  limit,
+  unit,
+  color = "blue",
+}) => {
+  const percentage = limit > 0 ? Math.min((used / limit) * 100, 100) : 0;
+
+  const remaining = Math.max(limit - used, 0);
+
+  const colors = {
+    blue: {
+      icon: "bg-blue-500/10 text-blue-600 dark:text-blue-400",
+      bar: "bg-blue-600 dark:bg-blue-500",
+      badge: "bg-blue-50 text-blue-700 dark:bg-blue-500/10 dark:text-blue-400",
+    },
+    violet: {
+      icon: "bg-violet-500/10 text-violet-600 dark:text-violet-400",
+      bar: "bg-violet-600 dark:bg-violet-500",
+      badge:
+        "bg-violet-50 text-violet-700 dark:bg-violet-500/10 dark:text-violet-400",
+    },
+    emerald: {
+      icon: "bg-emerald-500/10 text-emerald-600 dark:text-emerald-400",
+      bar: "bg-emerald-600 dark:bg-emerald-500",
+      badge:
+        "bg-emerald-50 text-emerald-700 dark:bg-emerald-500/10 dark:text-emerald-400",
+    },
+  };
+
+  const theme = colors[color];
+
+  const formatNumber = (number) =>
+    new Intl.NumberFormat("en-IN").format(number);
+
+  return (
+    <div
+      className="
+        min-w-0 rounded-2xl border border-gray-200
+        bg-white p-4 shadow-sm transition
+        hover:shadow-md sm:p-5
+        dark:border-white/10 dark:bg-[#171b23]
+      "
+    >
+      {/* Header */}
+      <div className="flex items-start justify-between gap-3">
+        <div className="flex min-w-0 items-center gap-3">
+          <div
+            className={`flex h-11 w-11 shrink-0 items-center justify-center rounded-xl ${theme.icon}`}
+          >
+            <Icon size={21} />
+          </div>
+
+          <div className="min-w-0">
+            <h3 className="text-sm font-semibold text-gray-900 dark:text-white">
+              {title}
+            </h3>
+
+            <p className="mt-1 text-xs text-gray-500 dark:text-gray-400">
+              {description}
+            </p>
+          </div>
+        </div>
+
+        <span
+          className={`shrink-0 rounded-lg px-2 py-1 text-xs font-semibold ${theme.badge}`}
+        >
+          {percentage.toFixed(0)}%
+        </span>
+      </div>
+
+      {/* Usage */}
+      <div className="mt-6">
+        <div className="flex flex-wrap items-baseline gap-1.5">
+          <span className="text-2xl font-bold tracking-tight text-gray-900 dark:text-white sm:text-xl">
+            {formatNumber(used)}
+          </span>
+
+          <span className="text-sm text-gray-400 dark:text-gray-500">
+            / {formatNumber(limit)} {unit}
+          </span>
+        </div>
+
+        {/* Progress */}
+        <div
+          className="mt-4 h-2 w-full overflow-hidden rounded-full bg-gray-100 dark:bg-white/10"
+          role="progressbar"
+          aria-label={`${title} usage`}
+          aria-valuenow={Math.round(percentage)}
+          aria-valuemin={0}
+          aria-valuemax={100}
+        >
+          <div
+            className={`h-full rounded-full transition-all duration-500 ${theme.bar}`}
+            style={{ width: `${percentage}%` }}
+          />
+        </div>
+
+        <div className="mt-3 flex items-center justify-between gap-2">
+          <span className="text-xs text-gray-500 dark:text-gray-400">
+            Used this billing period
+          </span>
+
+          <span className="text-xs font-semibold text-gray-700 dark:text-gray-200">
+            {formatNumber(remaining)} left
+          </span>
+        </div>
+      </div>
+    </div>
+  );
+};
+
 function SectionHeading({ icon: Icon, title, action }) {
   return (
     <div className="mb-5 flex items-center justify-between gap-3 ">
@@ -148,9 +266,7 @@ function SectionHeading({ icon: Icon, title, action }) {
           {title}
         </h2>
       </div>
-      <div>
-      {action}
-      </div>
+      <div>{action}</div>
     </div>
   );
 }
@@ -211,6 +327,21 @@ export default function Analytics() {
   const [dateRange, setDateRange] = useState("7");
   const [chartMode, setChartMode] = useState("conversations");
   const [search, setSearch] = useState("");
+  const { client, loading } = useSelector(
+    (state) => state?.ClientReducer?.clientSlice || {},
+  );
+
+  const {
+    data: usageAnalyticsResponse,
+    isLoading,
+    isFetching,
+    isError,
+    error,
+    status,
+    fetchStatus,
+  } = useUsageAnalytics(Boolean(client?.active_plan));
+
+  const usage = usageAnalyticsResponse?.data?.data?.usage || {};
 
   const chartData = conversationData[dateRange];
 
@@ -265,57 +396,11 @@ export default function Analytics() {
     },
   ];
 
-  const handleExport = () => {
-    const headers = ["Name", "Email", "Message", "Category", "Status", "Time"];
-
-    const rows = filteredConversations.map((item) => [
-      item.name,
-      item.email,
-      item.message,
-      item.category,
-      item.status,
-      item.time,
-    ]);
-
-    const escapeCSV = (value) => `"${String(value).replace(/"/g, '""')}"`;
-
-    const csv = [headers, ...rows]
-      .map((row) => row.map(escapeCSV).join(","))
-      .join("\n");
-
-    const blob = new Blob(["\uFEFF" + csv], {
-      type: "text/csv;charset=utf-8;",
-    });
-
-    const url = URL.createObjectURL(blob);
-    const link = document.createElement("a");
-
-    link.href = url;
-    link.download = "analytics-conversations.csv";
-    link.click();
-
-    URL.revokeObjectURL(url);
-  };
-
   return (
     <div className="min-h-full w-full text-gray-900 dark:text-white">
       <div className="w-full space-y-6">
         {/* Page heading */}
-        <header className="flex flex-col justify-between gap-4 xl:flex-row xl:items-center">
-          {/* <div>
-            <div className="flex items-center gap-3">
-              <div className="rounded-2xl bg-gradient-to-br from-indigo-500 to-violet-600 p-3 text-white shadow-lg shadow-indigo-500/20">
-                <Activity size={25} />
-              </div>
-
-              <div>
-                <h1 className="text-xl font-semibold">Analytics</h1>
-                <p className="mt-1 text-sm text-gray-500 dark:text-gray-400">
-                  Track chatbot performance and understand your users.
-                </p>
-              </div>
-            </div>
-          </div> */}
+        <header className="flex flex-col justify-between gap-4 sm:flex-row xl:items-center">
           <div>
             <div className="flex items-center gap-3">
               <div
@@ -376,15 +461,6 @@ export default function Analytics() {
                 icon={true}
               />
             </div>
-
-            <button
-              type="button"
-              onClick={handleExport}
-              className="inline-flex items-center gap-2 rounded-xl bg-blue-600 px-4 py-2.5 text-sm font-semibold text-white shadow-sm transition hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 dark:focus:ring-offset-slate-950"
-            >
-              <Download size={17} />
-              Export CSV
-            </button>
           </div>
         </header>
 
@@ -410,6 +486,99 @@ export default function Analytics() {
           {metrics.map((metric) => (
             <MetricCard key={metric.title} {...metric} />
           ))}
+        </div>
+
+        <div
+          className="
+            rounded-2xl
+            border border-gray-200
+            bg-white
+            p-5
+            shadow-sm
+            dark:border-white/10
+            dark:bg-[#171b23]
+          "
+        >
+          <h2 className="text-base font-semibold">Usage Analytics</h2>
+
+          <p className="mt-1 text-xs text-gray-500 dark:text-gray-400">
+            Track your Gemini API usage and plan limits.
+          </p>
+
+          {/* Usage Cards */}
+          <div className="mt-5 grid grid-cols-1 gap-4 md:grid-cols-2 xl:grid-cols-3">
+            <UsageCard
+              title="Gemini Tokens"
+              description="Total token consumption"
+              icon={Zap}
+              used={usage?.tokens?.used ?? 0}
+              limit={usage?.tokens?.limit ?? 0}
+              unit="tokens"
+              color="blue"
+            />
+
+            <UsageCard
+              title="Conversations"
+              description="Conversations created"
+              icon={MessageSquare}
+              used={usage?.conversations?.used ?? 0}
+              limit={usage?.conversations?.limit ?? 0}
+              unit="conversations"
+              color="violet"
+            />
+
+            <UsageCard
+              title="AI Responses"
+              description="Responses generated"
+              icon={Bot}
+              used={usage?.aiResponses?.used ?? 0}
+              limit={usage?.aiResponses?.limit ?? 0}
+              unit="responses"
+              color="emerald"
+            />
+          </div>
+
+          {/* Bottom Summary */}
+          <div
+            className="
+      mt-5 flex items-start gap-3 rounded-xl
+      border border-gray-200 bg-gray-50 p-3.5
+      dark:border-white/10 dark:bg-white/3
+    "
+          >
+            <TrendingUp
+              size={18}
+              className="mt-0.5 shrink-0 text-blue-600 dark:text-blue-400"
+            />
+
+            <div>
+              <p className="text-sm font-medium text-gray-800 dark:text-gray-200">
+                Usage summary
+              </p>
+
+              <p className="mt-1 text-xs leading-5 text-gray-500 dark:text-gray-400">
+                You have used{" "}
+                {usage?.tokens?.limit > 0
+                  ? ((usage.tokens.used / usage.tokens.limit) * 100).toFixed(1)
+                  : "0.0"}
+                % of your token quota,{" "}
+                {usage?.conversations?.limit > 0
+                  ? (
+                      (usage.conversations.used / usage.conversations.limit) *
+                      100
+                    ).toFixed(0)
+                  : "0"}
+                % of your conversation quota and{" "}
+                {usage?.aiResponses?.limit > 0
+                  ? (
+                      (usage.aiResponses.used / usage.aiResponses.limit) *
+                      100
+                    ).toFixed(0)
+                  : "0"}
+                % of your AI response quota.
+              </p>
+            </div>
+          </div>
         </div>
 
         {/* Main charts */}
@@ -623,8 +792,8 @@ export default function Analytics() {
         </div>
 
         {/* Insights row */}
-        <div className="grid grid-cols-1 gap-5 lg:grid-cols-3">
-          <Card>
+        <div className="grid grid-cols-1 gap-5 lg:grid-cols-2">
+          {/* <Card>
             <SectionHeading
               icon={Flame}
               title="Popular Topics"
@@ -661,7 +830,7 @@ export default function Analytics() {
                 </div>
               ))}
             </div>
-          </Card>
+          </Card> */}
 
           <Card>
             <SectionHeading icon={Globe} title="Conversation Sources" />
@@ -767,7 +936,7 @@ export default function Analytics() {
         </div>
 
         {/* Recent conversations */}
-        <Card className="overflow-hidden">
+        {/* <Card className="overflow-hidden">
           <div className="mb-5 flex flex-col justify-between gap-4 md:flex-row md:items-center">
             <SectionHeading icon={MessageSquare} title="Recent Conversations" />
 
@@ -879,16 +1048,16 @@ export default function Analytics() {
               Dashboard preview
             </span>
           </div>
-        </Card>
+        </Card> */}
 
         {/* Footer */}
-        <footer className="flex flex-wrap items-center justify-between gap-2 pb-2 text-xs text-gray-400">
+        {/* <footer className="flex flex-wrap items-center justify-between gap-2 pb-2 text-xs text-gray-400">
           <span>AI Chatbot Analytics</span>
           <span className="inline-flex items-center gap-1.5">
             <Activity size={13} />
             Performance overview
           </span>
-        </footer>
+        </footer> */}
       </div>
     </div>
   );

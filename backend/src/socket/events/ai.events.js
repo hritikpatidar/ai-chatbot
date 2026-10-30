@@ -380,6 +380,7 @@ export const registerAIEvents = (io, socket) => {
             conversationId: conversation._id,
             role: "assistant",
             text: fallbackMessage,
+            replyToMessageId: userMessage._id,
           });
 
           const ticket = await createAITicketService({
@@ -481,6 +482,7 @@ export const registerAIEvents = (io, socket) => {
           conversationId: conversation._id,
           role: "assistant",
           text: fullResponse,
+          replyToMessageId: userMessage._id,
         });
 
         await updateConversation(conversation._id, {

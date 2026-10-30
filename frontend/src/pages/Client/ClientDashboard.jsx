@@ -12,6 +12,7 @@ import {
   MessageSquare,
   TrendingUp,
   LayoutDashboard,
+  RefreshCw,
 } from "lucide-react";
 import { motion } from "framer-motion";
 import { useNavigate } from "react-router-dom";
@@ -157,6 +158,7 @@ export default function ClientDashboard() {
   const {
     data: clientResponse,
     isLoading: clientLoading,
+    isFetchingClient,
     isError: clientError,
     error: clientErrorMessage,
     refetch: refetchClient,
@@ -173,6 +175,7 @@ export default function ClientDashboard() {
     error,
     status,
     fetchStatus,
+    refetch: refetchUsage,
   } = useUsageAnalytics(Boolean(client?.active_plan));
 
   const usage = usageAnalyticsResponse?.data?.data?.usage || {};
@@ -181,7 +184,7 @@ export default function ClientDashboard() {
   //   dispatch(getClientById(profileDetails?.clientId));
   // }, [dispatch]);
 
-  if (loading && !clientDetails && clientConfigLoading) {
+  if (isLoading && clientLoading && !clientDetails && clientConfigLoading) {
     return <PageLoader />;
   }
 
@@ -190,29 +193,20 @@ export default function ClientDashboard() {
   return (
     <div className="min-h-full w-full bg-transparent text-gray-900 dark:text-white">
       {/* Header */}
-      <div className="flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between mb-6">
+      <div className="mb-6 flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
         <div>
           <div className="flex items-center gap-3">
             <div
               className="
-                flex h-10 w-10
-                items-center justify-center
-                rounded-xl
-                bg-blue-500/10
-                text-blue-500
-              "
+          flex h-10 w-10 items-center justify-center
+          rounded-xl bg-blue-500/10 text-blue-500
+        "
             >
               <LayoutDashboard size={21} />
             </div>
 
             <div>
-              <h1
-                className="
-                  text-xl font-semibold
-                  text-gray-900
-                  dark:text-white
-                "
-              >
+              <h1 className="text-xl font-semibold text-gray-900 dark:text-white">
                 Admin Dashboard
               </h1>
 
@@ -223,30 +217,76 @@ export default function ClientDashboard() {
           </div>
         </div>
 
-        <button
-          type="button"
-          onClick={() => navigate("/client/client-settings")}
-          className="
-              inline-flex items-center justify-center gap-2
-              rounded-lg
-              border border-gray-200
+        <div className="flex items-center gap-2">
+          {/* Refresh Button */}
+          <button
+            type="button"
+            onClick={() => {
+              refetchUsage();
+              refetchClient();
+            }}
+            disabled={isFetching || isFetchingClient}
+            className="
+              inline-flex
+              items-center
+              justify-center
+              gap-2
+              rounded-xl
+              border
+              border-gray-200
               bg-white
               px-4 py-2
-              text-sm font-medium
+              text-sm
+              font-medium
               text-gray-700
-              transition
-              hover:border-blue-500
-              hover:text-blue-600
-              dark:border-white/10
+              transition-all
+              hover:bg-gray-50
+              disabled:cursor-not-allowed
+              disabled:opacity-50
+              dark:border-white/8
               dark:bg-[#171b23]
-              dark:text-gray-200
-              dark:hover:border-blue-500
-              dark:hover:text-blue-400
+              dark:text-gray-300
+              dark:hover:bg-white/4
             "
-        >
-          <Settings size={16} />
-          Settings
-        </button>
+          >
+            <RefreshCw
+              size={16}
+              className={isFetching || isFetchingClient ? "animate-spin" : ""}
+            />
+            Refresh
+          </button>
+
+          {/* Settings Button */}
+          <button
+            type="button"
+            onClick={() => navigate("/client/client-settings")}
+            className="
+              inline-flex
+              items-center
+              justify-center
+              gap-2
+              rounded-xl
+              border
+              border-gray-200
+              bg-white
+              px-4 py-2
+              text-sm
+              font-medium
+              text-gray-700
+              transition-all
+              hover:bg-gray-50
+              disabled:cursor-not-allowed
+              disabled:opacity-50
+              dark:border-white/8
+              dark:bg-[#171b23]
+              dark:text-gray-300
+              dark:hover:bg-white/4
+            "
+          >
+            <Settings size={16} />
+            Settings
+          </button>
+        </div>
       </div>
 
       {/* Stats */}
@@ -289,7 +329,7 @@ export default function ClientDashboard() {
           <ClientOverview />
         </div>
 
-        {clientDetails?.active_plan ? (
+        {clientDetails?.active_plan && (
           <div
             className="
               rounded-2xl
@@ -385,8 +425,28 @@ export default function ClientDashboard() {
                 </p>
               </div>
             </div>
+            {client?.active_plan === "Pro" && (
+              <div className="mt-4 flex justify-end">
+                <button
+                  type="button"
+                  onClick={() => navigate("/client/analytics")}
+                  className="
+                    inline-flex items-center gap-1.5
+                    text-sm font-medium
+                    text-blue-600 transition
+                    hover:text-blue-700
+                    dark:text-blue-400
+                    dark:hover:text-blue-300
+                  "
+                >
+                  View More
+                  <ArrowRight size={16} />
+                </button>
+              </div>
+            )}
           </div>
-        ) : (
+        )}
+        {!clientDetails?.active_plan && (
           <div
             className="
               rounded-2xl
@@ -494,7 +554,10 @@ export default function ClientDashboard() {
           <InfoItem label="Bot Name" value={chatbot?.name || "AI Assistant"} />
           <InfoItem label="Language" value={chatbot?.language || "English"} />
           <InfoItem label="Tone" value={chatbot?.tone || "Friendly"} />
-          <InfoItem label="Status" value={clientDetails?.status || "inactive"} />
+          <InfoItem
+            label="Status"
+            value={clientDetails?.status || "inactive"}
+          />
         </div>
 
         {chatbot?.welcomeMessage && (

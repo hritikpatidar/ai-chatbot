@@ -47,6 +47,23 @@ const conversationSchema = new mongoose.Schema(
       type: Boolean,
       default: false,
     },
+
+    source: {
+      type: String,
+      enum: ["website", "widget", "mobile_app", "other"],
+      default: "widget",
+    },
+
+    status: {
+      type: String,
+      enum: ["open", "resolved", "pending"],
+      default: "open",
+    },
+
+    topic: {
+      type: String,
+      default: "other",
+    }
   },
   {
     timestamps: true,
@@ -62,5 +79,8 @@ conversationSchema.virtual("visitor", {
 
 conversationSchema.set("toJSON", { virtuals: true });
 conversationSchema.set("toObject", { virtuals: true });
+
+conversationSchema.index({ clientId: 1, createdAt: -1 });
+conversationSchema.index({ clientId: 1, status: 1 });
 
 export default mongoose.model("Conversation", conversationSchema);

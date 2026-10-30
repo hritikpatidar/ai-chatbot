@@ -5,10 +5,18 @@ const ScrollToTop = () => {
   const { pathname } = useLocation();
 
   useEffect(() => {
-    window.scrollTo({
-      top: 0,
-      left: 0,
-      behavior: "instant", // ya "auto"
+    // Window scroll
+    window.scrollTo(0, 0);
+
+    // All scrollable containers
+    document.querySelectorAll("*").forEach((element) => {
+      if (element.scrollTop > 0) {
+        element.scrollTo({
+          top: 0,
+          left: 0,
+          behavior: "instant",
+        });
+      }
     });
   }, [pathname]);
 

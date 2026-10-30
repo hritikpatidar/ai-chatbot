@@ -8,6 +8,12 @@ const messageSchema = new mongoose.Schema(
       required: true,
       index: true,
     },
+    
+    replyToMessageId: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "Message",
+      default: null,
+    },
 
     role: {
       type: String,

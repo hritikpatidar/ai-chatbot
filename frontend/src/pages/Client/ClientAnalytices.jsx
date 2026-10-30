@@ -461,6 +461,41 @@ export default function Analytics() {
                 icon={true}
               />
             </div>
+            <button
+              type="button"
+              onClick={() => {}}
+              disabled={isFetching}
+              className="
+              inline-flex
+              items-center
+              justify-center
+              gap-2
+              rounded-xl
+              border
+              border-gray-200
+              hover:border-gray-300
+              bg-white
+              px-4 py-2.5
+              text-sm
+              font-medium
+              text-gray-700
+              transition-all
+              hover:bg-gray-50
+              disabled:cursor-not-allowed
+              disabled:opacity-50
+              dark:border-white/8
+              dark:bg-[#171b23]
+              dark:text-gray-300
+              dark:hover:bg-white/4
+              dark:hover:border-white/20
+            "
+            >
+              <RefreshCw
+                size={16}
+                className={isFetching ? "animate-spin" : ""}
+              />
+              Refresh
+            </button>
           </div>
         </header>
 

@@ -39,32 +39,19 @@ import {
   Zap,
 } from "lucide-react";
 import CustomSelect from "../../components/common/CustomSelect";
-import { useUsageAnalytics } from "../../hooks/Client/useUsageAnalytics";
+import {
+  useAnalyticsOverview,
+  useConversationsChart,
+  useConversationSources,
+  usePopularTopics,
+  useUsageAnalytics,
+  useUserActivity,
+  useUserSatisfaction,
+} from "../../hooks/Client/useUsageAnalytics";
 import { useSelector } from "react-redux";
+import { useQueryClient } from "@tanstack/react-query";
 
 // Demo data: replace with your analytics API response.
-const conversationData = {
-  7: [
-    { day: "Mon", conversations: 120, users: 80 },
-    { day: "Tue", conversations: 165, users: 105 },
-    { day: "Wed", conversations: 140, users: 92 },
-    { day: "Thu", conversations: 205, users: 132 },
-    { day: "Fri", conversations: 175, users: 115 },
-    { day: "Sat", conversations: 245, users: 160 },
-    { day: "Sun", conversations: 215, users: 145 },
-  ],
-  30: [
-    { day: "Week 1", conversations: 620, users: 410 },
-    { day: "Week 2", conversations: 780, users: 520 },
-    { day: "Week 3", conversations: 690, users: 470 },
-    { day: "Week 4", conversations: 940, users: 650 },
-  ],
-  90: [
-    { day: "Aug", conversations: 2100, users: 1400 },
-    { day: "Sep", conversations: 2650, users: 1750 },
-    { day: "Oct", conversations: 3200, users: 2200 },
-  ],
-};
 
 const activityData = [
   { day: "Mon", newUsers: 42, returningUsers: 25 },
@@ -343,58 +330,168 @@ export default function Analytics() {
 
   const usage = usageAnalyticsResponse?.data?.data?.usage || {};
 
-  const chartData = conversationData[dateRange];
+  const analyticsEnabled = Boolean(client?.active_plan);
+  const overviewQuery = useAnalyticsOverview(dateRange, analyticsEnabled);
+  const conversationsQuery = useConversationsChart(
+    dateRange,
+    chartMode,
+    analyticsEnabled,
+  );
+  const activityQuery = useUserActivity(dateRange, analyticsEnabled);
+  const sourcesQuery = useConversationSources(dateRange, analyticsEnabled);
+  const topicsQuery = usePopularTopics(dateRange, analyticsEnabled);
+  const satisfactionQuery = useUserSatisfaction(dateRange, analyticsEnabled);
 
-  const filteredConversations = useMemo(() => {
-    const value = search.trim().toLowerCase();
+  // Refresh all analytics APIs together
+  const analyticsQueries = [
+    overviewQuery,
+    conversationsQuery,
+    activityQuery,
+    sourcesQuery,
+    topicsQuery,
+    satisfactionQuery,
+  ];
+  const isAnalyticsFetching = analyticsQueries.some(
+    (query) => query.isFetching,
+  );
 
-    if (!value) return conversations;
+  const isAnalyticsLoading = analyticsQueries.some((query) => query.isLoading);
 
-    return conversations.filter((item) =>
-      [item.name, item.email, item.message, item.category, item.status].some(
-        (field) => field.toLowerCase().includes(value),
-      ),
+  const refreshAnalytics = () => {
+    return Promise.all(analyticsQueries.map((query) => query.refetch()));
+  };
+
+  // API response normalizer
+  const getPayload = (response) =>
+    response?.data?.data ?? response?.data ?? response ?? {};
+
+  const getArray = (response) => {
+    const payload = getPayload(response);
+    if (Array.isArray(payload)) return payload;
+
+    return (
+      payload?.data ||
+      payload?.items ||
+      payload?.results ||
+      payload?.chartData ||
+      []
     );
-  }, [search]);
+  };
+
+  // API data
+  const overview = getPayload(overviewQuery.data);
+  const chartData = getArray(conversationsQuery.data);
+  const activityData = getArray(activityQuery.data);
+  const rawSources = getArray(sourcesQuery.data);
+  const totalConversation = getPayload(sourcesQuery);
+  const topics = getArray(topicsQuery.data);
+  const satisfaction = getPayload(satisfactionQuery.data);
+  console.log("activityData", activityData);
+  // Overview data
+  const formatNumber = (value) =>
+    new Intl.NumberFormat("en-IN").format(Number(value || 0));
+
+  const formatResponseTime = (value) => {
+    const time = Number(value || 0);
+
+    return time >= 1000
+      ? `${(time / 1000).toFixed(2)}s`
+      : `${time.toFixed(0)}ms`;
+  };
+
+  const calculatePercentageChange = (current, previous) => {
+    current = Number(current || 0);
+    previous = Number(previous || 0);
+
+    if (previous === 0) {
+      if (current === 0) return 0;
+      return 100;
+    }
+
+    return Number((((current - previous) / previous) * 100).toFixed(1));
+  };
+
+  const conversationChange = calculatePercentageChange(
+    overview?.comparison?.conversations?.current,
+    overview?.comparison?.conversations?.previous,
+  );
+
+  const userChange = calculatePercentageChange(
+    overview?.comparison?.uniqueUsers?.current,
+    overview?.comparison?.uniqueUsers?.previous,
+  );
+
+  const responseTimeChange = calculatePercentageChange(
+    overview?.comparison?.avgResponseTime?.current,
+    overview?.comparison?.avgResponseTime?.previous,
+  );
+
+  const resolutionChange = calculatePercentageChange(
+    overview?.comparison?.resolutionRate?.current,
+    overview?.comparison?.resolutionRate?.previous,
+  );
 
   const metrics = [
     {
       title: "Total Conversations",
-      value: "1,248",
-      change: "+12%",
-      positive: true,
+      value: formatNumber(overview?.totalConversations),
+      change: conversationChange,
+      positive: conversationChange >= 0,
       icon: MessageSquare,
       iconClass:
         "bg-blue-50 text-blue-600 dark:bg-blue-500/15 dark:text-blue-400",
     },
     {
       title: "Unique Users",
-      value: "892",
-      change: "+8%",
-      positive: true,
+      value: formatNumber(overview?.uniqueUsers),
+      change: userChange,
+      positive: userChange >= 0,
       icon: Users,
       iconClass:
         "bg-violet-50 text-violet-600 dark:bg-violet-500/15 dark:text-violet-400",
     },
     {
       title: "Avg. Response Time",
-      value: "1.2s",
-      change: "-35%",
-      positive: true,
+      value: formatResponseTime(overview?.avgResponseTime),
+      change: responseTimeChange,
+      positive: responseTimeChange <= 0,
       icon: Clock3,
       iconClass:
         "bg-fuchsia-50 text-fuchsia-600 dark:bg-fuchsia-500/15 dark:text-fuchsia-400",
     },
     {
       title: "Resolution Rate",
-      value: "78%",
-      change: "+6%",
-      positive: true,
+      value: `${Number(overview?.resolutionRate ?? 0).toFixed(1)}%`,
+      change: resolutionChange,
+      positive: resolutionChange >= 0,
       icon: CircleCheck,
       iconClass:
         "bg-emerald-50 text-emerald-600 dark:bg-emerald-500/15 dark:text-emerald-400",
     },
   ];
+
+  // Sources: API data ko chart ke format mein convert karo
+  const sourceColors = {
+    website: "#6366f1",
+    widget: "#3b82f6",
+    mobile_app: "#10b981",
+    "mobile app": "#10b981",
+    other: "#f59e0b",
+  };
+  const sourceData = rawSources.map((item) => {
+    const name = item.name.replace("_", " ") || "Other";
+    return {
+      name,
+      value: Number(item.value ?? 0),
+      color: item.color || sourceColors[name.toLowerCase()] || "#94a3b8",
+      count: item.count || 0,
+    };
+  });
+
+  // Satisfaction API data
+  const ratingDistribution = satisfaction?.ratingDistribution || [];
+  const totalReviews = satisfaction?.totalReviews ?? 0;
+  const averageRating = satisfaction?.averageRating ?? 0;
 
   return (
     <div className="min-h-full w-full text-gray-900 dark:text-white">
@@ -463,8 +560,8 @@ export default function Analytics() {
             </div>
             <button
               type="button"
-              onClick={() => {}}
-              disabled={isFetching}
+              onClick={() => refreshAnalytics()}
+              disabled={isAnalyticsFetching}
               className="
               inline-flex
               items-center
@@ -492,7 +589,7 @@ export default function Analytics() {
             >
               <RefreshCw
                 size={16}
-                className={isFetching ? "animate-spin" : ""}
+                className={isAnalyticsFetching ? "animate-spin" : ""}
               />
               Refresh
             </button>
@@ -777,10 +874,12 @@ export default function Analytics() {
                   data={
                     dateRange === "7"
                       ? activityData
-                      : chartData.map((item) => ({
+                      : activityData.map((item) => ({
                           day: item.day,
-                          newUsers: item.users,
-                          returningUsers: Math.round(item.users * 0.42),
+                          newUsers: item.newUsers,
+                          returningUsers: Math.round(
+                            item.returningUsers * 0.42,
+                          ),
                         }))
                   }
                   margin={{ top: 8, right: 0, left: -22, bottom: 0 }}
@@ -892,7 +991,7 @@ export default function Analytics() {
 
               <div className="pointer-events-none absolute inset-0 flex flex-col items-center justify-center">
                 <span className="text-2xl font-bold text-gray-900 dark:text-white">
-                  1,248
+                  {totalConversation?.data?.totalConversations}
                 </span>
                 <span className="text-xs text-gray-500 dark:text-gray-400">
                   Conversations
@@ -912,11 +1011,11 @@ export default function Analytics() {
                     <div className="flex items-center gap-2">
                       <SourceIcon size={16} style={{ color: source.color }} />
                       <span className="text-sm text-gray-600 dark:text-gray-400">
-                        {source.name}
+                        {source.name} ({source.count})
                       </span>
                     </div>
                     <span className="text-sm font-semibold text-gray-800 dark:text-gray-200">
-                      {source.value}%
+                      {source.value} %
                     </span>
                   </div>
                 );
@@ -930,27 +1029,22 @@ export default function Analytics() {
             <div className="flex flex-col items-center py-2">
               <div className="flex h-32 w-32 flex-col items-center justify-center rounded-full border-[9px] border-emerald-400/20">
                 <span className="text-3xl font-bold text-gray-900 dark:text-white">
-                  4.6
+                  {averageRating}
                 </span>
                 <div className="mt-1 flex gap-0.5 text-amber-400">
-                  {Array.from({ length: 5 }).map((_, index) => (
+                  {Array.from({ length: averageRating }).map((_, index) => (
                     <Star key={index} size={13} fill="currentColor" />
                   ))}
                 </div>
               </div>
 
               <p className="mt-3 text-xs text-gray-500 dark:text-gray-400">
-                Based on 328 ratings
+                Based on {totalReviews} ratings
               </p>
             </div>
 
             <div className="mt-5 space-y-4">
-              {[
-                { label: "Excellent", value: 72, color: "bg-emerald-500" },
-                { label: "Good", value: 18, color: "bg-blue-500" },
-                { label: "Average", value: 7, color: "bg-amber-400" },
-                { label: "Poor", value: 3, color: "bg-rose-500" },
-              ].map((item) => (
+              {ratingDistribution.map((item) => (
                 <div key={item.label} className="flex items-center gap-3">
                   <span className="w-16 text-xs text-gray-500 dark:text-gray-400">
                     {item.label}
@@ -969,121 +1063,6 @@ export default function Analytics() {
             </div>
           </Card>
         </div>
-
-        {/* Recent conversations */}
-        {/* <Card className="overflow-hidden">
-          <div className="mb-5 flex flex-col justify-between gap-4 md:flex-row md:items-center">
-            <SectionHeading icon={MessageSquare} title="Recent Conversations" />
-
-            <div className="flex flex-wrap items-center gap-3">
-              <label className="flex min-w-0 items-center gap-2 rounded-xl border border-gray-200 bg-gray-50 px-3 py-2.5 dark:border-white/10 dark:bg-[#0f131a]">
-                <Search size={16} className="shrink-0 text-gray-400" />
-                <input
-                  type="search"
-                  value={search}
-                  onChange={(e) => setSearch(e.target.value)}
-                  placeholder="Search conversations..."
-                  className="w-full min-w-0 bg-transparent text-sm outline-none placeholder:text-gray-400 sm:w-48 dark:text-white"
-                />
-              </label>
-
-              <button
-                type="button"
-                onClick={handleExport}
-                className="inline-flex items-center gap-2 rounded-xl border border-gray-200 px-3 py-2.5 text-sm font-medium text-gray-600 transition hover:bg-gray-50 dark:border-white/10 dark:text-gray-300 dark:hover:bg-[#0f131a]"
-              >
-                <Download size={16} />
-                Export
-              </button>
-            </div>
-          </div>
-
-          <div className="overflow-x-auto">
-            <table className="w-full min-w-190 text-left">
-              <thead>
-                <tr className="border-y border-gray-200 bg-gray-50 text-xs font-semibold uppercase tracking-wide text-gray-500 dark:border-white/10 dark:bg-[#0f131a] dark:text-gray-400">
-                  <th className="px-4 py-3">User</th>
-                  <th className="px-4 py-3">Message</th>
-                  <th className="px-4 py-3">Category</th>
-                  <th className="px-4 py-3">Status</th>
-                  <th className="px-4 py-3">Time</th>
-                </tr>
-              </thead>
-
-              <tbody className="divide-y divide-slate-100 dark:divide-slate-800">
-                {filteredConversations.map((item) => (
-                  <tr
-                    key={item.email}
-                    className="transition hover:bg-gray-50/80 dark:hover:bg-[#0f131a]/40"
-                  >
-                    <td className="px-4 py-4">
-                      <div className="flex items-center gap-3">
-                        <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-linear-to-br from-indigo-100 to-violet-100 text-xs font-bold text-blue-700 dark:from-indigo-500/20 dark:to-violet-500/20 dark:text-blue-300">
-                          {item.initials}
-                        </div>
-                        <div>
-                          <p className="text-sm font-semibold text-gray-800 dark:text-gray-200">
-                            {item.name}
-                          </p>
-                          <p className="mt-0.5 text-xs text-gray-500 dark:text-gray-400">
-                            {item.email}
-                          </p>
-                        </div>
-                      </div>
-                    </td>
-
-                    <td className="max-w-60 truncate px-4 py-4 text-sm text-gray-600 dark:text-gray-400">
-                      {item.message}
-                    </td>
-
-                    <td className="px-4 py-4">
-                      <span className="inline-flex rounded-full bg-blue-50 px-2.5 py-1 text-xs font-medium text-blue-700 dark:bg-blue-500/10 dark:text-blue-300">
-                        {item.category}
-                      </span>
-                    </td>
-
-                    <td className="px-4 py-4">
-                      <span
-                        className={`inline-flex rounded-full px-2.5 py-1 text-xs font-semibold ${
-                          item.status === "Resolved"
-                            ? "bg-emerald-50 text-emerald-700 dark:bg-emerald-500/10 dark:text-emerald-400"
-                            : item.status === "In Progress"
-                              ? "bg-blue-50 text-blue-700 dark:bg-blue-500/10 dark:text-blue-400"
-                              : "bg-amber-50 text-amber-700 dark:bg-amber-500/10 dark:text-amber-400"
-                        }`}
-                      >
-                        {item.status}
-                      </span>
-                    </td>
-
-                    <td className="whitespace-nowrap px-4 py-4 text-xs text-gray-500 dark:text-gray-400">
-                      {item.time}
-                    </td>
-                  </tr>
-                ))}
-
-                {filteredConversations.length === 0 && (
-                  <tr>
-                    <td
-                      colSpan={5}
-                      className="px-4 py-12 text-center text-sm text-gray-500 dark:text-gray-400"
-                    >
-                      No conversations found.
-                    </td>
-                  </tr>
-                )}
-              </tbody>
-            </table>
-          </div>
-
-          <div className="mt-4 flex flex-col justify-between gap-3 border-t border-slate-100 pt-4 text-xs text-gray-500 dark:border-white/10 dark:text-gray-400 sm:flex-row sm:items-center">
-            <span>Showing {filteredConversations.length} conversations</span>
-            <span className="flex items-center gap-2">
-              <span className="h-2 w-2 rounded-full bg-emerald-500" />
-              Dashboard preview
-            </span>
-          </div>
-        </Card> */}
 
         {/* Footer */}
         {/* <footer className="flex flex-wrap items-center justify-between gap-2 pb-2 text-xs text-gray-400">

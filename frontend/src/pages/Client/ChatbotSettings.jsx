@@ -683,7 +683,7 @@ export default function ClientChatbotSettings() {
                 />
 
                 <p className="mt-1.5 text-xs text-gray-500 dark:text-gray-400">
-                  {aiInstructions.length}/3000 characters
+                  {aiInstructions.length}/10000 characters
                 </p>
               </div>
             </div>

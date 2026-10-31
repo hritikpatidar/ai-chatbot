@@ -193,7 +193,7 @@ export default function ClientDashboard() {
   return (
     <div className="min-h-full w-full bg-transparent text-gray-900 dark:text-white">
       {/* Header */}
-      <div className="mb-6 flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
+      <div className="mb-6 flex flex-col gap-4 sm:flex-row lg:items-center sm:justify-between">
         <div>
           <div className="flex items-center gap-3">
             <div

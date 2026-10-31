@@ -14,7 +14,6 @@ import {
   getConversationsChart,
   getConversationSources,
   getPopularTopics,
-  getRecentConversations,
   getUserActivity,
   getUserSatisfaction,
 } from "../controllers/clientAnalytics.controller.js";
@@ -35,7 +34,6 @@ router.get("/analytics/user-activity", authMiddleware, getUserActivity);
 router.get("/analytics/sources", authMiddleware, getConversationSources);
 router.get("/analytics/topics", authMiddleware, getPopularTopics);
 router.get("/analytics/satisfaction", authMiddleware, getUserSatisfaction);
-router.get("/analytics/recent-conversations", authMiddleware, getRecentConversations);
 
 // Client APIs
 router.get("/:clientId", authMiddleware, getClientById);

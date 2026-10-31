@@ -63,7 +63,7 @@ ticketSchema.virtual("guestKeyId", {
   ref: "WidgetVisitor",
   localField: "guestId",
   foreignField: "guestId",
-  justOne: true,
+  // justOne: true,
 });
 
 ticketSchema.set("toJSON", { virtuals: true });

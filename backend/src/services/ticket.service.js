@@ -39,7 +39,7 @@ export const createAITicketService = async ({
   try {
 
     const emailTemplate = ticketCreatedEmailTemplate({
-      fullName: ticket.guestKeyId.fullName,
+      fullName: ticket?.guestKeyId?.fullName,
       ticketId: ticket.id?.slice(-8) || ticket._id,
       subject: ticket.subject,
       description: ticket.description,
@@ -48,7 +48,7 @@ export const createAITicketService = async ({
 
     const info = await transporter.sendMail({
       from: `"AI Chatbot" <${env.MAIL_USER}>`,
-      to: ticket.guestKeyId.email,
+      to: ticket?.guestKeyId?.email,
       subject: emailTemplate.subject,
       html: emailTemplate.html,
     });

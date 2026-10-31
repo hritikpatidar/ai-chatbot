@@ -228,34 +228,3 @@ export const getUserSatisfaction = async (req, res) => {
     return handleError(res, error);
   }
 };
-
-// Recent Conversations
-export const getRecentConversations = async (req, res) => {
-  try {
-    const clientId = getClientId(req);
-
-    if (!clientId) {
-      return res.status(403).json({
-        success: false,
-        message: "Client access required",
-      });
-    }
-
-    const query = validate(recentConversationsSchema, req.query, res);
-    if (!query) return;
-
-    const data = await analyticsService.getRecentConversationsService(
-      clientId,
-      query,
-    );
-
-    return res.status(200).json({
-      success: true,
-      message: "Recent conversations fetched successfully",
-      data,
-    });
-  } catch (error) {
-    return handleError(res, error);
-  }
-};
-

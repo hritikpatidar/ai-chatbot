@@ -46,49 +46,32 @@ export const getOverviewService = async (clientId, range) => {
     const previousStart = new Date(startDate);
     previousStart.setDate(previousStart.getDate() - days);
 
+    const clientObjectId = new mongoose.Types.ObjectId(clientId);
+
     const currentFilter = getClientFilter(
         clientId,
         startDate,
-        endDate,
+        endDate
     );
 
-    const previousFilter = getClientFilter(
-        clientId,
-        previousStart,
-        startDate,
-    );
+    const previousFilter = {
+        ...getClientFilter(clientId, previousStart, startDate),
+        createdAt: {
+            $gte: previousStart,
+            $lt: startDate,
+        },
+    };
 
-    const [
-        totalConversations,
-        previousConversations,
-        userIds,
-        guestIds,
-        messages,
-        resolvedCount,
-        previousResolvedCount,
-    ] = await Promise.all([
-        Conversation.countDocuments(currentFilter),
-
-        Conversation.countDocuments(previousFilter),
-
-        Conversation.distinct("userId", {
-            ...currentFilter,
-            userId: { $ne: null },
-        }),
-
-        Conversation.distinct("guestId", {
-            ...currentFilter,
-            guestId: { $nin: [null, ""] },
-        }),
-
-        Message.aggregate([
+    // Calculate average response time for a period
+    const getAverageResponseTime = async (periodStart, periodEnd) => {
+        const messages = await Message.aggregate([
             {
                 $match: {
                     role: "assistant",
                     status: "completed",
                     createdAt: {
-                        $gte: startDate,
-                        $lte: endDate,
+                        $gte: periodStart,
+                        $lte: periodEnd,
                     },
                     replyToMessageId: { $ne: null },
                 },
@@ -101,7 +84,9 @@ export const getOverviewService = async (clientId, range) => {
                     as: "userMessage",
                 },
             },
-            { $unwind: "$userMessage" },
+            {
+                $unwind: "$userMessage",
+            },
             {
                 $match: {
                     "userMessage.role": "user",
@@ -115,41 +100,132 @@ export const getOverviewService = async (clientId, range) => {
                     as: "conversation",
                 },
             },
-            { $unwind: "$conversation" },
+            {
+                $unwind: "$conversation",
+            },
             {
                 $match: {
-                    "conversation.clientId": new mongoose.Types.ObjectId(clientId),
+                    "conversation.clientId": clientObjectId,
                 },
             },
             {
                 $project: {
                     responseTime: {
-                        $subtract: ["$createdAt", "$userMessage.createdAt"],
+                        $subtract: [
+                            "$createdAt",
+                            "$userMessage.createdAt",
+                        ],
                     },
                 },
             },
-        ]),
+            {
+                $match: {
+                    responseTime: { $gte: 0 },
+                },
+            },
+            {
+                $group: {
+                    _id: null,
+                    totalResponseTime: {
+                        $sum: "$responseTime",
+                    },
+                    totalResponses: {
+                        $sum: 1,
+                    },
+                },
+            },
+        ]);
 
+        if (!messages.length || !messages[0].totalResponses) {
+            return 0;
+        }
+
+        // Milliseconds to seconds
+        return Number(
+            (
+                messages[0].totalResponseTime /
+                messages[0].totalResponses /
+                1000
+            ).toFixed(2)
+        );
+    };
+
+    // Fetch current and previous period data
+    const [
+        totalConversations,
+        previousConversations,
+
+        currentUserIds,
+        currentGuestIds,
+
+        previousUserIds,
+        previousGuestIds,
+
+        resolvedCount,
+        previousResolvedCount,
+
+        avgResponseTime,
+        previousAvgResponseTime,
+    ] = await Promise.all([
+        // Conversations
+        Conversation.countDocuments(currentFilter),
+        Conversation.countDocuments(previousFilter),
+        // Current unique users
+        Conversation.distinct("userId", {
+            ...currentFilter,
+            userId: { $ne: null },
+        }),
+        Conversation.distinct("guestId", {
+            ...currentFilter,
+            guestId: { $nin: [null, ""] },
+        }),
+        // Previous unique users
+        Conversation.distinct("userId", {
+            ...previousFilter,
+            userId: { $ne: null },
+        }),
+        Conversation.distinct("guestId", {
+            ...previousFilter,
+            guestId: { $nin: [null, ""] },
+        }),
+        // Resolution count
         Conversation.countDocuments({
             ...currentFilter,
             status: "resolved",
         }),
-
         Conversation.countDocuments({
             ...previousFilter,
             status: "resolved",
         }),
+        // Average response time
+        getAverageResponseTime(startDate, endDate),
+
+        getAverageResponseTime(previousStart, startDate),
     ]);
 
-    const uniqueUsers = userIds.length + guestIds.length;
+    // Unique users count
+    const getUniqueUserCount = (userIds, guestIds) => {
+        const identities = new Set();
+        userIds.forEach((id) => {
+            if (id) identities.add(`user:${id.toString()}`);
+        });
+        guestIds.forEach((id) => {
+            if (id) identities.add(`guest:${id}`);
+        });
+        return identities.size;
+    };
 
-    const avgResponseTime =
-        messages.length > 0
-            ? messages.reduce((sum, item) => {
-                return sum + Math.max(0, item.responseTime);
-            }, 0) / messages.length
-            : 0;
+    const uniqueUsers = getUniqueUserCount(
+        currentUserIds,
+        currentGuestIds
+    );
 
+    const previousUniqueUsers = getUniqueUserCount(
+        previousUserIds,
+        previousGuestIds
+    );
+
+    // Resolution rate
     const resolutionRate =
         totalConversations > 0
             ? (resolvedCount / totalConversations) * 100
@@ -163,13 +239,20 @@ export const getOverviewService = async (clientId, range) => {
     return {
         totalConversations,
         uniqueUsers,
-        avgResponseTime: Number((avgResponseTime / 1000).toFixed(2)),
+        avgResponseTime,
         resolutionRate: Number(resolutionRate.toFixed(2)),
-
         comparison: {
             conversations: {
                 current: totalConversations,
                 previous: previousConversations,
+            },
+            uniqueUsers: {
+                current: uniqueUsers,
+                previous: previousUniqueUsers,
+            },
+            avgResponseTime: {
+                current: avgResponseTime,
+                previous: previousAvgResponseTime,
             },
             resolutionRate: {
                 current: Number(resolutionRate.toFixed(2)),
@@ -197,6 +280,7 @@ export const getConversationsChartService = async (
                     $dateToString: {
                         format: "%Y-%m-%d",
                         date: "$createdAt",
+                        timezone: "Asia/Kolkata",
                     },
                 },
                 conversations: { $sum: 1 },
@@ -241,11 +325,21 @@ export const getConversationsChartService = async (
 
     const result = [];
 
+    // IST date formatter - avoids UTC date shifting
+    const formatDate = (date) => {
+        const year = date.getFullYear();
+        const month = String(date.getMonth() + 1).padStart(2, "0");
+        const day = String(date.getDate()).padStart(2, "0");
+
+        return `${year}-${month}-${day}`;
+    };
+
     for (let i = 0; i < days; i++) {
         const date = new Date(startDate);
-        date.setDate(startDate.getDate() + i);
 
-        const key = date.toISOString().slice(0, 10);
+        date.setDate(date.getDate() + i);
+
+        const key = formatDate(date);
         const item = dataMap.get(key);
 
         result.push({
@@ -267,6 +361,17 @@ export const getConversationsChartService = async (
 export const getUserActivityService = async (clientId, range) => {
     const { startDate, endDate } = getDateRange(range);
 
+    const days = Number(range);
+
+    // Local date formatter (server timezone should be Asia/Kolkata)
+    const formatDate = (date) => {
+        const year = date.getFullYear();
+        const month = String(date.getMonth() + 1).padStart(2, "0");
+        const day = String(date.getDate()).padStart(2, "0");
+
+        return `${year}-${month}-${day}`;
+    };
+
     const conversations = await Conversation.find({
         clientId,
         createdAt: { $lte: endDate },
@@ -277,6 +382,7 @@ export const getUserActivityService = async (clientId, range) => {
 
     const firstSeen = new Map();
 
+    // Find each user's first conversation
     for (const conversation of conversations) {
         const identity = conversation.userId
             ? `user:${conversation.userId}`
@@ -291,39 +397,46 @@ export const getUserActivityService = async (clientId, range) => {
         }
     }
 
+    // Initialize daily data
     const daily = new Map();
 
-    for (let i = 0; i < Number(range); i++) {
+    for (let i = 0; i < days; i++) {
         const date = new Date(startDate);
-        date.setDate(startDate.getDate() + i);
 
-        const key = date.toISOString().slice(0, 10);
+        date.setDate(date.getDate() + i);
+
+        const key = formatDate(date);
 
         daily.set(key, {
             date: key,
-            day: getDayLabel(date, Number(range)),
+            day: getDayLabel(date, days),
             newUsers: 0,
             returningUsers: 0,
         });
     }
 
+    // Calculate new users
     for (const [identity, firstDate] of firstSeen.entries()) {
         if (firstDate < startDate || firstDate > endDate) continue;
 
-        const key = firstDate.toISOString().slice(0, 10);
+        const key = formatDate(new Date(firstDate));
         const item = daily.get(key);
 
-        if (item) item.newUsers++;
+        if (item) {
+            item.newUsers++;
+        }
     }
 
+    // Filter conversations in selected date range
     const currentConversations = conversations.filter(
         (item) =>
             item.createdAt >= startDate &&
-            item.createdAt <= endDate,
+            item.createdAt <= endDate
     );
 
     const returningByDay = new Map();
 
+    // Calculate returning users
     for (const conversation of currentConversations) {
         const identity = conversation.userId
             ? `user:${conversation.userId}`
@@ -336,7 +449,7 @@ export const getUserActivityService = async (clientId, range) => {
         const firstDate = firstSeen.get(identity);
 
         if (firstDate && firstDate < startDate) {
-            const key = conversation.createdAt.toISOString().slice(0, 10);
+            const key = formatDate(new Date(conversation.createdAt));
 
             if (!returningByDay.has(key)) {
                 returningByDay.set(key, new Set());
@@ -346,9 +459,13 @@ export const getUserActivityService = async (clientId, range) => {
         }
     }
 
+    // Assign returning users to daily data
     for (const [key, users] of returningByDay.entries()) {
         const item = daily.get(key);
-        if (item) item.returningUsers = users.size;
+
+        if (item) {
+            item.returningUsers = users.size;
+        }
     }
 
     return Array.from(daily.values());
@@ -465,90 +582,5 @@ export const getSatisfactionService = async (clientId, range) => {
             ? Number((totalScore / totalReviews).toFixed(2))
             : 0,
         ratingDistribution,
-    };
-};
-
-// 7. RECENT CONVERSATIONS
-export const getRecentConversationsService = async (
-    clientId,
-    { page, limit, search },
-) => {
-    const skip = (page - 1) * limit;
-
-    const filter = {
-        clientId: new mongoose.Types.ObjectId(clientId),
-    };
-
-    const searchRegex = search
-        ? new RegExp(search.replace(/[.*+?^${}()|[\]\\]/g, "\\$&"), "i")
-        : null;
-
-    if (searchRegex) {
-        filter.$or = [
-            { title: searchRegex },
-            { lastMessage: searchRegex },
-            { topic: searchRegex },
-            { status: searchRegex },
-        ];
-    }
-
-    const [conversations, total] = await Promise.all([
-        Conversation.find(filter)
-            .sort({ lastMessageAt: -1 })
-            .skip(skip)
-            .limit(limit)
-            .populate("userId", "fullName email")
-            .lean(),
-
-        Conversation.countDocuments(filter),
-    ]);
-
-    const guestIds = conversations
-        .filter((item) => !item.userId && item.guestId)
-        .map((item) => item.guestId);
-
-    const guests = guestIds.length
-        ? await WidgetVisitor.find({
-            clientId,
-            guestId: { $in: guestIds },
-        })
-            .select("guestId fullName email")
-            .lean()
-        : [];
-
-    const guestMap = new Map(
-        guests.map((guest) => [guest.guestId, guest]),
-    );
-
-    const result = conversations.map((conversation) => {
-        const guest = conversation.guestId
-            ? guestMap.get(conversation.guestId)
-            : null;
-
-        const user = conversation.userId || guest;
-
-        return {
-            _id: conversation._id,
-            name: user?.fullName || "Guest User",
-            email: user?.email || "",
-            message: conversation.lastMessage || "",
-            category: conversation.topic || "Other",
-            status: conversation.status || "open",
-            source: conversation.source || "other",
-            time: conversation.lastMessageAt,
-            createdAt: conversation.createdAt,
-        };
-    });
-
-    return {
-        conversations: result,
-        pagination: {
-            total,
-            page,
-            limit,
-            totalPages: Math.ceil(total / limit),
-            hasNextPage: page * limit < total,
-            hasPrevPage: page > 1,
-        },
     };
 };

@@ -17,7 +17,11 @@ export const findOpenTicketByConversation = async (conversationId) => {
     status: {
       $in: ["open", "in_progress"],
     },
-  });
+  }).populate("userId", "fullName email")
+    .populate("guestKeyId", "fullName email phone")
+    .populate("clientId", "businessName clientKey")
+    .populate("conversationId")
+    .populate("messageId");;
 };
 
 
@@ -103,5 +107,9 @@ export const findTicketByIdAndClient = async (ticketId, clientId) => {
   return await Ticket.findOne({
     _id: ticketId,
     clientId,
-  });
+  }).populate("userId", "fullName email")
+    .populate("guestKeyId", "fullName email phone")
+    .populate("clientId", "businessName clientKey")
+    .populate("conversationId")
+    .populate("messageId");;
 };

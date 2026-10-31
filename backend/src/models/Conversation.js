@@ -51,7 +51,7 @@ const conversationSchema = new mongoose.Schema(
     source: {
       type: String,
       enum: ["website", "widget", "mobile_app", "other"],
-      default: "widget",
+      default: "other",
     },
 
     status: {

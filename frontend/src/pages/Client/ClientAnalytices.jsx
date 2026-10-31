@@ -1,4 +1,4 @@
-import { useMemo, useState } from "react";
+import { useState } from "react";
 import {
   ResponsiveContainer,
   AreaChart,
@@ -21,18 +21,11 @@ import {
   CircleCheck,
   TrendingUp,
   TrendingDown,
-  ArrowUpRight,
-  ArrowDownRight,
-  CalendarDays,
-  ChevronDown,
-  Download,
   Sparkles,
-  Flame,
   Globe,
   Smartphone,
   Monitor,
   Star,
-  Search,
   Bot,
   RefreshCw,
   Activity,
@@ -49,20 +42,8 @@ import {
   useUserSatisfaction,
 } from "../../hooks/Client/useUsageAnalytics";
 import { useSelector } from "react-redux";
-import { useQueryClient } from "@tanstack/react-query";
 
 // Demo data: replace with your analytics API response.
-
-const activityData = [
-  { day: "Mon", newUsers: 42, returningUsers: 25 },
-  { day: "Tue", newUsers: 58, returningUsers: 32 },
-  { day: "Wed", newUsers: 46, returningUsers: 35 },
-  { day: "Thu", newUsers: 71, returningUsers: 42 },
-  { day: "Fri", newUsers: 83, returningUsers: 51 },
-  { day: "Sat", newUsers: 65, returningUsers: 39 },
-  { day: "Sun", newUsers: 76, returningUsers: 48 },
-];
-
 const topics = [
   { name: "Product Information", count: 320, color: "bg-blue-500" },
   { name: "Pricing & Plans", count: 280, color: "bg-violet-500" },
@@ -71,51 +52,6 @@ const topics = [
   { name: "Other Queries", count: 120, color: "bg-amber-500" },
 ];
 
-const sourceData = [
-  { name: "Website", value: 62, color: "#6366f1" },
-  { name: "Widget", value: 18, color: "#3b82f6" },
-  { name: "Mobile App", value: 12, color: "#10b981" },
-  { name: "Other", value: 8, color: "#f59e0b" },
-];
-
-const conversations = [
-  {
-    name: "John Doe",
-    email: "john@example.com",
-    initials: "JD",
-    message: "How can I upgrade my plan?",
-    category: "Pricing",
-    status: "Resolved",
-    time: "2 min ago",
-  },
-  {
-    name: "Sarah Smith",
-    email: "sarah@example.com",
-    initials: "SS",
-    message: "Where can I check my order?",
-    category: "Order Status",
-    status: "In Progress",
-    time: "15 min ago",
-  },
-  {
-    name: "Mike Johnson",
-    email: "mike@example.com",
-    initials: "MJ",
-    message: "Can you tell me about your products?",
-    category: "Product Info",
-    status: "Resolved",
-    time: "32 min ago",
-  },
-  {
-    name: "Emily Brown",
-    email: "emily@example.com",
-    initials: "EB",
-    message: "I need help with my account.",
-    category: "Support",
-    status: "Pending",
-    time: "48 min ago",
-  },
-];
 
 function Card({ children, className = "" }) {
   return (

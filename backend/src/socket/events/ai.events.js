@@ -292,6 +292,7 @@ export const registerAIEvents = (io, socket) => {
           title: cleanMessage.substring(0, 40),
           lastMessage: cleanMessage,
           lastMessageAt: new Date(),
+          source: "website"
         };
 
         if (userId) conversationData.userId = userId;
@@ -303,6 +304,7 @@ export const registerAIEvents = (io, socket) => {
             guestId,
             title: cleanMessage.substring(0, 40),
             lastMessage: cleanMessage,
+            source: "widget"
           });
           // The helper must return { conversation, created }.
           conversation = guestResult.conversation;

@@ -386,7 +386,7 @@ export default function Analytics() {
   const totalConversation = getPayload(sourcesQuery);
   const topics = getArray(topicsQuery.data);
   const satisfaction = getPayload(satisfactionQuery.data);
-  console.log("activityData", activityData);
+
   // Overview data
   const formatNumber = (value) =>
     new Intl.NumberFormat("en-IN").format(Number(value || 0));

@@ -15,7 +15,6 @@ const getUsageStats = (used = 0, limit = 0) => {
 
 export const getUsageAnalyticsService = async (clientId) => {
     // 1. Get active subscription and its plan
-    console.log("clientId", clientId)
     const subscription = await Subscription.findOne({
         clientId,
         status: { $in: ["active", "incomplete", "trialing"] }, 

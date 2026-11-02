@@ -39,7 +39,6 @@ export default function ClientTickets() {
     search,
   });
 
-  console.log("tickets", tickets);
   useEffect(() => {
     setPage(1);
   }, [status]);

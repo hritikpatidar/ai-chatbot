@@ -18,7 +18,7 @@ export const getUsageAnalyticsService = async (clientId) => {
     console.log("clientId", clientId)
     const subscription = await Subscription.findOne({
         clientId,
-        status: { $in: ["active", "trialing"] },
+        status: { $in: ["active", "incomplete", "trialing"] }, 
     }).populate("planId");
 
     if (!subscription) {

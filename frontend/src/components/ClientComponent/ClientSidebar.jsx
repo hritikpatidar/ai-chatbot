@@ -21,11 +21,13 @@ import { handleLogout } from "../../utils/logout";
 import { useState } from "react";
 import { getImageUrl } from "../../utils/imageUrl";
 import profile from "../../assets/profile1.jpg";
+import ConfirmModal from "./ConfirmModal";
 
 export default function ClientSidebar({ mobileOpen, setMobileOpen }) {
   const dispatch = useDispatch();
   const navigate = useNavigate();
   const [isLogoutLoading, setIsLogoutLoading] = useState(false);
+  const [logOutModalOpen, setLogOutModalOpen] = useState(false);
 
   const { profileDetails, refreshToken } = useSelector(
     (state) => state?.authReducer?.AuthSlice,
@@ -327,7 +329,7 @@ export default function ClientSidebar({ mobileOpen, setMobileOpen }) {
         >
           <button
             type="button"
-            onClick={handleAuth}
+            onClick={() => setLogOutModalOpen(true)}
             disabled={isLogoutLoading}
             className="
               flex
@@ -346,10 +348,26 @@ export default function ClientSidebar({ mobileOpen, setMobileOpen }) {
             "
           >
             <LogOut size={18} />
-            <span> {isLogoutLoading ? "Logging out..." : "Logout"}</span>
+            <span>Logout</span>
           </button>
         </div>
       </aside>
+
+      <ConfirmModal
+        isOpen={logOutModalOpen}
+        onCancel={() => {
+          setLogOutModalOpen(false);
+        }}
+        onConfirm={handleAuth}
+        loading={isLogoutLoading}
+        title="Logout Confirmation"
+        message={
+          "Are you sure you want to logout? You will need to login again to access your account."
+        }
+        confirmText={isLogoutLoading ? "Logging out..." : "Logout"}
+        cancelText="Cancel"
+        danger
+      />
     </>
   );
 }

@@ -14,12 +14,14 @@ import { useDispatch, useSelector } from "react-redux";
 import { useNavigate } from "react-router-dom";
 import { handleLogout } from "../../utils/logout";
 import NotificationDropdown from "../common/NotificationDropdown";
+import ConfirmModal from "../ClientComponent/ConfirmModal";
 
 export default function AdminHeader({ onMenuClick, collapsed }) {
   const dispatch = useDispatch();
   const navigate = useNavigate();
   const { isDarkMode, toggleTheme } = useTheme();
   const [isLogoutLoading, setIsLogoutLoading] = useState(false);
+  const [logOutModalOpen, setLogOutModalOpen] = useState(false);
   const [isProfileOpen, setIsProfileOpen] = useState(false);
   const { profileDetails, refreshToken } = useSelector(
     (store) => store.authReducer.AuthSlice,
@@ -58,8 +60,9 @@ export default function AdminHeader({ onMenuClick, collapsed }) {
   };
 
   return (
-    <header
-      className={`
+    <>
+      <header
+        className={`
         fixed
         right-0
         top-0
@@ -83,15 +86,14 @@ export default function AdminHeader({ onMenuClick, collapsed }) {
 
         left-0
       `}
-    >
+      >
+        <div className="flex items-center gap-3">
+          {/* Mobile Menu */}
 
-      <div className="flex items-center gap-3">
-        {/* Mobile Menu */}
-
-        <button
-          type="button"
-          onClick={onMenuClick}
-          className="
+          <button
+            type="button"
+            onClick={onMenuClick}
+            className="
             flex
             h-10
             w-10
@@ -104,39 +106,39 @@ export default function AdminHeader({ onMenuClick, collapsed }) {
             dark:hover:bg-white/5
             lg:hidden
           "
-        >
-          <Menu size={20} />
-        </button>
+          >
+            <Menu size={20} />
+          </button>
 
-        {/* Dashboard Title */}
+          {/* Dashboard Title */}
 
-        <div className="hidden sm:block">
-          <p
-            className="
+          <div className="hidden sm:block">
+            <p
+              className="
               text-sm
               font-semibold
               text-gray-900
               dark:text-white
             "
-          >
-            Admin Dashboard
-          </p>
+            >
+              Admin Dashboard
+            </p>
 
-          <p
-            className="
+            <p
+              className="
               text-xs
               text-gray-500
               dark:text-gray-400
             "
-          >
-            Manage your chatbot platform
-          </p>
-        </div>
+            >
+              Manage your chatbot platform
+            </p>
+          </div>
 
-        {/* Search */}
+          {/* Search */}
 
-        <div
-          className="
+          <div
+            className="
             hidden
             h-10
             w-65
@@ -151,19 +153,19 @@ export default function AdminHeader({ onMenuClick, collapsed }) {
             dark:border-white/10
             dark:bg-white/3
           "
-        >
-          <Search
-            size={16}
-            className="
+          >
+            <Search
+              size={16}
+              className="
               text-gray-600
               dark:text-gray-500
             "
-          />
+            />
 
-          <input
-            type="text"
-            placeholder="Search..."
-            className="
+            <input
+              type="text"
+              placeholder="Search..."
+              className="
               w-full
               bg-transparent
               text-sm
@@ -172,10 +174,10 @@ export default function AdminHeader({ onMenuClick, collapsed }) {
               placeholder:text-gray-400
               dark:text-white
             "
-          />
+            />
 
-          <span
-            className="
+            <span
+              className="
               rounded
               border
               border-gray-400
@@ -185,20 +187,20 @@ export default function AdminHeader({ onMenuClick, collapsed }) {
               text-gray-600
               dark:border-white/10
             "
-          >
-            /
-          </span>
+            >
+              /
+            </span>
+          </div>
         </div>
-      </div>
 
-      <div className="flex items-center gap-2 sm:gap-3">
-        {/* Theme */}
+        <div className="flex items-center gap-2 sm:gap-3">
+          {/* Theme */}
 
-        <button
-          type="button"
-          onClick={toggleTheme}
-          title="Toggle theme"
-          className="
+          <button
+            type="button"
+            onClick={toggleTheme}
+            title="Toggle theme"
+            className="
             flex
             h-10
             w-10
@@ -211,13 +213,13 @@ export default function AdminHeader({ onMenuClick, collapsed }) {
             dark:text-gray-300
             dark:hover:bg-white/5
           "
-        >
-          {isDarkMode ? <Sun size={18} /> : <Moon size={18} />}
-        </button>
+          >
+            {isDarkMode ? <Sun size={18} /> : <Moon size={18} />}
+          </button>
 
-        {/* Notification */}
+          {/* Notification */}
 
-        {/* <button
+          {/* <button
           type="button"
           className="
             relative
@@ -251,12 +253,12 @@ export default function AdminHeader({ onMenuClick, collapsed }) {
             "
           />
         </button> */}
-        <NotificationDropdown />
+          <NotificationDropdown />
 
-        {/* Divider */}
+          {/* Divider */}
 
-        <div
-          className="
+          <div
+            className="
             hidden
             h-8
             w-px
@@ -264,16 +266,16 @@ export default function AdminHeader({ onMenuClick, collapsed }) {
             sm:block
             dark:bg-white/10
           "
-        />
+          />
 
-        <div ref={profileRef} className="relative">
-          {/* Profile Button */}
+          <div ref={profileRef} className="relative">
+            {/* Profile Button */}
 
-          <button
-            type="button"
-            onClick={handleProfileToggle}
-            aria-expanded={isProfileOpen}
-            className="
+            <button
+              type="button"
+              onClick={handleProfileToggle}
+              aria-expanded={isProfileOpen}
+              className="
               flex
               items-center
               gap-2
@@ -283,23 +285,23 @@ export default function AdminHeader({ onMenuClick, collapsed }) {
               hover:bg-gray-100
               dark:hover:bg-white/5
             "
-          >
-            {/* Profile Image */}
+            >
+              {/* Profile Image */}
 
-            {profileImage ? (
-              <img
-                src={profileImage}
-                alt={fullName}
-                className="
+              {profileImage ? (
+                <img
+                  src={profileImage}
+                  alt={fullName}
+                  className="
                   h-9
                   w-9
                   rounded-lg
                   object-cover
                 "
-              />
-            ) : (
-              <div
-                className="
+                />
+              ) : (
+                <div
+                  className="
                   flex
                   h-9
                   w-9
@@ -311,16 +313,16 @@ export default function AdminHeader({ onMenuClick, collapsed }) {
                   font-semibold
                   text-white
                 "
-              >
-                {fullName.charAt(0).toUpperCase()}
-              </div>
-            )}
+                >
+                  {fullName.charAt(0).toUpperCase()}
+                </div>
+              )}
 
-            {/* Name + Email */}
+              {/* Name + Email */}
 
-            <div className="hidden text-left md:block">
-              <p
-                className="
+              <div className="hidden text-left md:block">
+                <p
+                  className="
                   max-w-32.5
                   truncate
                   text-xs
@@ -328,28 +330,28 @@ export default function AdminHeader({ onMenuClick, collapsed }) {
                   text-gray-900
                   dark:text-white
                 "
-              >
-                {fullName}
-              </p>
+                >
+                  {fullName}
+                </p>
 
-              <p
-                className="
+                <p
+                  className="
                   max-w-32.5
                   truncate
                   text-[10px]
                   text-gray-500
                   dark:text-gray-400
                 "
-              >
-                {email}
-              </p>
-            </div>
+                >
+                  {email}
+                </p>
+              </div>
 
-            {/* Arrow */}
+              {/* Arrow */}
 
-            <ChevronDown
-              size={15}
-              className={`
+              <ChevronDown
+                size={15}
+                className={`
                 hidden
                 text-gray-400
                 transition-transform
@@ -358,12 +360,12 @@ export default function AdminHeader({ onMenuClick, collapsed }) {
 
                 ${isProfileOpen ? "rotate-180" : ""}
               `}
-            />
-          </button>
+              />
+            </button>
 
-          {isProfileOpen && (
-            <div
-              className="
+            {isProfileOpen && (
+              <div
+                className="
                 absolute
                 right-0
                 top-12
@@ -377,51 +379,51 @@ export default function AdminHeader({ onMenuClick, collapsed }) {
                 dark:border-white/10
                 dark:bg-[#171b23]
               "
-            >
-              {/* User Information */}
+              >
+                {/* User Information */}
 
-              <div
-                className="
+                <div
+                  className="
                   border-b
                   border-gray-100
                   px-3
                   py-2.5
                   dark:border-white/10
                 "
-              >
-                <p
-                  className="
+                >
+                  <p
+                    className="
                     truncate
                     text-xs
                     font-semibold
                     text-gray-900
                     dark:text-white
                   "
-                >
-                  {fullName}
-                </p>
+                  >
+                    {fullName}
+                  </p>
 
-                <p
-                  className="
+                  <p
+                    className="
                     truncate
                     text-[10px]
                     text-gray-500
                     dark:text-gray-400
                   "
-                >
-                  {email}
-                </p>
-              </div>
+                  >
+                    {email}
+                  </p>
+                </div>
 
-              {/* Profile */}
+                {/* Profile */}
 
-              <button
-                type="button"
-                onClick={() => {
-                  setIsProfileOpen(false);
-                  navigate('/admin/profile')
-                }}
-                className="
+                <button
+                  type="button"
+                  onClick={() => {
+                    setIsProfileOpen(false);
+                    navigate("/admin/profile");
+                  }}
+                  className="
                   mt-1
                   flex
                   w-full
@@ -436,18 +438,18 @@ export default function AdminHeader({ onMenuClick, collapsed }) {
                   dark:text-gray-300
                   dark:hover:bg-white/5
                 "
-              >
-                <User size={15} />
-                Profile
-              </button>
+                >
+                  <User size={15} />
+                  Profile
+                </button>
 
-              {/* Logout */}
+                {/* Logout */}
 
-              <button
-                type="button"
-                onClick={handleAuth}
-                disabled={isLogoutLoading}
-                className="
+                <button
+                  type="button"
+                  onClick={() => setLogOutModalOpen(true)}
+                  disabled={isLogoutLoading}
+                  className="
                   flex
                   w-full
                   items-center
@@ -460,14 +462,30 @@ export default function AdminHeader({ onMenuClick, collapsed }) {
                   hover:bg-red-50
                   dark:hover:bg-red-500/10
                 "
-              >
-                <LogOut size={15} />
-                {isLogoutLoading ? "Logging out..." : "Logout"}
-              </button>
-            </div>
-          )}
+                >
+                  <LogOut size={15} />
+                  Logout
+                </button>
+              </div>
+            )}
+          </div>
         </div>
-      </div>
-    </header>
+      </header>
+      <ConfirmModal
+        isOpen={logOutModalOpen}
+        onCancel={() => {
+          setLogOutModalOpen(false);
+        }}
+        onConfirm={handleAuth}
+        loading={isLogoutLoading}
+        title="Logout Confirmation"
+        message={
+          "Are you sure you want to logout? You will need to login again to access your account."
+        }
+        confirmText={isLogoutLoading ? "Logging out..." : "Logout"}
+        cancelText="Cancel"
+        danger
+      />
+    </>
   );
 }

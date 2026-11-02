@@ -36,7 +36,7 @@ export default function TicketTable({
     (state) => state?.ClientReducer?.clientSlice || {},
   );
   const hasActivePlan = Boolean(client?.active_plan);
-  
+
   if (loading) {
     return (
       <div
@@ -248,7 +248,7 @@ export default function TicketTable({
                 <td className="px-5 py-4">
                   <div className="min-w-0">
                     <p className="truncate text-sm font-medium text-gray-900 dark:text-white">
-                      {ticket.guestKeyId?.fullName || "-"}
+                      {ticket?.guestKeyId?.fullName || "-"}
                     </p>
 
                     <p className="mt-0.5 truncate text-xs text-gray-500 dark:text-gray-400">
@@ -354,10 +354,11 @@ export default function TicketTable({
       =================================================== */}
 
       <div className="space-y-3 p-3 md:hidden">
-        {tickets.map((ticket) => (
-          <div
-            key={ticket._id}
-            className="
+        {tickets.map((ticket) => {
+          return (
+            <div
+              key={ticket._id}
+              className="
               rounded-xl
               border
               border-gray-200
@@ -366,12 +367,12 @@ export default function TicketTable({
               dark:border-white/10
               dark:bg-[#11151d]
             "
-          >
-            {/* Header */}
+            >
+              {/* Header */}
 
-            <div className="flex items-start gap-3">
-              <div
-                className="
+              <div className="flex items-start gap-3">
+                <div
+                  className="
                   flex
                   h-10
                   w-10
@@ -383,128 +384,128 @@ export default function TicketTable({
                   text-blue-600
                   dark:text-blue-400
                 "
-              >
-                <Ticket size={18} />
-              </div>
+                >
+                  <Ticket size={18} />
+                </div>
 
-              <div className="min-w-0 flex-1">
-                <div
-                  className="
+                <div className="min-w-0 flex-1">
+                  <div
+                    className="
                     flex
                     items-start
                     justify-between
                     gap-3
                   "
-                >
-                  <div className="min-w-0">
-                    <h3
-                      className="
+                  >
+                    <div className="min-w-0">
+                      <h3
+                        className="
                         truncate
                         text-sm
                         font-semibold
                         text-gray-900
                         dark:text-white
                       "
-                    >
-                      {ticket.subject || "Untitled Ticket"}
-                    </h3>
+                      >
+                        {ticket.subject || "Untitled Ticket"}
+                      </h3>
 
-                    <p
-                      className="
+                      <p
+                        className="
                         mt-1
                         text-xs
                         text-gray-500
                         dark:text-gray-400
                       "
-                    >
-                      #{ticket._id?.slice(-8) || "--------"}
-                    </p>
-                  </div>
+                      >
+                        #{ticket._id?.slice(-8) || "--------"}
+                      </p>
+                    </div>
 
-                  <StatusBadge status={ticket.status} />
+                    <StatusBadge status={ticket.status} />
+                  </div>
                 </div>
               </div>
-            </div>
-            <p
-              className=" mt-3
+              <p
+                className=" mt-3
                 line-clamp-2
                 text-sm
                 leading-5
                 text-gray-500
                 dark:text-gray-400"
-            >
-              Name - {ticket.guestKeyId?.fullName || "-"}
-            </p>
+              >
+                Name - {ticket?.guestKeyId?.fullName || "-"}
+              </p>
 
-            {/* Contact Information */}
-            <div className="mt-3 rounded-xl border border-gray-200 bg-white p-3 dark:border-white/10 dark:bg-[#171b23]">
-              <div className="flex items-start gap-3">
-                {hasActivePlan ? (
-                  <div className="min-w-0 flex-1 space-y-2">
-                    <div>
-                      <p className="text-[11px] font-medium uppercase tracking-wide text-gray-400">
-                        Email
-                      </p>
+              {/* Contact Information */}
+              <div className="mt-3 rounded-xl border border-gray-200 bg-white p-3 dark:border-white/10 dark:bg-[#171b23]">
+                <div className="flex items-start gap-3">
+                  {hasActivePlan ? (
+                    <div className="min-w-0 flex-1 space-y-2">
+                      <div>
+                        <p className="text-[11px] font-medium uppercase tracking-wide text-gray-400">
+                          Email
+                        </p>
 
-                      <p className="mt-0.5 break-all text-sm text-gray-700 dark:text-gray-200">
-                        {ticket.guestKeyId?.email || "-"}
-                      </p>
+                        <p className="mt-0.5 break-all text-sm text-gray-700 dark:text-gray-200">
+                          {ticket?.guestKeyId?.email || "-"}
+                        </p>
+                      </div>
+
+                      <div>
+                        <p className="text-[11px] font-medium uppercase tracking-wide text-gray-400">
+                          Phone
+                        </p>
+
+                        <p className="mt-0.5 text-sm text-gray-700 dark:text-gray-200">
+                          {ticket?.guestKeyId?.phone || "-"}
+                        </p>
+                      </div>
                     </div>
-
-                    <div>
-                      <p className="text-[11px] font-medium uppercase tracking-wide text-gray-400">
-                        Phone
-                      </p>
-
-                      <p className="mt-0.5 text-sm text-gray-700 dark:text-gray-200">
-                        {ticket.guestKeyId?.phone || "-"}
-                      </p>
-                    </div>
-                  </div>
-                ) : (
-                  <>
-                    <div
-                      className="
+                  ) : (
+                    <>
+                      <div
+                        className="
                         flex h-9 w-9 shrink-0 items-center justify-center
                         rounded-lg bg-gray-100 text-gray-500
                         dark:bg-white/5 dark:text-gray-400
                       "
-                    >
-                      <Lock size={16} />
-                    </div>
+                      >
+                        <Lock size={16} />
+                      </div>
 
-                    <div className="min-w-0 flex-1">
-                      <p className="text-sm font-medium text-gray-800 dark:text-gray-200">
-                        Contact details are hidden
-                      </p>
+                      <div className="min-w-0 flex-1">
+                        <p className="text-sm font-medium text-gray-800 dark:text-gray-200">
+                          Contact details are hidden
+                        </p>
 
-                      <p className="mt-1 text-xs leading-5 text-gray-500 dark:text-gray-400">
-                        Upgrade your subscription to view customer email and
-                        phone number.
-                      </p>
+                        <p className="mt-1 text-xs leading-5 text-gray-500 dark:text-gray-400">
+                          Upgrade your subscription to view customer email and
+                          phone number.
+                        </p>
 
-                      <button
-                        type="button"
-                        onClick={() => onUpdatePlan?.(client)}
-                        className="
+                        <button
+                          type="button"
+                          onClick={() => onUpdatePlan?.(client)}
+                          className="
                           mt-2 inline-flex items-center gap-1.5
                           rounded-lg bg-blue-600 px-3 py-2
                           text-xs font-medium text-white
                           transition hover:bg-blue-700
                         "
-                      >
-                        Upgrade Plan
-                        <ArrowUpRight size={13} />
-                      </button>
-                    </div>
-                  </>
-                )}
+                        >
+                          Upgrade Plan
+                          <ArrowUpRight size={13} />
+                        </button>
+                      </div>
+                    </>
+                  )}
+                </div>
               </div>
-            </div>
-            {/* Description */}
+              {/* Description */}
 
-            <p
-              className="
+              <p
+                className="
                 mt-3
                 line-clamp-2
                 text-sm
@@ -512,35 +513,35 @@ export default function TicketTable({
                 text-gray-500
                 dark:text-gray-400
               "
-            >
-              Description - {ticket.description || "No description provided."}
-            </p>
+              >
+                Description - {ticket.description || "No description provided."}
+              </p>
 
-            {/* Meta */}
+              {/* Meta */}
 
-            <div
-              className="
+              <div
+                className="
                 mt-4
                 flex
                 flex-wrap
                 items-center
                 gap-2
               "
-            >
-              <span
-                className="
+              >
+                <span
+                  className="
                   text-xs
                   text-gray-400
                 "
-              >
-                Created: {formatDate(ticket.createdAt)}
-              </span>
-            </div>
+                >
+                  Created: {formatDate(ticket.createdAt)}
+                </span>
+              </div>
 
-            {/* Actions */}
+              {/* Actions */}
 
-            <div
-              className="
+              <div
+                className="
                 mt-4
                 flex
                 items-center
@@ -550,23 +551,25 @@ export default function TicketTable({
                 pt-3
                 dark:border-white/10
               "
-            >
-              <ActionButton
-                icon={<Edit2 size={15} />}
-                label="Edit"
-                onClick={() => onEdit?.(ticket)}
-              />
-              {(ticket.status === "resolved" || ticket.status === "closed") && (
+              >
                 <ActionButton
-                  icon={<Trash2 size={15} />}
-                  label="Delete"
-                  danger
-                  onClick={() => onDelete?.(ticket)}
+                  icon={<Edit2 size={15} />}
+                  label="Edit"
+                  onClick={() => onEdit?.(ticket)}
                 />
-              )}
+                {(ticket.status === "resolved" ||
+                  ticket.status === "closed") && (
+                  <ActionButton
+                    icon={<Trash2 size={15} />}
+                    label="Delete"
+                    danger
+                    onClick={() => onDelete?.(ticket)}
+                  />
+                )}
+              </div>
             </div>
-          </div>
-        ))}
+          );
+        })}
       </div>
     </div>
   );

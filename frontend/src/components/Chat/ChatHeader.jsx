@@ -11,6 +11,7 @@ import { handleLogout } from "../../utils/logout";
 import { useTheme } from "../../context/ThemeContext";
 import { motion, AnimatePresence } from "framer-motion";
 import { getImageUrl } from "../../utils/imageUrl";
+import ConfirmModal from "../ClientComponent/ConfirmModal";
 
 const ChatHeader = () => {
   const dispatch = useDispatch();
@@ -19,6 +20,7 @@ const ChatHeader = () => {
   const { activePage, clientConfig } = useSelector((store) => store.chatSlice);
   const [profileOpen, setProfileOpen] = useState(false);
   const [isLogoutLoading, setIsLogoutLoading] = useState(false);
+  const [logOutModalOpen, setLogOutModalOpen] = useState(false);
   const dropdownRef = useRef(null);
   const token = isLogin();
   const { conversationId } = useSpeechRecognition();
@@ -361,7 +363,7 @@ const ChatHeader = () => {
                 absolute
                 right-0
                 top-full
-                z-50
+                z-40
                 mt-2
                 w-60
                 overflow-hidden
@@ -455,7 +457,7 @@ const ChatHeader = () => {
               <div className="p-1.5">
                 <button
                   type="button"
-                  onClick={handleAuth}
+                  onClick={() => setLogOutModalOpen(true)}
                   disabled={isLogoutLoading}
                   className="
                     flex
@@ -492,7 +494,7 @@ const ChatHeader = () => {
                   </span>
 
                   <span className="flex-1">
-                    {isLogoutLoading ? "Logging out..." : "Logout"}
+                    Logout
                   </span>
                 </button>
               </div>
@@ -500,6 +502,21 @@ const ChatHeader = () => {
           )}
         </div>
       </div>
+      <ConfirmModal
+        isOpen={logOutModalOpen}
+        onCancel={() => {
+          setLogOutModalOpen(false);
+        }}
+        onConfirm={handleAuth}
+        loading={isLogoutLoading}
+        title="Logout Confirmation"
+        message={
+          "Are you sure you want to logout? You will need to login again to access your account."
+        }
+        confirmText={isLogoutLoading ? "Logging out..." : "Logout"}
+        cancelText="Cancel"
+        danger
+      />
     </div>
   );
 };

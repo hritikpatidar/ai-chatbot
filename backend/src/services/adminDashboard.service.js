@@ -1,11 +1,13 @@
-import { getClientActivity, getDashboardStats, getRecentClients } from "../repositories/admin.repository.js";
+import { getChatbotStats, getClientActivity, getDashboardStats, getRecentClients, getSubscriptionStats } from "../repositories/admin.repository.js";
 
 
 export const getAdminDashboardService = async () => {
-  const [stats, activity, recentClients] = await Promise.all([
+  const [stats, activity, recentClients, chatbotStats, subscriptionStats,] = await Promise.all([
     getDashboardStats(),
     getClientActivity(),
     getRecentClients(),
+    getChatbotStats(),
+    getSubscriptionStats(),
   ]);
 
   const activeClientsPercentage =
@@ -25,14 +27,27 @@ export const getAdminDashboardService = async () => {
 
     systemOverview: {
       activeClientsPercentage,
-
+      inactiveClientsPercentage,
+      chatbotsOnlinePercentage: null,
+      subscriptionsActivePercentage: null,
+    },
+    systemOverview: {
+      activeClients: stats.activeClients,
+      totalClients: stats.totalClients,
+      activeClientsPercentage,
       inactiveClientsPercentage,
 
-      // Abhi actual chatbot/subscription
-      // collection available nahi hai.
-      chatbotsOnlinePercentage: null,
+      totalChatbots: chatbotStats.totalChatbots,
+      onlineChatbots: chatbotStats.onlineChatbots,
+      offlineChatbots: chatbotStats.offlineChatbots,
+      chatbotsOnlinePercentage:
+        chatbotStats.chatbotsOnlinePercentage,
 
-      subscriptionsActivePercentage: null,
+      totalSubscriptions: subscriptionStats.totalSubscriptions,
+      activeSubscriptions: subscriptionStats.activeSubscriptions,
+      inactiveSubscriptions: subscriptionStats.inactiveSubscriptions,
+      subscriptionsActivePercentage:
+        subscriptionStats.subscriptionsActivePercentage,
     },
 
     recentClients,

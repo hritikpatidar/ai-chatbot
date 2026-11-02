@@ -94,7 +94,7 @@ export default function ClientChatbotSettings() {
   });
   const aiInstructions = watch("chatbot.aiInstructions") || "";
 
-  const questionLimit = 10;
+  const questionLimit = client?.active_plan === "Basic" ? 5 : 10;
 
   const { fields, append, remove, move } = useFieldArray({
     control,

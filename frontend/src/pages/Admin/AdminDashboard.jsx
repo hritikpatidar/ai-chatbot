@@ -89,20 +89,6 @@ const formatNumber = (value) => {
   return new Intl.NumberFormat("en-IN").format(number);
 };
 
-const getPercentage = (value, total) => {
-  const numericValue = Number(value || 0);
-  const numericTotal = Number(total || 0);
-
-  if (!numericTotal) {
-    return 0;
-  }
-
-  return Math.min(
-    100,
-    Math.max(0, Math.round((numericValue / numericTotal) * 100)),
-  );
-};
-
 //  NORMALIZE API DATA
 //  Backend response thoda different ho to yaha handle
 //  kar sakte ho.
@@ -199,32 +185,11 @@ export default function AdminDashboard() {
 
   /* SYSTEM OVERVIEW */
 
-  const chatbotOnline =
-    system?.chatbotsOnline ??
-    system?.onlineChatbots ??
-    stats?.chatbotsOnline ??
-    0;
-
-  const totalChatbots =
-    system?.totalChatbots ?? stats?.totalChatbots ?? totalClients;
-
-  const activeSubscriptions =
-    system?.activeSubscriptions ?? stats?.activeSubscriptions ?? 0;
-
-  const totalSubscriptions =
-    system?.totalSubscriptions ?? stats?.totalSubscriptions ?? totalClients;
-
-  const activeClientPercentage = getPercentage(activeClients, totalClients);
-
-  const chatbotPercentage =
-    system?.chatbotsOnlinePercentage ??
-    system?.chatbotPercentage ??
-    getPercentage(chatbotOnline, totalChatbots);
-
-  const subscriptionPercentage =
-    system?.subscriptionsActivePercentage ??
-    system?.subscriptionPercentage ??
-    getPercentage(activeSubscriptions, totalSubscriptions);
+  const {
+    activeClientsPercentage = 0,
+    chatbotsOnlinePercentage = 0,
+    subscriptionsActivePercentage = 0,
+  } = system || {};
 
   const chartData = useMemo(() => {
     if (!Array.isArray(activity)) {
@@ -944,20 +909,20 @@ export default function AdminDashboard() {
           <div className="mt-6 space-y-5">
             <ProgressItem
               label="Active Clients"
-              value={`${activeClientPercentage}%`}
-              progress={activeClientPercentage}
+              value={`${activeClientsPercentage}%`}
+              progress={activeClientsPercentage}
             />
 
             <ProgressItem
               label="Chatbots Online"
-              value={`${chatbotPercentage}%`}
-              progress={chatbotPercentage}
+              value={`${chatbotsOnlinePercentage}%`}
+              progress={chatbotsOnlinePercentage}
             />
 
             <ProgressItem
               label="Subscriptions Active"
-              value={`${subscriptionPercentage}%`}
-              progress={subscriptionPercentage}
+              value={`${subscriptionsActivePercentage}%`}
+              progress={subscriptionsActivePercentage}
             />
           </div>
 
@@ -1200,12 +1165,12 @@ export default function AdminDashboard() {
                     client?.contact?.email ||
                     client?.user?.email ||
                     "-";
-                  const plan = client.active_plan ||
-                    "-";
+                  const plan = client.active_plan || "-";
                   const status =
                     client?.status || client?.accountStatus || "inactive";
                   const chatbotStatus =
-                    client?.chatbot?.status ||client?.status ||
+                    client?.chatbot?.status ||
+                    client?.status ||
                     client?.chatbotStatus ||
                     (client?.chatbot?.online ? "online" : "offline");
                   const lastLogin =

@@ -577,7 +577,7 @@ const ConversationHistory = ({ onConversationSelect }) => {
   const { socket } = useSocket();
 
   const { messages = [], conversationList = [] } = useSelector(
-    (store) => store.chatSlice
+    (store) => store.chatSlice,
   );
 
   const [search, setSearch] = useState("");
@@ -598,6 +598,30 @@ const ConversationHistory = ({ onConversationSelect }) => {
   const deleteRequestIdRef = useRef(null);
   const messageRequestIdRef = useRef(null);
   const mountedRef = useRef(false);
+
+  // const [menuOpen, setMenuOpen] = useState(null);
+  const [menuPosition, setMenuPosition] = useState("bottom");
+
+  // const menuRef = useRef(null);
+
+  const handleMenuToggle = (event, conversationId) => {
+    event.stopPropagation();
+
+    if (menuOpen === conversationId) {
+      setMenuOpen(null);
+      return;
+    }
+
+    const buttonRect = event.currentTarget.getBoundingClientRect();
+    const spaceBelow = window.innerHeight - buttonRect.bottom;
+    const spaceAbove = buttonRect.top;
+
+    setMenuPosition(
+      spaceBelow < 150 && spaceAbove > spaceBelow ? "top" : "bottom",
+    );
+
+    setMenuOpen(conversationId);
+  };
 
   const updateSelectedConversation = (conversation) => {
     const id = conversation?._id ? String(conversation._id) : null;
@@ -621,23 +645,6 @@ const ConversationHistory = ({ onConversationSelect }) => {
     dispatch(clearMessages([]));
   };
 
-  // Close the dropdown when the user clicks outside.
-  useEffect(() => {
-    const handleOutsideClick = (event) => {
-      if (menuRef.current && !menuRef.current.contains(event.target)) {
-        setMenuOpen(null);
-      }
-    };
-
-    document.addEventListener("mousedown", handleOutsideClick);
-    document.addEventListener("touchstart", handleOutsideClick);
-
-    return () => {
-      document.removeEventListener("mousedown", handleOutsideClick);
-      document.removeEventListener("touchstart", handleOutsideClick);
-    };
-  }, []);
-
   // Fetch the conversation list when the component mounts.
   useEffect(() => {
     getConversations();
@@ -659,7 +666,7 @@ const ConversationHistory = ({ onConversationSelect }) => {
       // Preserve the currently selected conversation if it still exists.
       if (currentId) {
         const currentConversation = conversations.find(
-          (conversation) => String(conversation?._id) === currentId
+          (conversation) => String(conversation?._id) === currentId,
         );
 
         if (currentConversation) {
@@ -728,13 +735,14 @@ const ConversationHistory = ({ onConversationSelect }) => {
       deleteRequestIdRef.current = null;
 
       if (!deletedId) {
-        toast.error(data?.message || "Could not identify the deleted conversation");
+        toast.error(
+          data?.message || "Could not identify the deleted conversation",
+        );
         return;
       }
 
       const deletedIdString = String(deletedId);
-      const wasSelected =
-        selectedIdRef.current === deletedIdString;
+      const wasSelected = selectedIdRef.current === deletedIdString;
 
       dispatch(removeConversation(deletedId));
 
@@ -768,7 +776,7 @@ const ConversationHistory = ({ onConversationSelect }) => {
     if (!selectedId) return;
 
     const currentConversation = conversationList.find(
-      (conversation) => String(conversation?._id) === String(selectedId)
+      (conversation) => String(conversation?._id) === String(selectedId),
     );
 
     if (currentConversation) {
@@ -788,9 +796,7 @@ const ConversationHistory = ({ onConversationSelect }) => {
         .includes(query);
 
       const messageMatches = (conversation?.messages || []).some((message) =>
-        (message?.content || message?.text || "")
-          .toLowerCase()
-          .includes(query)
+        (message?.content || message?.text || "").toLowerCase().includes(query),
       );
 
       return titleMatches || messageMatches;
@@ -923,14 +929,12 @@ const ConversationHistory = ({ onConversationSelect }) => {
               </div>
             ) : (
               filteredConversations.map((conversation) => {
-                const conversationId = String(conversation?._id);
-                const active = selectedId === conversationId;
+                const conversationId = conversation._id;
                 const isMenuOpen = menuOpen === conversationId;
-
+                const active = selectedId === conversationId;
                 return (
                   <div
                     key={conversationId}
-                    ref={isMenuOpen ? menuRef : null}
                     className={`group relative mb-1 flex w-full min-w-0 items-center rounded-xl border transition-colors ${
                       active
                         ? "border-blue-200 bg-blue-50 dark:border-blue-500/20 dark:bg-blue-500/10"
@@ -942,45 +946,38 @@ const ConversationHistory = ({ onConversationSelect }) => {
                       type="button"
                       title={conversation?.title || "New Conversation"}
                       onClick={() => selectConversation(conversation)}
-                      className="flex min-w-0 flex-1 items-center gap-3 rounded-xl px-3 py-3 text-left"
+                      className="flex min-w-0 flex-1 items-center gap-3 rounded-xl px-3 py-2.5 text-left"
                     >
-                      <MessageSquare
-                        size={18}
-                        className={`shrink-0 ${
+                      <div
+                        className={`flex h-9 w-9 shrink-0 items-center justify-center rounded-lg ${
                           active
-                            ? "text-blue-600 dark:text-blue-400"
-                            : "text-gray-500 dark:text-gray-400"
-                        }`}
-                      />
-
-                      <span
-                        className={`min-w-0 flex-1 truncate text-sm ${
-                          active
-                            ? "font-medium text-blue-700 dark:text-blue-400"
-                            : "text-gray-700 dark:text-gray-300"
+                            ? "bg-blue-100 text-blue-600 dark:bg-blue-500/15 dark:text-blue-400"
+                            : "bg-gray-200/70 text-gray-500 dark:bg-white/5 dark:text-gray-400"
                         }`}
                       >
-                        {conversation?.title || "New Conversation"}
-                      </span>
+                        <MessageSquare size={17} />
+                      </div>
+
+                      <div className="flex min-w-0 flex-1 flex-col gap-0.5">
+                        <span className="truncate text-sm font-medium text-gray-800 dark:text-gray-200">
+                          {conversation?.visitor?.fullName || "Visitor"}
+                        </span>
+
+                        <span className="truncate text-xs text-gray-500 dark:text-gray-400">
+                          {conversation?.title || "New Conversation"}
+                        </span>
+                      </div>
                     </button>
 
                     {/* Three dots */}
                     <button
                       type="button"
-                      aria-label={`More options for ${
-                        conversation?.title || "conversation"
-                      }`}
+                      aria-label="More options"
                       aria-expanded={isMenuOpen}
-                      onClick={(event) => {
-                        event.stopPropagation();
-
-                        setMenuOpen((current) =>
-                          current === conversationId ? null : conversationId
-                        );
-
-                        event.currentTarget.blur();
-                      }}
-                      className={`mr-2 flex h-8 w-8 shrink-0 items-center justify-center rounded-lg transition-colors focus:outline-none focus:ring-0 ${
+                      onClick={(event) =>
+                        handleMenuToggle(event, conversationId)
+                      }
+                      className={`mr-2 flex h-8 w-8 shrink-0 items-center justify-center rounded-lg transition-colors focus:outline-none ${
                         isMenuOpen
                           ? "bg-gray-200 text-gray-800 dark:bg-white/10 dark:text-white"
                           : "text-gray-500 hover:bg-gray-200 hover:text-gray-900 dark:text-gray-400 dark:hover:bg-white/10 dark:hover:text-white sm:opacity-0 sm:group-hover:opacity-100"
@@ -991,7 +988,13 @@ const ConversationHistory = ({ onConversationSelect }) => {
 
                     {/* Dropdown */}
                     {isMenuOpen && (
-                      <div className="absolute right-2 top-full z-50 mt-1 w-44 rounded-xl border border-gray-200 bg-white p-1.5 shadow-xl shadow-black/10 dark:border-white/10 dark:bg-[#1b202b] dark:shadow-black/30">
+                      <div
+                        className={`absolute right-2 z-50 w-44 rounded-xl border border-gray-200 bg-white p-1.5 shadow-xl shadow-black/10 dark:border-white/10 dark:bg-[#1b202b] dark:shadow-black/30 ${
+                          menuPosition === "top"
+                            ? "bottom-full mb-1"
+                            : "top-full mt-1"
+                        }`}
+                      >
                         <button
                           type="button"
                           onClick={(event) => {

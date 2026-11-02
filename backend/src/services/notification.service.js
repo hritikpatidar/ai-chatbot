@@ -124,7 +124,7 @@ export const createAndSendNotification = async ({
         });
       }
     }
-
+    console.log("recipients", recipients)
     const results = await Promise.allSettled(
       recipients.map(async ({ user, clientId: recipientClientId, role }) => {
         const notification = await createNotification({
@@ -138,7 +138,7 @@ export const createAndSendNotification = async ({
           metadata,
           type,
         });
-
+        console.log("notification", notification)
         try {
           emitNotificationCreated(io, notification);
           console.log(`[${role}] Socket event emitted`);
@@ -200,7 +200,7 @@ export const getMyNotifications = async (
   limit = 10,
   filter = "all"
 ) => {
-  console.log("filter",filter)
+  console.log("filter", filter)
   return findNotificationsByUser(
     userId,
     Math.max(1, Number(page) || 1),

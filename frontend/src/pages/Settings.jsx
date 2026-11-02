@@ -24,6 +24,7 @@ import { useTheme } from "../context/ThemeContext";
 import EditProfileModal from "../components/EditProfileModal";
 import { setIsProfileModalOpen } from "../redux/features/Auth/authSlice";
 import { getImageUrl } from "../utils/imageUrl";
+import ConfirmModal from "../components/ClientComponent/ConfirmModal";
 
 const settingsSections = [
   {
@@ -83,7 +84,8 @@ export default function Settings() {
   );
   const { isDarkMode, toggleTheme } = useTheme();
   const [isLogoutLoading, setIsLogoutLoading] = useState(false);
-
+  const [logOutModalOpen, setLogOutModalOpen] = useState(false);
+  
   const handleOpenProfileModal = () => {
     dispatch(setIsProfileModalOpen(true));
   };
@@ -593,7 +595,7 @@ export default function Settings() {
 
             <button
               type="button"
-              onClick={handleAuth}
+              onClick={() => setLogOutModalOpen(true)}
               disabled={isLogoutLoading}
               className="
                 group
@@ -640,7 +642,7 @@ export default function Settings() {
                     dark:text-red-400
                   "
                 >
-                  {isLogoutLoading ? "Logging out..." : "Log Out"}
+                  Log Out
                 </h3>
 
                 <p
@@ -687,6 +689,22 @@ export default function Settings() {
       </div>
 
       <EditProfileModal />
+
+      <ConfirmModal
+        isOpen={logOutModalOpen}
+        onCancel={() => {
+          setLogOutModalOpen(false);
+        }}
+        onConfirm={handleAuth}
+        loading={isLogoutLoading}
+        title="Logout Confirmation"
+        message={
+          "Are you sure you want to logout? You will need to login again to access your account."
+        }
+        confirmText={isLogoutLoading ? "Logging out..." : "Logout"}
+        cancelText="Cancel"
+        danger
+      />
     </div>
   );
 }

@@ -142,7 +142,7 @@ export default function SupportTickets() {
       {
         onSuccess: (data) => {
           toast.success(data?.message || "Reply emailed to client");
-          setReply("");
+          closeTicket();
         },
         onError: (error) => {
           toast.error(getErrorMessage(error));

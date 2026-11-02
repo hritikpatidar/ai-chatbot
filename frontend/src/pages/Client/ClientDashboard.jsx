@@ -353,8 +353,8 @@ export default function ClientDashboard() {
                 title="Gemini Tokens"
                 description="Total token consumption"
                 icon={Zap}
-                used={usage?.tokens?.used}
-                limit={usage?.tokens?.limit}
+                used={usage?.tokens?.used ?? 0}
+                limit={usage?.tokens?.limit ?? 0}
                 unit="tokens"
                 color="blue"
               />
@@ -363,8 +363,8 @@ export default function ClientDashboard() {
                 title="Conversations"
                 description="Conversations created"
                 icon={MessageSquare}
-                used={usage?.conversations?.used}
-                limit={usage?.conversations?.limit}
+                used={usage?.conversations?.used ?? 0}
+                limit={usage?.conversations?.limit ?? 0}
                 unit="conversations"
                 color="violet"
               />
@@ -373,8 +373,8 @@ export default function ClientDashboard() {
                 title="AI Responses"
                 description="Responses generated"
                 icon={Bot}
-                used={usage?.aiResponses?.used}
-                limit={usage?.aiResponses?.limit}
+                used={usage?.aiResponses?.used ?? 0}
+                limit={usage?.aiResponses?.limit ?? 0}
                 unit="responses"
                 color="emerald"
               />

@@ -30,6 +30,7 @@ import {
   RefreshCw,
   Activity,
   Zap,
+  LoaderCircle,
 } from "lucide-react";
 import CustomSelect from "../../components/common/CustomSelect";
 import {
@@ -51,7 +52,6 @@ const topics = [
   { name: "Returns & Refunds", count: 150, color: "bg-emerald-500" },
   { name: "Other Queries", count: 120, color: "bg-amber-500" },
 ];
-
 
 function Card({ children, className = "" }) {
   return (
@@ -428,6 +428,14 @@ export default function Analytics() {
   const ratingDistribution = satisfaction?.ratingDistribution || [];
   const totalReviews = satisfaction?.totalReviews ?? 0;
   const averageRating = satisfaction?.averageRating ?? 0;
+
+  if(isAnalyticsLoading) {
+    return (
+      <div className="flex h-full w-full items-center justify-center">
+        <LoaderCircle size={40} className="animate-spin text-blue-500" />
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-full w-full text-gray-900 dark:text-white">

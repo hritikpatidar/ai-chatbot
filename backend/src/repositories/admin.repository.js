@@ -1,4 +1,5 @@
 import Client from "../models/Client.js";
+import Subscription from "../models/Subscription.js";
 import User from "../models/User.js";
 
 // DASHBOARD STATS
@@ -177,4 +178,56 @@ export const getRecentClients = async () => {
         : null,
     };
   });
+};
+
+// GET CHATBOT STATS
+
+export const getChatbotStats = async () => {
+  const [totalChatbots, onlineChatbots] = await Promise.all([
+    Client.countDocuments(),
+
+    Client.countDocuments({
+      status: "active",
+    }),
+  ]);
+
+  const chatbotsOnlinePercentage =
+    totalChatbots > 0
+      ? Math.round((onlineChatbots / totalChatbots) * 100)
+      : 0;
+
+  return {
+    totalChatbots,
+    onlineChatbots,
+    offlineChatbots: totalChatbots - onlineChatbots,
+    chatbotsOnlinePercentage,
+  };
+};
+
+// GET SUBSCRIPTION STATS\
+
+export const getSubscriptionStats = async () => {
+  const [totalSubscriptions, activeSubscriptions] = await Promise.all([
+    Subscription.countDocuments(),
+
+    Subscription.countDocuments({
+      status: {
+        $in: ["trialing", "active", "past_due", "incomplete"],
+      },
+    }),
+  ]);
+
+  const subscriptionsActivePercentage =
+    totalSubscriptions > 0
+      ? Math.round(
+        (activeSubscriptions / totalSubscriptions) * 100
+      )
+      : 0;
+
+  return {
+    totalSubscriptions,
+    activeSubscriptions,
+    inactiveSubscriptions: totalSubscriptions - activeSubscriptions,
+    subscriptionsActivePercentage,
+  };
 };

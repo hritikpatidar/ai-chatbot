@@ -418,9 +418,9 @@ export default function Analytics() {
     const name = item.name.replace("_", " ") || "Other";
     return {
       name,
-      value: Number(item.value ?? 0),
+      value: Number(item.count ?? 0),
       color: item.color || sourceColors[name.toLowerCase()] || "#94a3b8",
-      count: item.count || 0,
+      percentage: item.value || 0,
     };
   });
 
@@ -429,7 +429,62 @@ export default function Analytics() {
   const totalReviews = satisfaction?.totalReviews ?? 0;
   const averageRating = satisfaction?.averageRating ?? 0;
 
-  if(isAnalyticsLoading) {
+  const UserActivityTooltip = ({ active, payload, label }) => {
+    if (!active || !payload?.length) return null;
+    const newUsers =
+      payload.find((item) => item.dataKey === "newUsers")?.value || 0;
+    const returningUsers =
+      payload.find((item) => item.dataKey === "returningUsers")?.value || 0;
+    const total = newUsers + returningUsers;
+    return (
+      <div className="min-w-47.5 rounded-xl border border-gray-200 bg-white p-3 shadow-xl dark:border-white/10 dark:bg-[#202631]">
+        <p className="mb-3 text-xs font-semibold text-gray-500 dark:text-gray-400">
+          {label}
+        </p>
+
+        <div className="space-y-3">
+          <div className="flex items-center justify-between gap-5">
+            <div className="flex items-center gap-2">
+              <span className="h-2.5 w-2.5 rounded-full bg-indigo-500" />
+              <span className="text-xs text-gray-600 dark:text-gray-300">
+                New Users
+              </span>
+            </div>
+
+            <span className="text-sm font-bold text-gray-900 dark:text-white">
+              {Number(newUsers).toLocaleString("en-IN")}
+            </span>
+          </div>
+
+          <div className="flex items-center justify-between gap-5">
+            <div className="flex items-center gap-2">
+              <span className="h-2.5 w-2.5 rounded-full bg-sky-400" />
+              <span className="text-xs text-gray-600 dark:text-gray-300">
+                Returning
+              </span>
+            </div>
+
+            <span className="text-sm font-bold text-gray-900 dark:text-white">
+              {Number(returningUsers).toLocaleString("en-IN")}
+            </span>
+          </div>
+
+          <div className="border-t border-gray-200 pt-2 dark:border-white/10">
+            <div className="flex items-center justify-between">
+              <span className="text-xs font-medium text-gray-500 dark:text-gray-400">
+                Total Users
+              </span>
+              <span className="text-sm font-bold text-gray-900 dark:text-white">
+                {Number(total).toLocaleString("en-IN")}
+              </span>
+            </div>
+          </div>
+        </div>
+      </div>
+    );
+  };
+
+  if (isAnalyticsLoading) {
     return (
       <div className="flex h-full w-full items-center justify-center">
         <LoaderCircle size={40} className="animate-spin text-blue-500" />
@@ -497,7 +552,6 @@ export default function Analytics() {
                   },
                 ]}
                 placeholder="Select status"
-                // error={errors.accountStatus?.message}
                 required
                 icon={true}
               />
@@ -664,15 +718,6 @@ export default function Analytics() {
               icon={MessageSquare}
               title="Conversations Overview"
               action={
-                // <select
-                //   value={chartMode}
-                //   onChange={(e) => setChartMode(e.target.value)}
-                //   className="max-w-36 rounded-lg border border-gray-200 bg-white px-2 py-2 text-xs outline-none dark:border-white/10 dark:bg-[#171b23] dark:text-gray-200"
-                //   aria-label="Conversation chart metric"
-                // >
-                //   <option value="conversations">Conversations</option>
-                //   <option value="users">Unique users</option>
-                // </select>
                 <CustomSelect
                   size="sm"
                   // label="Business Status"
@@ -801,67 +846,103 @@ export default function Analytics() {
           <Card className="xl:col-span-2">
             <SectionHeading icon={Users} title="User Activity" />
 
-            <div className="mb-4 flex flex-wrap gap-4 text-xs text-gray-500 dark:text-gray-400">
-              <span className="flex items-center gap-2">
-                <span className="h-2.5 w-2.5 rounded-full bg-blue-500" />
-                New Users
-              </span>
-              <span className="flex items-center gap-2">
-                <span className="h-2.5 w-2.5 rounded-full bg-blue-400" />
-                Returning
-              </span>
+            <div className="mb-5 flex flex-wrap items-center justify-between gap-3">
+              <p className="text-sm text-gray-500 dark:text-gray-400">
+                New and returning users activity
+              </p>
+
+              <div className="flex flex-wrap items-center gap-4 text-xs">
+                <span className="flex items-center gap-2 text-gray-600 dark:text-gray-300">
+                  <span className="h-2.5 w-2.5 rounded-full bg-indigo-500" />
+                  New Users
+                </span>
+
+                <span className="flex items-center gap-2 text-gray-600 dark:text-gray-300">
+                  <span className="h-2.5 w-2.5 rounded-full bg-sky-400" />
+                  Returning
+                </span>
+              </div>
             </div>
 
-            <div className="h-70 w-full">
+            <div className="h-75 w-full">
               <ResponsiveContainer width="100%" height="100%">
                 <BarChart
-                  data={
-                    dateRange === "7"
-                      ? activityData
-                      : activityData.map((item) => ({
-                          day: item.day,
-                          newUsers: item.newUsers,
-                          returningUsers: Math.round(
-                            item.returningUsers * 0.42,
-                          ),
-                        }))
-                  }
-                  margin={{ top: 8, right: 0, left: -22, bottom: 0 }}
-                  barGap={4}
+                  data={activityData}
+                  margin={{ top: 12, right: 10, left: -18, bottom: 0 }}
+                  // barGap={8}
+                  barCategoryGap="25%"
                 >
                   <CartesianGrid
                     strokeDasharray="3 3"
                     vertical={false}
                     stroke="#94a3b8"
-                    strokeOpacity={0.2}
+                    strokeOpacity={0.15}
                   />
+
                   <XAxis
                     dataKey="day"
-                    tick={{ fill: "#94a3b8", fontSize: 10 }}
+                    tick={{
+                      fill: "#94a3b8",
+                      fontSize: 11,
+                    }}
                     axisLine={false}
                     tickLine={false}
+                    tickMargin={12}
                   />
+
                   <YAxis
-                    tick={{ fill: "#94a3b8", fontSize: 10 }}
+                    allowDecimals={false}
+                    tick={{
+                      fill: "#94a3b8",
+                      fontSize: 11,
+                    }}
                     axisLine={false}
                     tickLine={false}
+                    tickMargin={8}
+                    width={40}
                   />
-                  <Tooltip contentStyle={tooltipStyle} />
+
+                  <Tooltip
+                    content={<UserActivityTooltip />}
+                    cursor={{
+                      fill: "#94a3b8",
+                      fillOpacity: 0.08,
+                      radius: 8,
+                    }}
+                    isAnimationActive={false}
+                    wrapperStyle={{
+                      outline: "none",
+                      zIndex: 50,
+                      pointerEvents: "none",
+                    }}
+                  />
+
                   <Bar
                     dataKey="newUsers"
                     name="New Users"
-                    stackId="users"
                     fill="#6366f1"
-                    radius={[0, 0, 0, 0]}
-                    maxBarSize={28}
+                    radius={[6, 6, 0, 0]}
+                    maxBarSize={22}
+                    animationDuration={900}
+                    activeBar={{
+                      fill: "#818cf8",
+                      stroke: "#a5b4fc",
+                      strokeWidth: 1,
+                    }}
                   />
+
                   <Bar
                     dataKey="returningUsers"
                     name="Returning Users"
-                    stackId="users"
                     fill="#60a5fa"
-                    radius={[5, 5, 0, 0]}
-                    maxBarSize={28}
+                    radius={[6, 6, 0, 0]}
+                    maxBarSize={22}
+                    animationDuration={900}
+                    activeBar={{
+                      fill: "#38bdf8",
+                      stroke: "#7dd3fc",
+                      strokeWidth: 1,
+                    }}
                   />
                 </BarChart>
               </ResponsiveContainer>
@@ -920,16 +1001,23 @@ export default function Analytics() {
                     data={sourceData}
                     dataKey="value"
                     nameKey="name"
-                    innerRadius={62}
-                    outerRadius={88}
+                    innerRadius={65}
+                    outerRadius={90}
                     paddingAngle={4}
+                    cornerRadius={5}
                     stroke="none"
                   >
                     {sourceData.map((entry) => (
                       <Cell key={entry.name} fill={entry.color} />
                     ))}
                   </Pie>
-                  <Tooltip contentStyle={tooltipStyle} />
+                  <Tooltip
+                    contentStyle={tooltipStyle}
+                    wrapperStyle={{
+                      zIndex: 50,
+                      pointerEvents: "none",
+                    }}
+                  />
                 </PieChart>
               </ResponsiveContainer>
 
@@ -955,11 +1043,11 @@ export default function Analytics() {
                     <div className="flex items-center gap-2">
                       <SourceIcon size={16} style={{ color: source.color }} />
                       <span className="text-sm text-gray-600 dark:text-gray-400">
-                        {source.name} ({source.count})
+                        {source.name} ({source.value})
                       </span>
                     </div>
                     <span className="text-sm font-semibold text-gray-800 dark:text-gray-200">
-                      {source.value} %
+                      {source.percentage} %
                     </span>
                   </div>
                 );

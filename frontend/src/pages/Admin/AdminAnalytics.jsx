@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useMemo, useState } from "react";
 import {
   Users,
   UserCheck,
@@ -11,120 +11,291 @@ import {
   Activity,
   Bot,
   CalendarDays,
+  RefreshCw,
 } from "lucide-react";
+import {
+  ResponsiveContainer,
+  BarChart,
+  Bar,
+  XAxis,
+  YAxis,
+  CartesianGrid,
+  Tooltip,
+  PieChart,
+  Pie,
+  Cell,
+  Legend,
+} from "recharts";
+import CustomSelect from "../../components/common/CustomSelect";
+import { useAdminAnalytics } from "../../hooks/Admin/useAdminAnalytics";
+
+const formatNumber = (value = 0) => Number(value || 0).toLocaleString("en-IN");
+
+const formatPercentage = (value = 0) => {
+  const number = Number(value || 0);
+  return `${number > 0 ? "+" : ""}${number}%`;
+};
+
+const getChangeColor = (positive) =>
+  positive ? "text-emerald-500" : "text-red-500";
+
+const getChangeIcon = (positive) => (positive ? TrendingUp : TrendingDown);
+
+const AnalyticsSkeleton = () => (
+  <div className="space-y-6 animate-pulse">
+    <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-4">
+      {Array.from({ length: 8 }).map((_, index) => (
+        <div
+          key={index}
+          className="h-32 rounded-xl bg-gray-200 dark:bg-white/5"
+        />
+      ))}
+    </div>
+
+    <div className="grid grid-cols-1 gap-6 xl:grid-cols-3">
+      <div className="h-80 rounded-xl bg-gray-200 dark:bg-white/5 xl:col-span-2" />
+      <div className="h-80 rounded-xl bg-gray-200 dark:bg-white/5" />
+    </div>
+
+    <div className="h-72 rounded-xl bg-gray-200 dark:bg-white/5" />
+  </div>
+);
+
+const EmptyState = ({ message }) => (
+  <div className="flex min-h-40 items-center justify-center text-sm text-gray-400">
+    {message}
+  </div>
+);
+
+// Platform Growth Tooltip
+
+const GrowthTooltip = ({ active, payload, label }) => {
+  if (!active || !payload?.length) return null;
+
+  return (
+    <div className="min-w-45 rounded-xl border border-gray-200 bg-white p-3 shadow-xl dark:border-white/10 dark:bg-[#202631]">
+      <p className="mb-3 text-xs font-semibold text-gray-900 dark:text-white">
+        {label}
+      </p>
+
+      {payload.map((item) => (
+        <div
+          key={item.dataKey}
+          className="mb-2 flex items-center justify-between gap-5 last:mb-0"
+        >
+          <div className="flex items-center gap-2">
+            <span
+              className="h-2.5 w-2.5 rounded-full"
+              style={{ backgroundColor: item.color }}
+            />
+
+            <span className="text-xs text-gray-500 dark:text-gray-400">
+              {item.name}
+            </span>
+          </div>
+
+          <span className="text-sm font-semibold text-gray-900 dark:text-white">
+            {Number(item.value || 0).toLocaleString("en-IN")}
+          </span>
+        </div>
+      ))}
+    </div>
+  );
+};
+
+// Client Status Tooltip
+
+const ClientStatusTooltip = ({ active, payload }) => {
+  if (!active || !payload?.length) return null;
+
+  const item = payload[0]?.payload;
+
+  if (!item) return null;
+
+  return (
+    <div className="min-w-40 rounded-xl border border-gray-200 bg-white p-3 shadow-xl dark:border-white/10 dark:bg-[#202631]">
+      <div className="mb-2 flex items-center gap-2">
+        <span
+          className="h-2.5 w-2.5 rounded-full"
+          style={{ backgroundColor: item.color }}
+        />
+
+        <span className="text-xs font-medium text-gray-600 dark:text-gray-300">
+          {item.name}
+        </span>
+      </div>
+
+      <p className="text-xl font-bold text-gray-900 dark:text-white">
+        {Number(item.value || 0).toLocaleString("en-IN")}
+      </p>
+
+      <p className="mt-1 text-xs text-gray-400">
+        {item.percentage}% of total clients
+      </p>
+    </div>
+  );
+};
 
 export default function AdminAnalytics() {
-  const stats = [
-    {
-      title: "Total Clients",
-      value: "248",
-      change: "+12.5%",
-      positive: true,
-      icon: Users,
-    },
-    {
-      title: "Active Clients",
-      value: "192",
-      change: "+8.2%",
-      positive: true,
-      icon: UserCheck,
-    },
-    {
-      title: "Inactive Clients",
-      value: "56",
-      change: "-4.3%",
-      positive: true,
-      icon: UserX,
-    },
-    {
-      title: "Total Conversations",
-      value: "18,492",
-      change: "+18.7%",
-      positive: true,
-      icon: MessagesSquare,
-    },
-    {
-      title: "Total Messages",
-      value: "84,721",
-      change: "+24.1%",
-      positive: true,
-      icon: MessageSquare,
-    },
-    {
-      title: "Active Chatbots",
-      value: "214",
-      change: "+6.8%",
-      positive: true,
-      icon: Bot,
-    },
-    {
-      title: "Subscriptions",
-      value: "221",
-      change: "+10.4%",
-      positive: true,
-      icon: CreditCard,
-    },
-    {
-      title: "Engagement",
-      value: "76.8%",
-      change: "+5.6%",
-      positive: true,
-      icon: Activity,
-    },
-  ];
+  const [dateRange, setDateRange] = useState("7");
 
-  const monthlyData = [
-    { month: "Jan", clients: 120, conversations: 4200 },
-    { month: "Feb", clients: 145, conversations: 5100 },
-    { month: "Mar", clients: 158, conversations: 6300 },
-    { month: "Apr", clients: 176, conversations: 7200 },
-    { month: "May", clients: 194, conversations: 8900 },
-    { month: "Jun", clients: 218, conversations: 10500 },
-    { month: "Jul", clients: 231, conversations: 12800 },
-    { month: "Aug", clients: 248, conversations: 14600 },
-  ];
+  const {
+    data: analytics,
+    isLoading,
+    isFetching,
+    isError,
+    error,
+    refetch,
+  } = useAdminAnalytics(Number(dateRange));
+
+  const statsData = analytics?.data?.data?.stats || {};
+  const clientDistribution = analytics?.data?.data?.clientDistribution || {};
+  const monthlyData = analytics?.data?.data?.platformGrowth || [];
+  const topClients = analytics?.data?.data?.topClients || [];
+
+  const stats = useMemo(() => {
+    const totalClients = statsData.totalClients || {};
+    const activeClients = statsData.activeClients || {};
+    const inactiveClients = statsData.inactiveClients || {};
+    const conversations = statsData.totalConversations || {};
+    const messages = statsData.totalMessages || {};
+    const chatbots = statsData.activeChatbots || {};
+    const subscriptions = statsData.subscriptions || {};
+    const engagement = statsData.engagement || {};
+
+    return [
+      {
+        title: "New Clients",
+        value: formatNumber(totalClients.value),
+        change: totalClients.comparison?.change,
+        positive: (totalClients.comparison?.change ?? 0) >= 0,
+        comparisonLabel: "vs previous period",
+        icon: Users,
+      },
+      {
+        title: "Active Clients",
+        value: formatNumber(activeClients.value),
+        change: null,
+        icon: UserCheck,
+      },
+      {
+        title: "Inactive Clients",
+        value: formatNumber(inactiveClients.value),
+        change: null,
+        icon: UserX,
+      },
+      {
+        title: "Total Conversations",
+        value: formatNumber(conversations.value),
+        change: conversations.comparison?.change,
+        positive: (conversations.comparison?.change ?? 0) >= 0,
+        icon: MessagesSquare,
+      },
+      {
+        title: "Total Messages",
+        value: formatNumber(messages.value),
+        change: messages.comparison?.change,
+        positive: (messages.comparison?.change ?? 0) >= 0,
+        icon: MessageSquare,
+      },
+      {
+        title: "Active Chatbots",
+        value: formatNumber(chatbots.value),
+        subtitle: chatbots.isEstimated
+          ? "Estimated from active clients"
+          : undefined,
+        change: null,
+        icon: Bot,
+      },
+      {
+        title: "Subscriptions",
+        value: formatNumber(subscriptions.value),
+        subtitle: `${formatNumber(subscriptions.total)} total subscriptions`,
+        change: subscriptions.comparison?.change,
+        positive: (subscriptions.comparison?.change ?? 0) >= 0,
+        comparisonLabel: subscriptions.comparisonLabel || "vs previous period",
+        icon: CreditCard,
+      },
+      {
+        title: "Engagement",
+        value: `${Number(engagement.value || 0).toFixed(1)}%`,
+        subtitle: `${formatNumber(engagement.engagedClients)} engaged clients`,
+        change: null,
+        icon: Activity,
+      },
+    ];
+  }, [statsData]);
 
   const maxConversation = Math.max(
-    ...monthlyData.map((item) => item.conversations),
+    1,
+    ...monthlyData.map((item) => Number(item.conversations || 0)),
   );
 
-  const topClients = [
+  const maxClients = Math.max(
+    1,
+    ...monthlyData.map((item) => Number(item.clients || 0)),
+  );
+
+  const totalClients = Number(clientDistribution.total || 0);
+  const activeClients = Number(clientDistribution.active || 0);
+  const inactiveClients = Number(clientDistribution.inactive || 0);
+
+  const activePercentage = Number(clientDistribution.activePercentage || 0);
+
+  const inactivePercentage = Number(clientDistribution.inactivePercentage || 0);
+  const CLIENT_COLORS = {
+    active: "#10b981",
+    inactive: "#ef4444",
+  };
+
+  const clientStatusData = [
     {
-      name: "Fresh Basket",
-      email: "contact@freshbasket.com",
-      conversations: "2,842",
-      messages: "12,492",
-      status: "active",
+      name: "Active",
+      value: activeClients,
+      percentage: activePercentage,
+      color: CLIENT_COLORS.active,
     },
     {
-      name: "Tech Store",
-      email: "hello@techstore.com",
-      conversations: "2,316",
-      messages: "10,827",
-      status: "active",
+      name: "Inactive",
+      value: inactiveClients,
+      percentage: inactivePercentage,
+      color: CLIENT_COLORS.inactive,
     },
-    {
-      name: "Fashion Hub",
-      email: "support@fashionhub.com",
-      conversations: "1,984",
-      messages: "8,412",
-      status: "active",
-    },
-    {
-      name: "Food Corner",
-      email: "info@foodcorner.com",
-      conversations: "1,742",
-      messages: "7,891",
-      status: "active",
-    },
-    {
-      name: "Home Store",
-      email: "admin@homestore.com",
-      conversations: "1,428",
-      messages: "6,723",
-      status: "inactive",
-    },
-  ];
+  ].filter((item) => item.value > 0);
+  
+  if (isLoading) {
+    return (
+      <div className="min-h-full">
+        <AnalyticsSkeleton />
+      </div>
+    );
+  }
+
+  if (isError && !analytics) {
+    return (
+      <div className="flex min-h-100 flex-col items-center justify-center gap-3">
+        <AlertCircle size={35} className="text-red-500" />
+
+        <p className="text-sm font-medium text-gray-700 dark:text-gray-300">
+          Failed to load analytics
+        </p>
+
+        <p className="max-w-md text-center text-xs text-gray-400">
+          {error?.response?.data?.message ||
+            error?.message ||
+            "Something went wrong."}
+        </p>
+
+        <button
+          type="button"
+          onClick={() => refetch()}
+          className="rounded-lg bg-blue-600 px-4 py-2 text-sm font-medium text-white hover:bg-blue-700"
+        >
+          Try Again
+        </button>
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-full ">
@@ -143,41 +314,80 @@ export default function AdminAnalytics() {
           </p>
         </div>
 
-        <div className="flex items-center gap-2">
-          <div
-            className="
-              flex
-              h-10
-              items-center
-              gap-2
-              rounded-lg
-              border
-              border-gray-200
-              bg-white
-              px-3
-              text-sm
-              text-gray-600
-              shadow-sm
-              dark:border-white/10
-              dark:bg-[#151a22]
-              dark:text-gray-300
-            "
-          >
-            <CalendarDays size={16} />
-
-            <span>Last 30 days</span>
+        <div className="flex flex-wrap items-center gap-3">
+          <div>
+            <CustomSelect
+              size="sm"
+              // label="Business Status"
+              name={"filter"}
+              value={dateRange}
+              onChange={(e) => setDateRange(e.target.value)}
+              options={[
+                {
+                  value: "7",
+                  label: "Last 7 days",
+                },
+                {
+                  value: "30",
+                  label: "Last 30 days",
+                },
+                {
+                  value: "90",
+                  label: "Last 90 days",
+                },
+              ]}
+              placeholder="Select status"
+              // error={errors.accountStatus?.message}
+              required
+              icon={true}
+            />
           </div>
+          <button
+            type="button"
+            onClick={() => refetch()}
+            disabled={isFetching}
+            className="
+                      inline-flex
+                      items-center
+                      justify-center
+                      gap-2
+                      rounded-xl
+                      border
+                      border-gray-200
+                      hover:border-gray-300
+                      bg-white
+                      px-4 py-2.5
+                      text-sm
+                      font-medium
+                      text-gray-700
+                      transition-all
+                      hover:bg-gray-50
+                      disabled:cursor-not-allowed
+                      disabled:opacity-50
+                      dark:border-white/8
+                      dark:bg-[#171b23]
+                      dark:text-gray-300
+                      dark:hover:bg-white/4
+                      dark:hover:border-white/20
+                    "
+          >
+            <RefreshCw size={16} className={isFetching ? "animate-spin" : ""} />
+            Refresh
+          </button>
         </div>
       </div>
 
-      {/* =====================================================
-          STAT CARDS
-      ===================================================== */}
+      {/* Background refresh error */}
 
+      {isError && analytics && (
+        <div className="mb-4 rounded-xl border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-600 dark:border-red-500/20 dark:bg-red-500/10 dark:text-red-400">
+          Could not refresh analytics. Showing the previously loaded data.
+        </div>
+      )}
       <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-4">
         {stats.map((item) => {
           const Icon = item.icon;
-
+          const ChangeIcon = getChangeIcon(item.positive);
           return (
             <div
               key={item.title}
@@ -224,18 +434,17 @@ export default function AdminAnalytics() {
               </div>
 
               <div className="mt-4 flex items-center gap-1.5">
-                {item.positive ? (
-                  <TrendingUp size={14} className="text-emerald-500" />
-                ) : (
-                  <TrendingDown size={14} className="text-red-500" />
-                )}
+                <ChangeIcon
+                  size={14}
+                  className={getChangeColor(item.positive)}
+                />
 
                 <span
                   className={`text-xs font-medium ${
                     item.positive ? "text-emerald-500" : "text-red-500"
                   }`}
                 >
-                  {item.change}
+                  {formatPercentage(item.change)}
                 </span>
 
                 <span className="text-xs text-gray-400">vs last month</span>
@@ -245,18 +454,11 @@ export default function AdminAnalytics() {
         })}
       </div>
 
-      {/* =====================================================
-          CHART SECTION
-      ===================================================== */}
-
       <div className="mt-6 grid grid-cols-1 gap-6 xl:grid-cols-3">
-        {/* Growth Chart */}
-
         <div
           className="
-            rounded-xl
-            border
-            border-gray-200
+            rounded-2xl
+            border border-gray-200
             bg-white
             p-5
             shadow-sm
@@ -265,87 +467,146 @@ export default function AdminAnalytics() {
             dark:bg-[#151a22]
           "
         >
-          <div className="mb-6 flex items-center justify-between">
+          {/* Header */}
+
+          <div className="mb-6 flex flex-wrap items-center justify-between gap-4">
             <div>
               <h2 className="text-base font-semibold text-gray-900 dark:text-white">
                 Platform Growth
               </h2>
 
               <p className="mt-1 text-xs text-gray-500 dark:text-gray-400">
-                Client and conversation growth
+                Monthly client and conversation growth
               </p>
             </div>
 
-            <div className="flex items-center gap-4 text-xs">
+            {/* Custom Legend */}
+
+            <div className="flex items-center gap-4">
               <div className="flex items-center gap-2">
-                <span className="h-2.5 w-2.5 rounded-full bg-blue-500" />
-                Clients
+                <span className="h-2.5 w-2.5 rounded-sm bg-blue-500" />
+
+                <span className="text-xs text-gray-500 dark:text-gray-400">
+                  Clients
+                </span>
               </div>
 
               <div className="flex items-center gap-2">
-                <span className="h-2.5 w-2.5 rounded-full bg-emerald-500" />
-                Conversations
+                <span className="h-2.5 w-2.5 rounded-sm bg-emerald-500" />
+
+                <span className="text-xs text-gray-500 dark:text-gray-400">
+                  Conversations
+                </span>
               </div>
             </div>
           </div>
 
-          <div className="flex h-72 items-end gap-3 overflow-x-auto pb-6">
-            {monthlyData.map((item) => {
-              const height = (item.conversations / maxConversation) * 100;
+          {/* Chart */}
 
-              return (
-                <div
-                  key={item.month}
-                  className="flex min-w-12 flex-1 flex-col items-center justify-end gap-2"
+          {monthlyData.length === 0 ? (
+            <EmptyState message="No platform growth data available." />
+          ) : (
+            <div className="h-75 w-full">
+              <ResponsiveContainer width="100%" height="100%">
+                <BarChart
+                  data={monthlyData}
+                  margin={{
+                    top: 10,
+                    right: 10,
+                    left: -15,
+                    bottom: 5,
+                  }}
+                  barGap={6}
                 >
-                  <div className="flex h-56 w-full items-end justify-center gap-1">
-                    {/* Clients */}
+                  <CartesianGrid
+                    strokeDasharray="3 3"
+                    vertical={false}
+                    stroke="currentColor"
+                    opacity={0.1}
+                  />
 
-                    <div
-                      className="
-                        w-2.5
-                        rounded-t-md
-                        bg-blue-500
-                        transition-all
-                      "
-                      style={{
-                        height: `${Math.max((item.clients / 250) * 100, 8)}%`,
-                      }}
-                      title={`${item.clients} clients`}
-                    />
+                  <XAxis
+                    dataKey="month"
+                    axisLine={false}
+                    tickLine={false}
+                    tick={{
+                      fill: "#9ca3af",
+                      fontSize: 11,
+                    }}
+                    dy={10}
+                  />
 
-                    {/* Conversations */}
+                  {/* Left axis: Clients */}
 
-                    <div
-                      className="
-                        w-2.5
-                        rounded-t-md
-                        bg-emerald-500
-                        transition-all
-                      "
-                      style={{
-                        height: `${height}%`,
-                      }}
-                      title={`${item.conversations} conversations`}
-                    />
-                  </div>
+                  <YAxis
+                    yAxisId="clients"
+                    orientation="left"
+                    axisLine={false}
+                    tickLine={false}
+                    allowDecimals={false}
+                    tick={{
+                      fill: "#9ca3af",
+                      fontSize: 10,
+                    }}
+                    width={40}
+                  />
 
-                  <span className="text-[11px] text-gray-400">
-                    {item.month}
-                  </span>
-                </div>
-              );
-            })}
-          </div>
+                  {/* Right axis: Conversations */}
+
+                  <YAxis
+                    yAxisId="conversations"
+                    orientation="right"
+                    axisLine={false}
+                    tickLine={false}
+                    allowDecimals={false}
+                    tick={{
+                      fill: "#9ca3af",
+                      fontSize: 10,
+                    }}
+                    width={40}
+                  />
+
+                  <Tooltip
+                    content={<GrowthTooltip />}
+                    cursor={{
+                      fill: "currentColor",
+                      opacity: 0.04,
+                    }}
+                  />
+
+                  {/* Clients */}
+
+                  <Bar
+                    yAxisId="clients"
+                    dataKey="clients"
+                    name="Clients"
+                    fill="#3b82f6"
+                    radius={[5, 5, 0, 0]}
+                    maxBarSize={22}
+                    animationDuration={700}
+                  />
+
+                  {/* Conversations */}
+
+                  <Bar
+                    yAxisId="conversations"
+                    dataKey="conversations"
+                    name="Conversations"
+                    fill="#10b981"
+                    radius={[5, 5, 0, 0]}
+                    maxBarSize={22}
+                    animationDuration={900}
+                  />
+                </BarChart>
+              </ResponsiveContainer>
+            </div>
+          )}
         </div>
-
-        {/* Client Status */}
 
         <div
           className="
-            rounded-xl
-            border
-            border-gray-200
+            rounded-2xl
+            border border-gray-200
             bg-white
             p-5
             shadow-sm
@@ -353,7 +614,9 @@ export default function AdminAnalytics() {
             dark:bg-[#151a22]
           "
         >
-          <div className="mb-6">
+          {/* Header */}
+
+          <div className="mb-3">
             <h2 className="text-base font-semibold text-gray-900 dark:text-white">
               Client Status
             </h2>
@@ -363,77 +626,106 @@ export default function AdminAnalytics() {
             </p>
           </div>
 
-          <div className="flex items-center justify-center py-4">
-            <div
-              className="
-                relative
-                flex
-                h-44
-                w-44
-                items-center
-                justify-center
-                rounded-full
-                bg-[conic-gradient(#22c55e_0_77%,#ef4444_77%_100%)]
-              "
-            >
-              <div
-                className="
-                  flex
-                  h-28
-                  w-28
-                  flex-col
-                  items-center
-                  justify-center
-                  rounded-full
-                  bg-white
-                  dark:bg-[#151a22]
-                "
-              >
-                <span className="text-2xl font-bold text-gray-900 dark:text-white">
-                  248
-                </span>
+          {totalClients === 0 ? (
+            <EmptyState message="No clients available." />
+          ) : (
+            <>
+              {/* Donut Chart */}
 
-                <span className="text-xs text-gray-400">Total</span>
-              </div>
-            </div>
-          </div>
+              <div className="relative h-57.5 w-full">
+                <ResponsiveContainer width="100%" height="100%">
+                  <PieChart>
+                    <Pie
+                      data={clientStatusData}
+                      dataKey="value"
+                      nameKey="name"
+                      cx="50%"
+                      cy="50%"
+                      innerRadius={65}
+                      outerRadius={90}
+                      paddingAngle={4}
+                      cornerRadius={5}
+                      stroke="none"
+                      animationDuration={800}
+                    >
+                      {clientStatusData.map((item) => (
+                        <Cell key={item.name} fill={item.color} />
+                      ))}
+                    </Pie>
 
-          <div className="mt-5 space-y-4">
-            <div className="flex items-center justify-between">
-              <div className="flex items-center gap-2">
-                <span className="h-2.5 w-2.5 rounded-full bg-green-500" />
+                    <Tooltip
+                      content={<ClientStatusTooltip />}
+                      wrapperStyle={{
+                        zIndex: 50,
+                        pointerEvents: "none",
+                      }}
+                    />
+                  </PieChart>
+                </ResponsiveContainer>
 
-                <span className="text-sm text-gray-600 dark:text-gray-300">
-                  Active
-                </span>
-              </div>
+                {/* Center Content */}
+                <div className="pointer-events-none absolute inset-0 flex flex-col items-center justify-center">
+                  <span className="text-3xl font-bold text-gray-900 dark:text-white">
+                    {formatNumber(totalClients)}
+                  </span>
 
-              <span className="text-sm font-semibold text-gray-900 dark:text-white">
-                192
-              </span>
-            </div>
-
-            <div className="flex items-center justify-between">
-              <div className="flex items-center gap-2">
-                <span className="h-2.5 w-2.5 rounded-full bg-red-500" />
-
-                <span className="text-sm text-gray-600 dark:text-gray-300">
-                  Inactive
-                </span>
+                  <span className="mt-1 text-xs text-gray-400">
+                    Total Clients
+                  </span>
+                </div>
               </div>
 
-              <span className="text-sm font-semibold text-gray-900 dark:text-white">
-                56
-              </span>
-            </div>
-          </div>
+              {/* Status Details */}
+
+              <div className="mt-3 space-y-4">
+                {/* Active */}
+
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center gap-2.5">
+                    <span className="h-3 w-3 rounded-full bg-emerald-500" />
+
+                    <div>
+                      <p className="text-sm font-medium text-gray-700 dark:text-gray-200">
+                        Active
+                      </p>
+
+                      <p className="text-[11px] text-gray-400">
+                        {activePercentage}% of total
+                      </p>
+                    </div>
+                  </div>
+
+                  <span className="text-sm font-semibold text-gray-900 dark:text-white">
+                    {formatNumber(activeClients)}
+                  </span>
+                </div>
+
+                {/* Inactive */}
+
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center gap-2.5">
+                    <span className="h-3 w-3 rounded-full bg-red-500" />
+
+                    <div>
+                      <p className="text-sm font-medium text-gray-700 dark:text-gray-200">
+                        Inactive
+                      </p>
+
+                      <p className="text-[11px] text-gray-400">
+                        {inactivePercentage}% of total
+                      </p>
+                    </div>
+                  </div>
+
+                  <span className="text-sm font-semibold text-gray-900 dark:text-white">
+                    {formatNumber(inactiveClients)}
+                  </span>
+                </div>
+              </div>
+            </>
+          )}
         </div>
       </div>
-
-      {/* =====================================================
-          TOP CLIENTS
-      ===================================================== */}
-
       <div
         className="
           mt-6

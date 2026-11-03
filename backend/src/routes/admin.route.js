@@ -10,6 +10,7 @@ import {
 } from "../controllers/admin.controller.js";
 import { getAdminDashboard } from "../controllers/adminDashboard.controller.js";
 import { createSubscriptionPlanController, deleteSubscriptionPlanController, getAdminSubscriptionPlanController, getAllSubscriptionPlansController, updateSubscriptionPlanController } from "../controllers/adminSubscriptionPlan.controller.js";
+import { getAdminAnalytics } from "../controllers/analytics.controller.js";
 
 const router = express.Router();
 
@@ -19,6 +20,7 @@ router.get("/clients/:clientId", authMiddleware, getClientById);
 router.delete("/delete-client/:clientId", authMiddleware, deleteClient);
 router.put("/clients/:clientId", authMiddleware, updateAdminClient);
 router.get("/dashboard", authMiddleware, getAdminDashboard);
+router.get("/analytics", authMiddleware, getAdminAnalytics);
 
 router.post(
   "/subscription-plans",

@@ -135,8 +135,7 @@ export default function ClientHeader({ onMenuClick }) {
             </p>
 
             <p className="truncate text-[10px] text-gray-500 dark:text-gray-400">
-              {`${client?.active_plan} Plan` ||
-                "Free Plan"}
+              {`${client?.active_plan || "Free"} Plan`}
             </p>
           </div>
         </div>

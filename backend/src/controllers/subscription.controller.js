@@ -15,6 +15,7 @@ import {
   setDefaultPaymentMethodService,
   removePaymentMethodService,
   refreshSubscriptionService,
+  getAdminSubscriptionsService,
 } from "../services/subscription.service.js";
 
 /* =========================================================
@@ -652,6 +653,26 @@ export const refreshSubscriptionController = async (req, res) => {
     return res.status(error.statusCode || 500).json({
       success: false,
       message: error.message || "Failed to refresh subscription",
+    });
+  }
+};
+
+//admin subcriptions analytics
+export const getAdminSubscriptionsController = async (req, res) => {
+  try {
+    const data = await getAdminSubscriptionsService(req.query);
+
+    return res.status(200).json({
+      success: true,
+      message: "Admin subscriptions fetched successfully",
+      data,
+    });
+  } catch (error) {
+    console.error("Admin subscriptions error:", error);
+
+    return res.status(error.statusCode || 500).json({
+      success: false,
+      message: error.message || "Failed to fetch subscriptions",
     });
   }
 };

@@ -23,6 +23,12 @@ import {
 import { findClientUserFcmTokenByClientId } from "../repositories/user.repository.js";
 import { createAndSendNotification } from "./notification.service.js";
 
+import mongoose from "mongoose";
+
+import Subscription from "../models/Subscription.js";
+import SubscriptionPlan from "../models/SubscriptionPlan.js";
+import Client from "../models/Client.js";
+
 import {
   createStripeCustomer,
   getStripeCustomer,
@@ -1145,4 +1151,324 @@ export const refreshSubscriptionService = async (subscriptionId) => {
   });
 
   return await updateSubscriptionById(subscriptionId, updateData);
+};
+
+
+//admin subscription analytics
+// Search input ko safe regex mein convert karo
+const escapeRegex = (value = "") =>
+  value.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+
+const VALID_STATUSES = [
+  "trialing",
+  "active",
+  "past_due",
+  "canceled",
+  "unpaid",
+  "incomplete",
+  "incomplete_expired",
+  "paused",
+];
+
+export const getAdminSubscriptionsService = async (query = {}) => {
+  const {
+    search = "",
+    status = "all",
+  } = query;
+
+  const pageLimit = 10;
+
+  if (status !== "all" && !VALID_STATUSES.includes(status)) {
+    const error = new Error("Invalid subscription status");
+    error.statusCode = 400;
+    throw error;
+  }
+  const [
+    totalSubscriptions,
+    totalClients,
+    statusCounts,
+    revenueData,
+  ] = await Promise.all([
+    Subscription.countDocuments(),
+
+    Client.countDocuments(),
+
+    Subscription.aggregate([
+      {
+        $group: {
+          _id: "$status",
+          count: { $sum: 1 },
+        },
+      },
+    ]),
+
+    // Monthly recurring revenue, currency-wise
+    Subscription.aggregate([
+      // {
+      //   $match: {
+      //     status: "active",
+      //   },
+      // },
+      {
+        $group: {
+          _id: "$currency",
+          monthlyRevenue: {
+            $sum: {
+              $cond: [
+                { $eq: ["$interval", "year"] },
+                { $divide: ["$amount", 12] },
+                "$amount",
+              ],
+            },
+          },
+          subscriptions: { $sum: 1 },
+        },
+      },
+      {
+        $project: {
+          _id: 0,
+          currency: "$_id",
+          monthlyRevenue: {
+            $round: ["$monthlyRevenue", 0],
+          },
+          subscriptions: 1,
+        },
+      },
+    ]),
+  ]);
+
+  const statusSummary = Object.fromEntries(
+    VALID_STATUSES.map((item) => [item, 0]),
+  );
+
+  statusCounts.forEach((item) => {
+    statusSummary[item._id] = item.count;
+  });
+
+  const activeSubscriptions = statusSummary.active;
+
+  // --------------------------------------------------
+  // 2. PLAN OVERVIEW
+  // --------------------------------------------------
+
+  const plans = await SubscriptionPlan.aggregate([
+    {
+      $lookup: {
+        from: Subscription.collection.name,
+        let: { planId: "$_id" },
+        pipeline: [
+          {
+            $match: {
+              $expr: {
+                $eq: ["$planId", "$$planId"],
+              },
+            },
+          },
+          {
+            $group: {
+              _id: "$status",
+              count: { $sum: 1 },
+            },
+          },
+        ],
+        as: "subscriptionStats",
+      },
+    },
+    {
+      $addFields: {
+        totalSubscribers: {
+          $sum: "$subscriptionStats.count",
+        },
+        activeSubscribers: {
+          $let: {
+            vars: {
+              activeItem: {
+                $arrayElemAt: [
+                  {
+                    $filter: {
+                      input: "$subscriptionStats",
+                      as: "item",
+                      cond: { $eq: ["$$item._id", "active"] },
+                    },
+                  },
+                  0,
+                ],
+              },
+            },
+            in: { $ifNull: ["$$activeItem.count", 0] },
+          },
+        },
+      },
+    },
+    {
+      $project: {
+        name: 1,
+        description: 1,
+        amount: 1,
+        currency: 1,
+        interval: 1,
+        status: 1,
+        sortOrder: 1,
+        totalSubscribers: 1,
+        activeSubscribers: 1,
+      },
+    },
+    {
+      $sort: { sortOrder: 1, createdAt: 1 },
+    },
+  ]);
+
+  // --------------------------------------------------
+  // 3. SUBSCRIPTION LIST + SEARCH + STATUS FILTER
+  // --------------------------------------------------
+
+  const pipeline = [
+    {
+      $lookup: {
+        from: "clients",
+        localField: "clientId",
+        foreignField: "_id",
+        as: "client",
+      },
+    },
+    {
+      $unwind: {
+        path: "$client",
+        preserveNullAndEmptyArrays: true,
+      },
+    },
+    {
+      $lookup: {
+        from: "users",
+        localField: "userId",
+        foreignField: "_id",
+        as: "user",
+      },
+    },
+    {
+      $unwind: {
+        path: "$user",
+        preserveNullAndEmptyArrays: true,
+      },
+    },
+    {
+      $lookup: {
+        from: SubscriptionPlan.collection.name,
+        localField: "planId",
+        foreignField: "_id",
+        as: "plan",
+      },
+    },
+    {
+      $unwind: {
+        path: "$plan",
+        preserveNullAndEmptyArrays: true,
+      },
+    },
+  ];
+
+  const filters = {};
+
+  if (status !== "all") {
+    filters.status = status;
+  }
+
+  if (mongoose.Types.ObjectId.isValid(query.planId)) {
+    filters.planId = new mongoose.Types.ObjectId(query.planId);
+  }
+
+  if (search.trim()) {
+    const regex = new RegExp(escapeRegex(search.trim()), "i");
+
+    filters.$or = [
+      { "client.businessName": regex },
+      { "user.fullName": regex },
+      { "user.email": regex },
+      { stripeSubscriptionId: regex },
+    ];
+  }
+
+  pipeline.push({
+    $match: filters,
+  });
+
+  pipeline.push({
+    $facet: {
+      metadata: [
+        { $count: "total" },
+      ],
+
+      subscriptions: [
+        { $sort: { createdAt: -1 } },
+        { $limit: pageLimit },
+        {
+          $project: {
+            _id: 1,
+            stripeSubscriptionId: 1,
+            status: 1,
+            amount: 1,
+            currency: 1,
+            interval: 1,
+            currentPeriodStart: 1,
+            currentPeriodEnd: 1,
+            expiresAt: 1,
+            cancelAtPeriodEnd: 1,
+            canceledAt: 1,
+            trialStart: 1,
+            trialEnd: 1,
+            createdAt: 1,
+
+            client: {
+              _id: "$client._id",
+              businessName: "$client.businessName",
+              email: "$client.contact.email",
+            },
+
+            user: {
+              _id: "$user._id",
+              fullName: "$user.fullName",
+              email: "$user.email",
+            },
+
+            plan: {
+              _id: "$plan._id",
+              name: "$plan.name",
+              amount: "$plan.amount",
+              currency: "$plan.currency",
+              interval: "$plan.interval",
+            },
+          },
+        },
+      ],
+    },
+  });
+
+  const [listResult] = await Subscription.aggregate(pipeline);
+
+  const subscriptions = listResult?.subscriptions || [];
+  const totalRecords = listResult?.metadata?.[0]?.total || 0;
+
+  // --------------------------------------------------
+  // 4. FINAL RESPONSE
+  // --------------------------------------------------
+
+  return {
+    stats: {
+      totalSubscriptions,
+      activeSubscriptions,
+      trialingSubscriptions: statusSummary.trialing,
+      pastDueSubscriptions: statusSummary.past_due,
+      canceledSubscriptions: statusSummary.canceled,
+      unpaidSubscriptions: statusSummary.unpaid,
+      incompleteSubscriptions: statusSummary.incomplete,
+      totalClients,
+      monthlyRevenue: revenueData,
+    },
+
+    statusSummary,
+
+    plans,
+
+    subscriptions,
+  };
 };

@@ -1313,7 +1313,7 @@ export default function AdminSubscriptions() {
       icon: <CheckCircle2 size={20} />,
     },
     {
-      title: "Monthly Revenue",
+      title: "Total Revenue",
       value: formatMonthlyRevenue(stats.monthlyRevenue),
       icon: <DollarSign size={20} />,
     },

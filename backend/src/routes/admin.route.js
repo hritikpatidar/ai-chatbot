@@ -63,4 +63,7 @@ router.delete(
   deleteSubscriptionPlanController,
 );
 
+router.get("/settings", authMiddleware,);
+router.patch("/settings", authMiddleware,);
+
 export default router;

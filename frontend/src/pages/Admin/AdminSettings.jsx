@@ -1,447 +1,538 @@
-import React, { useState } from "react";
+
+import { useState } from "react";
 import {
+  Settings,
+  Bot,
+  ShieldCheck,
   Bell,
-  Shield,
-  Lock,
+  Gauge,
   Globe,
-  Database,
   Save,
+  RefreshCw,
   Mail,
-  KeyRound,
+  MessageSquare,
+  Users,
+  CreditCard,
+  Lock,
+  Clock,
+  Sparkles,
+  CheckCircle2,
 } from "lucide-react";
 
-export default function AdminSettings ()  {
-  const [settings, setSettings] = useState({
-    emailNotifications: true,
-    clientNotifications: true,
-    maintenanceMode: false,
-    twoFactorAuth: false,
-    autoBackup: true,
-    publicRegistration: true,
-    language: "English",
-    timezone: "Asia/Kolkata",
-  });
+const initialSettings = {
+  platformName: "AI Chatbot",
+  supportEmail: "support@yourcompany.com",
+  defaultLanguage: "en",
+  timezone: "Asia/Kolkata",
 
+  aiModel: "gemini-2.5-flash",
+  temperature: "0.7",
+  maxOutputTokens: "2048",
+  enableChatHistory: true,
+  enableStreaming: true,
+  enableFallback: true,
+
+  monthlyUsageAlert: true,
+  usageAlertLimit: "80",
+  emailNotifications: true,
+  newClientNotification: true,
+  subscriptionNotification: true,
+  paymentNotification: true,
+
+  maxLoginAttempts: "5",
+  sessionTimeout: "30",
+  twoFactorAuth: false,
+  maintenanceMode: false,
+};
+
+const navigation = [
+  { id: "general", label: "General", icon: Settings },
+  { id: "ai", label: "AI Configuration", icon: Bot },
+  { id: "usage", label: "Usage & Limits", icon: Gauge },
+  { id: "notifications", label: "Notifications", icon: Bell },
+  { id: "security", label: "Security", icon: ShieldCheck },
+];
+
+export default function AdminSettings() {
+  const [activeTab, setActiveTab] = useState("general");
+  const [settings, setSettings] = useState(initialSettings);
   const [success, setSuccess] = useState(false);
+  const [saving, setSaving] = useState(false);
 
-  const handleChange = (key, value) => {
-    setSettings((prev) => ({
-      ...prev,
-      [key]: value,
-    }));
-
+  const updateSetting = (key, value) => {
+    setSettings((prev) => ({ ...prev, [key]: value }));
     setSuccess(false);
   };
 
-  const handleSave = () => {
+  const handleSave = async () => {
+    setSaving(true);
+
+    // Replace with your save settings API.
+    await new Promise((resolve) => setTimeout(resolve, 500));
+
+    setSaving(false);
     setSuccess(true);
-    setTimeout(() => {
-      setSuccess(false);
-    }, 3000);
+
+    setTimeout(() => setSuccess(false), 3000);
+  };
+
+  const handleReset = () => {
+    setSettings(initialSettings);
+    setSuccess(false);
   };
 
   return (
-    <div className="min-h-full bg-gray-50 dark:bg-[#0d1117] ">
+    <div className="min-h-full space-y-6 bg-gray-50 pb-8 dark:bg-[#0d1117]">
       {/* Header */}
-      <div className="mb-6">
-        <h1 className="text-xl font-bold text-gray-900 dark:text-white sm:text-2xl">
-          Admin Settings
-        </h1>
+      <div className="flex flex-col justify-between gap-4 sm:flex-row sm:items-center">
+        <div>
+          <div className="flex items-center gap-2">
+            <Settings className="h-6 w-6 text-indigo-600 dark:text-indigo-400" />
+            <h1 className="text-xl font-bold text-gray-900 dark:text-white sm:text-2xl">
+              Admin Settings
+            </h1>
+          </div>
+          <p className="mt-1 text-sm text-gray-500 dark:text-gray-400">
+            Manage your AI chatbot platform configuration and preferences.
+          </p>
+        </div>
 
-        <p className="mt-1 text-sm text-gray-500 dark:text-gray-400">
-          Manage your platform settings and preferences
-        </p>
+        <div className="flex gap-2">
+          <button
+            onClick={handleReset}
+            className="flex items-center justify-center gap-2 rounded-xl border border-gray-200 bg-white px-4 py-2.5 text-sm font-medium text-gray-700 transition hover:bg-gray-100 dark:border-gray-700 dark:bg-[#161b22] dark:text-gray-300 dark:hover:bg-gray-800"
+          >
+            <RefreshCw size={16} />
+            Reset
+          </button>
+
+          <button
+            onClick={handleSave}
+            disabled={saving}
+            className="flex items-center justify-center gap-2 rounded-xl bg-indigo-600 px-4 py-2.5 text-sm font-semibold text-white shadow-sm transition hover:bg-indigo-700 disabled:opacity-60"
+          >
+            <Save size={16} />
+            {saving ? "Saving..." : "Save Changes"}
+          </button>
+        </div>
       </div>
 
-      {/* Success */}
+      {/* Success Message */}
       {success && (
-        <div className="mb-5 rounded-xl border border-green-200 bg-green-50 px-4 py-3 text-sm text-green-700 dark:border-green-500/20 dark:bg-green-500/10 dark:text-green-400">
+        <div className="flex items-center gap-2 rounded-xl border border-green-200 bg-green-50 px-4 py-3 text-sm text-green-700 dark:border-green-500/20 dark:bg-green-500/10 dark:text-green-400">
+          <CheckCircle2 size={18} />
           Settings updated successfully.
         </div>
       )}
 
-      <div className="grid grid-cols-1 gap-5 xl:grid-cols-3">
-        {/* Notifications */}
-        <SettingsCard
-          icon={<Bell size={18} />}
-          title="Notifications"
-          description="Manage admin and client notifications"
-        >
-          <ToggleRow
-            title="Email Notifications"
-            description="Receive important platform notifications"
-            checked={settings.emailNotifications}
-            onChange={(value) =>
-              handleChange("emailNotifications", value)
-            }
-          />
+      {/* Settings Layout */}
+      <div className="grid grid-cols-1 gap-6 lg:grid-cols-[240px_minmax(0,1fr)]">
+        {/* Sidebar */}
+        <aside className="h-fit rounded-2xl border border-gray-200 bg-white p-3 dark:border-gray-800 dark:bg-[#161b22]">
+          <p className="px-3 pb-3 pt-2 text-xs font-semibold uppercase tracking-wider text-gray-400">
+            Preferences
+          </p>
 
-          <ToggleRow
-            title="Client Notifications"
-            description="Receive notifications about client activity"
-            checked={settings.clientNotifications}
-            onChange={(value) =>
-              handleChange("clientNotifications", value)
-            }
-          />
-        </SettingsCard>
+          <div className="flex gap-2 overflow-x-auto lg:flex-col">
+            {navigation.map((item) => {
+              const Icon = item.icon;
+              const active = activeTab === item.id;
 
-        {/* Security */}
-        <SettingsCard
-          icon={<Shield size={18} />}
-          title="Security"
-          description="Manage your admin security settings"
-        >
-          <ToggleRow
-            title="Two-Factor Authentication"
-            description="Add an extra layer of security"
-            checked={settings.twoFactorAuth}
-            onChange={(value) =>
-              handleChange("twoFactorAuth", value)
-            }
-          />
+              return (
+                <button
+                  key={item.id}
+                  onClick={() => setActiveTab(item.id)}
+                  className={`flex shrink-0 items-center gap-3 rounded-xl px-3 py-3 text-sm font-medium transition lg:w-full ${
+                    active
+                      ? "bg-indigo-50 text-indigo-700 dark:bg-indigo-500/10 dark:text-indigo-400"
+                      : "text-gray-600 hover:bg-gray-100 dark:text-gray-400 dark:hover:bg-gray-800"
+                  }`}
+                >
+                  <Icon size={18} />
+                  {item.label}
+                </button>
+              );
+            })}
+          </div>
 
-          <button
-            type="button"
-            className="
-              mt-3
-              flex
-              w-full
-              items-center
-              gap-3
-              rounded-xl
-              border
-              border-gray-200
-              px-4
-              py-3
-              text-left
-              transition
-              hover:bg-gray-50
-              dark:border-white/10
-              dark:hover:bg-white/5
-            "
-          >
-            <KeyRound
-              size={17}
-              className="text-gray-500 dark:text-gray-400"
-            />
-
-            <div>
-              <p className="text-sm font-medium text-gray-900 dark:text-white">
-                Change Password
-              </p>
-
-              <p className="text-xs text-gray-500 dark:text-gray-400">
-                Update your administrator password
-              </p>
+          <div className="mt-5 hidden rounded-xl bg-gray-50 p-4 dark:bg-[#0d1117] lg:block">
+            <div className="mb-2 flex items-center gap-2 text-indigo-600 dark:text-indigo-400">
+              <Sparkles size={17} />
+              <span className="text-sm font-semibold">AI Platform</span>
             </div>
-          </button>
-        </SettingsCard>
-
-        {/* Platform */}
-        <SettingsCard
-          icon={<Globe size={18} />}
-          title="Platform"
-          description="Configure platform preferences"
-        >
-          <SelectField
-            label="Language"
-            value={settings.language}
-            options={["English", "Hindi"]}
-            onChange={(value) => handleChange("language", value)}
-          />
-
-          <SelectField
-            label="Timezone"
-            value={settings.timezone}
-            options={["Asia/Kolkata", "Europe/London", "UTC"]}
-            onChange={(value) => handleChange("timezone", value)}
-          />
-        </SettingsCard>
-
-        {/* System */}
-        <SettingsCard
-          icon={<Database size={18} />}
-          title="System"
-          description="Manage system-level configuration"
-        >
-          <ToggleRow
-            title="Automatic Backup"
-            description="Automatically backup platform data"
-            checked={settings.autoBackup}
-            onChange={(value) =>
-              handleChange("autoBackup", value)
-            }
-          />
-
-          <ToggleRow
-            title="Public Registration"
-            description="Allow new users to register"
-            checked={settings.publicRegistration}
-            onChange={(value) =>
-              handleChange("publicRegistration", value)
-            }
-          />
-
-          <ToggleRow
-            title="Maintenance Mode"
-            description="Temporarily disable public access"
-            checked={settings.maintenanceMode}
-            onChange={(value) =>
-              handleChange("maintenanceMode", value)
-            }
-          />
-        </SettingsCard>
-
-        {/* Email */}
-        <SettingsCard
-          icon={<Mail size={18} />}
-          title="Email Configuration"
-          description="Configure platform email settings"
-        >
-          <InputField
-            label="SMTP Host"
-            placeholder="smtp.example.com"
-          />
-
-          <InputField
-            label="SMTP Port"
-            placeholder="587"
-            type="number"
-          />
-        </SettingsCard>
-
-        {/* Access */}
-        <SettingsCard
-          icon={<Lock size={18} />}
-          title="Access Control"
-          description="Manage administrator access"
-        >
-          <div
-            className="
-              rounded-xl
-              border
-              border-gray-200
-              bg-gray-50
-              p-4
-              dark:border-white/10
-              dark:bg-white/3
-            "
-          >
-            <p className="text-sm font-medium text-gray-900 dark:text-white">
-              Administrator Access
-            </p>
-
-            <p className="mt-1 text-xs text-gray-500 dark:text-gray-400">
-              Only authorized administrators can access this dashboard.
+            <p className="text-xs leading-5 text-gray-500 dark:text-gray-400">
+              Manage your platform, AI models, client usage and security from one place.
             </p>
           </div>
-        </SettingsCard>
-      </div>
+        </aside>
 
-      {/* Save */}
-      <div className="mt-6 flex justify-end">
-        <button
-          type="button"
-          onClick={handleSave}
-          className="
-            flex
-            items-center
-            gap-2
-            rounded-xl
-            bg-blue-600
-            px-5
-            py-2.5
-            text-sm
-            font-medium
-            text-white
-            transition
-            hover:bg-blue-700
-          "
-        >
-          <Save size={16} />
-          Save Settings
-        </button>
+        {/* Main Content */}
+        <main className="min-w-0 space-y-5">
+          {activeTab === "general" && (
+            <>
+              <Section
+                title="General Settings"
+                description="Configure your platform's basic information."
+                icon={Globe}
+              >
+                <div className="grid grid-cols-1 gap-5 md:grid-cols-2">
+                  <InputField
+                    label="Platform Name"
+                    value={settings.platformName}
+                    onChange={(v) => updateSetting("platformName", v)}
+                    placeholder="Enter platform name"
+                  />
+                  <InputField
+                    label="Support Email"
+                    type="email"
+                    value={settings.supportEmail}
+                    onChange={(v) => updateSetting("supportEmail", v)}
+                    placeholder="support@example.com"
+                  />
+                  {/* <SelectField
+                    label="Default Language"
+                    value={settings.defaultLanguage}
+                    onChange={(v) => updateSetting("defaultLanguage", v)}
+                    options={[
+                      ["en", "English"],
+                      ["hi", "Hindi"],
+                    ]}
+                  /> */}
+                  {/* <SelectField
+                    label="Timezone"
+                    value={settings.timezone}
+                    onChange={(v) => updateSetting("timezone", v)}
+                    options={[
+                      ["Asia/Kolkata", "India (IST)"],
+                      ["Europe/London", "London"],
+                      ["America/New_York", "New York"],
+                      ["UTC", "UTC"],
+                    ]}
+                  /> */}
+                </div>
+              </Section>
+
+              <Section
+                title="Platform Status"
+                description="Control the availability of your SaaS platform."
+                icon={Globe}
+              >
+                <SettingToggle
+                  title="Maintenance Mode"
+                  description="Temporarily restrict client access while maintenance is in progress."
+                  checked={settings.maintenanceMode}
+                  onChange={(v) => updateSetting("maintenanceMode", v)}
+                />
+              </Section>
+            </>
+          )}
+
+          {activeTab === "ai" && (
+            <>
+              <Section
+                title="AI Configuration"
+                description="Set default AI behavior for newly created client chatbots."
+                icon={Bot}
+              >
+                <div className="grid grid-cols-1 gap-5 md:grid-cols-2">
+                  <SelectField
+                    label="Default AI Model"
+                    value={settings.aiModel}
+                    onChange={(v) => updateSetting("aiModel", v)}
+                    options={[
+                      ["gemini-2.5-flash", "Gemini 2.5 Flash"],
+                      ["gemini-2.5-pro", "Gemini 2.5 Pro"],
+                    ]}
+                  />
+                  <InputField
+                    label="Temperature"
+                    type="number"
+                    value={settings.temperature}
+                    onChange={(v) => updateSetting("temperature", v)}
+                    placeholder="0.7"
+                  />
+                  <InputField
+                    label="Max Output Tokens"
+                    type="number"
+                    value={settings.maxOutputTokens}
+                    onChange={(v) => updateSetting("maxOutputTokens", v)}
+                    placeholder="2048"
+                  />
+                </div>
+
+                <div className="mt-6 space-y-4">
+                  <SettingToggle
+                    title="Chat History"
+                    description="Allow chatbots to use previous conversation context."
+                    checked={settings.enableChatHistory}
+                    onChange={(v) => updateSetting("enableChatHistory", v)}
+                  />
+                  <SettingToggle
+                    title="Streaming Responses"
+                    description="Display AI responses as they are generated."
+                    checked={settings.enableStreaming}
+                    onChange={(v) => updateSetting("enableStreaming", v)}
+                  />
+                  <SettingToggle
+                    title="Fallback Responses"
+                    description="Enable a fallback response when AI generation fails."
+                    checked={settings.enableFallback}
+                    onChange={(v) => updateSetting("enableFallback", v)}
+                  />
+                </div>
+              </Section>
+
+              <InfoCard
+                icon={Sparkles}
+                title="AI Configuration Note"
+                description="These values should act as platform defaults. Client-specific chatbot settings and subscription plan limits should take priority wherever configured."
+              />
+            </>
+          )}
+
+          {activeTab === "usage" && (
+            <>
+              <Section
+                title="Usage & Limits"
+                description="Configure platform-wide usage alert preferences."
+                icon={Gauge}
+              >
+                <div className="grid grid-cols-1 gap-5 md:grid-cols-2">
+                  <InputField
+                    label="Usage Alert Threshold (%)"
+                    type="number"
+                    value={settings.usageAlertLimit}
+                    onChange={(v) => updateSetting("usageAlertLimit", v)}
+                    placeholder="80"
+                  />
+                </div>
+
+                <div className="mt-6 space-y-4">
+                  <SettingToggle
+                    title="Monthly Usage Alerts"
+                    description="Get notified when platform usage reaches the configured threshold."
+                    checked={settings.monthlyUsageAlert}
+                    onChange={(v) => updateSetting("monthlyUsageAlert", v)}
+                  />
+                </div>
+              </Section>
+
+              <InfoCard
+                icon={CreditCard}
+                title="Plan-based Limits"
+                description="Client message limits, token limits, FAQ limits and chatbot configuration restrictions should be controlled through Subscription Plans, not by overriding individual client settings here."
+              />
+            </>
+          )}
+
+          {activeTab === "notifications" && (
+            <Section
+              title="Notification Preferences"
+              description="Choose which platform events should trigger admin notifications."
+              icon={Bell}
+            >
+              <SettingToggle
+                title="Email Notifications"
+                description="Enable email notifications for important platform events."
+                checked={settings.emailNotifications}
+                onChange={(v) => updateSetting("emailNotifications", v)}
+              />
+              <div className="my-4 border-t border-gray-100 dark:border-gray-800" />
+              <SettingToggle
+                title="New Client Registration"
+                description="Get notified whenever a new client is created."
+                checked={settings.newClientNotification}
+                onChange={(v) => updateSetting("newClientNotification", v)}
+              />
+              <div className="my-4 border-t border-gray-100 dark:border-gray-800" />
+              <SettingToggle
+                title="Subscription Events"
+                description="Receive notifications for subscription creation, upgrade, downgrade and cancellation."
+                checked={settings.subscriptionNotification}
+                onChange={(v) => updateSetting("subscriptionNotification", v)}
+              />
+              <div className="my-4 border-t border-gray-100 dark:border-gray-800" />
+              <SettingToggle
+                title="Payment Notifications"
+                description="Receive notifications for successful and failed payments."
+                checked={settings.paymentNotification}
+                onChange={(v) => updateSetting("paymentNotification", v)}
+              />
+            </Section>
+          )}
+
+          {activeTab === "security" && (
+            <>
+              <Section
+                title="Security Settings"
+                description="Manage platform access and session security."
+                icon={ShieldCheck}
+              >
+                <div className="grid grid-cols-1 gap-5 md:grid-cols-2">
+                  <InputField
+                    label="Maximum Login Attempts"
+                    type="number"
+                    value={settings.maxLoginAttempts}
+                    onChange={(v) => updateSetting("maxLoginAttempts", v)}
+                    placeholder="5"
+                  />
+                  <SelectField
+                    label="Session Timeout"
+                    value={settings.sessionTimeout}
+                    onChange={(v) => updateSetting("sessionTimeout", v)}
+                    options={[
+                      ["15", "15 Minutes"],
+                      ["30", "30 Minutes"],
+                      ["60", "1 Hour"],
+                      ["120", "2 Hours"],
+                    ]}
+                  />
+                </div>
+
+                <div className="mt-6 space-y-4">
+                  <SettingToggle
+                    title="Two-Factor Authentication"
+                    description="Require an additional verification step for admin login."
+                    checked={settings.twoFactorAuth}
+                    onChange={(v) => updateSetting("twoFactorAuth", v)}
+                  />
+                </div>
+              </Section>
+
+              <InfoCard
+                icon={Lock}
+                title="Security Recommendation"
+                description="Use strong passwords, secure HTTP-only cookies, server-side session validation and rate limiting for admin APIs."
+              />
+            </>
+          )}
+
+          {/* Bottom Save */}
+          <div className="flex flex-col-reverse justify-between gap-3 rounded-2xl border border-gray-200 bg-white p-4 dark:border-gray-800 dark:bg-[#161b22] sm:flex-row sm:items-center">
+            <p className="text-xs text-gray-500 dark:text-gray-400">
+              Make sure to save your changes before leaving this page.
+            </p>
+            <button
+              onClick={handleSave}
+              disabled={saving}
+              className="flex items-center justify-center gap-2 rounded-xl bg-indigo-600 px-5 py-2.5 text-sm font-semibold text-white transition hover:bg-indigo-700 disabled:opacity-60"
+            >
+              <Save size={16} />
+              {saving ? "Saving..." : "Save Settings"}
+            </button>
+          </div>
+        </main>
       </div>
     </div>
   );
-};
+}
 
-const SettingsCard = ({
-  icon,
-  title,
-  description,
-  children,
-}) => {
+/* Reusable Components */
+
+function Section({ title, description, icon: Icon, children }) {
   return (
-    <div
-      className="
-        rounded-2xl
-        border
-        border-gray-200
-        bg-white
-        p-5
-        shadow-sm
-        dark:border-white/10
-        dark:bg-[#11161f]
-      "
-    >
-      <div className="mb-5 flex items-start gap-3">
-        <div
-          className="
-            flex
-            h-9
-            w-9
-            shrink-0
-            items-center
-            justify-center
-            rounded-lg
-            bg-blue-50
-            text-blue-600
-            dark:bg-blue-500/10
-            dark:text-blue-400
-          "
-        >
-          {icon}
+    <section className="rounded-2xl border border-gray-200 bg-white p-5 dark:border-gray-800 dark:bg-[#161b22] sm:p-6">
+      <div className="mb-6 flex items-start gap-3">
+        <div className="rounded-xl bg-indigo-50 p-2.5 text-indigo-600 dark:bg-indigo-500/10 dark:text-indigo-400">
+          <Icon size={20} />
         </div>
-
         <div>
-          <h2 className="text-sm font-semibold text-gray-900 dark:text-white">
+          <h2 className="text-base font-semibold text-gray-900 dark:text-white">
             {title}
           </h2>
-
-          <p className="mt-0.5 text-xs text-gray-500 dark:text-gray-400">
+          <p className="mt-1 text-sm text-gray-500 dark:text-gray-400">
             {description}
           </p>
         </div>
       </div>
+      {children}
+    </section>
+  );
+}
 
-      <div className="space-y-4">{children}</div>
+function InputField({ label, value, onChange, type = "text", placeholder }) {
+  return (
+    <div>
+      <label className="mb-2 block text-sm font-medium text-gray-700 dark:text-gray-300">
+        {label}
+      </label>
+      <input
+        type={type}
+        value={value}
+        onChange={(e) => onChange(e.target.value)}
+        placeholder={placeholder}
+        className="w-full rounded-xl border border-gray-200 bg-white px-4 py-3 text-sm text-gray-900 outline-none transition placeholder:text-gray-400 focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500/10 dark:border-gray-700 dark:bg-[#0d1117] dark:text-white"
+      />
     </div>
   );
-};
+}
 
-const ToggleRow = ({
-  title,
-  description,
-  checked,
-  onChange,
-}) => {
+function SelectField({ label, value, onChange, options }) {
+  return (
+    <div>
+      <label className="mb-2 block text-sm font-medium text-gray-700 dark:text-gray-300">
+        {label}
+      </label>
+      <select
+        value={value}
+        onChange={(e) => onChange(e.target.value)}
+        className="w-full rounded-xl border border-gray-200 bg-white px-4 py-3 text-sm text-gray-900 outline-none transition focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500/10 dark:border-gray-700 dark:bg-[#0d1117] dark:text-white"
+      >
+        {options.map(([value, label]) => (
+          <option key={value} value={value}>
+            {label}
+          </option>
+        ))}
+      </select>
+    </div>
+  );
+}
+
+function SettingToggle({ title, description, checked, onChange }) {
   return (
     <div className="flex items-center justify-between gap-4">
-      <div>
-        <p className="text-sm font-medium text-gray-800 dark:text-gray-200">
+      <div className="min-w-0">
+        <h3 className="text-sm font-medium text-gray-900 dark:text-white">
           {title}
-        </p>
-
-        <p className="mt-0.5 text-xs text-gray-500 dark:text-gray-400">
+        </h3>
+        <p className="mt-1 text-xs leading-5 text-gray-500 dark:text-gray-400 sm:text-sm">
           {description}
         </p>
       </div>
 
       <button
         type="button"
+        role="switch"
+        aria-checked={checked}
         onClick={() => onChange(!checked)}
-        className={`
-          relative
-          h-6
-          w-11
-          shrink-0
-          rounded-full
-          transition
-          ${checked ? "bg-blue-600" : "bg-gray-300 dark:bg-gray-700"}
-        `}
+        className={`relative inline-flex h-6 w-11 shrink-0 items-center rounded-full transition ${
+          checked ? "bg-indigo-600" : "bg-gray-300 dark:bg-gray-600"
+        }`}
       >
         <span
-          className={`
-            absolute
-            top-1
-            h-4
-            w-4
-            rounded-full
-            bg-white
-            shadow
-            transition
-            ${checked ? "left-6" : "left-1"}
-          `}
+          className={`inline-block h-4 w-4 transform rounded-full bg-white shadow transition ${
+            checked ? "translate-x-6" : "translate-x-1"
+          }`}
         />
       </button>
     </div>
   );
-};
+}
 
-const SelectField = ({
-  label,
-  value,
-  options,
-  onChange,
-}) => {
+function InfoCard({ icon: Icon, title, description }) {
   return (
-    <div>
-      <label className="mb-1.5 block text-xs font-medium text-gray-700 dark:text-gray-300">
-        {label}
-      </label>
-
-      <select
-        value={value}
-        onChange={(e) => onChange(e.target.value)}
-        className="
-          h-10
-          w-full
-          rounded-lg
-          border
-          border-gray-200
-          bg-white
-          px-3
-          text-sm
-          text-gray-800
-          outline-none
-          focus:border-blue-500
-          dark:border-white/10
-          dark:bg-[#171c25]
-          dark:text-white
-        "
-      >
-        {options.map((option) => (
-          <option key={option}>{option}</option>
-        ))}
-      </select>
+    <div className="flex gap-3 rounded-2xl border border-indigo-100 bg-indigo-50/70 p-4 dark:border-indigo-500/20 dark:bg-indigo-500/5">
+      <div className="mt-0.5 text-indigo-600 dark:text-indigo-400">
+        <Icon size={19} />
+      </div>
+      <div>
+        <h3 className="text-sm font-semibold text-indigo-900 dark:text-indigo-300">
+          {title}
+        </h3>
+        <p className="mt-1 text-xs leading-5 text-indigo-800/80 dark:text-indigo-200/70 sm:text-sm">
+          {description}
+        </p>
+      </div>
     </div>
   );
-};
-
-const InputField = ({
-  label,
-  placeholder,
-  type = "text",
-}) => {
-  return (
-    <div>
-      <label className="mb-1.5 block text-xs font-medium text-gray-700 dark:text-gray-300">
-        {label}
-      </label>
-
-      <input
-        type={type}
-        placeholder={placeholder}
-        className="
-          h-10
-          w-full
-          rounded-lg
-          border
-          border-gray-200
-          bg-white
-          px-3
-          text-sm
-          text-gray-800
-          outline-none
-          placeholder:text-gray-400
-          focus:border-blue-500
-          dark:border-white/10
-          dark:bg-[#171c25]
-          dark:text-white
-        "
-      />
-    </div>
-  );
-};
+}

@@ -1,4 +1,3 @@
-
 import { useState } from "react";
 import {
   Settings,
@@ -18,6 +17,7 @@ import {
   Sparkles,
   CheckCircle2,
 } from "lucide-react";
+import CustomSelect from "../../components/common/CustomSelect";
 
 const initialSettings = {
   platformName: "AI Chatbot",
@@ -161,7 +161,8 @@ export default function AdminSettings() {
               <span className="text-sm font-semibold">AI Platform</span>
             </div>
             <p className="text-xs leading-5 text-gray-500 dark:text-gray-400">
-              Manage your platform, AI models, client usage and security from one place.
+              Manage your platform, AI models, client usage and security from
+              one place.
             </p>
           </div>
         </aside>
@@ -240,8 +241,14 @@ export default function AdminSettings() {
                     value={settings.aiModel}
                     onChange={(v) => updateSetting("aiModel", v)}
                     options={[
-                      ["gemini-2.5-flash", "Gemini 2.5 Flash"],
-                      ["gemini-2.5-pro", "Gemini 2.5 Pro"],
+                      {
+                        value: "gemini-2.5-flash",
+                        label: "Gemini 2.5 Flash",
+                      },
+                      {
+                        value: "gemini-2.5-pro",
+                        label: "Gemini 2.5 Pro",
+                      },
                     ]}
                   />
                   <InputField
@@ -381,10 +388,22 @@ export default function AdminSettings() {
                     value={settings.sessionTimeout}
                     onChange={(v) => updateSetting("sessionTimeout", v)}
                     options={[
-                      ["15", "15 Minutes"],
-                      ["30", "30 Minutes"],
-                      ["60", "1 Hour"],
-                      ["120", "2 Hours"],
+                      {
+                        value: "15",
+                        label: "15 Minutes",
+                      },
+                      {
+                        value: "30",
+                        label: "30 Minutes",
+                      },
+                      {
+                        value: "60",
+                        label: "1 Hour",
+                      },
+                      {
+                        value: "120",
+                        label: "2 Hours",
+                      },
                     ]}
                   />
                 </div>
@@ -461,7 +480,7 @@ function InputField({ label, value, onChange, type = "text", placeholder }) {
         value={value}
         onChange={(e) => onChange(e.target.value)}
         placeholder={placeholder}
-        className="w-full rounded-xl border border-gray-200 bg-white px-4 py-3 text-sm text-gray-900 outline-none transition placeholder:text-gray-400 focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500/10 dark:border-gray-700 dark:bg-[#0d1117] dark:text-white"
+        className="w-full rounded-xl border border-gray-200 bg-white px-4 py-3 text-sm text-gray-700 outline-none transition placeholder:text-gray-400 focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500/10 dark:border-gray-700 dark:bg-white/3 dark:text-white"
       />
     </div>
   );
@@ -473,17 +492,18 @@ function SelectField({ label, value, onChange, options }) {
       <label className="mb-2 block text-sm font-medium text-gray-700 dark:text-gray-300">
         {label}
       </label>
-      <select
+      <CustomSelect
+        size="md"
+        // label="Business Status"
+        name={"filter"}
         value={value}
         onChange={(e) => onChange(e.target.value)}
-        className="w-full rounded-xl border border-gray-200 bg-white px-4 py-3 text-sm text-gray-900 outline-none transition focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500/10 dark:border-gray-700 dark:bg-[#0d1117] dark:text-white"
-      >
-        {options.map(([value, label]) => (
-          <option key={value} value={value}>
-            {label}
-          </option>
-        ))}
-      </select>
+        options={options}
+        placeholder="Select status"
+        // error={errors.accountStatus?.message}
+        required
+        icon={true}
+      />
     </div>
   );
 }

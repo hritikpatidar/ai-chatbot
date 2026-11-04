@@ -11,6 +11,7 @@ import {
   ChevronLeft,
   ChevronRight,
   Ticket,
+  Receipt,
 } from "lucide-react";
 
 const menuItems = [
@@ -34,7 +35,7 @@ const menuItems = [
   {
     label: "Subscriptions",
     path: "/admin/subscriptions",
-    icon: CreditCard,
+    icon: Receipt,
     end: true,
   },
   {

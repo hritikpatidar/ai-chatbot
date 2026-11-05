@@ -240,6 +240,7 @@ export default function AdminSettings() {
                     label="Default AI Model"
                     value={settings.aiModel}
                     onChange={(v) => updateSetting("aiModel", v)}
+                    isDisabled={true}
                     options={[
                       {
                         value: "gemini-2.5-flash",
@@ -251,7 +252,7 @@ export default function AdminSettings() {
                       },
                     ]}
                   />
-                  <InputField
+                  {/* <InputField
                     label="Temperature"
                     type="number"
                     value={settings.temperature}
@@ -264,7 +265,7 @@ export default function AdminSettings() {
                     value={settings.maxOutputTokens}
                     onChange={(v) => updateSetting("maxOutputTokens", v)}
                     placeholder="2048"
-                  />
+                  /> */}
                 </div>
 
                 <div className="mt-6 space-y-4">
@@ -383,10 +384,11 @@ export default function AdminSettings() {
                     onChange={(v) => updateSetting("maxLoginAttempts", v)}
                     placeholder="5"
                   />
-                  <SelectField
+                  {/* <SelectField
                     label="Session Timeout"
                     value={settings.sessionTimeout}
                     onChange={(v) => updateSetting("sessionTimeout", v)}
+                    isIcon={true}
                     options={[
                       {
                         value: "15",
@@ -405,7 +407,7 @@ export default function AdminSettings() {
                         label: "2 Hours",
                       },
                     ]}
-                  />
+                  /> */}
                 </div>
 
                 <div className="mt-6 space-y-4">
@@ -486,7 +488,7 @@ function InputField({ label, value, onChange, type = "text", placeholder }) {
   );
 }
 
-function SelectField({ label, value, onChange, options }) {
+function SelectField({ label, value, isIcon = false, isDisabled = false, onChange, options }) {
   return (
     <div>
       <label className="mb-2 block text-sm font-medium text-gray-700 dark:text-gray-300">
@@ -502,7 +504,8 @@ function SelectField({ label, value, onChange, options }) {
         placeholder="Select status"
         // error={errors.accountStatus?.message}
         required
-        icon={true}
+        icon={isIcon}
+        disabled={isDisabled}
       />
     </div>
   );

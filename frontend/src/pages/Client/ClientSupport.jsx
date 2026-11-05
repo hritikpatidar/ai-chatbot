@@ -84,6 +84,7 @@ const ClientSupport = () => {
       });
 
       toast.success(successMessage);
+      setTimeout(() => setApiStatus({ type: "", message: "" }), 3000);
       reset();
     } catch (error) {
       const message =

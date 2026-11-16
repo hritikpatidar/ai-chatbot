@@ -9,7 +9,10 @@ import {
   findClientById,
 } from "../repositories/client.repository.js";
 import { deleteUserByClientId, findClientUserFcmTokenByClientId } from "../repositories/user.repository.js";
-import { createAndSendNotification } from "./notification.service.js";
+import {
+  createAndSendNotification,
+  notifyAdminOfClientEvent,
+} from "./notification.service.js";
 
 export const createClientService = async (data) => {
   const session = await mongoose.startSession();
@@ -139,6 +142,26 @@ export const createClientService = async (data) => {
         emailError,
       );
     }
+
+    const adminNotification = await notifyAdminOfClientEvent({
+      clientId: client._id,
+      adminId,
+      preference: "newClientNotification",
+      type: "general",
+      title: "New Client Registered",
+      message: `${client.businessName} has been added to the platform.`,
+      webRoute: "/admin/clients",
+      screen: "clients",
+      metadata: { clientId: client._id.toString() },
+    });
+
+    if (!adminNotification.success) {
+      console.error("New client admin notification was not delivered", {
+        clientId: client._id,
+        adminId,
+      });
+    }
+
     return {
       client,
       user,

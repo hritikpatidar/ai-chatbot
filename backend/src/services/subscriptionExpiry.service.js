@@ -4,7 +4,10 @@ import { findExpiredSubscriptions, markSubscriptionExpired, updateSubscriptionBy
 import { subscriptionExpiredEmailTemplate } from "../helpers/emailTemplate.js";
 import { updateClientById } from "../repositories/client.repository.js";
 import { findClientUserFcmTokenByClientId } from "../repositories/user.repository.js";
-import { createAndSendNotification } from "./notification.service.js";
+import {
+    createAndSendNotification,
+    notifyAdminOfClientEvent,
+} from "./notification.service.js";
 import SubscriptionUsage from "../models/SubscriptionUsage.js";
 
 export const processExpiredSubscriptions = async () => {
@@ -80,6 +83,22 @@ export const processExpiredSubscriptions = async () => {
                     expiryDate: null,
                 },
             });
+
+            const adminNotification = await notifyAdminOfClientEvent({
+                clientId,
+                preference: "subscriptionNotification",
+                type: "subscription",
+                title: "Client Subscription Expired",
+                message: `${client.businessName} subscription (${subscription.planId?.name || "plan"}) has expired.`,
+                webRoute: "/admin/subscriptions",
+                screen: "subscriptions",
+                metadata: { subscriptionId: subscription._id.toString() },
+            });
+            if (!adminNotification.success) {
+                console.error("Subscription expiry admin notification was not delivered", {
+                    clientId,
+                });
+            }
 
             console.log(`✅ Subscription marked expired: ${subscription._id}`);
         } catch (error) {

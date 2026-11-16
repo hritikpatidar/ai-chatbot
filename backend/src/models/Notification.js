@@ -52,6 +52,7 @@ const notificationSchema = new mongoose.Schema(
       type: String,
       enum: [
         "subscription",
+        "payment",
         "message",
         "settings",
         "alert",

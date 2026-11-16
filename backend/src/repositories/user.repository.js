@@ -120,5 +120,5 @@ export const findAdminUserFcmTokenByAdminId = async (adminId) => {
   return User.findOne({
     _id: adminId,
     role: "admin",
-  }).select("_id fcmToken");
+  }).select("_id fullName email fcmToken");
 };

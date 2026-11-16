@@ -9,7 +9,10 @@ import {
 import { findClientUserFcmTokenByClientId } from "../repositories/user.repository.js";
 
 import { subscriptionExpiryReminderEmailTemplate } from "../helpers/emailTemplate.js";
-import { createAndSendNotification } from "./notification.service.js";
+import {
+    createAndSendNotification,
+    notifyAdminOfClientEvent,
+} from "./notification.service.js";
 
 // IST date boundaries: two days from today's Indian calendar date
 const getReminderDateRange = () => {
@@ -72,7 +75,7 @@ export const processSubscriptionExpiryReminders = async () => {
                 html: emailTemplate.html,
             });
 
-            await createAndSendNotification({
+            const notificationResult = await createAndSendNotification({
                 type: "subscription",
                 clientId: client._id,
                 title: "Subscription Expiring Soon",
@@ -85,6 +88,22 @@ export const processSubscriptionExpiryReminders = async () => {
                     expiryDate: null,
                 },
             });
+
+            const adminNotification = await notifyAdminOfClientEvent({
+                clientId: client._id,
+                preference: "subscriptionNotification",
+                type: "subscription",
+                title: "Client Subscription Expiring Soon",
+                message: `${client.businessName} subscription expires on ${expiryDate}.`,
+                webRoute: "/admin/subscriptions",
+                screen: "subscriptions",
+                metadata: { subscriptionId: subscription._id.toString() },
+            });
+            if (!adminNotification.success) {
+                console.error("Subscription reminder admin notification was not delivered", {
+                    clientId: client._id,
+                });
+            }
 
             // Mark reminder sent only after both delivery operations succeed
             if (!notificationResult?.success) {

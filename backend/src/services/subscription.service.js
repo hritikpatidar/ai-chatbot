@@ -21,7 +21,10 @@ import {
   findSubscriptionPlanByStripePriceId,
 } from "../repositories/subscriptionPlan.repository.js";
 import { findClientUserFcmTokenByClientId } from "../repositories/user.repository.js";
-import { createAndSendNotification } from "./notification.service.js";
+import {
+  createAndSendNotification,
+  notifyAdminOfClientEvent,
+} from "./notification.service.js";
 
 import mongoose from "mongoose";
 
@@ -350,20 +353,6 @@ export const createSubscriptionService = async ({
       html: emailTemplate.html,
     });
 
-    await createAndSendNotification({
-      type: "subscription",
-      clientId: clientId,
-      title: "subscription purchase",
-      message: `You have successfully purchased the ${plan.name} plan. Your subscription and chatbot is now active.`,
-      webRoute: "/client/subscription",
-      screen: "",
-      image: "https://api.naqshapp.com/naqshsvg.jpg",
-      metadata: {
-        subscriptionId: stripeSubscription.id,
-        expiryDate: null,
-      },
-    });
-
     console.log(
       `✅ Subscription purchase email sent to ${email}`,
       info.messageId
@@ -373,6 +362,39 @@ export const createSubscriptionService = async ({
       `❌ Failed to send subscription purchase email to ${email}`,
       error
     );
+  }
+
+  await createAndSendNotification({
+    type: "subscription",
+    clientId,
+    title: "subscription purchase",
+    message: `You have successfully purchased the ${plan.name} plan. Your subscription and chatbot is now active.`,
+    webRoute: "/client/subscription",
+    screen: "",
+    image: "https://api.naqshapp.com/naqshsvg.jpg",
+    metadata: {
+      subscriptionId: stripeSubscription.id,
+      expiryDate: null,
+    },
+  });
+
+  const adminNotification = await notifyAdminOfClientEvent({
+    clientId,
+    preference: "subscriptionNotification",
+    type: "subscription",
+    title: "New Subscription Purchased",
+    message: `${client?.businessName || "A client"} purchased the ${plan.name} plan.`,
+    webRoute: "/admin/subscriptions",
+    screen: "subscriptions",
+    metadata: {
+      subscriptionId: subscription._id.toString(),
+      planName: plan.name,
+    },
+  });
+  if (!adminNotification.success) {
+    console.error("Subscription admin notification was not delivered", {
+      clientId,
+    });
   }
 
   /*
@@ -605,20 +627,6 @@ export const changeSubscriptionPlanService = async ({
         html: emailTemplate.html,
       });
 
-    await createAndSendNotification({
-      type: "subscription",
-      clientId: currentSubscription.clientId?._id,
-      title: `subscription ${changeType}`,
-      message: `You have successfully ${changeType}d your subscription to the ${newPlan.name} plan. Your subscription is now active.`,
-      webRoute: "/client/subscription",
-      screen: "",
-      image: "https://api.naqshapp.com/naqshsvg.jpg",
-      metadata: {
-        subscriptionId: stripeSubscription.id,
-        expiryDate: null,
-      },
-    });
-
     console.log(
       `✅ Subscription ${changeType} email sent to ${email}`,
       info.messageId
@@ -631,6 +639,41 @@ export const changeSubscriptionPlanService = async ({
       error
     );
 
+  }
+
+  await createAndSendNotification({
+    type: "subscription",
+    clientId: currentSubscription.clientId?._id,
+    title: `subscription ${changeType}`,
+    message: `You have successfully ${changeType}d your subscription to the ${newPlan.name} plan. Your subscription is now active.`,
+    webRoute: "/client/subscription",
+    screen: "",
+    image: "https://api.naqshapp.com/naqshsvg.jpg",
+    metadata: {
+      subscriptionId: stripeSubscription.id,
+      expiryDate: null,
+    },
+  });
+
+  const adminNotification = await notifyAdminOfClientEvent({
+    clientId: currentSubscription.clientId?._id || currentSubscription.clientId,
+    preference: "subscriptionNotification",
+    type: "subscription",
+    title: "Client Subscription Changed",
+    message: `${currentSubscription.clientId?.businessName || "A client"} changed their plan from ${oldPlanName} to ${newPlan.name}.`,
+    webRoute: "/admin/subscriptions",
+    screen: "subscriptions",
+    metadata: {
+      subscriptionId: currentSubscription._id.toString(),
+      oldPlanName,
+      newPlanName: newPlan.name,
+      changeType,
+    },
+  });
+  if (!adminNotification.success) {
+    console.error("Subscription change admin notification was not delivered", {
+      clientId: currentSubscription.clientId?._id || currentSubscription.clientId,
+    });
   }
 
   return {
@@ -808,26 +851,43 @@ export const cancelSubscriptionService = async (subscriptionId, fullName, email)
         info.messageId
       );
 
-      await createAndSendNotification({
-        type: "subscription",
-        clientId: clientId,
-        title: `Subscription Cancelled`,
-        message: `Your subscription has been successfully cancelled. We hope to see you back soon!`,
-        webRoute: "/client/subscription",
-        screen: "",
-        image: "https://api.naqshapp.com/naqshsvg.jpg",
-        metadata: {
-          subscriptionId: null,
-          expiryDate: null,
-        },
-      });
-
     } catch (emailError) {
       console.error(
         `❌ Failed to send cancellation email to ${email}`,
         emailError
       );
     }
+
+    await createAndSendNotification({
+      type: "subscription",
+      clientId: clientId?._id || clientId,
+      title: "Subscription Cancelled",
+      message: "Your subscription has been successfully cancelled. We hope to see you back soon!",
+      webRoute: "/client/subscription",
+      screen: "",
+      image: "https://api.naqshapp.com/naqshsvg.jpg",
+      metadata: {
+        subscriptionId: null,
+        expiryDate: null,
+      },
+    });
+
+    const adminNotification = await notifyAdminOfClientEvent({
+      clientId: clientId?._id || clientId,
+      preference: "subscriptionNotification",
+      type: "subscription",
+      title: "Client Subscription Cancelled",
+      message: `${subscription.clientId?.businessName || "A client"} cancelled their ${oldPlanName} subscription.`,
+      webRoute: "/admin/subscriptions",
+      screen: "subscriptions",
+      metadata: { subscriptionId: stripeSubscriptionId },
+    });
+    if (!adminNotification.success) {
+      console.error("Subscription cancellation admin notification was not delivered", {
+        clientId,
+      });
+    }
+
     return {};
   } catch (error) {
     console.error("Stripe cancel error:", error);

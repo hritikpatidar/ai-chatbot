@@ -6,6 +6,57 @@ import {
   stripe,
 } from "../services/stripe.service.js";
 import { syncSubscriptionFromStripe } from "../services/subscription.service.js";
+import { notifyAdminOfClientEvent } from "../services/notification.service.js";
+
+const notifyAdminOfInvoiceEvent = async ({
+  invoice,
+  subscription,
+  status,
+}) => {
+  const clientId =
+    subscription?.clientId?._id ||
+    subscription?.clientId ||
+    subscription?.metadata?.clientId;
+
+  if (!clientId) {
+    console.error("Cannot notify admin about invoice without a client", {
+      invoiceId: invoice.id,
+    });
+    return;
+  }
+
+  const isPaid = status === "paid";
+  const amount = Number(isPaid ? invoice.amount_paid : invoice.amount_due);
+  const formattedAmount = Number.isFinite(amount)
+    ? `${(amount / 100).toFixed(2)} ${(invoice.currency || "").toUpperCase()}`
+    : "an unknown amount";
+
+  const result = await notifyAdminOfClientEvent({
+    clientId,
+    preference: "paymentNotification",
+    type: "payment",
+    title: isPaid ? "Client Payment Received" : "Client Payment Issue",
+    message: isPaid
+      ? `Payment of ${formattedAmount} was received from ${subscription.clientId?.businessName || "a client"}.`
+      : `Payment of ${formattedAmount} from ${subscription.clientId?.businessName || "a client"} ${status === "failed" ? "failed" : "requires customer action"}.`,
+    webRoute: "/admin/subscriptions",
+    screen: "subscriptions",
+    metadata: {
+      invoiceId: invoice.id,
+      subscriptionId: subscription._id?.toString(),
+      paymentStatus: status,
+      amount: Number.isFinite(amount) ? amount / 100 : null,
+      currency: invoice.currency || null,
+    },
+  });
+
+  if (!result.success) {
+    console.error("Payment admin notification was not delivered", {
+      invoiceId: invoice.id,
+      clientId,
+    });
+  }
+};
 
 /* =========================================================
    GET PAYMENT INTENT
@@ -171,7 +222,13 @@ export const stripeWebhook = async (req, res) => {
             invoice.subscription,
           );
 
-          await syncSubscriptionFromStripe(stripeSubscription);
+          const subscription =
+            await syncSubscriptionFromStripe(stripeSubscription);
+          await notifyAdminOfInvoiceEvent({
+            invoice,
+            subscription: subscription || stripeSubscription,
+            status: "paid",
+          });
         }
 
         break;
@@ -184,7 +241,13 @@ export const stripeWebhook = async (req, res) => {
             invoice.subscription,
           );
 
-          await syncSubscriptionFromStripe(stripeSubscription);
+          const subscription =
+            await syncSubscriptionFromStripe(stripeSubscription);
+          await notifyAdminOfInvoiceEvent({
+            invoice,
+            subscription: subscription || stripeSubscription,
+            status: "failed",
+          });
         }
 
         break;
@@ -197,7 +260,13 @@ export const stripeWebhook = async (req, res) => {
             invoice.subscription,
           );
 
-          await syncSubscriptionFromStripe(stripeSubscription);
+          const subscription =
+            await syncSubscriptionFromStripe(stripeSubscription);
+          await notifyAdminOfInvoiceEvent({
+            invoice,
+            subscription: subscription || stripeSubscription,
+            status: "action_required",
+          });
         }
 
         break;

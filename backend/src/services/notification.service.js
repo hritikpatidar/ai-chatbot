@@ -13,10 +13,13 @@ import {
 } from "../repositories/user.repository.js";
 import Client from "../models/Client.js";
 import User from "../models/User.js";
+import AdminSetting from "../models/adminSetting.model.js";
 
 import sendNotification from "../helpers/fcm_notification.js";
 import { getIO } from "../config/socket.js";
 import { emitNotificationCreated } from "../socket/events/notification.event.js";
+import transporter from "../config/mail.js";
+import env from "../config/env.js";
 
 // export const createAndSendNotification = async ({
 //   type = "general",
@@ -90,6 +93,7 @@ export const createAndSendNotification = async ({
   type = "general",
   clientId = null,
   adminId = null,
+  adminPreference = null,
   title,
   message,
   webRoute = "/",
@@ -117,17 +121,30 @@ export const createAndSendNotification = async ({
     // 2. Specific admin recipient
     if (adminId) {
       const adminUser = await findAdminUserFcmTokenByAdminId(adminId);
+      const adminSettings = await AdminSetting.findOne({ adminId })
+        .select(
+          "emailNotifications newClientNotification subscriptionNotification paymentNotification",
+        )
+        .lean();
+      const preferenceEnabled =
+        !adminPreference || adminSettings?.[adminPreference] !== false;
 
-      if (adminUser) {
+      if (adminUser && preferenceEnabled) {
         recipients.push({
           user: adminUser,
           clientId: null,
           role: "admin",
+          emailEnabled: adminSettings?.emailNotifications !== false,
         });
       }
     }
     const results = await Promise.allSettled(
-      recipients.map(async ({ user, clientId: recipientClientId, role }) => {
+      recipients.map(async ({
+        user,
+        clientId: recipientClientId,
+        role,
+        emailEnabled,
+      }) => {
         const notification = await createNotification({
           userId: user._id,
           clientId: recipientClientId,
@@ -164,6 +181,20 @@ export const createAndSendNotification = async ({
         } else {
           console.warn(`[${role}] FCM token missing for user:`, user._id);
         }
+
+        if (role === "admin" && emailEnabled && user.email) {
+          try {
+            await transporter.sendMail({
+              from: `"AI Chatbot" <${env.MAIL_USER}>`,
+              to: user.email,
+              subject: title,
+              text: `${message}\n\nOpen your admin dashboard to review this notification.`,
+            });
+          } catch (emailError) {
+            console.error("[admin] Email notification failed:", emailError);
+          }
+        }
+
         return notification;
       })
     );
@@ -191,6 +222,46 @@ export const createAndSendNotification = async ({
       count: 0,
       notifications: [],
     };
+  }
+};
+
+export const notifyAdminOfClientEvent = async ({
+  clientId,
+  adminId: suppliedAdminId = null,
+  preference,
+  ...notification
+}) => {
+  try {
+    let adminId = suppliedAdminId;
+
+    if (!adminId && clientId) {
+      const client = await Client.findById(clientId)
+        .select("adminId")
+        .lean();
+      adminId = client?.adminId;
+    }
+
+    if (!adminId) {
+      const primaryAdmin = await User.findOne({ role: "admin" })
+        .sort({ createdAt: 1 })
+        .select("_id")
+        .lean();
+      adminId = primaryAdmin?._id;
+    }
+
+    if (!adminId) {
+      console.error("Cannot send admin notification: no admin account found");
+      return { success: false, count: 0, notifications: [] };
+    }
+
+    return await createAndSendNotification({
+      ...notification,
+      adminId,
+      adminPreference: preference,
+    });
+  } catch (error) {
+    console.error("Failed to prepare admin event notification:", error);
+    return { success: false, count: 0, notifications: [] };
   }
 };
 

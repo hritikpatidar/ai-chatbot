@@ -27,6 +27,7 @@ export const createClientService = async (data) => {
       clientKey,
       slug,
       chatbot = {},
+      adminId,
     } = data;
 
     const normalizedEmail = email.trim().toLowerCase();
@@ -60,6 +61,7 @@ export const createClientService = async (data) => {
     const [client] = await Client.create(
       [
         {
+          adminId,
           businessName: businessName.trim(),
           businessType: businessType.trim(),
           businessDescription: businessDescription.trim(),

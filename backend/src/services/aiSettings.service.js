@@ -1,0 +1,43 @@
+import env from "../config/env.js";
+import AdminSetting from "../models/adminSetting.model.js";
+import User from "../models/User.js";
+
+const defaultSettings = {
+  aiModel: env.GEMINI_MODEL || "gemini-2.5-flash",
+  temperature: 0.7,
+  maxOutputTokens: 2048,
+};
+
+export const getAISettingsForRequest = async ({
+  adminId,
+  client,
+} = {}) => {
+  let settingsAdminId = client?.adminId || adminId;
+
+  if (!settingsAdminId) {
+    // Legacy clients and unowned chats use the first admin as platform owner.
+    const primaryAdmin = await User.findOne({ role: "admin" })
+      .sort({ createdAt: 1 })
+      .select("_id")
+      .lean();
+
+    settingsAdminId = primaryAdmin?._id;
+  }
+
+  if (!settingsAdminId) {
+    return defaultSettings;
+  }
+
+  const settings = await AdminSetting.findOne({
+    adminId: settingsAdminId,
+  })
+    .select("aiModel temperature maxOutputTokens")
+    .lean();
+
+  return {
+    aiModel: settings?.aiModel || defaultSettings.aiModel,
+    temperature: settings?.temperature ?? defaultSettings.temperature,
+    maxOutputTokens:
+      settings?.maxOutputTokens ?? defaultSettings.maxOutputTokens,
+  };
+};

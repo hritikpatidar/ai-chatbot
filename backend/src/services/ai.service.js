@@ -1,5 +1,4 @@
 
-import env from "../config/env.js";
 import ai from "../config/gemini.js";
 
 const MAX_HISTORY_MESSAGES = 6;
@@ -151,6 +150,7 @@ export const classifyUserMessage = async ({
   message,
   knowledgeContext = "",
   client,
+  aiSettings,
 }) => {
   const question =
     typeof message === "string" ? message.trim() : "";
@@ -198,7 +198,7 @@ QUESTION: ${JSON.stringify(
 
   try {
     const response = await ai.models.generateContent({
-      model: env.GEMINI_MODEL,
+      model: aiSettings.aiModel,
       contents: prompt,
       config: {
         maxOutputTokens: 80,

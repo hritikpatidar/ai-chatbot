@@ -28,6 +28,7 @@ import {
 import { createAITicketService } from "../../services/ticket.service.js";
 import { findOrCreateGuestConversation } from "../../services/conversation.service.js";
 import { createAndSendNotification } from "../../services/notification.service.js";
+import { getAISettingsForRequest } from "../../services/aiSettings.service.js";
 
 import { getActiveSubscriptionWithPlan } from "../../repositories/subscription.repository.js";
 
@@ -39,8 +40,6 @@ import {
   completeConversationCreation,
   releaseConversationCreation,
 } from "../../services/aiUsage.service.js";
-
-import env from "../../config/env.js";
 
 const activeStreams = new Map();
 
@@ -168,6 +167,22 @@ export const registerAIEvents = (io, socket) => {
           return;
         }
       }
+
+      const settingsClientId =
+        clientId ||
+        (socket.user?.role === "client" ? socket.user?.clientId : null);
+      const settingsClient =
+        client ||
+        (settingsClientId
+          ? await findClientById(settingsClientId)
+          : null);
+      const aiSettings = await getAISettingsForRequest({
+        adminId:
+          socket.user?.role === "admin" ? socket.user?.id : null,
+        client: settingsClient,
+      });
+
+      console.log("aiSettings", aiSettings)
 
       // 2. Validate an existing conversation before reserving quota.
       let conversation = null;
@@ -349,6 +364,7 @@ export const registerAIEvents = (io, socket) => {
           message: cleanMessage,
           knowledgeContext,
           client,
+          aiSettings,
         });
 
         // Use actual metadata where available.
@@ -429,20 +445,22 @@ export const registerAIEvents = (io, socket) => {
 
       // 7. Build conversation content.
       const contents = buildConversationContents(history, cleanMessage);
-      const maxOutputTokens = plan?.limits?.maxOutputTokens;
+      const planMaxOutputTokens = plan?.limits?.maxOutputTokens;
+      const maxOutputTokens =
+        Number.isFinite(planMaxOutputTokens) && planMaxOutputTokens > 0
+          ? Math.min(planMaxOutputTokens, aiSettings.maxOutputTokens)
+          : aiSettings.maxOutputTokens;
 
       // 8. Generate final answer.
       activeStreams.set(socket.id, false);
       const stream = await ai.models.generateContentStream({
-        model: env.GEMINI_MODEL,
+        model: aiSettings.aiModel,
         contents,
-        config: clientId
-          ? {
-            systemInstruction,
-            maxOutputTokens,
-            temperature: 0.4
-          }
-          : undefined,
+        config: {
+          ...(clientId ? { systemInstruction } : {}),
+          maxOutputTokens,
+          temperature: aiSettings.temperature,
+        },
       });
 
       let fullResponse = "";

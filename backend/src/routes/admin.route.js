@@ -29,7 +29,7 @@ const adminOnly = (req, res, next) => {
   next();
 };
 
-router.post("/create-client", authMiddleware, createClientUser);
+router.post("/create-client", authMiddleware, adminOnly, createClientUser);
 router.get("/clients", authMiddleware, getAllClients);
 router.get("/clients/:clientId", authMiddleware, getClientById);
 router.delete("/delete-client/:clientId", authMiddleware, deleteClient);

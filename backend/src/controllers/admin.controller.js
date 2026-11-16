@@ -19,7 +19,10 @@ export const createClientUser = async (req, res, next) => {
         message: error.details[0].message,
       });
     }
-    const result = await createClientService(req.body);
+    const result = await createClientService({
+      ...req.body,
+      adminId: req.user?.id,
+    });
 
     return res.status(201).json({
       success: true,

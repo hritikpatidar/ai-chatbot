@@ -11,6 +11,8 @@ import {
   findAdminUserFcmTokenByAdminId,
   findClientUserFcmTokenByClientId,
 } from "../repositories/user.repository.js";
+import Client from "../models/Client.js";
+import User from "../models/User.js";
 
 import sendNotification from "../helpers/fcm_notification.js";
 import { getIO } from "../config/socket.js";
@@ -190,6 +192,70 @@ export const createAndSendNotification = async ({
       notifications: [],
     };
   }
+};
+
+export const notifyAdminClientsOfMaintenanceMode = async ({
+  adminId,
+  maintenanceMode,
+}) => {
+  const primaryAdmin = await User.findOne({ role: "admin" })
+    .sort({ createdAt: 1 })
+    .select("_id")
+    .lean();
+  const isPrimaryAdmin =
+    primaryAdmin?._id.toString() === adminId.toString();
+  const clientFilter = isPrimaryAdmin
+    ? { $or: [{ adminId }, { adminId: null }] }
+    : { adminId };
+
+  const clients = await Client.find(clientFilter).select("_id").lean();
+  const title = maintenanceMode
+    ? "Maintenance Mode Enabled"
+    : "Maintenance Mode Disabled";
+  const message = maintenanceMode
+    ? "Platform maintenance is now in progress. Some services may be temporarily unavailable."
+    : "Platform maintenance is complete. Services are available again.";
+
+  const results = await Promise.allSettled(
+    clients.map(({ _id: clientId }) =>
+      createAndSendNotification({
+        type: "system",
+        clientId,
+        title,
+        message,
+        webRoute: "/client",
+        screen: "settings",
+        metadata: { maintenanceMode },
+      }),
+    ),
+  );
+
+  let notificationCount = 0;
+
+  results.forEach((result, index) => {
+    if (result.status === "rejected") {
+      console.error(
+        `Maintenance notification failed for client ${clients[index]._id}:`,
+        result.reason,
+      );
+      return;
+    }
+
+    if (!result.value.success) {
+      console.error(
+        `Maintenance notification delivery was incomplete for client ${clients[index]._id}`,
+      );
+      return;
+    }
+
+    notificationCount += result.value.count;
+  });
+
+  return {
+    success: notificationCount === clients.length,
+    count: notificationCount,
+    clients: clients.length,
+  };
 };
 
 export const getMyNotifications = async (

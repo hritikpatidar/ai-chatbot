@@ -692,16 +692,37 @@ export const adminSettingSchema = z.object({
 
   aiModel: z.string().min(1, "Please select an AI model"),
 
-  temperature: z.coerce
-    .number()
-    .min(0, "Temperature must be at least 0")
-    .max(2, "Temperature cannot exceed 2"),
+  temperature: z
+    .string()
+    .trim()
+    .min(1, "Temperature is required")
+    .refine(
+      (value) => {
+        const temperature = Number(value);
+        return (
+          Number.isFinite(temperature) &&
+          temperature >= 0 &&
+          temperature <= 2
+        );
+      },
+      "Temperature must be between 0 and 2",
+    ),
 
-  maxOutputTokens: z.coerce
-    .number()
-    .int("Tokens must be a whole number")
-    .min(1, "Minimum 1 token is required")
-    .max(100000, "Maximum 100000 tokens allowed"),
+  maxOutputTokens: z
+    .string()
+    .trim()
+    .min(1, "Max output tokens are required")
+    .refine(
+      (value) => {
+        const tokenLimit = Number(value);
+        return (
+          Number.isInteger(tokenLimit) &&
+          tokenLimit >= 1 &&
+          tokenLimit <= 8192
+        );
+      },
+      "Max output tokens must be a whole number between 1 and 8192",
+    ),
 
   enableChatHistory: z.boolean(),
   enableStreaming: z.boolean(),

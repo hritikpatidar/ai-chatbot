@@ -34,8 +34,8 @@ const initialSettings = {
   timezone: "",
 
   aiModel: "",
-  temperature: "",
-  maxOutputTokens: "",
+  temperature: "0.7",
+  maxOutputTokens: "2048",
   enableChatHistory: true,
   enableStreaming: true,
   enableFallback: true,
@@ -412,41 +412,69 @@ export default function AdminSettings() {
                 icon={Bot}
               >
                 <div className="grid grid-cols-1 gap-5 md:grid-cols-2">
-                  <SelectField
-                    label="Default AI Model"
-                    value={settings.aiModel}
-                    onChange={(v) => updateSetting("aiModel", v)}
-                    isDisabled={isGeminiModelsPending || isGeminiModelsError || !modelOptions.length}
-                    placeholder={
-                      isGeminiModelsPending
-                        ? "Loading Gemini models..."
-                        : "Select a Gemini model"
-                    }
-                    error={errors.aiModel?.message}
-                    options={modelOptions}
-                  />
-                  {isGeminiModelsError && (
-                    <div className="mt-2 flex items-center justify-between gap-3 text-xs text-red-500">
-                      <span>
-                        {getErrorMessage(geminiModelsError)}
-                      </span>
-                      <button
-                        type="button"
-                        onClick={() => refetchGeminiModels()}
-                        disabled={isGeminiModelsFetching}
-                        className="shrink-0 font-medium underline disabled:opacity-60"
-                      >
-                        Retry
-                      </button>
-                    </div>
-                  )}
-                  {!isGeminiModelsPending &&
-                    !isGeminiModelsError &&
-                    modelOptions.length === 0 && (
-                      <p className="mt-2 text-xs text-gray-500 dark:text-gray-400">
-                        No Gemini models are available for this API key.
-                      </p>
+                  <div>
+                    <SelectField
+                      label="Default AI Model"
+                      value={settings.aiModel}
+                      onChange={(v) => updateSetting("aiModel", v)}
+                      isDisabled={
+                        isGeminiModelsPending ||
+                        isGeminiModelsError ||
+                        !modelOptions.length
+                      }
+                      placeholder={
+                        isGeminiModelsPending
+                          ? "Loading Gemini models..."
+                          : "Select a Gemini model"
+                      }
+                      error={errors.aiModel?.message}
+                      options={modelOptions}
+                    />
+                    {isGeminiModelsError && (
+                      <div className="mt-2 flex items-center justify-between gap-3 text-xs text-red-500">
+                        <span>{getErrorMessage(geminiModelsError)}</span>
+                        <button
+                          type="button"
+                          onClick={() => refetchGeminiModels()}
+                          disabled={isGeminiModelsFetching}
+                          className="shrink-0 font-medium underline disabled:opacity-60"
+                        >
+                          Retry
+                        </button>
+                      </div>
                     )}
+                    {!isGeminiModelsPending &&
+                      !isGeminiModelsError &&
+                      modelOptions.length === 0 && (
+                        <p className="mt-2 text-xs text-gray-500 dark:text-gray-400">
+                          No Gemini models are available for this API key.
+                        </p>
+                      )}
+                  </div>
+
+                  <InputField
+                    label="Temperature (0-2)"
+                    type="number"
+                    min="0"
+                    max="2"
+                    step="0.1"
+                    value={settings.temperature}
+                    onChange={(v) => updateSetting("temperature", v)}
+                    placeholder="0.7"
+                    error={errors.temperature?.message}
+                  />
+
+                  <InputField
+                    label="Max Output Tokens (1-8192)"
+                    type="number"
+                    min="1"
+                    max="8192"
+                    step="1"
+                    value={settings.maxOutputTokens}
+                    onChange={(v) => updateSetting("maxOutputTokens", v)}
+                    placeholder="2048"
+                    error={errors.maxOutputTokens?.message}
+                  />
                 </div>
 
                 <div className="mt-6 space-y-4">
@@ -659,6 +687,9 @@ function InputField({
   value,
   onChange,
   type = "text",
+  min,
+  max,
+  step,
   placeholder,
   error,
 }) {
@@ -670,6 +701,9 @@ function InputField({
 
       <input
         type={type}
+        min={min}
+        max={max}
+        step={step}
         value={value}
         onChange={(e) => onChange(e.target.value)}
         placeholder={placeholder}

@@ -1,5 +1,6 @@
 import { getAdminSettingsService, updateAdminSettingsService } from "../services/adminSetting.service.js";
 import { getGeminiModelsService } from "../services/gemini.service.js";
+import { notifyAdminClientsOfMaintenanceMode } from "../services/notification.service.js";
 
 
 
@@ -44,10 +45,30 @@ export const updateAdminSettingsController = async (req, res) => {
       });
     }
 
-    const settings = await updateAdminSettingsService(
-      adminId,
-      req.body
-    );
+    const previousSettings = await getAdminSettingsService(adminId);
+    const settings = await updateAdminSettingsService(adminId, req.body);
+
+    if (previousSettings.maintenanceMode !== settings.maintenanceMode) {
+      try {
+        const notificationResult =
+          await notifyAdminClientsOfMaintenanceMode({
+            adminId,
+            maintenanceMode: settings.maintenanceMode,
+          });
+
+        if (!notificationResult.success) {
+          console.error(
+            "Some clients did not receive the maintenance notification:",
+            notificationResult,
+          );
+        }
+      } catch (notificationError) {
+        console.error(
+          "Failed to send maintenance mode notifications:",
+          notificationError,
+        );
+      }
+    }
 
     return res.status(200).json({
       success: true,

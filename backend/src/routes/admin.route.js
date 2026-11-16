@@ -37,8 +37,8 @@ router.put("/clients/:clientId", authMiddleware, updateAdminClient);
 router.get("/dashboard", authMiddleware, getAdminDashboard);
 router.get("/analytics", authMiddleware, getAdminAnalytics);
 router.get("/subscriptions", authMiddleware, adminOnly, getAdminSubscriptionsController);
-router.get("/settings", authMiddleware, getAdminSettingsController);
-router.patch("/settings", authMiddleware, updateAdminSettingsController);
+router.get("/settings", authMiddleware, adminOnly, getAdminSettingsController);
+router.patch("/settings", authMiddleware, adminOnly, updateAdminSettingsController);
 router.get("/ai-models", authMiddleware, adminOnly, getGeminiModelsController);
 
 router.post(

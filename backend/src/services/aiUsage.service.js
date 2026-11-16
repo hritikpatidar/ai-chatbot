@@ -161,6 +161,106 @@ export const completeAIUsage = async ({
   }
 };
 
+const getUsagePercentage = (used, limit) =>
+  Number.isFinite(limit) && limit > 0
+    ? ((Number.isFinite(used) ? used : 0) / limit) * 100
+    : 0;
+
+export const claimMonthlyUsageAlert = async ({
+  usageId,
+  limits,
+  threshold,
+}) => {
+  if (!Number.isFinite(threshold)) {
+    return null;
+  }
+
+  const usage = await SubscriptionUsage.findById(usageId).lean();
+
+  if (!usage || usage.usageAlertSentAt) {
+    return null;
+  }
+
+  const usagePercentages = {
+    responses: getUsagePercentage(
+      usage.responsesUsed,
+      limits.monthlyResponses,
+    ),
+    tokens: getUsagePercentage(
+      usage.tokensUsed,
+      limits.monthlyTokenBudget,
+    ),
+    conversations: getUsagePercentage(
+      usage.conversationsUsed,
+      limits.monthlyConversations,
+    ),
+  };
+
+  if (Math.max(...Object.values(usagePercentages)) < threshold) {
+    return null;
+  }
+
+  const claimedAt = new Date();
+  const staleClaimBefore = new Date(claimedAt.getTime() - 5 * 60 * 1000);
+  const claim = await SubscriptionUsage.findOneAndUpdate(
+    {
+      _id: usageId,
+      usageAlertSentAt: null,
+      $or: [
+        { usageAlertClaimedAt: null },
+        { usageAlertClaimedAt: { $lt: staleClaimBefore } },
+      ],
+    },
+    { $set: { usageAlertClaimedAt: claimedAt } },
+    { new: true },
+  ).lean();
+
+  if (!claim) {
+    return null;
+  }
+
+  return {
+    claimedAt,
+    periodStart: usage.periodStart,
+    usagePercentages,
+  };
+};
+
+export const markMonthlyUsageAlertSent = async ({
+  usageId,
+  claimedAt,
+}) => {
+  const result = await SubscriptionUsage.updateOne(
+    {
+      _id: usageId,
+      usageAlertClaimedAt: claimedAt,
+      usageAlertSentAt: null,
+    },
+    {
+      $set: { usageAlertSentAt: new Date() },
+      $unset: { usageAlertClaimedAt: 1 },
+    },
+  );
+
+  if (result.modifiedCount !== 1) {
+    throw new Error("USAGE_ALERT_CLAIM_NOT_FOUND");
+  }
+};
+
+export const releaseMonthlyUsageAlertClaim = async ({
+  usageId,
+  claimedAt,
+}) => {
+  await SubscriptionUsage.updateOne(
+    {
+      _id: usageId,
+      usageAlertClaimedAt: claimedAt,
+      usageAlertSentAt: null,
+    },
+    { $unset: { usageAlertClaimedAt: 1 } },
+  );
+};
+
 export const releaseAIUsage = async ({
   usageId,
   reservedTokens,

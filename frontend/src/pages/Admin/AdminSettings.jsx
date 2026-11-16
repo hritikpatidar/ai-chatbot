@@ -517,13 +517,16 @@ export default function AdminSettings() {
             <>
               <Section
                 title="Usage & Limits"
-                description="Configure platform-wide usage alert preferences."
+                description="Configure when clients receive monthly usage alerts."
                 icon={Gauge}
               >
                 <div className="grid grid-cols-1 gap-5 md:grid-cols-2">
                   <InputField
-                    label="Usage Alert Threshold (%)"
+                    label="Client Usage Alert Threshold (%)"
                     type="number"
+                    min="1"
+                    max="100"
+                    step="1"
                     value={settings.usageAlertLimit}
                     onChange={(v) => updateSetting("usageAlertLimit", v)}
                     placeholder="80"
@@ -534,7 +537,7 @@ export default function AdminSettings() {
                 <div className="mt-6 space-y-4">
                   <SettingToggle
                     title="Monthly Usage Alerts"
-                    description="Get notified when platform usage reaches the configured threshold."
+                    description="When on, notify clients as monthly responses, token budget, or conversations reach this threshold. When off, no usage alerts are sent."
                     checked={settings.monthlyUsageAlert}
                     onChange={(v) => updateSetting("monthlyUsageAlert", v)}
                   />

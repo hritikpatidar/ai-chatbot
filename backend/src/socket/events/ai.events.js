@@ -36,6 +36,9 @@ import {
   reserveAIUsage,
   completeAIUsage,
   releaseAIUsage,
+  claimMonthlyUsageAlert,
+  markMonthlyUsageAlertSent,
+  releaseMonthlyUsageAlertClaim,
   reserveConversationCreation,
   completeConversationCreation,
   releaseConversationCreation,
@@ -48,6 +51,77 @@ const estimateTokens = (value = "") => {
   return Math.ceil(String(value).length / 4);
 };
 
+const notifyMonthlyUsageThreshold = async ({
+  usageId,
+  clientId,
+  plan,
+  aiSettings,
+}) => {
+  if (!clientId || aiSettings?.monthlyUsageAlert !== true) {
+    return;
+  }
+
+  let claim = null;
+  const releaseClaim = async () => {
+    if (!claim) return;
+
+    try {
+      await releaseMonthlyUsageAlertClaim({
+        usageId,
+        claimedAt: claim.claimedAt,
+      });
+      claim = null;
+    } catch (error) {
+      console.error("Failed to release usage alert claim:", error);
+    }
+  };
+
+  try {
+    claim = await claimMonthlyUsageAlert({
+      usageId,
+      limits: plan?.limits || {},
+      threshold: aiSettings.usageAlertLimit,
+    });
+
+    if (!claim) {
+      return;
+    }
+
+    const formatPercentage = (value) => `${value.toFixed(1)}%`;
+    const { responses, tokens, conversations } = claim.usagePercentages;
+    const notification = await createAndSendNotification({
+      type: "alert",
+      clientId,
+      title: "Monthly Usage Threshold Reached",
+      message: `Monthly usage reached the ${aiSettings.usageAlertLimit}% alert threshold. Responses: ${formatPercentage(responses)}, tokens: ${formatPercentage(tokens)}, conversations: ${formatPercentage(conversations)}.`,
+      webRoute: "/client",
+      screen: "usage",
+      metadata: {
+        threshold: aiSettings.usageAlertLimit,
+        usagePercentages: claim.usagePercentages,
+        periodStart: claim.periodStart,
+      },
+    });
+
+    if (!notification.success || notification.count === 0) {
+      console.error("Monthly usage notification was not delivered", {
+        clientId,
+        notification,
+      });
+      await releaseClaim();
+      return;
+    }
+
+    await markMonthlyUsageAlertSent({
+      usageId,
+      claimedAt: claim.claimedAt,
+    });
+  } catch (error) {
+    console.error("Failed to send monthly usage notification:", error);
+    await releaseClaim();
+  }
+};
+
 export const registerAIEvents = (io, socket) => {
   socket.on("ai:message", async (data = {}) => {
     let usageReservation = null;
@@ -58,7 +132,12 @@ export const registerAIEvents = (io, socket) => {
     let conversationReservation = null;
     let conversationReservationSettled = false;
 
-    const settleUsage = async (actualTokens) => {
+    const settleUsage = async (
+      actualTokens,
+      clientId,
+      plan,
+      aiSettings,
+    ) => {
       if (!usageReservation || usageSettled) return;
 
       await completeAIUsage({
@@ -68,6 +147,12 @@ export const registerAIEvents = (io, socket) => {
       });
 
       usageSettled = true;
+      await notifyMonthlyUsageThreshold({
+        usageId: usageReservation.usageId,
+        clientId,
+        plan,
+        aiSettings,
+      });
     };
 
     const releaseUsage = async () => {
@@ -392,7 +477,7 @@ export const registerAIEvents = (io, socket) => {
             : "I'm sorry, I don't have enough information to answer that. I've created a support ticket for you.";
 
           // The classifier has already consumed tokens, so count this request.
-          await settleUsage(totalGeminiTokens);
+          await settleUsage(totalGeminiTokens, clientId, plan, aiSettings);
 
           await createMessage({
             conversationId: conversation._id,
@@ -512,7 +597,7 @@ export const registerAIEvents = (io, socket) => {
       }
 
       // 9. Finalize quota once. Stopped streams are counted too.
-      await settleUsage(totalGeminiTokens);
+      await settleUsage(totalGeminiTokens, clientId, plan, aiSettings);
       socket.emit("ai:end", {
         success: true,
         message: wasStopped

@@ -6,6 +6,8 @@ const defaultSettings = {
   aiModel: env.GEMINI_MODEL || "gemini-2.5-flash",
   temperature: 0.7,
   maxOutputTokens: 2048,
+  monthlyUsageAlert: true,
+  usageAlertLimit: 80,
 };
 
 export const getAISettingsForRequest = async ({
@@ -31,7 +33,9 @@ export const getAISettingsForRequest = async ({
   const settings = await AdminSetting.findOne({
     adminId: settingsAdminId,
   })
-    .select("aiModel temperature maxOutputTokens")
+    .select(
+      "aiModel temperature maxOutputTokens monthlyUsageAlert usageAlertLimit",
+    )
     .lean();
 
   return {
@@ -39,5 +43,9 @@ export const getAISettingsForRequest = async ({
     temperature: settings?.temperature ?? defaultSettings.temperature,
     maxOutputTokens:
       settings?.maxOutputTokens ?? defaultSettings.maxOutputTokens,
+    monthlyUsageAlert:
+      settings?.monthlyUsageAlert ?? defaultSettings.monthlyUsageAlert,
+    usageAlertLimit:
+      settings?.usageAlertLimit ?? defaultSettings.usageAlertLimit,
   };
 };

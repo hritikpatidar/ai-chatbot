@@ -47,6 +47,14 @@ const subscriptionUsageSchema = new mongoose.Schema(
       default: 0,
       min: 0,
     },
+    usageAlertClaimedAt: {
+      type: Date,
+      default: null,
+    },
+    usageAlertSentAt: {
+      type: Date,
+      default: null,
+    },
   },
   { timestamps: true }
 );

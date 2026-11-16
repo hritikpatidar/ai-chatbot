@@ -759,3 +759,63 @@ export const clientSupportSchema = z.object({
     .min(10, "Message must contain at least 10 characters.")
     .max(10000, "Message cannot exceed 10000 characters."),
 });
+
+export const adminSettingSchema = z.object({
+  platformName: z
+    .string()
+    .trim()
+    .min(3, "Platform name must be at least 3 characters")
+    .max(50, "Platform name cannot exceed 50 characters"),
+
+  supportEmail: z
+    .string()
+    .trim()
+    .min(1, "Support email is required")
+    .email("Please enter a valid email address"),
+
+  defaultLanguage: z.string().optional(),
+  timezone: z.string().optional(),
+
+  aiModel: z.string().min(1, "Please select an AI model"),
+
+  temperature: z.coerce
+    .number()
+    .min(0, "Temperature must be at least 0")
+    .max(2, "Temperature cannot exceed 2"),
+
+  maxOutputTokens: z.coerce
+    .number()
+    .int("Tokens must be a whole number")
+    .min(1, "Minimum 1 token is required")
+    .max(100000, "Maximum 100000 tokens allowed"),
+
+  enableChatHistory: z.boolean(),
+  enableStreaming: z.boolean(),
+  enableFallback: z.boolean(),
+
+  monthlyUsageAlert: z.boolean(),
+
+  usageAlertLimit: z.coerce
+    .number()
+    .min(1, "Usage alert must be at least 1%")
+    .max(100, "Usage alert cannot exceed 100%"),
+
+  emailNotifications: z.boolean(),
+  newClientNotification: z.boolean(),
+  subscriptionNotification: z.boolean(),
+  paymentNotification: z.boolean(),
+
+  maxLoginAttempts: z.coerce
+    .number()
+    .int("Login attempts must be a whole number")
+    .min(1, "Minimum 1 login attempt required")
+    .max(20, "Maximum 20 login attempts allowed"),
+
+  sessionTimeout: z.coerce
+    .number()
+    .min(1, "Session timeout must be at least 1 minute")
+    .max(1440, "Maximum session timeout is 1440 minutes"),
+
+  twoFactorAuth: z.boolean(),
+  maintenanceMode: z.boolean(),
+});

@@ -18,6 +18,7 @@ import {
 
 import CustomSelect from "../../components/common/CustomSelect";
 import {
+  useAdminGeminiModels,
   useAdminSettings,
   useUpdateAdminSettings,
 } from "../../hooks/Admin/useAdminSettings";
@@ -105,6 +106,14 @@ export default function AdminSettings() {
   // GET API
   const { data, isPending, isError, error, refetch, isFetching } =
     useAdminSettings();
+  const {
+    data: geminiModelsResponse,
+    isPending: isGeminiModelsPending,
+    isError: isGeminiModelsError,
+    error: geminiModelsError,
+    refetch: refetchGeminiModels,
+    isFetching: isGeminiModelsFetching,
+  } = useAdminGeminiModels();
 
   const {
     handleSubmit,
@@ -121,6 +130,23 @@ export default function AdminSettings() {
 
   // Keep the existing UI controlled by React Hook Form values.
   const settings = watch();
+  const geminiModels = geminiModelsResponse?.data?.data;
+  const modelOptions = Array.isArray(geminiModels)
+    ? geminiModels.map((model) => ({
+        value: model.id,
+        label: model.displayName,
+      }))
+    : [];
+
+  if (
+    settings.aiModel &&
+    !modelOptions.some((option) => option.value === settings.aiModel)
+  ) {
+    modelOptions.unshift({
+      value: settings.aiModel,
+      label: `${settings.aiModel} (saved)`,
+    });
+  }
 
   // PATCH API
   const updateMutation = useUpdateAdminSettings();
@@ -390,19 +416,37 @@ export default function AdminSettings() {
                     label="Default AI Model"
                     value={settings.aiModel}
                     onChange={(v) => updateSetting("aiModel", v)}
-                    isDisabled={true}
+                    isDisabled={isGeminiModelsPending || isGeminiModelsError || !modelOptions.length}
+                    placeholder={
+                      isGeminiModelsPending
+                        ? "Loading Gemini models..."
+                        : "Select a Gemini model"
+                    }
                     error={errors.aiModel?.message}
-                    options={[
-                      {
-                        value: "gemini-2.5-flash",
-                        label: "Gemini 2.5 Flash",
-                      },
-                      {
-                        value: "gemini-2.5-pro",
-                        label: "Gemini 2.5 Pro",
-                      },
-                    ]}
+                    options={modelOptions}
                   />
+                  {isGeminiModelsError && (
+                    <div className="mt-2 flex items-center justify-between gap-3 text-xs text-red-500">
+                      <span>
+                        {getErrorMessage(geminiModelsError)}
+                      </span>
+                      <button
+                        type="button"
+                        onClick={() => refetchGeminiModels()}
+                        disabled={isGeminiModelsFetching}
+                        className="shrink-0 font-medium underline disabled:opacity-60"
+                      >
+                        Retry
+                      </button>
+                    </div>
+                  )}
+                  {!isGeminiModelsPending &&
+                    !isGeminiModelsError &&
+                    modelOptions.length === 0 && (
+                      <p className="mt-2 text-xs text-gray-500 dark:text-gray-400">
+                        No Gemini models are available for this API key.
+                      </p>
+                    )}
                 </div>
 
                 <div className="mt-6 space-y-4">
@@ -647,6 +691,7 @@ function SelectField({
   value,
   isIcon = false,
   isDisabled = false,
+  placeholder = "Select an option",
   onChange,
   options,
   error,
@@ -663,7 +708,7 @@ function SelectField({
         value={value}
         onChange={(e) => onChange(e.target.value)}
         options={options}
-        placeholder="Select status"
+        placeholder={placeholder}
         required
         icon={isIcon}
         disabled={isDisabled}

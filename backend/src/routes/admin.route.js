@@ -12,7 +12,11 @@ import { getAdminDashboard } from "../controllers/adminDashboard.controller.js";
 import { createSubscriptionPlanController, deleteSubscriptionPlanController, getAdminSubscriptionPlanController, getAllSubscriptionPlansController, updateSubscriptionPlanController } from "../controllers/adminSubscriptionPlan.controller.js";
 import { getAdminAnalytics } from "../controllers/analytics.controller.js";
 import { getAdminSubscriptionsController } from "../controllers/subscription.controller.js";
-import { getAdminSettingsController, updateAdminSettingsController } from "../controllers/adminSetting.controller.js";
+import {
+  getAdminSettingsController,
+  getGeminiModelsController,
+  updateAdminSettingsController,
+} from "../controllers/adminSetting.controller.js";
 
 const router = express.Router();
 const adminOnly = (req, res, next) => {
@@ -35,6 +39,7 @@ router.get("/analytics", authMiddleware, getAdminAnalytics);
 router.get("/subscriptions", authMiddleware, adminOnly, getAdminSubscriptionsController);
 router.get("/settings", authMiddleware, getAdminSettingsController);
 router.patch("/settings", authMiddleware, updateAdminSettingsController);
+router.get("/ai-models", authMiddleware, adminOnly, getGeminiModelsController);
 
 router.post(
   "/subscription-plans",

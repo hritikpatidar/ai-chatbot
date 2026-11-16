@@ -50,7 +50,8 @@ const platformSettingSchema = new mongoose.Schema(
     // AI Configuration
     aiModel: {
       type: String,
-      enum: ["gemini-2.5-flash", "gemini-2.5-pro"],
+      trim: true,
+      match: /^gemini-[a-zA-Z0-9._-]+$/,
       default: "gemini-2.5-flash",
     },
 

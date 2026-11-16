@@ -1,4 +1,5 @@
 import { getAdminSettingsService, updateAdminSettingsService } from "../services/adminSetting.service.js";
+import { getGeminiModelsService } from "../services/gemini.service.js";
 
 
 
@@ -66,6 +67,25 @@ export const updateAdminSettingsController = async (req, res) => {
     return res.status(isValidationError ? 400 : 500).json({
       success: false,
       message: error.message || "Failed to update admin settings",
+    });
+  }
+};
+
+export const getGeminiModelsController = async (req, res) => {
+  try {
+    const models = await getGeminiModelsService();
+
+    return res.status(200).json({
+      success: true,
+      message: "Gemini models fetched successfully",
+      data: models,
+    });
+  } catch (error) {
+    console.error("Get Gemini Models Error:", error);
+
+    return res.status(502).json({
+      success: false,
+      message: "Failed to fetch Gemini models",
     });
   }
 };

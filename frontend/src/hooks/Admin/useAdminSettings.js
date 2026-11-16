@@ -1,11 +1,16 @@
 
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
-import { getAdminSettingsService, updateAdminSettingsService } from "../../service/Admin/adminSettingsService";
+import {
+  getAdminGeminiModelsService,
+  getAdminSettingsService,
+  updateAdminSettingsService,
+} from "../../service/Admin/adminSettingsService";
 
 
 
 export const adminSettingsKeys = {
   all: ["adminSettings"],
+  geminiModels: ["adminGeminiModels"],
 };
 
 // GET SETTINGS
@@ -13,6 +18,16 @@ export const useAdminSettings = () => {
   return useQuery({
     queryKey: adminSettingsKeys.all,
     queryFn: getAdminSettingsService,
+    staleTime: 5 * 60 * 1000,
+    retry: 1,
+    refetchOnWindowFocus: false,
+  });
+};
+
+export const useAdminGeminiModels = () => {
+  return useQuery({
+    queryKey: adminSettingsKeys.geminiModels,
+    queryFn: getAdminGeminiModelsService,
     staleTime: 5 * 60 * 1000,
     retry: 1,
     refetchOnWindowFocus: false,

@@ -8,6 +8,7 @@ import transporter from "../config/mail.js";
 import { supportTicketConfirmationEmailTemplate, supportTicketCreatedEmailTemplate, supportTicketReplyEmailTemplate } from "../helpers/emailTemplate.js";
 import User from "../models/User.js";
 import { createAndSendNotification } from "../services/notification.service.js";
+import { getAdminSettingsService } from "../services/adminSetting.service.js";
 
 const sendTemplateEmail = async (to, template, options = {}) => {
     if (!to) {
@@ -75,6 +76,7 @@ export const createSupportTicket = async (req, res) => {
         const client = await User.findById(clientId).lean();
         const admin = await User.findOne({ email: "superadmin@gmail.com" }).lean();
         const ClientBusiness = await Client.findById(client.clientId).lean();
+        const adminSettings = await getAdminSettingsService(admin._id);
 
         if (!client) {
             return res.status(404).json({
@@ -109,7 +111,7 @@ export const createSupportTicket = async (req, res) => {
         // Ticket remains saved even if an email provider is temporarily down.
         const emailResults = await Promise.allSettled([
             sendTemplateEmail(
-                env.ADMIN_SUPPORT_EMAIL,
+                adminSettings.supportEmail,
                 supportTicketCreatedEmailTemplate({
                     ticketNumber: ticket.ticketNumber,
                     clientName,

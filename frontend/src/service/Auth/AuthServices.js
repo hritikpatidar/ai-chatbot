@@ -17,6 +17,10 @@ export const loginUserService = (data) => {
   return httpServices.post(`/auth/login`, data);
 };
 
+export const verifyAdminLoginOtpService = (data) => {
+  return httpServices.post(`/auth/verify-admin-login-otp`, data);
+};
+
 export const forgotPasswordService = (data) => {
   return httpServices.post(`/auth/forgot-password`, data);
 };

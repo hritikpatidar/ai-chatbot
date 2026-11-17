@@ -23,15 +23,33 @@ export const messaging = getMessaging(app);
 
 export const generateToken = async () => {
     try {
+        if (!("serviceWorker" in navigator) || !("Notification" in window)) {
+            return null;
+        }
+
         const permission = await Notification.requestPermission();
         if (permission !== "granted") {
             console.log("❌ Notification permission denied");
             return null;
         }
+
+        const serviceWorkerUrl = new URL(
+            "/firebase-messaging-sw.js",
+            window.location.origin,
+        );
+        Object.entries(firebaseConfig).forEach(([key, value]) => {
+            if (value) {
+                serviceWorkerUrl.searchParams.set(key, value);
+            }
+        });
+        const serviceWorkerRegistration =
+            await navigator.serviceWorker.register(serviceWorkerUrl.toString());
+
         const token = await getToken(
             messaging,
             {
                 vapidKey: import.meta.env.VITE_FIREBASE_VAPID_KEY,
+                serviceWorkerRegistration,
             }
         );
         if (!token) {

@@ -2,6 +2,7 @@ import express from "express";
 import {
   forgotPassword,
   login,
+  verifyAdminLoginOTP,
   logout,
   resendOTP,
   resetPassword,
@@ -19,6 +20,7 @@ router.post("/verify-email-otp", verifyEmailOTP);
 router.post("/resend-otp", resendOTP);
 router.post("/forgot-password", forgotPassword);
 router.post("/login", login);
+router.post("/verify-admin-login-otp", verifyAdminLoginOTP);
 router.post("/reset-password", resetPassword);
 router.post("/change-password", authMiddleware, changePassword);
 router.post("/logout", logout);

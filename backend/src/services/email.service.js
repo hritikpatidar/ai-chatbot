@@ -12,7 +12,7 @@ export const sendOTPEmail = async (email, otp) => {
     subject: "Your OTP Verification Code",
     html: otpEmailTemplate(otp),
   });
-  console.log(`✅ Client OTP email sent to ${email}`, info.messageId);
+  console.log(`✅ OTP email sent to ${email}`, info.messageId);
 };
 
 export const sendClientWelcomeEmail = async ({

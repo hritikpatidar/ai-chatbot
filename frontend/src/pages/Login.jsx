@@ -1,5 +1,13 @@
 import { useState } from "react";
-import { Eye, EyeOff, Mail, Lock, Sparkles, Check } from "lucide-react";
+import {
+  Eye,
+  EyeOff,
+  Mail,
+  Lock,
+  Sparkles,
+  Check,
+  ShieldCheck,
+} from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { motion } from "framer-motion";
 import { getItemLocalStorage, setItemLocalStorage } from "../utils/browserServices";
@@ -7,15 +15,21 @@ import AnimatedBackground from "../components/AnimatedBackground";
 import { useDispatch } from "react-redux";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { loginUser } from "../redux/features/Auth/authSlice";
+import {
+  loginUser,
+  verifyAdminLoginOtp,
+} from "../redux/features/Auth/authSlice";
 import toast from "react-hot-toast";
 import { loginSchema } from "../utils/validation";
+import { generateToken } from "../firebase";
 
 export default function Login() {
   const navigate = useNavigate();
   const dispatch = useDispatch();
 
   const [showPassword, setShowPassword] = useState(false);
+  const [challengeId, setChallengeId] = useState("");
+  const [otp, setOtp] = useState("");
 
   const {
     register,
@@ -28,26 +42,61 @@ export default function Login() {
 
   const onSubmit = async (data) => {
     try {
-      const payload = {...data,fcmToken: getItemLocalStorage("fcm_token")}
+      if (challengeId) {
+        const response = await dispatch(
+          verifyAdminLoginOtp({ challengeId, otp }),
+        ).unwrap();
+        finishLogin(response);
+        return;
+      }
+
+      const fcmToken =
+        getItemLocalStorage("fcm_token") || (await generateToken());
+      const payload = {
+        ...data,
+        ...(typeof fcmToken === "string" && fcmToken ? { fcmToken } : {}),
+      };
       const response = await dispatch(loginUser(payload)).unwrap();
+      if (response?.requiresTwoFactor && response?.challengeId) {
+        setChallengeId(response.challengeId);
+        toast.success(response.message);
+        return;
+      }
       if (response?.success) {
-        toast.success(response?.message);
-        setItemLocalStorage("token", response?.accessToken);
-        setItemLocalStorage("refreshToken", response?.refreshToken);
-        setItemLocalStorage("userRole", response?.user?.role);
-        if (response?.user?.role === "client") {
-          navigate("/client");
-        } else if (response?.user?.role === "admin") {
-          navigate("/admin");
-        } else {
-          navigate("/");
-        }
+        finishLogin(response);
       } else {
         toast.error(response?.message);
       }
     } catch (error) {
       console.error("Login Error:", error);
-      toast.error("An error occurred while logging in.");
+      const errorMessage =
+        error?.message || "An error occurred while logging in.";
+      if (challengeId && /expired|log in again/i.test(errorMessage)) {
+        setChallengeId("");
+        setOtp("");
+      }
+      toast.error(errorMessage);
+    }
+  };
+
+  const handleLoginSubmit = challengeId
+    ? (event) => {
+        event.preventDefault();
+        onSubmit();
+      }
+    : handleSubmit(onSubmit);
+
+  const finishLogin = (response) => {
+    toast.success(response?.message || "Login successful");
+    setItemLocalStorage("token", response?.accessToken);
+    setItemLocalStorage("refreshToken", response?.refreshToken);
+    setItemLocalStorage("userRole", response?.user?.role);
+    if (response?.user?.role === "client") {
+      navigate("/client");
+    } else if (response?.user?.role === "admin") {
+      navigate("/admin");
+    } else {
+      navigate("/");
     }
   };
 
@@ -339,7 +388,7 @@ export default function Login() {
                 dark:text-white
               "
             >
-              Welcome Back 👋
+              {challengeId ? "Verify your login" : "Welcome Back 👋"}
             </motion.h2>
 
             <p
@@ -350,7 +399,9 @@ export default function Login() {
                 dark:text-gray-400
               "
             >
-              Sign in to continue
+              {challengeId
+                ? "Enter the 6-digit code sent to your admin email"
+                : "Sign in to continue"}
             </p>
 
             <motion.form
@@ -362,8 +413,9 @@ export default function Login() {
               }}
               className="mt-6 space-y-4"
               autoComplete="off"
-              onSubmit={handleSubmit(onSubmit)}
+              onSubmit={handleLoginSubmit}
             >
+              {!challengeId && (
               <motion.div
                 initial={{ y: 25, opacity: 0 }}
                 animate={{ y: 0, opacity: 1 }}
@@ -423,7 +475,9 @@ export default function Login() {
                   </p>
                 )}
               </motion.div>
+              )}
 
+              {!challengeId && (
               <motion.div
                 initial={{ y: 25, opacity: 0 }}
                 animate={{ y: 0, opacity: 1 }}
@@ -501,7 +555,69 @@ export default function Login() {
                   </p>
                 )}
               </motion.div>
+              )}
 
+              {challengeId ? (
+                <motion.div
+                  initial={{ y: 25, opacity: 0 }}
+                  animate={{ y: 0, opacity: 1 }}
+                  transition={{ duration: 0.45 }}
+                >
+                  <label
+                    className="
+                      mb-2
+                      block
+                      text-sm
+                      text-gray-700
+                      dark:text-gray-300
+                    "
+                  >
+                    Verification code
+                    <span className="text-red-500 dark:text-red-400"> *</span>
+                  </label>
+                  <div
+                    className="
+                      flex
+                      items-center
+                      rounded-xl
+                      border
+                      border-gray-200
+                      bg-gray-100
+                      px-4
+                      transition
+                      focus-within:border-blue-500
+                      dark:border-white/10
+                      dark:bg-[#222938]
+                    "
+                  >
+                    <ShieldCheck size={18} className="text-gray-400" />
+                    <input
+                      type="text"
+                      inputMode="numeric"
+                      autoComplete="one-time-code"
+                      maxLength={6}
+                      placeholder="Enter 6-digit code"
+                      value={otp}
+                      onChange={(event) =>
+                        setOtp(event.target.value.replace(/\D/g, "").slice(0, 6))
+                      }
+                      className="
+                        w-full
+                        bg-transparent
+                        px-3
+                        py-3
+                        text-gray-900
+                        tracking-[0.3em]
+                        outline-none
+                        placeholder:tracking-normal
+                        placeholder:text-gray-400
+                        dark:text-white
+                        dark:placeholder:text-gray-500
+                      "
+                    />
+                  </div>
+                </motion.div>
+              ) : (
               <motion.div
                 initial={{ y: 25, opacity: 0 }}
                 animate={{ y: 0, opacity: 1 }}
@@ -550,10 +666,11 @@ export default function Login() {
                   Forgot Password?
                 </button>
               </motion.div>
+              )}
 
               <motion.button
                 type="submit"
-                disabled={isSubmitting}
+                disabled={isSubmitting || (challengeId && otp.length !== 6)}
                 whileHover={{
                   scale: 1.03,
                 }}
@@ -572,9 +689,30 @@ export default function Login() {
                   text-white
                 "
               >
-                {isSubmitting ? "Logging in..." : "Login"}
+                {isSubmitting
+                  ? challengeId
+                    ? "Verifying..."
+                    : "Logging in..."
+                  : challengeId
+                    ? "Verify and sign in"
+                    : "Login"}
               </motion.button>
 
+              {challengeId && (
+                <button
+                  type="button"
+                  onClick={() => {
+                    setChallengeId("");
+                    setOtp("");
+                  }}
+                  className="w-full text-sm text-blue-600 hover:text-blue-700 dark:text-blue-400"
+                >
+                  Back to sign in
+                </button>
+              )}
+
+              {!challengeId && (
+              <>
               <div className="flex items-center gap-3">
                 <div
                   className="
@@ -627,6 +765,8 @@ export default function Login() {
                 />
                 Continue with Google
               </button>
+              </>
+              )}
             </motion.form>
 
             <p
@@ -638,7 +778,8 @@ export default function Login() {
                 dark:text-gray-400
               "
             >
-              Don't have an account?
+              {!challengeId && "Don't have an account?"}
+              {!challengeId && (
               <button
                 onClick={() => navigate("/signup")}
                 className="
@@ -652,6 +793,7 @@ export default function Login() {
               >
                 Sign Up
               </button>
+              )}
             </p>
           </motion.div>
         </div>

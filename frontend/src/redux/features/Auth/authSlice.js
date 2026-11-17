@@ -3,6 +3,7 @@ import {
   loginUserService,
   logoutService,
   verifyOtpService,
+  verifyAdminLoginOtpService,
 } from "../../../service/Auth/AuthServices";
 import { profileUpdateService } from "../../../service/Profile/ProfileServices";
 
@@ -16,15 +17,41 @@ const initialState = {
   error: "",
 };
 
-export const verifyOtp = createAsyncThunk("auth/verifyOtp", async (payload) => {
-  const response = await verifyOtpService(payload);
-  return response.data || {};
-});
+export const verifyAdminLoginOtp = createAsyncThunk(
+  "auth/verifyAdminLoginOtp",
+  async (payload, { rejectWithValue }) => {
+    try {
+      const response = await verifyAdminLoginOtpService(payload);
+      return response.data || {};
+    } catch (error) {
+      return rejectWithValue(
+        error.response?.data || { message: "OTP verification failed" },
+      );
+    }
+  },
+);
 
-export const loginUser = createAsyncThunk("auth/loginUser", async (payload) => {
-  const response = await loginUserService(payload);
-  return response.data || {};
-});
+export const verifyOtp = createAsyncThunk(
+  "auth/verifyOtp",
+  async (payload) => {
+    const response = await verifyOtpService(payload);
+    return response.data || {};
+  },
+);
+
+export const loginUser = createAsyncThunk(
+  "auth/loginUser",
+  async (payload, { rejectWithValue }) => {
+    try {
+      const response = await loginUserService(payload);
+      return response.data || {};
+    } catch (error) {
+      return rejectWithValue(
+        error.response?.data || { message: "Login failed" },
+      );
+    }
+  },
+);
 
 export const profileUpdate = createAsyncThunk(
   "auth/profileUpdate",
@@ -110,7 +137,21 @@ const AuthSlice = createSlice({
       state.loading = false;
       state.token = "";
       state.profileDetails = {};
-      state.error = action.payload;
+      state.error = action.payload?.message || action.error.message;
+    });
+    builder.addCase(verifyAdminLoginOtp.pending, (state) => {
+      state.loading = true;
+    });
+    builder.addCase(verifyAdminLoginOtp.fulfilled, (state, action) => {
+      state.loading = false;
+      state.token = action.payload?.accessToken || "";
+      state.refreshToken = action.payload?.refreshToken || "";
+      state.profileDetails = action.payload?.user || {};
+      state.error = "";
+    });
+    builder.addCase(verifyAdminLoginOtp.rejected, (state, action) => {
+      state.loading = false;
+      state.error = action.payload?.message || action.error.message;
     });
     //------------------------------------------------------------------
     builder.addCase(profileUpdate.pending, (state) => {

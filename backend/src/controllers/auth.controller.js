@@ -6,6 +6,7 @@ import {
   resendOTPValidation,
   resetPasswordValidation,
   signupValidation,
+  adminLoginOTPValidation,
   verifyEmailValidation,
 } from "../validators/auth.validator.js";
 
@@ -55,7 +56,7 @@ export const verifyEmailOTP = async (req, res) => {
   }
 };
 
-export const login = async (req, res) => { 
+export const login = async (req, res) => {
   try {
     const { error } = loginValidation.validate(req.body);
 
@@ -70,7 +71,29 @@ export const login = async (req, res) => {
 
     return res.status(200).json(response);
   } catch (error) {
-    return res.status(400).json({
+    return res.status(error.statusCode || 400).json({
+      success: false,
+      message: error.message,
+      ...error.details,
+    });
+  }
+};
+
+export const verifyAdminLoginOTP = async (req, res) => {
+  try {
+    const { error } = adminLoginOTPValidation.validate(req.body);
+
+    if (error) {
+      return res.status(400).json({
+        success: false,
+        message: error.details[0].message,
+      });
+    }
+
+    const response = await authService.verifyAdminLoginOTPService(req.body);
+    return res.status(200).json(response);
+  } catch (error) {
+    return res.status(error.statusCode || 400).json({
       success: false,
       message: error.message,
     });

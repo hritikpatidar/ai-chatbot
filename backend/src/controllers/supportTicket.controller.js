@@ -107,7 +107,8 @@ export const createSupportTicket = async (req, res) => {
             ],
             lastReplyAt: new Date(),
         });
-
+        console.log("email",email)
+        console.log("adminSettings",adminSettings)
         // Ticket remains saved even if an email provider is temporarily down.
         const emailResults = await Promise.allSettled([
             sendTemplateEmail(

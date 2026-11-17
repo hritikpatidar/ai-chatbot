@@ -176,7 +176,7 @@ const TransactionDetails = ({ transaction, onClose }) => {
 
   return (
     <div
-      className="fixed inset-0 z-[70] flex items-end justify-center bg-black/50 p-0 backdrop-blur-sm sm:items-center sm:p-4"
+      className="fixed inset-0 z-70 flex items-end justify-center bg-black/50 p-0 backdrop-blur-sm sm:items-center sm:p-4"
       onMouseDown={(event) => {
         if (event.target === event.currentTarget) {
           onClose();
@@ -287,7 +287,7 @@ const TransactionDetails = ({ transaction, onClose }) => {
 const Detail = ({ label, children }) => (
   <div className="min-w-0">
     <dt className="text-xs text-gray-500 dark:text-gray-400">{label}</dt>
-    <dd className="mt-1 break-words text-sm font-medium text-gray-800 dark:text-gray-200">
+    <dd className="mt-1 wrap-break-word text-sm font-medium text-gray-800 dark:text-gray-200">
       {children}
     </dd>
   </div>
@@ -526,7 +526,7 @@ export default function AdminTransactions() {
               <p className="text-sm font-semibold text-red-700 dark:text-red-400">
                 Could not load Stripe transactions
               </p>
-              <p className="mt-1 break-words text-xs text-red-600 dark:text-red-300">
+              <p className="mt-1 wrap-break-word text-xs text-red-600 dark:text-red-300">
                 {error?.response?.data?.message ||
                   error?.message ||
                   "Please try again."}
@@ -564,9 +564,9 @@ export default function AdminTransactions() {
           )}
 
           <div className="hidden overflow-x-auto lg:block">
-            <table className="w-full min-w-[980px] text-left">
+            <table className="w-full min-w-245 text-left">
               <thead>
-                <tr className="border-b border-gray-200 bg-gray-50 text-xs font-semibold uppercase tracking-wide text-gray-500 dark:border-white/10 dark:bg-white/[0.03] dark:text-gray-400">
+                <tr className="border-b border-gray-200 bg-gray-50 text-xs font-semibold uppercase tracking-wide text-gray-500 dark:border-white/10 dark:bg-white/3 dark:text-gray-400">
                   <th className="px-5 py-3.5">Transaction</th>
                   <th className="px-5 py-3.5">Customer</th>
                   <th className="px-5 py-3.5">Payment method</th>
@@ -590,7 +590,7 @@ export default function AdminTransactions() {
                   : transactions.map((transaction) => (
                       <tr
                         key={transaction.id}
-                        className="transition hover:bg-gray-50/80 dark:hover:bg-white/[0.03]"
+                        className="transition hover:bg-gray-50/80 dark:hover:bg-white/3"
                       >
                         <td className="px-5 py-4">
                           <p className="font-mono text-xs font-semibold text-gray-800 dark:text-gray-200">

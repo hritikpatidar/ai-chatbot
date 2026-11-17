@@ -18,8 +18,7 @@ import AdminSetting from "../models/adminSetting.model.js";
 import sendNotification from "../helpers/fcm_notification.js";
 import { getIO } from "../config/socket.js";
 import { emitNotificationCreated } from "../socket/events/notification.event.js";
-import transporter from "../config/mail.js";
-import env from "../config/env.js";
+import { enqueueEmail } from "./emailQueue.service.js";
 
 // export const createAndSendNotification = async ({
 //   type = "general",
@@ -184,8 +183,7 @@ export const createAndSendNotification = async ({
 
         if (role === "admin" && emailEnabled && user.email) {
           try {
-            await transporter.sendMail({
-              from: `"AI Chatbot" <${env.MAIL_USER}>`,
+            await enqueueEmail({
               to: user.email,
               subject: title,
               text: `${message}\n\nOpen your admin dashboard to review this notification.`,

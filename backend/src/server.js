@@ -8,6 +8,7 @@ import { socketHandler } from "./socket/socketHandler.js";
 import { initializeSocket } from "./config/socket.js";
 import { startSubscriptionExpiryJob } from "./jobs/subscriptionExpiry.job.js";
 import { startSubscriptionExpiryReminderJob } from "./jobs/subscriptionExpiryReminder.cron.js";
+import { startEmailQueueWorker } from "./jobs/emailQueue.job.js";
 
 
 const PORT = env.PORT || 5000;
@@ -25,6 +26,7 @@ const startServer = async () => {
       console.log(`🚀 Server running on port ${PORT}`);
       startSubscriptionExpiryJob();
       startSubscriptionExpiryReminderJob();
+      startEmailQueueWorker();
     });
   } catch (error) {
     console.error("❌ Failed to start server:", error.message);

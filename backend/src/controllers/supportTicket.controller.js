@@ -3,36 +3,23 @@ import SupportTicket from "../models/SupportTicket.js";
 import Client from "../models/Client.js";
 
 
-import env from "../config/env.js";
-import transporter from "../config/mail.js";
 import { supportTicketConfirmationEmailTemplate, supportTicketCreatedEmailTemplate, supportTicketReplyEmailTemplate } from "../helpers/emailTemplate.js";
 import User from "../models/User.js";
 import { createAndSendNotification } from "../services/notification.service.js";
 import { getAdminSettingsService } from "../services/adminSetting.service.js";
+import { enqueueEmail } from "../services/emailQueue.service.js";
 
-const sendTemplateEmail = async (to, template, options = {}) => {
-    if (!to) {
-        throw new Error("Email recipient is not configured");
-    }
-
+const enqueueTemplateEmail = async (to, template, options = {}) => {
     if (!template?.subject || !template?.html) {
         throw new Error("Invalid email template");
     }
 
-    const info = await transporter.sendMail({
-        from: `"AI Chatbot" <${env.MAIL_USER}>`,
+    return enqueueEmail({
         to,
         subject: template.subject,
         html: template.html,
-        ...(options.inReplyTo
-            ? { inReplyTo: options.inReplyTo }
-            : {}),
-        ...(options.references
-            ? { references: options.references }
-            : {}),
+        ...options,
     });
-
-    return info;
 };
 
 // CLIENT: Create a support ticket.
@@ -74,14 +61,28 @@ export const createSupportTicket = async (req, res) => {
 
         // Never trust planName from the request body for priority.
         const client = await User.findById(clientId).lean();
-        const admin = await User.findOne({ email: "superadmin@gmail.com" }).lean();
-        const ClientBusiness = await Client.findById(client.clientId).lean();
-        const adminSettings = await getAdminSettingsService(admin._id);
-
         if (!client) {
             return res.status(404).json({
                 success: false,
                 message: "Client not found",
+            });
+        }
+
+        const admin = await User.findOne({ email: "superadmin@gmail.com" }).lean();
+        if (!admin) {
+            return res.status(500).json({
+                success: false,
+                message: "Support administrator is not configured",
+            });
+        }
+
+        const ClientBusiness = await Client.findById(client.clientId).lean();
+        const adminSettings = await getAdminSettingsService(admin._id);
+
+        if (!ClientBusiness) {
+            return res.status(404).json({
+                success: false,
+                message: "Client business profile not found",
             });
         }
 
@@ -107,11 +108,8 @@ export const createSupportTicket = async (req, res) => {
             ],
             lastReplyAt: new Date(),
         });
-        console.log("email",email)
-        console.log("adminSettings",adminSettings)
-        // Ticket remains saved even if an email provider is temporarily down.
         const emailResults = await Promise.allSettled([
-            sendTemplateEmail(
+            enqueueTemplateEmail(
                 adminSettings.supportEmail,
                 supportTicketCreatedEmailTemplate({
                     ticketNumber: ticket.ticketNumber,
@@ -123,7 +121,7 @@ export const createSupportTicket = async (req, res) => {
                     priority,
                 })
             ),
-            sendTemplateEmail(
+            enqueueTemplateEmail(
                 email,
                 supportTicketConfirmationEmailTemplate({
                     ticketNumber: ticket.ticketNumber,
@@ -131,10 +129,22 @@ export const createSupportTicket = async (req, res) => {
                     subject: ticket.subject,
                     planName: actualPlan,
                     priority,
-                })
+                }),
+                {
+                    supportTicketId: ticket._id,
+                    purpose: "support-ticket-confirmation",
+                },
             ),
         ]);
-        await createAndSendNotification({
+        emailResults.forEach((result) => {
+            if (result.status === "rejected") {
+                console.error("[support-ticket] Email could not be queued:", {
+                    ticketId: ticket._id.toString(),
+                    message: result.reason?.message || result.reason,
+                });
+            }
+        });
+        void createAndSendNotification({
             type: "supportTicket",
             clientId: null,
             adminId: admin._id,
@@ -151,28 +161,21 @@ export const createSupportTicket = async (req, res) => {
                 planName: ticket.planName,
                 status: ticket.status,
             },
+        }).catch((error) => {
+            console.error("[support-ticket] Admin notification failed:", error);
         });
 
-        const clientEmailResult = emailResults[1];
-
-        if (clientEmailResult.status === "fulfilled") {
-            ticket.clientConfirmationMessageId =
-                clientEmailResult.value.messageId;
-
-            await ticket.save();
-        }
-
-        const emailsSent = emailResults.every(
+        const emailsQueued = emailResults.every(
             (result) => result.status === "fulfilled"
         );
 
         return res.status(201).json({
             success: true,
-            message: emailsSent
-                ? "Support ticket created and email notifications sent"
-                : "Support ticket created, but an email notification could not be sent",
+            message: emailsQueued
+                ? "Support ticket created. Email notifications are queued for delivery."
+                : "Support ticket created, but an email notification could not be queued.",
             ticket,
-            emailsSent,
+            emailsQueued,
         });
     } catch (error) {
         console.error("createSupportTicket:", error);
@@ -354,8 +357,8 @@ export const replyToSupportTicket = async (req, res) => {
 
         const nextStatus = status || "In Progress";
 
-        // Send email first. Do not save a reply that was not sent.
-        await sendTemplateEmail(
+        // Queue the email before saving the reply so queue failures are surfaced.
+        const emailJob = await enqueueTemplateEmail(
             ticket.clientEmail,
             supportTicketReplyEmailTemplate({
                 ticketNumber: ticket.ticketNumber,
@@ -369,7 +372,7 @@ export const replyToSupportTicket = async (req, res) => {
                     inReplyTo: originalMessageId,
                     references: originalMessageId,
                 }
-                : {}
+                : {},
         );
 
         ticket.replies.push({
@@ -384,7 +387,8 @@ export const replyToSupportTicket = async (req, res) => {
 
         return res.status(200).json({
             success: true,
-            message: "Reply sent to client successfully",
+            message: "Reply saved and email queued for delivery",
+            emailQueued: Boolean(emailJob),
             ticket,
         });
     } catch (error) {
@@ -392,7 +396,7 @@ export const replyToSupportTicket = async (req, res) => {
 
         return res.status(500).json({
             success: false,
-            message: "Failed to send reply email",
+            message: "Failed to save reply or queue email",
         });
     }
 };

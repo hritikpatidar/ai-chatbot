@@ -14,6 +14,7 @@ import AdminClient from "../pages/Admin/AdminClients";
 import AdminProfile from "../pages/Admin/AdminProfile";
 import AdminSettings from "../pages/Admin/AdminSettings";
 import AdminSubscriptions from "../pages/Admin/AdminSubscriptions";
+import AdminTransactions from "../pages/Admin/AdminTransactions";
 import AdminAnalytics from "../pages/Admin/AdminAnalytics";
 import AdminClientView from "../pages/Admin/AdminClientView";
 import ScrollToTop from "../components/ScrollToTop";
@@ -187,6 +188,10 @@ export default function AppRoutes() {
                 <Route
                   path="/admin/subscriptions"
                   element={<AdminSubscriptions />}
+                />
+                <Route
+                  path="/admin/transactions"
+                  element={<AdminTransactions />}
                 />
                 <Route path="/admin/analytics" element={<AdminAnalytics />} />
                 <Route

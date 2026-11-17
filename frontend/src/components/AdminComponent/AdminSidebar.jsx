@@ -1,4 +1,3 @@
-import React from "react";
 import { NavLink } from "react-router-dom";
 import {
   LayoutDashboard,
@@ -12,6 +11,7 @@ import {
   ChevronRight,
   Ticket,
   Receipt,
+  ArrowLeftRight,
 } from "lucide-react";
 
 const menuItems = [
@@ -36,6 +36,12 @@ const menuItems = [
     label: "Subscriptions",
     path: "/admin/subscriptions",
     icon: Receipt,
+    end: true,
+  },
+  {
+    label: "Transactions",
+    path: "/admin/transactions",
+    icon: ArrowLeftRight,
     end: true,
   },
   {

@@ -13,6 +13,10 @@ import { createSubscriptionPlanController, deleteSubscriptionPlanController, get
 import { getAdminAnalytics } from "../controllers/analytics.controller.js";
 import { getAdminSubscriptionsController } from "../controllers/subscription.controller.js";
 import {
+  getAdminTransactionStatsController,
+  getAdminTransactionsController,
+} from "../controllers/adminTransaction.controller.js";
+import {
   getAdminSettingsController,
   getGeminiModelsController,
   updateAdminSettingsController,
@@ -37,6 +41,8 @@ router.put("/clients/:clientId", authMiddleware, updateAdminClient);
 router.get("/dashboard", authMiddleware, getAdminDashboard);
 router.get("/analytics", authMiddleware, getAdminAnalytics);
 router.get("/subscriptions", authMiddleware, adminOnly, getAdminSubscriptionsController);
+router.get("/transactions/stats", authMiddleware, adminOnly, getAdminTransactionStatsController);
+router.get("/transactions", authMiddleware, adminOnly, getAdminTransactionsController);
 router.get("/settings", authMiddleware, adminOnly, getAdminSettingsController);
 router.patch("/settings", authMiddleware, adminOnly, updateAdminSettingsController);
 router.get("/ai-models", authMiddleware, adminOnly, getGeminiModelsController);

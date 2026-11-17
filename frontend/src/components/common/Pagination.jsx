@@ -6,10 +6,13 @@ export default function Pagination({
   total = 0,
   currentCount = 0,
   isFetching = false,
+  hasMore,
   onPrevious,
   onNext,
 }) {
-  if (totalPages <= 1) {
+  const hasExactTotal = total !== null && total !== undefined;
+
+  if (totalPages <= 1 && !hasMore) {
     return null;
   }
 
@@ -40,11 +43,18 @@ export default function Pagination({
         Showing{" "}
         <span className="font-medium text-gray-900 dark:text-white">
           {currentCount}
-        </span>{" "}
-        of{" "}
-        <span className="font-medium text-gray-900 dark:text-white">
-          {total}
         </span>
+        {hasExactTotal ? (
+          <>
+            {" "}
+            of{" "}
+            <span className="font-medium text-gray-900 dark:text-white">
+              {total}
+            </span>
+          </>
+        ) : (
+          " on this page"
+        )}
       </p>
 
       {/* Pagination Buttons */}
@@ -118,7 +128,10 @@ export default function Pagination({
         <button
           type="button"
           onClick={onNext}
-          disabled={page >= totalPages || isFetching}
+          disabled={
+            (hasMore === undefined ? page >= totalPages : !hasMore) ||
+            isFetching
+          }
           className="
             inline-flex
             shrink-0

@@ -22,15 +22,7 @@ export const getAdminDashboardService = async () => {
 
   return {
     stats,
-
     activity,
-
-    systemOverview: {
-      activeClientsPercentage,
-      inactiveClientsPercentage,
-      chatbotsOnlinePercentage: null,
-      subscriptionsActivePercentage: null,
-    },
     systemOverview: {
       activeClients: stats.activeClients,
       totalClients: stats.totalClients,
@@ -49,7 +41,6 @@ export const getAdminDashboardService = async () => {
       subscriptionsActivePercentage:
         subscriptionStats.subscriptionsActivePercentage,
     },
-
     recentClients,
   };
 };

@@ -19,10 +19,11 @@ export const removeConversationMessages = (callback) => {
 
 /* ---------------- Send Message ---------------- */
 
-export const sendAIMessage = (conversationId, message) => {
+export const sendAIMessage = (conversationId, message, language = "en") => {
   socket.emit("ai:message", {
     conversationId,
     message,
+    language,
   });
 };
 

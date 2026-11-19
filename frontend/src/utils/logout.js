@@ -17,6 +17,10 @@ export const handleLogout = async ({
 }) => {
   const fcmToken = getItemLocalStorage("fcm_token");
   const theme = getItemLocalStorage("theme");
+  const logoutFailedMessage =
+    getItemLocalStorage("i18nextLng") === "hi"
+      ? "लॉग आउट विफल रहा"
+      : "Logout failed";
 
   try {
     setIsLogoutLoading?.(true);
@@ -28,7 +32,7 @@ export const handleLogout = async ({
     ).unwrap();
   } catch (error) {
     console.error(error);
-    toast.error(error?.message || "Logout failed", {
+    toast.error(error?.message || logoutFailedMessage, {
       id: "INVALID_TOKEN",
     });
   } finally {

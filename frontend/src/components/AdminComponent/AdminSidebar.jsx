@@ -13,6 +13,7 @@ import {
   Receipt,
   ArrowLeftRight,
 } from "lucide-react";
+import { useLanguage } from "../../context/LanguageContext";
 
 const menuItems = [
   {
@@ -70,6 +71,8 @@ export default function AdminSidebar({
   collapsed,
   setCollapsed,
 }) {
+  const { t } = useLanguage();
+
   return (
     <>
       {/* Mobile Overlay */}
@@ -226,7 +229,7 @@ export default function AdminSidebar({
                   to={item.path}
                   end={item.end}
                   onClick={onClose}
-                  title={collapsed ? item.label : ""}
+                  title={collapsed ? t(item.label) : ""}
                   className={({ isActive }) => `
                     group
                     flex
@@ -262,7 +265,7 @@ export default function AdminSidebar({
                 >
                   <Icon size={19} className="shrink-0" />
 
-                  {!collapsed && <span className="truncate">{item.label}</span>}
+                  {!collapsed && <span className="truncate">                  {t(item.label)}</span>}
                 </NavLink>
               );
             })}
@@ -305,7 +308,7 @@ export default function AdminSidebar({
             ) : (
               <>
                 <ChevronLeft size={18} />
-                <span className="text-xs">Collapse Sidebar</span>
+                <span className="text-xs">{t("Collapse Sidebar")}</span>
               </>
             )}
           </button>

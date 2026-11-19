@@ -11,10 +11,14 @@ import {
   profileUpdate,
   setIsProfileModalOpen,
 } from "../redux/features/Auth/authSlice";
+import { useLanguage } from "../context/LanguageContext";
+import { translateShared } from "../context/translations/sharedComponents";
 import { getImageUrl } from "../utils/imageUrl";
 import toast from "react-hot-toast";
 
 export default function EditProfileModal() {
+  const { t, language } = useLanguage();
+  const translate = (text) => translateShared(text, t, language);
   const dispatch = useDispatch();
   const { profileDetails, refreshToken, isProfileModalOpen } = useSelector(
     (store) => store.authReducer.AuthSlice,
@@ -96,10 +100,10 @@ export default function EditProfileModal() {
 
       const response = await dispatch(profileUpdate(formData)).unwrap();
       if (response?.success) {
-        toast.success(response?.message || "Somthing went wrong");
+        toast.success(response?.message || translate("Something went wrong"));
         dispatch(setIsProfileModalOpen(false));
       } else {
-        toast.error(response?.message || "Somthing went wrong");
+        toast.error(response?.message || translate("Something went wrong"));
       }
     } catch (error) {
       console.error("Update Profile Error:", error);
@@ -226,7 +230,7 @@ export default function EditProfileModal() {
                       dark:text-white
                     "
                   >
-                    Edit Profile ✨
+                    {translate("Edit Profile")} ✨
                   </h2>
 
                   <p
@@ -237,7 +241,7 @@ export default function EditProfileModal() {
                       dark:text-gray-400
                     "
                   >
-                    Update your profile information
+                    {translate("Update your profile information")}
                   </p>
                 </div>
 
@@ -323,7 +327,7 @@ export default function EditProfileModal() {
                         duration: 0.3,
                       }}
                       src={getPreviewUrl(imagePreview)}
-                      alt="Profile"
+                      alt={translate("Profile")}
                       onError={(e) => {
                         e.currentTarget.onerror = null;
                         e.currentTarget.src = profile;
@@ -391,7 +395,7 @@ export default function EditProfileModal() {
                       text-gray-500
                     "
                   >
-                    JPG, PNG or WEBP · Maximum 2MB
+                    {translate("JPG, PNG or WEBP · Maximum 2MB")}
                   </p>
 
                   {errors.profileImage?.message && (
@@ -423,7 +427,7 @@ export default function EditProfileModal() {
                         dark:text-gray-300
                       "
                     >
-                      Full Name
+                      {translate("Full Name")}
                     </label>
 
                     <div
@@ -448,9 +452,9 @@ export default function EditProfileModal() {
                       <input
                         type="text"
                         {...register("fullName", {
-                          required: "Full name is required.",
+                          required: translate("Full name is required."),
                         })}
-                        placeholder="Enter your name"
+                        placeholder={translate("Enter your name")}
                         className="
                           w-full
                           bg-transparent
@@ -493,7 +497,7 @@ export default function EditProfileModal() {
                         dark:text-gray-300
                       "
                     >
-                      Email
+                      {translate("Email")}
                     </label>
 
                     <div
@@ -518,10 +522,10 @@ export default function EditProfileModal() {
                       <input
                         type="email"
                         {...register("email", {
-                          required: "Email is required.",
+                          required: translate("Email is required."),
                         })}
                         disabled={true}
-                        placeholder="Enter your email"
+                        placeholder={translate("Enter your email")}
                         className="
                           w-full
                           bg-transparent
@@ -598,7 +602,7 @@ export default function EditProfileModal() {
                     dark:hover:bg-white/10
                   "
                 >
-                  Cancel
+                  {translate("Cancel")}
                 </motion.button>
 
                 {/* Save */}
@@ -629,7 +633,9 @@ export default function EditProfileModal() {
                     sm:w-auto
                   "
                 >
-                  {isSubmitting ? "Saving..." : "Save Changes"}
+                  {isSubmitting
+                    ? translate("Saving...")
+                    : translate("Save Changes")}
                 </motion.button>
               </div>
             </form>

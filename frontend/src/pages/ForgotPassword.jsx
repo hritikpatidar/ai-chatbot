@@ -6,9 +6,14 @@ import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { forgotPasswordService } from "../service/Auth/AuthServices";
 import toast from "react-hot-toast";
+import { useLanguage } from "../context/LanguageContext";
+import accountScreens from "../context/translations/accountScreens";
 
 export default function ForgotPassword() {
   const navigate = useNavigate();
+  const { t: translate, language } = useLanguage();
+  const t = (key) =>
+    language === "hi" ? accountScreens[key] || translate(key) : key;
 
   const {
     register,
@@ -41,7 +46,7 @@ export default function ForgotPassword() {
     } catch (error) {
       console.error("Forgot Password Error:", error);
 
-      toast.error("An error occurred while processing your request.");
+      toast.error(t("An error occurred while processing your request."));
     }
   };
 
@@ -214,7 +219,7 @@ export default function ForgotPassword() {
             "
           >
             <ChevronLeft size={18} />
-            Back
+            {t("Back")}
           </button>
 
           <motion.div
@@ -253,7 +258,7 @@ export default function ForgotPassword() {
               dark:text-white
             "
           >
-            Forgot Password
+            {t("Forgot Password")}
           </h1>
 
           <p
@@ -265,8 +270,9 @@ export default function ForgotPassword() {
               dark:text-gray-400
             "
           >
-            Enter your registered email address and we'll send you a password
-            reset link.
+            {t(
+              "Enter your registered email address and we'll send you a password reset link.",
+            )}
           </p>
 
           <form className="mt-8 space-y-6" onSubmit={handleSubmit(onSubmit)}>
@@ -282,7 +288,7 @@ export default function ForgotPassword() {
                   dark:text-gray-300
                 "
               >
-                Email Address{" "}
+                {t("Email Address")}{" "}
                 <span className="text-red-500 dark:text-red-400">*</span>
               </label>
 
@@ -305,7 +311,7 @@ export default function ForgotPassword() {
 
                 <input
                   type="email"
-                  placeholder="Enter your email"
+                  placeholder={t("Enter your email")}
                   className="
                     w-full
                     bg-transparent
@@ -330,7 +336,7 @@ export default function ForgotPassword() {
                     dark:text-red-400
                   "
                 >
-                  {errors.email.message}
+                  {t(errors.email.message)}
                 </p>
               )}
             </div>
@@ -364,7 +370,7 @@ export default function ForgotPassword() {
             >
               <Send size={18} />
 
-              {isSubmitting ? "Sending..." : "Send OTP"}
+              {isSubmitting ? t("Sending...") : t("Send OTP")}
             </motion.button>
           </form>
 
@@ -377,7 +383,7 @@ export default function ForgotPassword() {
               dark:text-gray-400
             "
           >
-            Remember your password?
+            {t("Remember your password?")}
             <button
               type="button"
               onClick={() => navigate("/login")}
@@ -390,7 +396,7 @@ export default function ForgotPassword() {
                 dark:hover:text-blue-300
               "
             >
-              Login
+              {t("Login")}
             </button>
           </p>
         </motion.div>

@@ -29,9 +29,11 @@ import {
   removeConversationDeleted,
 } from "../service/conversation.services";
 import toast from "react-hot-toast";
+import { useLanguage } from "../context/LanguageContext";
 
 export default function Sidebar() {
   const navigate = useNavigate();
+  const { t } = useLanguage();
   const [open, setOpen] = useState(false);
   const dispatch = useDispatch();
   const [menuOpen, setMenuOpen] = useState(null);
@@ -69,7 +71,7 @@ export default function Sidebar() {
         });
       }
 
-      toast.success(data?.message || "Conversation deleted successfully", {
+      toast.success(data?.message || t("Conversation deleted successfully"), {
         id: "conversation-delete",
       });
     };
@@ -85,20 +87,20 @@ export default function Sidebar() {
     try {
       if (navigator.share) {
         await navigator.share({
-          title: "Chat",
-          text: "Check out this conversation",
+          title: t("Chat"),
+          text: t("Check out this conversation"),
           url,
         });
       } else {
         await navigator.clipboard.writeText(url);
-        alert("Conversation link copied!");
+        alert(t("Conversation link copied!"));
       }
     } catch {
       try {
         await navigator.clipboard.writeText(url);
-        alert("Conversation link copied!");
+        alert(t("Conversation link copied!"));
       } catch {
-        alert("Unable to copy link.");
+        alert(t("Unable to copy link."));
       }
     }
   };
@@ -257,7 +259,7 @@ export default function Sidebar() {
               </h2>
 
               <p className="text-xs text-gray-500 dark:text-gray-400">
-                Smart Conversations
+                {t("Smart Conversations")}
               </p>
             </div>
           </div>
@@ -281,7 +283,7 @@ export default function Sidebar() {
 
               <input
                 type="text"
-                placeholder="Search"
+                placeholder={t("Search")}
                 className="flex-1 bg-transparent text-sm text-gray-900 outline-none placeholder:text-gray-400 dark:text-white dark:placeholder:text-gray-400"
               />
             </div>
@@ -299,7 +301,7 @@ export default function Sidebar() {
                   <Plus size={16} />
                 </div>
 
-                <span>New Chat</span>
+                <span>{t("New Chat")}</span>
               </button>
 
               {/* Library */}
@@ -311,7 +313,7 @@ export default function Sidebar() {
                   <BookOpen size={16} />
                 </div>
 
-                <span>Library</span>
+                <span>{t("Library")}</span>
               </button>
 
               {/* Projects */}
@@ -323,7 +325,7 @@ export default function Sidebar() {
                   <FolderKanban size={16} />
                 </div>
 
-                <span>Projects</span>
+                <span>{t("Projects")}</span>
               </button>
             </nav>
           </div>
@@ -331,7 +333,7 @@ export default function Sidebar() {
           {/* Recent Chats */}
           <div className="min-h-0 flex-1 overflow-y-auto px-3 pb-4">
             <p className="mb-3 px-3 text-xs uppercase tracking-widest text-gray-500">
-              Recent Chats
+              {t("Recent Chats")}
             </p>
 
             {conversationList?.length > 0 ? (
@@ -405,7 +407,7 @@ export default function Sidebar() {
                             }
                           `}
                         >
-                          {chat.title || "New Conversation"}
+                          {chat.title || t("New Conversation")}
                         </span>
                       </button>
 
@@ -457,7 +459,7 @@ export default function Sidebar() {
                             dark:hover:bg-white/10
                             dark:hover:text-blue-400
                           "
-                          title="Pin"
+                          title={t("Pin")}
                         >
                           <Pin size={15} />
                         </button>
@@ -484,7 +486,7 @@ export default function Sidebar() {
                             hover:bg-white/10
                             hover:text-blue-400
                           "
-                          title="More"
+                          title={t("More")}
                         >
                           <MoreHorizontal size={17} />
                         </button>
@@ -532,7 +534,7 @@ export default function Sidebar() {
                             "
                           >
                             <Share2 size={16} />
-                            Share
+                            {t("Share")}
                           </button>
 
                           {/* Delete */}
@@ -556,7 +558,7 @@ export default function Sidebar() {
                             "
                           >
                             <Trash2 size={16} />
-                            Delete
+                            {t("Delete")}
                           </button>
                         </div>
                       )}
@@ -575,11 +577,11 @@ export default function Sidebar() {
                 </div>
 
                 <p className="text-sm font-medium text-gray-600 dark:text-gray-400">
-                  No conversations
+                  {t("No conversations")}
                 </p>
 
                 <p className="mt-1 text-xs leading-5 text-gray-500 dark:text-gray-600">
-                  Start a new chat to see your conversations here.
+                  {t("Start a new chat to see your conversations here.")}
                 </p>
               </div>
             )}
@@ -594,7 +596,7 @@ export default function Sidebar() {
           >
             <Settings size={17} className={getIconClass("settings")} />
 
-            <span>Settings</span>
+            <span>{t("Settings")}</span>
           </button>
         </div>
       </aside>
@@ -613,12 +615,13 @@ export default function Sidebar() {
               className="w-full max-w-sm rounded-2xl border border-gray-200 bg-white p-6 shadow-2xl dark:border-white/10 dark:bg-[#171b23]"
             >
               <h2 className="text-lg font-semibold text-gray-900 dark:text-white">
-                Delete Conversation?
+                {t("Delete Conversation?")}
               </h2>
 
               <p className="mt-2 text-sm text-gray-600 dark:text-gray-400">
-                Are you sure you want to delete this conversation? This action
-                cannot be undone.
+                {t(
+                  "Are you sure you want to delete this conversation? This action cannot be undone.",
+                )}
               </p>
 
               <div className="mt-6 flex justify-end gap-3">
@@ -631,7 +634,7 @@ export default function Sidebar() {
                   disabled={isLoading}
                   className="rounded-lg border border-gray-200 px-4 py-2 text-sm text-gray-700 transition hover:bg-gray-100 dark:border-white/10 dark:text-white dark:hover:bg-white/10"
                 >
-                  Cancel
+                  {t("Cancel")}
                 </button>
 
                 <button
@@ -643,7 +646,7 @@ export default function Sidebar() {
                   disabled={isLoading}
                   className="rounded-lg bg-red-500 px-4 py-2 text-sm text-white hover:bg-red-600"
                 >
-                  {isLoading ? "Deleting..." : "Delete"}
+                  {isLoading ? t("Deleting...") : t("Delete")}
                 </button>
               </div>
             </motion.div>

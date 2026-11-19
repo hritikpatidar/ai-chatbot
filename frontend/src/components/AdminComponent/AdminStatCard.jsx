@@ -1,4 +1,4 @@
-import React from "react";
+import { useLanguage } from "../../context/LanguageContext";
 
 export default function AdminStatCard({
   title,
@@ -8,6 +8,7 @@ export default function AdminStatCard({
   iconClass = "",
   trend,
 }) {
+  const { t } = useLanguage();
   return (
     <div
       className="
@@ -36,7 +37,7 @@ export default function AdminStatCard({
               dark:text-gray-400
             "
           >
-            {title}
+            {t(title)}
           </p>
 
           <h3
@@ -61,7 +62,7 @@ export default function AdminStatCard({
                 dark:text-gray-400
               "
             >
-              {description}
+              {t(description)}
             </p>
           )}
         </div>
@@ -106,7 +107,7 @@ export default function AdminStatCard({
               dark:text-gray-500
             "
           >
-            vs last month
+            {t("vs last month")}
           </span>
         </div>
       )}

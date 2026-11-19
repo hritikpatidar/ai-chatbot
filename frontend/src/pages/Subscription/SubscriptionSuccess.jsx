@@ -1,9 +1,14 @@
 import { CheckCircle2, ArrowRight, Receipt } from "lucide-react";
 
 import { useLocation, useNavigate } from "react-router-dom";
+import { useLanguage } from "../../context/LanguageContext";
+import accountScreens from "../../context/translations/accountScreens";
 
 const SubscriptionSuccess = () => {
   const navigate = useNavigate();
+  const { t: translate, language } = useLanguage();
+  const t = (key) =>
+    language === "hi" ? accountScreens[key] || translate(key) : key;
 
   const location = useLocation();
 
@@ -20,17 +25,17 @@ const SubscriptionSuccess = () => {
         </div>
 
         <h1 className="mt-6 text-2xl font-bold text-gray-900 dark:text-white">
-          Subscription Activated!
+          {t("Subscription Activated!")}
         </h1>
 
         <p className="mt-2 text-sm text-gray-500 dark:text-gray-400">
-          Your subscription has been successfully activated.
+          {t("Your subscription has been successfully activated.")}
         </p>
 
         {plan && (
           <div className="mt-7 rounded-2xl bg-gray-50 p-5 text-left dark:bg-gray-950">
             <div className="flex justify-between">
-              <span className="text-sm text-gray-500">Plan</span>
+              <span className="text-sm text-gray-500">{t("Plan")}</span>
 
               <span className="font-semibold text-gray-900 dark:text-white">
                 {plan.name}
@@ -38,7 +43,7 @@ const SubscriptionSuccess = () => {
             </div>
 
             <div className="mt-3 flex justify-between">
-              <span className="text-sm text-gray-500">Amount</span>
+              <span className="text-sm text-gray-500">{t("Amount")}</span>
 
               <span className="font-semibold text-gray-900 dark:text-white">
                 {/* {plan.currency?.toUpperCase()}{" "}
@@ -50,7 +55,9 @@ const SubscriptionSuccess = () => {
 
             {paymentIntent?.id && (
               <div className="mt-3 flex justify-between gap-4">
-                <span className="text-sm text-gray-500">Payment ID</span>
+                <span className="text-sm text-gray-500">
+                  {t("Payment ID")}
+                </span>
 
                 <span className="truncate text-xs font-medium text-gray-700 dark:text-gray-300">
                   {paymentIntent.id}
@@ -67,7 +74,7 @@ const SubscriptionSuccess = () => {
             className="inline-flex items-center justify-center gap-2 rounded-xl border border-gray-200 px-4 py-3 text-sm font-semibold text-gray-700 hover:bg-gray-50 dark:border-gray-700 dark:text-gray-300 dark:hover:bg-gray-800"
           >
             <Receipt size={17} />
-            View Subscription
+            {t("View Subscription")}
           </button>
 
           <button
@@ -75,7 +82,7 @@ const SubscriptionSuccess = () => {
             onClick={() => navigate("/client")}
             className="inline-flex items-center justify-center gap-2 rounded-xl bg-indigo-600 px-4 py-3 text-sm font-semibold text-white hover:bg-indigo-700"
           >
-            Continue
+            {t("Continue")}
             <ArrowRight size={17} />
           </button>
         </div>

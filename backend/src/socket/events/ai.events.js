@@ -204,6 +204,10 @@ export const registerAIEvents = (io, socket) => {
 
     try {
       const { conversationId, message } = data;
+      const requestedLanguage =
+        data.language === "hi" || data.language === "en"
+          ? data.language
+          : null;
       if (typeof message !== "string" || !message.trim()) {
         socket.emit("ai:error", {
           success: false,
@@ -472,9 +476,14 @@ export const registerAIEvents = (io, socket) => {
           );
 
         if (needsTicket) {
-          const fallbackMessage = !classification?.businessRelated
-            ? "I'm sorry, I can only help with questions related to our business and services. I've created a support ticket for you."
-            : "I'm sorry, I don't have enough information to answer that. I've created a support ticket for you.";
+          const fallbackMessage =
+            client.chatbot?.language === "hindi"
+              ? !classification?.businessRelated
+                ? "क्षमा करें, मैं केवल हमारे व्यवसाय और सेवाओं से जुड़े प्रश्नों में मदद कर सकता हूँ। मैंने आपके लिए एक सपोर्ट टिकट बना दिया है।"
+                : "क्षमा करें, मेरे पास इसका उत्तर देने के लिए पर्याप्त जानकारी नहीं है। मैंने आपके लिए एक सपोर्ट टिकट बना दिया है।"
+              : !classification?.businessRelated
+                ? "I'm sorry, I can only help with questions related to our business and services. I've created a support ticket for you."
+                : "I'm sorry, I don't have enough information to answer that. I've created a support ticket for you.";
 
           // The classifier has already consumed tokens, so count this request.
           await settleUsage(totalGeminiTokens, clientId, plan, aiSettings);
@@ -526,6 +535,14 @@ export const registerAIEvents = (io, socket) => {
           client,
           knowledgeContext
         );
+      } else {
+        const responseLanguage =
+          requestedLanguage ||
+          (aiSettings.defaultLanguage === "hi" ? "hi" : "en");
+        systemInstruction =
+          responseLanguage === "hi"
+            ? "Reply in natural Hindi using Devanagari script, unless the user explicitly asks for another language."
+            : "Reply in English, unless the user explicitly asks for another language.";
       }
 
       // 7. Build conversation content.
@@ -542,7 +559,7 @@ export const registerAIEvents = (io, socket) => {
         model: aiSettings.aiModel,
         contents,
         config: {
-          ...(clientId ? { systemInstruction } : {}),
+          systemInstruction,
           maxOutputTokens,
           temperature: aiSettings.temperature,
         },

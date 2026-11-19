@@ -22,8 +22,11 @@ import {
 import toast from "react-hot-toast";
 import { loginSchema } from "../utils/validation";
 import { generateToken } from "../firebase";
+import LanguageSwitcher from "../components/common/LanguageSwitcher";
+import { useLanguage } from "../context/LanguageContext";
 
 export default function Login() {
+  const { t } = useLanguage();
   const navigate = useNavigate();
   const dispatch = useDispatch();
 
@@ -87,7 +90,7 @@ export default function Login() {
     : handleSubmit(onSubmit);
 
   const finishLogin = (response) => {
-    toast.success(response?.message || "Login successful");
+    toast.success(response?.message || t("Login successful"));
     setItemLocalStorage("token", response?.accessToken);
     setItemLocalStorage("refreshToken", response?.refreshToken);
     setItemLocalStorage("userRole", response?.user?.role);
@@ -114,6 +117,9 @@ export default function Login() {
         dark:text-white
       "
     >
+      <div className="absolute right-4 top-4 z-20">
+        <LanguageSwitcher />
+      </div>
       {/* Background */}
       {/* <AnimatedBackground /> */}
 
@@ -306,7 +312,7 @@ export default function Login() {
                 dark:text-white
               "
             >
-              AI Assistant
+              {t("AI Assistant")}
             </motion.h1>
 
             <motion.p
@@ -326,8 +332,7 @@ export default function Login() {
                 dark:text-gray-400
               "
             >
-              Experience next-generation AI conversations with a clean, fast and
-              intelligent assistant.
+              {t("Experience next-generation AI conversations with a clean, fast and intelligent assistant.")}
             </motion.p>
           </div>
         </motion.div>
@@ -388,7 +393,9 @@ export default function Login() {
                 dark:text-white
               "
             >
-              {challengeId ? "Verify your login" : "Welcome Back 👋"}
+              {challengeId
+                ? t("Verify your login")
+                : t("Welcome Back 👋")}
             </motion.h2>
 
             <p
@@ -400,8 +407,8 @@ export default function Login() {
               "
             >
               {challengeId
-                ? "Enter the 6-digit code sent to your admin email"
-                : "Sign in to continue"}
+                ? t("Enter the 6-digit code sent to your admin email")
+                : t("Sign in to continue")}
             </p>
 
             <motion.form
@@ -430,7 +437,7 @@ export default function Login() {
                     dark:text-gray-300
                   "
                 >
-                  Email{" "}
+                  {t("Email")}{" "}
                   <span className="text-red-500 dark:text-red-400">*</span>
                 </label>
 
@@ -453,7 +460,7 @@ export default function Login() {
 
                   <input
                     type="email"
-                    placeholder="Enter your email"
+                    placeholder={t("Enter your email")}
                     className="
                       w-full
                       bg-transparent
@@ -492,7 +499,7 @@ export default function Login() {
                     dark:text-gray-300
                   "
                 >
-                  Password{" "}
+                  {t("Password")}{" "}
                   <span className="text-red-500 dark:text-red-400">*</span>
                 </label>
 
@@ -515,7 +522,7 @@ export default function Login() {
 
                   <input
                     type={showPassword ? "text" : "password"}
-                    placeholder="Enter your password"
+                    placeholder={t("Enter your password")}
                     className="
                       w-full
                       bg-transparent
@@ -572,7 +579,7 @@ export default function Login() {
                       dark:text-gray-300
                     "
                   >
-                    Verification code
+                    {t("Verification code")}
                     <span className="text-red-500 dark:text-red-400"> *</span>
                   </label>
                   <div
@@ -596,7 +603,7 @@ export default function Login() {
                       inputMode="numeric"
                       autoComplete="one-time-code"
                       maxLength={6}
-                      placeholder="Enter 6-digit code"
+                      placeholder={t("Enter 6-digit code")}
                       value={otp}
                       onChange={(event) =>
                         setOtp(event.target.value.replace(/\D/g, "").slice(0, 6))
@@ -649,7 +656,7 @@ export default function Login() {
                       dark:text-gray-400
                     "
                   >
-                    Remember me
+                    {t("Remember me")}
                   </span>
                 </label>
 
@@ -663,7 +670,7 @@ export default function Login() {
                   "
                   onClick={() => navigate("/forgot-password")}
                 >
-                  Forgot Password?
+                  {t("Forgot Password?")}
                 </button>
               </motion.div>
               )}
@@ -691,11 +698,11 @@ export default function Login() {
               >
                 {isSubmitting
                   ? challengeId
-                    ? "Verifying..."
-                    : "Logging in..."
+                    ? t("Verifying...")
+                    : t("Logging in...")
                   : challengeId
-                    ? "Verify and sign in"
-                    : "Login"}
+                    ? t("Verify and sign in")
+                    : t("Login")}
               </motion.button>
 
               {challengeId && (
@@ -707,7 +714,7 @@ export default function Login() {
                   }}
                   className="w-full text-sm text-blue-600 hover:text-blue-700 dark:text-blue-400"
                 >
-                  Back to sign in
+                  {t("Back to sign in")}
                 </button>
               )}
 
@@ -723,7 +730,7 @@ export default function Login() {
                   "
                 />
 
-                <span className="text-sm text-gray-500">OR</span>
+                <span className="text-sm text-gray-500">{t("OR")}</span>
 
                 <div
                   className="
@@ -763,7 +770,7 @@ export default function Login() {
                   alt="Google"
                   className="h-5 w-5"
                 />
-                Continue with Google
+                {t("Continue with Google")}
               </button>
               </>
               )}
@@ -778,7 +785,7 @@ export default function Login() {
                 dark:text-gray-400
               "
             >
-              {!challengeId && "Don't have an account?"}
+              {!challengeId && t("Don't have an account?")}
               {!challengeId && (
               <button
                 onClick={() => navigate("/signup")}

@@ -22,10 +22,12 @@ import { useState } from "react";
 import { getImageUrl } from "../../utils/imageUrl";
 import profile from "../../assets/profile1.jpg";
 import ConfirmModal from "./ConfirmModal";
+import { useLanguage } from "../../context/LanguageContext";
 
 export default function ClientSidebar({ mobileOpen, setMobileOpen }) {
   const dispatch = useDispatch();
   const navigate = useNavigate();
+  const { t } = useLanguage();
   const [isLogoutLoading, setIsLogoutLoading] = useState(false);
   const [logOutModalOpen, setLogOutModalOpen] = useState(false);
 
@@ -172,9 +174,9 @@ export default function ClientSidebar({ mobileOpen, setMobileOpen }) {
               <Bot size={21} />
             </div>
             <div>
-              <h1 className="text-sm font-semibold">AI Chatbot</h1>
+              <h1 className="text-sm font-semibold">{t("AI Chatbot")}</h1>
               <p className="text-[11px] text-gray-500 dark:text-gray-400">
-                Client Panel
+                {t("Client Panel")}
               </p>
             </div>
           </div>
@@ -230,7 +232,7 @@ export default function ClientSidebar({ mobileOpen, setMobileOpen }) {
               {profileDetails?.profileImage ? (
                 <img
                   src={getImageUrl(profileDetails?.profileImage, profile)}
-                  alt="Profile"
+                  alt={t("Profile")}
                   className="h-full w-full object-cover"
                 />
               ) : (
@@ -240,11 +242,11 @@ export default function ClientSidebar({ mobileOpen, setMobileOpen }) {
 
             <div className="min-w-0">
               <p className="truncate text-sm font-medium">
-                {profileDetails?.fullName || "Admin"}
+                {profileDetails?.fullName || t("Admin")}
               </p>
 
               <p className="truncate text-[11px] text-gray-500 dark:text-gray-400">
-                {profileDetails?.email || "Admin account"}
+                {profileDetails?.email || t("Admin account")}
               </p>
             </div>
           </div>
@@ -311,7 +313,7 @@ export default function ClientSidebar({ mobileOpen, setMobileOpen }) {
                     }
                   >
                     <Icon size={18} />
-                    <span className="flex-1">{item.label}</span>
+                    <span className="flex-1">                    {t(item.label)}</span>
                   </NavLink>
                 );
               })}
@@ -348,7 +350,7 @@ export default function ClientSidebar({ mobileOpen, setMobileOpen }) {
             "
           >
             <LogOut size={18} />
-            <span>Logout</span>
+            <span>{t("Logout")}</span>
           </button>
         </div>
       </aside>
@@ -360,12 +362,12 @@ export default function ClientSidebar({ mobileOpen, setMobileOpen }) {
         }}
         onConfirm={handleAuth}
         loading={isLogoutLoading}
-        title="Logout Confirmation"
+        title={t("Logout Confirmation")}
         message={
-          "Are you sure you want to logout? You will need to login again to access your account."
+          t("Are you sure you want to logout? You will need to login again to access your account.")
         }
-        confirmText={isLogoutLoading ? "Logging out..." : "Logout"}
-        cancelText="Cancel"
+        confirmText={isLogoutLoading ? t("Logging out...") : t("Logout")}
+        cancelText={t("Cancel")}
         danger
       />
     </>

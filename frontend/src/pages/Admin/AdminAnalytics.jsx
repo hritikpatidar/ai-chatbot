@@ -28,6 +28,18 @@ import {
 } from "recharts";
 import CustomSelect from "../../components/common/CustomSelect";
 import { useAdminAnalytics } from "../../hooks/Admin/useAdminAnalytics";
+import { useLanguage } from "../../context/LanguageContext";
+import adminScreens from "../../context/translations/adminScreens";
+
+const getTranslator = (language, t) => (key, values = {}) => {
+  const translated = t(key, values);
+  if (translated !== key || language !== "hi") return translated;
+
+  return Object.entries(values).reduce(
+    (text, [name, value]) => text.replaceAll(`{${name}}`, value),
+    adminScreens[key] || key,
+  );
+};
 
 const formatNumber = (value = 0) => Number(value || 0).toLocaleString("en-IN");
 
@@ -105,7 +117,7 @@ const GrowthTooltip = ({ active, payload, label }) => {
 
 // Client Status Tooltip
 
-const ClientStatusTooltip = ({ active, payload }) => {
+const ClientStatusTooltip = ({ active, payload, translate }) => {
   if (!active || !payload?.length) return null;
 
   const item = payload[0]?.payload;
@@ -130,13 +142,15 @@ const ClientStatusTooltip = ({ active, payload }) => {
       </p>
 
       <p className="mt-1 text-xs text-gray-400">
-        {item.percentage}% of total clients
+        {item.percentage}% {translate("of total")} {translate("Clients").toLowerCase()}
       </p>
     </div>
   );
 };
 
 export default function AdminAnalytics() {
+  const { language, t } = useLanguage();
+  const translate = getTranslator(language, t);
   const [dateRange, setDateRange] = useState("7");
 
   const {

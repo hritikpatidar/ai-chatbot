@@ -19,8 +19,10 @@ import { createSupportTicketService } from "../../service/Client/supportTicketSe
 import { useSelector } from "react-redux";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { clientSupportSchema } from "../../utils/validation";
+import { useLanguage } from "../../context/LanguageContext";
 
 const ClientSupport = () => {
+  const { t } = useLanguage();
   const [apiStatus, setApiStatus] = useState({
     type: "",
     message: "",
@@ -76,7 +78,7 @@ const ClientSupport = () => {
       const result = response?.data;
 
       const successMessage =
-        result?.message || "Support ticket created successfully.";
+        t(result?.message || "Support ticket created successfully.");
 
       setApiStatus({
         type: "success",
@@ -88,9 +90,11 @@ const ClientSupport = () => {
       reset();
     } catch (error) {
       const message =
-        error?.response?.data?.message ||
-        error?.message ||
-        "Unable to submit your support ticket. Please try again.";
+        t(
+          error?.response?.data?.message ||
+            error?.message ||
+            "Unable to submit your support ticket. Please try again.",
+        );
 
       setApiStatus({
         type: "error",
@@ -123,17 +127,17 @@ const ClientSupport = () => {
 
           <div>
             <h1 className="text-xl font-semibold text-gray-900 dark:text-white">
-              Email Support
+              {t("Email Support")}
             </h1>
             <p className="text-xs text-gray-500 dark:text-gray-400">
-              Contact your support team directly
+              {t("Contact your support team directly")}
             </p>
           </div>
         </div>
 
         <div className="flex w-fit items-center gap-2 rounded-full border border-green-200 bg-green-50 px-3 py-2 text-xs font-medium text-green-700 dark:border-green-500/20 dark:bg-green-500/10 dark:text-green-400">
           <span className="h-2 w-2 rounded-full bg-green-500" />
-          Support Center
+          {t("Support Center")}
         </div>
       </div>
 
@@ -144,9 +148,9 @@ const ClientSupport = () => {
             <Headphones size={20} />
           </div>
           <div>
-            <h3 className="text-sm font-semibold">We're here to help</h3>
+            <h3 className="text-sm font-semibold">{t("We're here to help")}</h3>
             <p className="mt-1 text-xs leading-5 text-gray-500 dark:text-gray-400">
-              Describe your question or issue and send it to our support team.
+              {t("Describe your question or issue and send it to our support team.")}
             </p>
           </div>
         </div>
@@ -156,9 +160,9 @@ const ClientSupport = () => {
             <ShieldCheck size={20} />
           </div>
           <div>
-            <h3 className="text-sm font-semibold">Secure communication</h3>
+            <h3 className="text-sm font-semibold">{t("Secure communication")}</h3>
             <p className="mt-1 text-xs leading-5 text-gray-500 dark:text-gray-400">
-              Your request will be submitted to the support ticket system.
+              {t("Your request will be submitted to the support ticket system.")}
             </p>
           </div>
         </div>
@@ -172,9 +176,9 @@ const ClientSupport = () => {
               <Mail size={20} />
             </div>
             <div>
-              <h2 className="text-base font-semibold">Create Support Ticket</h2>
+              <h2 className="text-base font-semibold">{t("Create Support Ticket")}</h2>
               <p className="mt-1 text-xs text-gray-500 dark:text-gray-400">
-                Fill in the details below and our team will assist you.
+                {t("Fill in the details below and our team will assist you.")}
               </p>
             </div>
           </div>
@@ -186,7 +190,7 @@ const ClientSupport = () => {
             <div>
               <label className="mb-2 flex items-center gap-2 text-sm font-medium">
                 <ShieldCheck size={16} className="text-gray-400" />
-                Current Plan
+                {t("Current Plan")}
               </label>
 
               <div className="flex items-center gap-2">
@@ -194,7 +198,7 @@ const ClientSupport = () => {
                   {normalizedPlan}
                 </span>
                 <span className="text-xs text-gray-500 dark:text-gray-400">
-                  Ticket priority is determined by your plan.
+                  {t("Ticket priority is determined by your plan.")}
                 </span>
               </div>
             </div>
@@ -206,7 +210,7 @@ const ClientSupport = () => {
                 className="mb-2 flex items-center gap-2 text-sm font-medium"
               >
                 <User size={16} className="text-gray-400" />
-                Support Email
+                {t("Support Email")}
                 <span className="text-red-500">*</span>
               </label>
 
@@ -235,7 +239,7 @@ const ClientSupport = () => {
               )}
 
               <p className="mt-2 text-xs text-gray-500 dark:text-gray-400">
-                Enter the email address associated with your support request.
+                {t("Enter the email address associated with your support request.")}
               </p>
             </div>
 
@@ -246,14 +250,14 @@ const ClientSupport = () => {
                 className="mb-2 flex items-center gap-2 text-sm font-medium"
               >
                 <FileText size={16} className="text-gray-400" />
-                Subject
+                {t("Subject")}
                 <span className="text-red-500">*</span>
               </label>
 
               <input
                 id="support-subject"
                 type="text"
-                placeholder="e.g. Chatbot is not responding"
+                placeholder={t("e.g. Chatbot is not responding")}
                 disabled={isSubmitting}
                 maxLength={150}
                 aria-invalid={Boolean(errors.subject)}
@@ -274,7 +278,7 @@ const ClientSupport = () => {
                   </p>
                 ) : (
                   <span className="text-xs text-gray-500 dark:text-gray-400">
-                    Keep your subject short and clear.
+                    {t("Keep your subject short and clear.")}
                   </span>
                 )}
 
@@ -291,14 +295,14 @@ const ClientSupport = () => {
                 className="mb-2 flex items-center gap-2 text-sm font-medium"
               >
                 <MessageSquareText size={16} className="text-gray-400" />
-                Message / Description
+                {t("Message / Description")}
                 <span className="text-red-500">*</span>
               </label>
 
               <textarea
                 id="support-description"
                 rows={6}
-                placeholder="Describe your question or issue in detail..."
+                placeholder={t("Describe your question or issue in detail...")}
                 disabled={isSubmitting}
                 maxLength={10000}
                 aria-invalid={Boolean(errors.description)}
@@ -319,7 +323,7 @@ const ClientSupport = () => {
                   </p>
                 ) : (
                   <p className="text-xs text-gray-500 dark:text-gray-400">
-                    Include relevant details so the team can help you.
+                    {t("Include relevant details so the team can help you.")}
                   </p>
                 )}
 
@@ -349,8 +353,8 @@ const ClientSupport = () => {
                 <div>
                   <p className="text-sm font-semibold">
                     {apiStatus.type === "success"
-                      ? "Ticket Created Successfully"
-                      : "Unable to Create Ticket"}
+                      ? t("Ticket Created Successfully")
+                      : t("Unable to Create Ticket")}
                   </p>
                   <p className="mt-1 wrap-break-word text-xs leading-5">
                     {apiStatus.message}
@@ -369,7 +373,7 @@ const ClientSupport = () => {
               className="inline-flex min-h-11 items-center justify-center gap-2 rounded-xl border border-gray-200 bg-white px-4 py-2.5 text-sm font-medium text-gray-700 transition hover:bg-gray-100 disabled:cursor-not-allowed disabled:opacity-50 dark:border-white/10 dark:bg-[#11151d] dark:text-gray-300 dark:hover:bg-white/5"
             >
               <RotateCcw size={16} />
-              Reset Form
+              {t("Reset Form")}
             </button>
 
             <button
@@ -380,12 +384,12 @@ const ClientSupport = () => {
               {isSubmitting ? (
                 <>
                   <LoaderCircle size={17} className="animate-spin" />
-                  Creating Ticket...
+                  {t("Creating Ticket...")}
                 </>
               ) : (
                 <>
                   <Send size={17} />
-                  Submit Ticket
+                  {t("Submit Ticket")}
                 </>
               )}
             </button>
@@ -394,7 +398,7 @@ const ClientSupport = () => {
       </div>
 
       <p className="px-2 text-center text-xs leading-5 text-gray-500 dark:text-gray-400 sm:text-left">
-        Please verify your email address and message before submitting.
+        {t("Please verify your email address and message before submitting.")}
       </p>
     </div>
   );

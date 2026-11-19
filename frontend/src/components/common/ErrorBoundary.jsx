@@ -1,6 +1,7 @@
 import React from "react";
+import { useLanguage } from "../../context/LanguageContext";
 
-class ErrorBoundary extends React.Component {
+class ErrorBoundaryContent extends React.Component {
   constructor(props) {
     super(props);
 
@@ -27,18 +28,19 @@ class ErrorBoundary extends React.Component {
 
   render() {
     if (this.state.hasError) {
+      const { t } = this.props;
+
       return (
         <div className="flex min-h-screen items-center justify-center bg-[#0b0f17] px-4">
           <div className="max-w-md text-center">
             <div className="mb-4 text-5xl">⚠️</div>
 
             <h1 className="text-2xl font-bold text-white">
-              Something went wrong
+              {t("Something went wrong")}
             </h1>
 
             <p className="mt-3 text-sm text-gray-400">
-              An unexpected error occurred. Please reload the page and try
-              again.
+              {t("An unexpected error occurred. Please reload the page and try again.")}
             </p>
 
             {import.meta.env.DEV && this.state.error && (
@@ -52,7 +54,7 @@ class ErrorBoundary extends React.Component {
               onClick={this.handleReload}
               className="mt-6 rounded-lg bg-blue-500 px-5 py-2.5 text-sm font-medium text-white transition hover:bg-blue-600"
             >
-              Reload Page
+              {t("Reload Page")}
             </button>
           </div>
         </div>
@@ -61,6 +63,11 @@ class ErrorBoundary extends React.Component {
 
     return this.props.children;
   }
+}
+
+function ErrorBoundary(props) {
+  const { t } = useLanguage();
+  return <ErrorBoundaryContent {...props} t={t} />;
 }
 
 export default ErrorBoundary;

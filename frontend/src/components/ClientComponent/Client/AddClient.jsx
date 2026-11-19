@@ -9,8 +9,10 @@ import {
 
 import { useDispatch, useSelector } from "react-redux";
 import { updateClient } from "../../../redux/features/Client/clientSlice";
+import { useLanguage } from "../../../context/LanguageContext";
 
 export default function AddClient() {
+  const { t } = useLanguage();
   const dispatch = useDispatch();
   const { clientDetails, loading } = useSelector(
     (state) => state?.clientReducer?.clientSlice || {},
@@ -104,11 +106,11 @@ export default function AddClient() {
 
         <div>
           <h2 className="text-lg font-semibold text-gray-900 dark:text-white">
-            Client Settings
+            {t("Client Settings")}
           </h2>
 
           <p className="text-xs text-gray-500 dark:text-gray-400">
-            Manage your business information and client configuration.
+            {t("Manage your business information and client configuration.")}
           </p>
         </div>
       </div>
@@ -126,49 +128,49 @@ export default function AddClient() {
         <div className="grid grid-cols-1 gap-5 md:grid-cols-2">
           {/* Business Name */}
           <FormField
-            label="Business Name"
+            label={t("Business Name")}
             name="businessName"
             value={formData.businessName}
             onChange={handleChange}
-            placeholder="ABC Books"
+            placeholder={t("ABC Books")}
             inputClass={inputClass}
           />
 
           {/* Business Type */}
           <FormField
-            label="Business Type"
+            label={t("Business Type")}
             name="businessType"
             value={formData.businessType}
             onChange={handleChange}
-            placeholder="Bookstore"
+            placeholder={t("Bookstore")}
             inputClass={inputClass}
           />
 
           {/* Client Key */}
           <FormField
-            label="Client Key"
+            label={t("Client Key")}
             name="clientKey"
             value={formData.clientKey}
             onChange={handleChange}
-            placeholder="abc-books"
+            placeholder={t("abc-books")}
             inputClass={inputClass}
             disabled
           />
 
           {/* Slug */}
           <FormField
-            label="Slug"
+            label={t("Slug")}
             name="slug"
             value={formData.slug}
             onChange={handleChange}
-            placeholder="abc-books"
+            placeholder={t("abc-books")}
             inputClass={inputClass}
           />
 
           {/* Description */}
           <div className="md:col-span-2">
             <label className="mb-2 block text-sm font-medium text-gray-700 dark:text-gray-300">
-              Business Description
+              {t("Business Description")}
             </label>
 
             <textarea
@@ -176,7 +178,7 @@ export default function AddClient() {
               value={formData.businessDescription}
               onChange={handleChange}
               rows={5}
-              placeholder="Describe your business..."
+              placeholder={t("Describe your business...")}
               className={inputClass}
             />
           </div>
@@ -194,11 +196,11 @@ export default function AddClient() {
             >
               <div>
                 <p className="text-sm font-medium text-gray-900 dark:text-white">
-                  Client Status
+                  {t("Client Status")}
                 </p>
 
                 <p className="mt-1 text-xs text-gray-500 dark:text-gray-400">
-                  Inactive clients will not be available for the chatbot.
+                  {t("Inactive clients will not be available for the chatbot.")}
                 </p>
               </div>
 
@@ -212,7 +214,7 @@ export default function AddClient() {
                     <ToggleRight size={34} className="text-green-500" />
 
                     <span className="text-sm font-medium text-green-600 dark:text-green-400">
-                      Active
+                      {t("Active")}
                     </span>
                   </>
                 ) : (
@@ -220,7 +222,7 @@ export default function AddClient() {
                     <ToggleLeft size={34} className="text-gray-400" />
 
                     <span className="text-sm font-medium text-gray-500">
-                      Inactive
+                      {t("Inactive")}
                     </span>
                   </>
                 )}
@@ -245,7 +247,7 @@ export default function AddClient() {
             "
           >
             <RotateCcw size={16} />
-            Reset
+            {t("Reset")}
           </button>
 
           <button
@@ -263,7 +265,7 @@ export default function AddClient() {
           >
             <Save size={16} />
 
-            {loading ? "Saving..." : "Save Changes"}
+            {loading ? t("Saving...") : t("Save Changes")}
           </button>
         </div>
       </form>

@@ -529,7 +529,13 @@
 
 // export default ConversationHistory;
 
-import React, { useEffect, useMemo, useRef, useState } from "react";
+import React, {
+  useCallback,
+  useEffect,
+  useMemo,
+  useRef,
+  useState,
+} from "react";
 import {
   Search,
   MessageSquare,
@@ -563,6 +569,8 @@ import {
 } from "../../redux/features/Chat/chatSlice";
 
 import { useSocket } from "../../context/SocketContext";
+import { useLanguage } from "../../context/LanguageContext";
+import { translateShared } from "../../context/translations/sharedComponents";
 import {
   getConversationMessages,
   onConversationMessages,
@@ -572,6 +580,11 @@ import {
 import AIMessage from "../Chat/AIMessage";
 
 const ConversationHistory = ({ onConversationSelect }) => {
+  const { t, language } = useLanguage();
+  const translate = useCallback(
+    (text) => translateShared(text, t, language),
+    [t, language],
+  );
   const navigate = useNavigate();
   const dispatch = useDispatch();
   const { socket } = useSocket();
@@ -722,7 +735,7 @@ const ConversationHistory = ({ onConversationSelect }) => {
 
       navigate("/", { replace: true });
 
-      toast.error(data?.message || "Something went wrong", {
+      toast.error(data?.message || translate("Something went wrong"), {
         id: "conversation-error",
       });
     };
@@ -736,7 +749,8 @@ const ConversationHistory = ({ onConversationSelect }) => {
 
       if (!deletedId) {
         toast.error(
-          data?.message || "Could not identify the deleted conversation",
+          data?.message ||
+            translate("Could not identify the deleted conversation"),
         );
         return;
       }
@@ -751,9 +765,12 @@ const ConversationHistory = ({ onConversationSelect }) => {
         onConversationSelect?.(null);
       }
 
-      toast.success(data?.message || "Conversation deleted successfully", {
+      toast.success(
+        data?.message || translate("Conversation deleted successfully"),
+        {
         id: "conversation-delete",
-      });
+        },
+      );
     };
 
     onConversationList(handleConversation);
@@ -769,7 +786,7 @@ const ConversationHistory = ({ onConversationSelect }) => {
       removeConversationMessages(handleMessageList);
       removeConversationDeleted(handleConversationDeleteRes);
     };
-  }, [socket, dispatch, navigate, onConversationSelect]);
+  }, [socket, dispatch, navigate, onConversationSelect, translate]);
 
   // Keep the selected conversation in sync with the Redux list.
   useEffect(() => {
@@ -847,7 +864,7 @@ const ConversationHistory = ({ onConversationSelect }) => {
       {mobileSidebarOpen && (
         <button
           type="button"
-          aria-label="Close sidebar overlay"
+          aria-label={translate("Close sidebar overlay")}
           onClick={() => setMobileSidebarOpen(false)}
           className="fixed inset-0 z-40 bg-black/60 lg:hidden"
         />
@@ -876,8 +893,8 @@ const ConversationHistory = ({ onConversationSelect }) => {
             type="search"
             value={search}
             onChange={(event) => setSearch(event.target.value)}
-            placeholder="Search conversations..."
-            aria-label="Search conversations"
+            placeholder={translate("Search conversations...")}
+            aria-label={translate("Search conversations")}
             className={`min-w-0 flex-1 bg-transparent text-sm text-gray-900 outline-none placeholder:text-gray-400 dark:text-white dark:placeholder:text-gray-400 ${
               sidebarCollapsed ? "lg:hidden" : ""
             }`}
@@ -885,7 +902,7 @@ const ConversationHistory = ({ onConversationSelect }) => {
 
           <button
             type="button"
-            aria-label="Close sidebar"
+            aria-label={translate("Close sidebar")}
             onClick={() => setMobileSidebarOpen(false)}
             className="ml-auto rounded-lg p-2 text-gray-600 transition hover:bg-gray-100 dark:text-gray-300 dark:hover:bg-white/6 lg:hidden"
           >
@@ -900,7 +917,7 @@ const ConversationHistory = ({ onConversationSelect }) => {
               sidebarCollapsed ? "lg:hidden" : ""
             }`}
           >
-            Recent Conversations
+            {translate("Recent Conversations")}
           </div>
 
           <div className="min-h-0 flex-1 overflow-y-auto px-3 pb-3">
@@ -917,14 +934,14 @@ const ConversationHistory = ({ onConversationSelect }) => {
 
                 <p className="mt-3 text-sm font-medium text-gray-900 dark:text-gray-100">
                   {search.trim()
-                    ? "No conversations found"
-                    : "No conversations yet"}
+                    ? translate("No conversations found")
+                    : translate("No conversations yet")}
                 </p>
 
                 <p className="mt-1 text-xs text-gray-600 dark:text-gray-400">
                   {search.trim()
-                    ? "Try another search term."
-                    : "Your conversations will appear here."}
+                    ? translate("Try another search term.")
+                    : translate("Your conversations will appear here.")}
                 </p>
               </div>
             ) : (
@@ -944,7 +961,9 @@ const ConversationHistory = ({ onConversationSelect }) => {
                     {/* Conversation button */}
                     <button
                       type="button"
-                      title={conversation?.title || "New Conversation"}
+                      title={
+                        conversation?.title || translate("New Conversation")
+                      }
                       onClick={() => selectConversation(conversation)}
                       className="flex min-w-0 flex-1 items-center gap-3 rounded-xl px-3 py-2.5 text-left"
                     >
@@ -960,11 +979,12 @@ const ConversationHistory = ({ onConversationSelect }) => {
 
                       <div className="flex min-w-0 flex-1 flex-col gap-0.5">
                         <span className="truncate text-sm font-medium text-gray-800 dark:text-gray-200">
-                          {conversation?.visitor?.fullName || "Visitor"}
+                          {conversation?.visitor?.fullName ||
+                            translate("Visitor")}
                         </span>
 
                         <span className="truncate text-xs text-gray-500 dark:text-gray-400">
-                          {conversation?.title || "New Conversation"}
+                          {conversation?.title || translate("New Conversation")}
                         </span>
                       </div>
                     </button>
@@ -972,7 +992,7 @@ const ConversationHistory = ({ onConversationSelect }) => {
                     {/* Three dots */}
                     <button
                       type="button"
-                      aria-label="More options"
+                      aria-label={translate("More options")}
                       aria-expanded={isMenuOpen}
                       onClick={(event) =>
                         handleMenuToggle(event, conversationId)
@@ -1005,7 +1025,7 @@ const ConversationHistory = ({ onConversationSelect }) => {
                           className="flex w-full items-center gap-2.5 rounded-lg px-3 py-2.5 text-sm font-medium text-red-600 transition-colors hover:bg-red-50 focus:outline-none focus:ring-2 focus:ring-red-500/30 dark:text-red-400 dark:hover:bg-red-500/10"
                         >
                           <Trash2 size={16} />
-                          <span>Delete</span>
+                          <span>{translate("Delete")}</span>
                         </button>
                       </div>
                     )}
@@ -1025,7 +1045,7 @@ const ConversationHistory = ({ onConversationSelect }) => {
             <div className="flex items-center gap-3 border-b border-gray-200 pb-4 dark:border-white/10">
               <button
                 type="button"
-                aria-label="Open conversations sidebar"
+                aria-label={translate("Open conversations sidebar")}
                 onClick={() => setMobileSidebarOpen(true)}
                 className="shrink-0 rounded-xl border border-gray-200 bg-white p-2.5 text-gray-700 transition hover:bg-gray-100 dark:border-white/10 dark:bg-white/5 dark:text-gray-200 dark:hover:bg-white/10 lg:hidden"
               >
@@ -1040,12 +1060,13 @@ const ConversationHistory = ({ onConversationSelect }) => {
 
               <div className="min-w-0 flex-1">
                 <h1 className="truncate text-base font-semibold text-gray-900 dark:text-gray-100 sm:text-lg">
-                  {selectedConversation?.visitor?.fullName || "Unknown User"}
+                  {selectedConversation?.visitor?.fullName ||
+                    translate("Unknown User")}
                 </h1>
 
                 <p className="truncate text-xs text-gray-500 dark:text-gray-400 sm:text-sm">
                   {selectedConversation?.visitor?.email ||
-                    "Email not available"}
+                    translate("Email not available")}
                 </p>
               </div>
             </div>
@@ -1062,13 +1083,14 @@ const ConversationHistory = ({ onConversationSelect }) => {
 
               <h2 className="mt-5 text-xl font-semibold text-gray-900 dark:text-gray-100">
                 {conversationList.length === 0
-                  ? "No conversations yet"
-                  : "Select a conversation"}
+                  ? translate("No conversations yet")
+                  : translate("Select a conversation")}
               </h2>
 
               <p className="mt-2 max-w-sm text-sm leading-6 text-gray-600 dark:text-gray-400">
-                Choose a conversation from the sidebar to view its complete
-                message history.
+                {translate(
+                  "Choose a conversation from the sidebar to view its complete message history.",
+                )}
               </p>
             </div>
           ) : (
@@ -1127,12 +1149,13 @@ const ConversationHistory = ({ onConversationSelect }) => {
               className="w-full max-w-sm rounded-2xl border border-gray-200 bg-white p-6 shadow-2xl dark:border-white/10 dark:bg-[#171b23]"
             >
               <h2 className="text-lg font-semibold text-gray-900 dark:text-white">
-                Delete Conversation?
+                {translate("Delete Conversation?")}
               </h2>
 
               <p className="mt-2 text-sm text-gray-600 dark:text-gray-400">
-                Are you sure you want to delete this conversation? This action
-                cannot be undone.
+                {translate(
+                  "Are you sure you want to delete this conversation? This action cannot be undone.",
+                )}
               </p>
 
               <div className="mt-6 flex justify-end gap-3">
@@ -1145,7 +1168,7 @@ const ConversationHistory = ({ onConversationSelect }) => {
                   disabled={isLoading}
                   className="rounded-lg border border-gray-200 px-4 py-2 text-sm text-gray-700 transition hover:bg-gray-100 disabled:cursor-not-allowed disabled:opacity-50 dark:border-white/10 dark:text-white dark:hover:bg-white/10"
                 >
-                  Cancel
+                  {translate("Cancel")}
                 </button>
 
                 <button
@@ -1154,7 +1177,9 @@ const ConversationHistory = ({ onConversationSelect }) => {
                   disabled={isLoading}
                   className="rounded-lg bg-red-500 px-4 py-2 text-sm text-white hover:bg-red-600 disabled:cursor-not-allowed disabled:opacity-50"
                 >
-                  {isLoading ? "Deleting..." : "Delete"}
+                  {isLoading
+                    ? translate("Deleting...")
+                    : translate("Delete")}
                 </button>
               </div>
             </motion.div>

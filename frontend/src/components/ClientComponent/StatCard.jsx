@@ -1,5 +1,6 @@
 import { motion } from "framer-motion";
 import { ArrowUpRight } from "lucide-react";
+import { useLanguage } from "../../context/LanguageContext";
 
 export default function StatCard({
   title,
@@ -8,6 +9,7 @@ export default function StatCard({
   description,
   onClick,
 }) {
+  const { t } = useLanguage();
   return (
     <motion.div
       whileHover={{ y: -2 }}
@@ -45,11 +47,11 @@ export default function StatCard({
       </div>
 
       <div className="mt-4">
-        <p className="text-xs text-gray-500 dark:text-gray-400">{title}</p>
+        <p className="text-xs text-gray-500 dark:text-gray-400">{t(title)}</p>
         <h3 className="mt-1 truncate text-lg font-semibold">{value}</h3>
         {description && (
           <p className="mt-1 text-xs text-gray-500 dark:text-gray-400">
-            {description}
+            {t(description)}
           </p>
         )}
       </div>

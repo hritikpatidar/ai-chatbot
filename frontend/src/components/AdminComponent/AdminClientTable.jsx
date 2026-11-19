@@ -5,7 +5,8 @@ import AdminClientStatus from "./AdminClientStatus";
 import ActionButton from "../common/ActionButton";
 import profile from "../../assets/profile1.jpg";
 import { getImageUrl } from "../../utils/imageUrl";
-
+import { useLanguage } from "../../context/LanguageContext";
+import { translateShared } from "../../context/translations/sharedComponents";
 
 export default function AdminClientTable({
   clients = [],
@@ -15,6 +16,9 @@ export default function AdminClientTable({
   onEdit,
   onDelete
 }) {
+  const { t, language } = useLanguage();
+  const translate = (text) => translateShared(text, t, language);
+
   if (loading) {
     return (
       <div
@@ -54,7 +58,7 @@ export default function AdminClientTable({
                       dark:text-gray-400
                     "
                   >
-                    {item}
+                    {translate(item)}
                   </th>
                 ))}
               </tr>
@@ -112,7 +116,7 @@ export default function AdminClientTable({
               dark:text-white
             "
           >
-            Clients
+            {translate("Clients")}
           </h3>
 
           <p
@@ -123,7 +127,7 @@ export default function AdminClientTable({
               dark:text-gray-400
             "
           >
-            Manage all registered clients
+            {translate("Manage all registered clients")}
           </p>
         </div>
 
@@ -138,7 +142,7 @@ export default function AdminClientTable({
           "
         >
           <Users size={14} />
-          {pagination.total} Clients
+          {pagination.total} {translate("Clients")}
         </div>
       </div>
 
@@ -155,7 +159,7 @@ export default function AdminClientTable({
               dark:text-gray-300
             "
           >
-            No clients found
+            {translate("No clients found")}
           </p>
         </div>
       ) : (
@@ -184,7 +188,7 @@ export default function AdminClientTable({
                     dark:text-gray-400
                   "
                 >
-                  Client
+                  {translate("Client")}
                 </th>
 
                 <th
@@ -200,7 +204,7 @@ export default function AdminClientTable({
                     dark:text-gray-400
                   "
                 >
-                  Business
+                  {translate("Business")}
                 </th>
 
                 <th
@@ -216,7 +220,7 @@ export default function AdminClientTable({
                     dark:text-gray-400
                   "
                 >
-                  Status
+                  {translate("Status")}
                 </th>
 
                 <th
@@ -232,7 +236,7 @@ export default function AdminClientTable({
                     dark:text-gray-400
                   "
                 >
-                  Created
+                  {translate("Created")}
                 </th>
 
                 <th
@@ -248,7 +252,7 @@ export default function AdminClientTable({
                     dark:text-gray-400
                   "
                 >
-                  Last Active
+                  {translate("Last Active")}
                 </th>
 
                 <th
@@ -264,7 +268,7 @@ export default function AdminClientTable({
                     dark:text-gray-400
                   "
                 >
-                  Actions
+                  {translate("Actions")}
                 </th>
               </tr>
             </thead>
@@ -274,7 +278,7 @@ export default function AdminClientTable({
                 const clientName =
                   client?.user?.fullName ||
                   client?.user?.name ||
-                  "Unnamed Client";
+                  translate("Unnamed Client");
 
                 const businessName =
                   client?.businessName ||
@@ -297,7 +301,7 @@ export default function AdminClientTable({
 
                 const lastActive = client?.user?.lastLogin
                   ? new Date(client?.user?.lastLogin).toLocaleString()
-                  : "Never";
+                  : translate("Never");
 
                 return (
                   <tr
@@ -430,19 +434,19 @@ export default function AdminClientTable({
                         <div className="flex shrink-0 gap-1">
                           <ActionButton
                             icon={<Eye size={14} />}
-                            title="view"
+                            title={translate("view")}
                             onClick={() => onView?.(client)}
                           />
                           <ActionButton
                             icon={<Edit2 size={14} />}
-                            title="Edit"
+                            title={translate("Edit")}
                             onClick={() => onEdit?.(client)}
                           />
 
                           <ActionButton
                             danger
                             icon={<Trash2 size={14} />}
-                            title="Delete"
+                            title={translate("Delete")}
                             onClick={() => onDelete?.(client)}
                           />
                         </div>

@@ -8,6 +8,7 @@ import { PersistGate } from "redux-persist/integration/react";
 import { ThemeProvider } from "./context/ThemeContext";
 import ErrorBoundary from "./components/common/ErrorBoundary";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
+import { LanguageProvider } from "./context/LanguageContext";
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -24,9 +25,11 @@ ReactDOM.createRoot(document.getElementById("root")).render(
       <QueryClientProvider client={queryClient}>
         <PersistGate loading={null} persistor={persistor}>
           <ThemeProvider>
-            <ErrorBoundary>
-              <App />
-            </ErrorBoundary>
+            <LanguageProvider>
+              <ErrorBoundary>
+                <App />
+              </ErrorBoundary>
+            </LanguageProvider>
           </ThemeProvider>
         </PersistGate>
       </QueryClientProvider>

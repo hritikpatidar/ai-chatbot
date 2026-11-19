@@ -1,5 +1,7 @@
 import React from "react";
 import { Inbox } from "lucide-react";
+import { useLanguage } from "../../context/LanguageContext";
+import { translateShared } from "../../context/translations/sharedComponents";
 
 export default function AdminEmptyState({
   title = "No data found",
@@ -7,6 +9,8 @@ export default function AdminEmptyState({
   icon: Icon = Inbox,
   action,
 }) {
+  const { t, language } = useLanguage();
+
   return (
     <div
       className="
@@ -53,7 +57,7 @@ export default function AdminEmptyState({
           dark:text-white
         "
       >
-        {title}
+        {translateShared(title, t, language)}
       </h3>
 
       <p
@@ -66,7 +70,7 @@ export default function AdminEmptyState({
           dark:text-gray-400
         "
       >
-        {description}
+        {translateShared(description, t, language)}
       </p>
 
       {action && <div className="mt-5">{action}</div>}

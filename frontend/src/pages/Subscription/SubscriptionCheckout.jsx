@@ -22,6 +22,8 @@ import PaymentForm from "../../components/Subscription/PaymentForm";
 import { billingAddressSchema, checkoutSchema } from "../../utils/validation";
 import { COUNTRIES } from "../../constants/countries";
 import CustomSelect from "../../components/common/CustomSelect";
+import { useLanguage } from "../../context/LanguageContext";
+import accountScreens from "../../context/translations/accountScreens";
 
 //  INITIAL ADDRESS
 const getInitialAddress = (client) => ({
@@ -36,6 +38,15 @@ const getInitialAddress = (client) => ({
 const SubscriptionCheckout = () => {
   const { planId } = useParams();
   const navigate = useNavigate();
+  const { t: translate, language } = useLanguage();
+  const t = (key, values = {}) => {
+    const translated =
+      language === "hi" ? accountScreens[key] || translate(key) : key;
+    return Object.entries(values).reduce(
+      (text, [name, value]) => text.replaceAll(`{${name}}`, value),
+      translated,
+    );
+  };
 
   const [paymentError, setPaymentError] = useState("");
   const [loading, setLoading] = useState(false);
@@ -82,8 +93,8 @@ const SubscriptionCheckout = () => {
 
     if (!checkoutResult.success) {
       const firstError =
-        checkoutResult.error.issues[0]?.message ||
-        "Please correct the highlighted fields.";
+        t(checkoutResult.error.issues[0]?.message) ||
+        t("Please correct the highlighted fields.");
 
       setPaymentError(firstError);
       return;
@@ -93,11 +104,11 @@ const SubscriptionCheckout = () => {
     setLoading(true);
     try {
       if (!stripe) {
-        throw new Error("Stripe is not initialized.");
+        throw new Error(t("Stripe is not initialized."));
       }
 
       if (!cardNumber) {
-        throw new Error("Card details are required.");
+        throw new Error(t("Card details are required."));
       }
 
       //  3. CREATE PAYMENT METHOD
@@ -123,7 +134,7 @@ const SubscriptionCheckout = () => {
       }
 
       if (!paymentMethod?.id) {
-        throw new Error("Payment method could not be created.");
+        throw new Error(t("Payment method could not be created."));
       }
 
       //  4. CREATE SUBSCRIPTION
@@ -176,7 +187,7 @@ const SubscriptionCheckout = () => {
       const clientSecret = responseData?.clientSecret || null;
       if (!clientSecret) {
         console.error("Subscription API response:", responseData);
-        throw new Error("Payment client secret was not generated.");
+        throw new Error(t("Payment client secret was not generated."));
       }
 
       //  6. CONFIRM PAYMENT
@@ -210,22 +221,24 @@ const SubscriptionCheckout = () => {
 
       if (paymentIntent?.status === "requires_action") {
         throw new Error(
-          "Additional authentication is required to complete payment.",
+          t("Additional authentication is required to complete payment."),
         );
       }
 
       throw new Error(
-        `Payment could not be completed. Status: ${
-          paymentIntent?.status || "unknown"
-        }`,
+        t("Payment could not be completed. Status: {status}", {
+          status: paymentIntent?.status || "unknown",
+        }),
       );
     } catch (error) {
       console.error("Subscription payment error:", error);
 
       setPaymentError(
-        error?.response?.data?.message ||
-          error?.message ||
-          "Payment failed. Please try again.",
+        t(
+          error?.response?.data?.message ||
+            error?.message ||
+            "Payment failed. Please try again.",
+        ),
       );
     } finally {
       setLoading(false);
@@ -245,7 +258,7 @@ const SubscriptionCheckout = () => {
     return (
       <div className="flex min-h-100 flex-col items-center justify-center px-4 text-center">
         <h2 className="text-xl font-semibold text-gray-900 dark:text-white">
-          Subscription plan not found.
+          {t("Subscription plan not found.")}
         </h2>
 
         <button
@@ -253,7 +266,7 @@ const SubscriptionCheckout = () => {
           onClick={() => navigate("/client/subscription")}
           className="mt-4 rounded-xl bg-indigo-600 px-5 py-2.5 text-sm font-semibold text-white transition hover:bg-indigo-700"
         >
-          Back to Plans
+          {t("Back to Plans")}
         </button>
       </div>
     );
@@ -274,16 +287,18 @@ const SubscriptionCheckout = () => {
         className="mb-5 inline-flex items-center gap-2 text-sm font-medium text-gray-600 transition hover:text-indigo-600 dark:text-gray-400 dark:hover:text-indigo-400"
       >
         <ArrowLeft size={17} />
-        Back to Plans
+        {t("Back to Plans")}
       </button>
 
       <div className="mb-6">
         <h1 className="text-2xl font-bold text-gray-900 dark:text-white sm:text-3xl">
-          Complete Your Subscription
+          {t("Complete Your Subscription")}
         </h1>
 
         <p className="mt-1 text-sm text-gray-500 dark:text-gray-400">
-          Enter your billing information and card details to activate your plan.
+          {t(
+            "Enter your billing information and card details to activate your plan.",
+          )}
         </p>
       </div>
 
@@ -296,11 +311,11 @@ const SubscriptionCheckout = () => {
               </div>
               <div>
                 <h2 className="text-lg font-semibold text-gray-900 dark:text-white">
-                  Billing Address
+                  {t("Billing Address")}
                 </h2>
 
                 <p className="mt-1 text-sm text-gray-500 dark:text-gray-400">
-                  Enter the address associated with your payment.
+                  {t("Enter the address associated with your payment.")}
                 </p>
               </div>
             </div>
@@ -309,13 +324,14 @@ const SubscriptionCheckout = () => {
               {/* Address */}
               <div className="sm:col-span-2">
                 <label className="mb-1.5 block text-sm font-medium text-gray-700 dark:text-gray-300">
-                  Address Line 1<span className="ml-1 text-red-500">*</span>
+                  {t("Address Line 1")}
+                  <span className="ml-1 text-red-500">*</span>
                 </label>
 
                 <input
                   type="text"
                   {...register("line1")}
-                  placeholder="Street address"
+                  placeholder={t("Street address")}
                   autoComplete="address-line1"
                   required
                   className={inputClass(!!formErrors.line1)}
@@ -323,7 +339,7 @@ const SubscriptionCheckout = () => {
 
                 {formErrors.line1 && (
                   <p className="mt-1 text-xs text-red-500">
-                    {formErrors.line1.message}
+                    {t(formErrors.line1.message)}
                   </p>
                 )}
               </div>
@@ -331,16 +347,16 @@ const SubscriptionCheckout = () => {
               {/* Address Line 2 */}
               <div className="sm:col-span-2">
                 <label className="mb-1.5 block text-sm font-medium text-gray-700 dark:text-gray-300">
-                  Address Line 2
+                  {t("Address Line 2")}
                   <span className="ml-1 text-xs font-normal text-gray-400">
-                    (Optional)
+                    {t("(Optional)")}
                   </span>
                 </label>
 
                 <input
                   type="text"
                   {...register("line2")}
-                  placeholder="Apartment, suite, landmark, etc."
+                  placeholder={t("Apartment, suite, landmark, etc.")}
                   autoComplete="address-line2"
                   required
                   className="w-full rounded-xl border border-gray-200 bg-white px-4 py-3 text-sm text-gray-900 outline-none transition placeholder:text-gray-400 focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500/20 dark:border-gray-700 dark:bg-[#11151c] dark:text-white"
@@ -350,7 +366,7 @@ const SubscriptionCheckout = () => {
               {/* City */}
               <div>
                 <label className="mb-1.5 block text-sm font-medium text-gray-700 dark:text-gray-300">
-                  City
+                  {t("City")}
                   <span className="ml-1 text-red-500">*</span>
                 </label>
 
@@ -365,7 +381,7 @@ const SubscriptionCheckout = () => {
 
                 {formErrors.city && (
                   <p className="mt-1 text-xs text-red-500">
-                    {formErrors.city.message}
+                    {t(formErrors.city.message)}
                   </p>
                 )}
               </div>
@@ -373,7 +389,7 @@ const SubscriptionCheckout = () => {
               {/* State */}
               <div>
                 <label className="mb-1.5 block text-sm font-medium text-gray-700 dark:text-gray-300">
-                  State / Province
+                  {t("State / Province")}
                   <span className="ml-1 text-red-500">*</span>
                 </label>
 
@@ -388,7 +404,7 @@ const SubscriptionCheckout = () => {
 
                 {formErrors.state && (
                   <p className="mt-1 text-xs text-red-500">
-                    {formErrors.state.message}
+                    {t(formErrors.state.message)}
                   </p>
                 )}
               </div>
@@ -396,7 +412,7 @@ const SubscriptionCheckout = () => {
               {/* Postal */}
               <div>
                 <label className="mb-1.5 block text-sm font-medium text-gray-700 dark:text-gray-300">
-                  Postal Code
+                  {t("Postal Code")}
                   <span className="ml-1 text-red-500">*</span>
                 </label>
 
@@ -411,7 +427,7 @@ const SubscriptionCheckout = () => {
 
                 {formErrors.postal_code && (
                   <p className="mt-1 text-xs text-red-500">
-                    {formErrors.postal_code.message}
+                    {t(formErrors.postal_code.message)}
                   </p>
                 )}
               </div>
@@ -419,7 +435,7 @@ const SubscriptionCheckout = () => {
               {/* Country */}
               <div>
                 <label className="mb-1.5 block text-sm font-medium text-gray-700 dark:text-gray-300">
-                  Country
+                  {t("Country")}
                   <span className="ml-1 text-red-500">*</span>
                 </label>
                 <Controller
@@ -440,8 +456,12 @@ const SubscriptionCheckout = () => {
                         value: country.code,
                         label: `${country.name} (${country.code})`,
                       }))}
-                      placeholder="Select country"
-                      error={formErrors?.country?.message}
+                      placeholder={t("Select country")}
+                      error={
+                        formErrors?.country?.message
+                          ? t(formErrors.country.message)
+                          : undefined
+                      }
                       required
                     />
                   )}
@@ -449,7 +469,7 @@ const SubscriptionCheckout = () => {
 
                 {formErrors.country && (
                   <p className="mt-1 text-xs text-red-500">
-                    {formErrors.country.message}
+                    {t(formErrors.country.message)}
                   </p>
                 )}
               </div>
@@ -458,11 +478,11 @@ const SubscriptionCheckout = () => {
             {/* Address Preview */}
             <div className="mt-5 rounded-xl border border-gray-100 bg-gray-50 p-4 dark:border-gray-800 dark:bg-[#11151c]">
               <p className="mb-2 text-xs font-semibold uppercase tracking-wide text-gray-400">
-                Billing Address
+                {t("Billing Address")}
               </p>
 
               <p className="text-sm leading-6 text-gray-600 dark:text-gray-300">
-                {billingAddress.line1 || "Address not entered"}
+                {billingAddress.line1 || t("Address not entered")}
                 {billingAddress.line2 && `, ${billingAddress.line2}`}
                 {billingAddress.city && `, ${billingAddress.city}`}
                 {billingAddress.state && `, ${billingAddress.state}`}
@@ -482,11 +502,11 @@ const SubscriptionCheckout = () => {
           <div className="rounded-2xl border border-gray-200 bg-white p-5 shadow-sm dark:border-gray-800 dark:bg-[#171b23] sm:p-7">
             <div className="mb-7">
               <h2 className="text-lg font-semibold text-gray-900 dark:text-white">
-                Payment Details
+                {t("Payment Details")}
               </h2>
 
               <p className="mt-1 text-sm text-gray-500 dark:text-gray-400">
-                Enter your card details to complete your subscription.
+                {t("Enter your card details to complete your subscription.")}
               </p>
             </div>
 
@@ -502,7 +522,7 @@ const SubscriptionCheckout = () => {
               <ShieldCheck size={16} className="shrink-0 text-emerald-500" />
 
               <span>
-                Your payment information is securely processed by Stripe.
+                {t("Your payment information is securely processed by Stripe.")}
               </span>
             </div>
           </div>
@@ -511,12 +531,12 @@ const SubscriptionCheckout = () => {
         {/* ORDER SUMMARY */}
         <div className="h-fit rounded-2xl border border-gray-200 bg-white p-5 shadow-sm dark:border-gray-800 dark:bg-[#171b23] sm:p-6 xl:sticky xl:top-6">
           <h2 className="text-lg font-semibold text-gray-900 dark:text-white">
-            Order Summary
+            {t("Order Summary")}
           </h2>
 
           <div className="mt-5">
             <p className="text-sm text-gray-500 dark:text-gray-400">
-              Selected Plan
+              {t("Selected Plan")}
             </p>
 
             <h3 className="mt-1 text-xl font-bold text-gray-900 dark:text-white">
@@ -532,7 +552,7 @@ const SubscriptionCheckout = () => {
 
           <div className="flex items-end justify-between gap-4">
             <span className="text-sm text-gray-500 dark:text-gray-400">
-              {plan.interval === "year" ? "Yearly" : "Monthly"}
+              {t(plan.interval === "year" ? "Yearly" : "Monthly")}
             </span>
 
             <div className="text-right">
@@ -543,7 +563,7 @@ const SubscriptionCheckout = () => {
               </span>
 
               <span className="ml-1 text-sm text-gray-500 dark:text-gray-400">
-                /{plan.interval}
+                /{t(plan.interval)}
               </span>
             </div>
           </div>
@@ -567,7 +587,7 @@ const SubscriptionCheckout = () => {
 
           <div className="mt-7 rounded-xl bg-indigo-50 p-4 dark:bg-indigo-500/10">
             <p className="text-xs leading-5 text-indigo-600 dark:text-indigo-400">
-              You will be charged according to the selected billing interval.
+              {t("You will be charged according to the selected billing interval.")}
             </p>
           </div>
         </div>

@@ -10,9 +10,18 @@ import Pagination from "../../components/common/Pagination";
 import useClientTickets from "../../hooks/Client/useClientTickets";
 import CustomSelect from "../../components/common/CustomSelect";
 import { useNavigate } from "react-router-dom";
+import { useLanguage } from "../../context/LanguageContext";
+import clientScreens from "../../context/translations/clientScreens";
 
 export default function ClientTickets() {
   const navigate = useNavigate();
+  const { t, language } = useLanguage();
+  const translate = (key) => {
+    const translated = t(key);
+    return translated === key && language === "hi"
+      ? clientScreens[key] || key
+      : translated;
+  };
   const [page, setPage] = useState(1);
   const [limit] = useState(10);
   const [status, setStatus] = useState("");
@@ -116,7 +125,7 @@ export default function ClientTickets() {
   };
 
   const errorMessage =
-    error?.message || "Something went wrong while fetching tickets.";
+    error?.message || translate("Something went wrong while fetching tickets.");
 
   return (
     <div className="min-h-full w-full">
@@ -143,11 +152,11 @@ export default function ClientTickets() {
                     dark:text-white
                   "
               >
-                Support Tickets
+                {translate("Support Tickets")}
               </h1>
 
               <p className="text-xs text-gray-500 dark:text-gray-400">
-                Manage your support tickets
+                {translate("Manage your support tickets")}
               </p>
             </div>
           </div>
@@ -182,7 +191,7 @@ export default function ClientTickets() {
             type="text"
             value={search}
             onChange={(e) => setSearch(e.target.value)}
-            placeholder="Search tickets..."
+            placeholder={translate("Search tickets...")}
             className="
                 w-full
                 rounded-lg
@@ -221,13 +230,13 @@ export default function ClientTickets() {
             rounded="rounded-lg"
             value={status}
             onChange={handleStatusChange}
-            placeholder="All Status"
+            placeholder={translate("All Status")}
             options={[
-              { value: "", label: "All Status" },
-              { value: "open", label: "Open" },
-              { value: "in_progress", label: "In Progress" },
-              { value: "resolved", label: "Resolved" },
-              { value: "closed", label: "Closed" },
+              { value: "", label: translate("All Status") },
+              { value: "open", label: translate("Open") },
+              { value: "in_progress", label: translate("In Progress") },
+              { value: "resolved", label: translate("Resolved") },
+              { value: "closed", label: translate("Closed") },
             ]}
             className="
                 w-full
@@ -267,7 +276,7 @@ export default function ClientTickets() {
               "
           >
             <RefreshCw size={15} className={isFetching ? "animate-spin" : ""} />
-            Refresh
+            {translate("Refresh")}
           </button>
         </div>
       </div>
@@ -339,18 +348,22 @@ export default function ClientTickets() {
 
       <ConfirmModal
         isOpen={Boolean(deleteTicketDetails)}
-        title="Delete Ticket"
+        title={translate("Delete Ticket")}
         message={
           <>
-            Are you sure you want to delete{" "}
-            <strong>{deleteTicketDetails?.subject || "this ticket"}</strong>
+            {translate("Are you sure you want to delete")}{" "}
+            <strong>
+              {deleteTicketDetails?.subject || translate("this ticket")}
+            </strong>
             ?
             <br />
-            <span className="text-xs">This action cannot be undone.</span>
+            <span className="text-xs">
+              {translate("This action cannot be undone.")}
+            </span>
           </>
         }
-        confirmText="Delete"
-        cancelText="Cancel"
+        confirmText={translate("Delete")}
+        cancelText={translate("Cancel")}
         loading={deleteLoading}
         onCancel={() => {
           if (!deleteLoading) {

@@ -4,6 +4,7 @@ import User from "../models/User.js";
 
 const defaultSettings = {
   aiModel: env.GEMINI_MODEL || "gemini-2.5-flash",
+  defaultLanguage: "en",
   temperature: 0.7,
   maxOutputTokens: 2048,
   monthlyUsageAlert: true,
@@ -34,12 +35,13 @@ export const getAISettingsForRequest = async ({
     adminId: settingsAdminId,
   })
     .select(
-      "aiModel temperature maxOutputTokens monthlyUsageAlert usageAlertLimit",
+      "aiModel defaultLanguage temperature maxOutputTokens monthlyUsageAlert usageAlertLimit",
     )
     .lean();
 
   return {
     aiModel: settings?.aiModel || defaultSettings.aiModel,
+    defaultLanguage: settings?.defaultLanguage || defaultSettings.defaultLanguage,
     temperature: settings?.temperature ?? defaultSettings.temperature,
     maxOutputTokens:
       settings?.maxOutputTokens ?? defaultSettings.maxOutputTokens,

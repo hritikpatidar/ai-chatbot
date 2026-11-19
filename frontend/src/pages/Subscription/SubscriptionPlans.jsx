@@ -12,9 +12,14 @@ import { useMemo, useState } from "react";
 import { useSelector } from "react-redux";
 import ChangePlanModal from "../../components/Subscription/ChangePlanModal";
 import StripeProvider from "../../components/Subscription/StripeProvider";
+import { useLanguage } from "../../context/LanguageContext";
+import accountScreens from "../../context/translations/accountScreens";
 
 const SubscriptionPlans = () => {
   const navigate = useNavigate();
+  const { t: translate, language } = useLanguage();
+  const t = (key) =>
+    language === "hi" ? accountScreens[key] || translate(key) : key;
   // monthly / yearly
   const [billingCycle, setBillingCycle] = useState("month");
   const [changePlanModal, setChangePlanModal] = useState({
@@ -88,7 +93,7 @@ const SubscriptionPlans = () => {
           <AlertCircle className="mx-auto text-red-500" size={32} />
 
           <h2 className="mt-3 font-semibold text-red-700 dark:text-red-400">
-            Unable to load subscription plans
+            {t("Unable to load subscription plans")}
           </h2>
 
           <button
@@ -96,7 +101,7 @@ const SubscriptionPlans = () => {
             className="mt-4 inline-flex items-center gap-2 rounded-xl bg-indigo-600 px-4 py-2 text-sm font-semibold text-white"
           >
             <RefreshCw size={16} />
-            Try Again
+            {t("Try Again")}
           </button>
         </div>
       </div>
@@ -115,11 +120,11 @@ const SubscriptionPlans = () => {
         </div>
 
         <h1 className="mt-4 text-3xl font-bold text-gray-900 dark:text-white">
-          Choose Your Plan
+          {t("Choose Your Plan")}
         </h1>
 
         <p className="mx-auto mt-2 max-w-2xl text-sm text-gray-500 dark:text-gray-400">
-          Select the subscription plan that best fits your business needs.
+          {t("Select the subscription plan that best fits your business needs.")}
         </p>
       </div>
 
@@ -220,7 +225,7 @@ const SubscriptionPlans = () => {
               "
           >
             <RefreshCw size={16} className={isFetching ? "animate-spin" : ""} />
-            Refresh
+            {t("Refresh")}
           </button>
         </div>
       </div>
@@ -229,8 +234,11 @@ const SubscriptionPlans = () => {
       {filteredPlans.length === 0 ? (
         <div className="mt-8 rounded-2xl border border-gray-200 bg-white p-10 text-center dark:border-gray-800 dark:bg-[#171b23]">
           <p className="text-gray-500 dark:text-gray-400">
-            No {billingCycle === "month" ? "monthly" : "yearly"} subscription
-            plans available.
+            {t(
+              billingCycle === "month"
+                ? "No monthly subscription plans available."
+                : "No yearly subscription plans available.",
+            )}
           </p>
         </div>
       ) : (

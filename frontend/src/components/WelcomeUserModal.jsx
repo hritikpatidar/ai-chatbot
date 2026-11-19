@@ -12,6 +12,8 @@ import {
 
 import { identifyWidgetUserService } from "../service/Widget/WidgetServices";
 import { welcomeUserSchema } from "../utils/validation";
+import { useLanguage } from "../context/LanguageContext";
+import { translateShared } from "../context/translations/sharedComponents";
 import PhoneInputField from "./common/PhoneInputField";
 
 const WelcomeUserModal = ({
@@ -21,6 +23,8 @@ const WelcomeUserModal = ({
   guestId,
   onSuccess,
 }) => {
+  const { t, language } = useLanguage();
+  const translate = (text) => translateShared(text, t, language);
   const [apiError, setApiError] = useState("");
 
   const {
@@ -73,12 +77,15 @@ const WelcomeUserModal = ({
         return;
       }
 
-      setApiError(response?.message || "Unable to continue. Please try again.");
+      setApiError(
+        response?.message ||
+          translate("Unable to continue. Please try again."),
+      );
     } catch (error) {
       setApiError(
         error?.response?.data?.message ||
           error?.message ||
-          "Something went wrong. Please try again.",
+          translate("Something went wrong. Please try again."),
       );
     }
   };
@@ -161,7 +168,7 @@ const WelcomeUserModal = ({
           dark:hover:bg-white/10
           dark:hover:text-white
         "
-          aria-label="Close"
+          aria-label={translate("Close")}
         >
           <X size={18} />
         </button> */}
@@ -222,7 +229,7 @@ const WelcomeUserModal = ({
             dark:text-white
           "
           >
-            Welcome! 👋
+            {translate("Welcome!")} 👋
           </h2>
 
           <p
@@ -240,8 +247,9 @@ const WelcomeUserModal = ({
             dark:text-gray-400
           "
           >
-            Before we get started, please share your details so we can provide
-            you with better support.
+            {translate(
+              "Before we get started, please share your details so we can provide you with better support.",
+            )}
           </p>
         </div>
 
@@ -275,7 +283,7 @@ const WelcomeUserModal = ({
               dark:text-gray-300
             "
             >
-              Full name{" "}
+              {translate("Full name")}{" "}
               <span className="text-red-500 dark:text-red-400">*</span>
             </label>
 
@@ -300,7 +308,7 @@ const WelcomeUserModal = ({
               <input
                 id="name"
                 type="text"
-                placeholder="Enter your name"
+                placeholder={translate("Enter your name")}
                 autoComplete="name"
                 {...register("name")}
                 className="
@@ -367,7 +375,7 @@ const WelcomeUserModal = ({
               dark:text-gray-300
             "
             >
-              Email address{" "}
+              {translate("Email address")}{" "}
               <span className="text-red-500 dark:text-red-400">*</span>
             </label>
 
@@ -459,7 +467,7 @@ const WelcomeUserModal = ({
               dark:text-gray-300
             "
             >
-              Phone number (optional)
+              {translate("Phone number (optional)")}
             </label>
 
             <div className="w-full min-w-0 overflow-hidden">
@@ -558,11 +566,11 @@ const WelcomeUserModal = ({
             {isSubmitting ? (
               <>
                 <Loader2 size={16} className="animate-spin" />
-                <span>Starting...</span>
+                <span>{translate("Starting...")}</span>
               </>
             ) : (
               <>
-                <span>Start Chat</span>
+                <span>{translate("Start Chat")}</span>
                 <ArrowRight size={16} />
               </>
             )}
@@ -584,7 +592,7 @@ const WelcomeUserModal = ({
             dark:text-gray-500
           "
           >
-            Your information will only be used to provide support.
+            {translate("Your information will only be used to provide support.")}
           </p>
         </form>
       </div>

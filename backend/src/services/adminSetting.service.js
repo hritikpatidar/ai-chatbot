@@ -113,7 +113,7 @@ export const getAdminSettingsService = async (adminId) => {
       },
     },
     {
-      new: true,
+      returnDocument: "after",
       upsert: true,
       setDefaultsOnInsert: true,
       runValidators: true,
@@ -164,7 +164,7 @@ export const updateAdminSettingsService = async (
       $setOnInsert: { adminId },
     },
     {
-      new: true,
+      returnDocument: "after",
       upsert: true,
       setDefaultsOnInsert: true,
       runValidators: true,

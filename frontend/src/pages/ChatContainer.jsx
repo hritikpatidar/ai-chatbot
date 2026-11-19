@@ -15,8 +15,10 @@ import useSpeechRecognition from "../hooks/useSpeechRecognition";
 import AIMessage from "../components/Chat/AIMessage";
 import { useSelector } from "react-redux";
 import { getFileIcon } from "../utils/Auth";
+import { useLanguage } from "../context/LanguageContext";
 
 export default function ChatContainer() {
+  const { t } = useLanguage();
   const {
     newMessageLoading,
     isSendDisable,
@@ -96,7 +98,7 @@ export default function ChatContainer() {
               <div className="flex items-center gap-2 text-sm text-gray-500 dark:text-gray-400">
                 <div className="h-4 w-4 animate-spin rounded-full border-2 border-gray-300 border-t-cyan-500 dark:border-gray-600 dark:border-t-cyan-400" />
 
-                <span>Loading conversation...</span>
+                <span>{t("Loading conversation...")}</span>
               </div>
             </div>
           ) : (
@@ -109,9 +111,9 @@ export default function ChatContainer() {
                     <AIMessage
                       content={
                         clientConfig.chatbot?.welcomeMessage ||
-                        `Hi 👋 Welcome to ${
-                          clientConfig.businessName || "our business"
-                        }! How can I help you today?`
+                        t("Hi 👋 Welcome to {business}! How can I help you today?", {
+                          business: clientConfig.businessName || "our business",
+                        })
                       }
                     />
                   </div>
@@ -164,7 +166,7 @@ export default function ChatContainer() {
               {isClientChatbot && clientConfigLoading && (
                 <div className="flex items-center gap-2 py-4 text-sm text-gray-500">
                   <div className="h-4 w-4 animate-spin rounded-full border-2 border-gray-300 border-t-cyan-500" />
-                  <span>Loading chatbot...</span>
+                  <span>{t("Loading chatbot...")}</span>
                 </div>
               )}
               {messages.map((msg, index) => (
@@ -322,7 +324,7 @@ export default function ChatContainer() {
                               "
                             >
                               <ThumbsUp size={13} />
-                              Good
+                              {t("Good")}
                             </button>
 
                             <button
@@ -343,7 +345,7 @@ export default function ChatContainer() {
                               "
                             >
                               <ThumbsDown size={13} />
-                              Bad
+                              {t("Bad")}
                             </button>
                           </div>
                         </div>
@@ -358,7 +360,7 @@ export default function ChatContainer() {
           {/* Thinking */}
           {newMessageLoading && (
             <p className="mb-3 text-sm font-medium text-gray-500 dark:text-gray-400">
-              Thinking
+              {t("Thinking")}
               <span className="animate-pulse">...</span>
             </p>
           )}
@@ -435,7 +437,7 @@ export default function ChatContainer() {
           </AnimatePresence>
 
           <p className="pb-2 text-center text-[11px] text-gray-500 dark:text-gray-500">
-            AI can make mistakes. Verify important information.
+            {t("AI can make mistakes. Verify important information.")}
           </p>
 
           <div ref={messagesEndRef} />
@@ -607,7 +609,7 @@ export default function ChatContainer() {
                 placeholder={
                   isClientChatbot
                     ? `Ask ${clientConfig?.businessName || "us"} anything...`
-                    : "Ask anything..."
+                    : t("Ask anything...")
                 }
                 onKeyDown={(e) => {
                   if (e.key === "Enter" && !e.shiftKey) {

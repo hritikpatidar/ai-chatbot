@@ -17,9 +17,18 @@ import Pagination from "../../components/common/Pagination";
 import useProducts from "../../hooks/Client/useProducts";
 import { useNavigate } from "react-router-dom";
 import toast from "react-hot-toast";
+import { useLanguage } from "../../context/LanguageContext";
+import clientScreens from "../../context/translations/clientScreens";
 
 export default function ClientProducts() {
   const navigate = useNavigate();
+  const { t, language } = useLanguage();
+  const translate = (key) => {
+    const translated = t(key);
+    return translated === key && language === "hi"
+      ? clientScreens[key] || key
+      : translated;
+  };
   const { client } = useSelector(
     (state) => state?.ClientReducer?.clientSlice || {},
   );
@@ -74,13 +83,15 @@ export default function ClientProducts() {
     const isProPlan = client.active_plan.trim().toLowerCase() === "pro";
     if (isBasicPlan && pagination.total >= 5) {
       toast.error(
-        "Basic plan allows a maximum of 5 products. Upgrade to Pro to add more.",
+        translate(
+          "Basic plan allows a maximum of 5 products. Upgrade to Pro to add more.",
+        ),
       );
       return;
     }
 
     if (isProPlan && pagination.total >= 20) {
-      toast.error("Pro plan allows a maximum of 20 products.");
+      toast.error(translate("Pro plan allows a maximum of 20 products."));
       return;
     }
 
@@ -219,7 +230,7 @@ export default function ClientProducts() {
         >
           <CheckCircle2 size={18} className="shrink-0" />
 
-          <span>{successMessage}</span>
+          <span>{translate(successMessage)}</span>
         </div>
       )}
 
@@ -249,7 +260,7 @@ export default function ClientProducts() {
           <span>
             {typeof error === "string"
               ? error
-              : error?.message || "Something went wrong."}
+              : error?.message || translate("Something went wrong.")}
           </span>
         </div>
       )}
@@ -282,11 +293,11 @@ export default function ClientProducts() {
                     dark:text-white
                   "
               >
-                Products
+                {translate("Products")}
               </h1>
 
               <p className="text-xs text-gray-500 dark:text-gray-400">
-                Manage your client product catalog
+                {translate("Manage your client product catalog")}
               </p>
             </div>
           </div>
@@ -306,22 +317,22 @@ export default function ClientProducts() {
             "
         >
           <Plus size={17} />
-          Add Product
+          {translate("Add Product")}
         </button>
       </div>
 
       <div className="mt-6 grid grid-cols-2 gap-3 lg:grid-cols-4">
-        <StatBox title="Total Products" value={pagination.total} />
+        <StatBox title={translate("Total Products")} value={pagination.total} />
 
-        <StatBox title="Total Page" value={pagination.totalPages} />
+        <StatBox title={translate("Total Page")} value={pagination.totalPages} />
 
         <StatBox
-          title="Active"
+          title={translate("Active")}
           value={products.filter((item) => item.status !== "inactive").length}
         />
 
         <StatBox
-          title="Inactive"
+          title={translate("Inactive")}
           value={products.filter((item) => item.status !== "active").length}
         />
       </div>
@@ -351,7 +362,7 @@ export default function ClientProducts() {
             type="text"
             value={search}
             onChange={handleSearch}
-            placeholder="Search products..."
+            placeholder={translate("Search products...")}
             className="
                 w-full rounded-lg border
                 border-gray-200 bg-gray-50
@@ -384,7 +395,7 @@ export default function ClientProducts() {
             "
         >
           <RefreshCw size={15} className={isFetching ? "animate-spin" : ""} />
-          Refresh
+          {translate("Refresh")}
         </button>
       </div>
 
@@ -432,18 +443,20 @@ export default function ClientProducts() {
 
       <ConfirmModal
         isOpen={Boolean(deleteProductDetails)}
-        title="Delete Product"
+        title={translate("Delete Product")}
         message={
           <>
-            Are you sure you want to delete{" "}
+            {translate("Are you sure you want to delete")}{" "}
             <strong>{deleteProductDetails?.name}</strong>
             ?
             <br />
-            <span className="text-xs">This action cannot be undone.</span>
+            <span className="text-xs">
+              {translate("This action cannot be undone.")}
+            </span>
           </>
         }
-        confirmText="Delete"
-        cancelText="Cancel"
+        confirmText={translate("Delete")}
+        cancelText={translate("Cancel")}
         loading={deleteLoading}
         onCancel={() => setDeleteProductDetails(null)}
         onConfirm={handleConfirmDelete}

@@ -7,10 +7,15 @@ import toast from "react-hot-toast";
 import { resendOtpService } from "../service/Auth/AuthServices";
 import { useDispatch } from "react-redux";
 import { verifyOtp } from "../redux/features/Auth/authSlice";
+import { useLanguage } from "../context/LanguageContext";
+import accountScreens from "../context/translations/accountScreens";
 
 export default function OTPVerification() {
   const navigate = useNavigate();
   const dispatch = useDispatch();
+  const { t: translate, language } = useLanguage();
+  const t = (key) =>
+    language === "hi" ? accountScreens[key] || translate(key) : key;
 
   const { state } = useLocation();
   const { email, purpose } = state || {};
@@ -98,7 +103,7 @@ export default function OTPVerification() {
     const code = otp.join("");
 
     if (code.length !== 6) {
-      toast.error("Please enter complete OTP.");
+      toast.error(t("Please enter complete OTP."));
       return false;
     }
 
@@ -110,7 +115,7 @@ export default function OTPVerification() {
   const handleSubmit = async () => {
     if (!validate()) return;
     const code = otp.join("");
-    const toastId = toast.loading("Verifying OTP...");
+    const toastId = toast.loading(t("Verifying OTP..."));
     try {
       setLoading(true);
       const payload = {
@@ -139,13 +144,13 @@ export default function OTPVerification() {
           navigate("/");
         }
       } else {
-        toast.error(response?.message || "Invalid OTP", {
+        toast.error(response?.message || t("Invalid OTP"), {
           id: toastId,
         });
       }
     } catch (error) {
       console.error("OTP Verification Error:", error);
-      toast.error(error?.response?.message || "Something went wrong", {
+      toast.error(error?.response?.message || t("Something went wrong"), {
         id: toastId,
       });
     } finally {
@@ -159,7 +164,7 @@ export default function OTPVerification() {
     if (timer > 0) return;
     try {
       setResending(true);
-      const toastId = toast.loading("Sending OTP...");
+      const toastId = toast.loading(t("Sending OTP..."));
       const response = await resendOtpService({
         email,
         purpose: purpose || "register",
@@ -169,7 +174,7 @@ export default function OTPVerification() {
           id: toastId,
         });
       } else {
-        toast.error(response?.data?.message || "Failed to resend OTP.", {
+        toast.error(response?.data?.message || t("Failed to resend OTP."), {
           id: toastId,
         });
       }
@@ -178,7 +183,9 @@ export default function OTPVerification() {
       setOtp(["", "", "", "", "", ""]);
       inputRefs.current[0]?.focus();
     } catch (error) {
-      toast.error(error?.response?.data?.message || "Failed to resend OTP.");
+      toast.error(
+        error?.response?.data?.message || t("Failed to resend OTP."),
+      );
     } finally {
       setResending(false);
     }
@@ -406,7 +413,7 @@ export default function OTPVerification() {
               dark:text-white
             "
           >
-            Verify OTP
+            {t("Verify OTP")}
           </h1>
 
           <p
@@ -418,7 +425,7 @@ export default function OTPVerification() {
               dark:text-gray-400
             "
           >
-            We've sent a 6-digit verification code to
+            {t("We've sent a 6-digit verification code to")}
           </p>
 
           <p
@@ -495,7 +502,7 @@ export default function OTPVerification() {
           >
             {timer > 0 ? (
               <>
-                Resend OTP in{" "}
+                {t("Resend OTP in")}{" "}
                 <span
                   className="
                     font-semibold
@@ -514,7 +521,7 @@ export default function OTPVerification() {
                   dark:text-green-400
                 "
               >
-                You can now resend the OTP.
+                {t("You can now resend the OTP.")}
               </span>
             )}
           </p>
@@ -546,7 +553,7 @@ export default function OTPVerification() {
               disabled:opacity-60
             "
           >
-            {loading ? "Verifying..." : "Verify OTP"}
+            {loading ? t("Verifying...") : t("Verify OTP")}
           </motion.button>
 
           {/* Resend */}
@@ -568,7 +575,7 @@ export default function OTPVerification() {
               }
             `}
           >
-            {resending ? "Sending..." : "Resend OTP"}
+            {resending ? t("Sending...") : t("Resend OTP")}
           </button>
         </motion.div>
       </motion.div>

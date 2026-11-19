@@ -69,7 +69,7 @@ export const markNotificationRead = async (
         readAt: new Date(),
       },
     },
-    { new: true }
+    { returnDocument: "after" }
   );
 };
 

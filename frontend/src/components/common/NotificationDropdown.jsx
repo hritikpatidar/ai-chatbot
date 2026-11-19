@@ -25,8 +25,12 @@ import {
 } from "../../hooks/useNotifications";
 
 import { useSocket } from "../../context/SocketContext";
+import { useLanguage } from "../../context/LanguageContext";
+import { translateShared } from "../../context/translations/sharedComponents";
 
 const NotificationDropdown = () => {
+  const { t, language } = useLanguage();
+  const translate = (text) => translateShared(text, t, language);
   const navigate = useNavigate();
   const queryClient = useQueryClient();
   const { socket } = useSocket();
@@ -80,10 +84,22 @@ const NotificationDropdown = () => {
     const hours = Math.floor(minutes / 60);
     const days = Math.floor(hours / 24);
 
-    if (minutes < 1) return "Just now";
-    if (minutes < 60) return `${minutes}m ago`;
-    if (hours < 24) return `${hours}h ago`;
-    if (days < 7) return `${days}d ago`;
+    if (minutes < 1) return translate("Just now");
+    if (minutes < 60) {
+      return language === "hi"
+        ? `${minutes} ${translate(minutes === 1 ? "minute ago" : "minutes ago")}`
+        : `${minutes}m ago`;
+    }
+    if (hours < 24) {
+      return language === "hi"
+        ? `${hours} ${translate(hours === 1 ? "hour ago" : "hours ago")}`
+        : `${hours}h ago`;
+    }
+    if (days < 7) {
+      return language === "hi"
+        ? `${days} ${translate(days === 1 ? "day ago" : "days ago")}`
+        : `${days}d ago`;
+    }
 
     return new Date(date).toLocaleDateString();
   };
@@ -250,7 +266,7 @@ const NotificationDropdown = () => {
       <button
         type="button"
         onClick={handleToggle}
-        aria-label="Notifications"
+        aria-label={translate("Notifications")}
         aria-expanded={isOpen}
         aria-haspopup="true"
         className="
@@ -280,7 +296,7 @@ const NotificationDropdown = () => {
       {isOpen && (
         <div
           role="dialog"
-          aria-label="Notifications"
+          aria-label={translate("Notifications")}
           className="
             fixed inset-x-3 top-16 z-100
             flex max-h-[calc(100dvh-5rem)] flex-col
@@ -306,12 +322,16 @@ const NotificationDropdown = () => {
           >
             <div className="min-w-0">
               <h3 className="text-sm font-semibold text-gray-900 dark:text-white">
-                Notifications
+                {translate("Notifications")}
               </h3>
 
               <p className="mt-0.5 text-xs text-gray-500 dark:text-gray-400">
-                {unreadCount} unread notification
-                {unreadCount === 1 ? "" : "s"}
+                {unreadCount}{" "}
+                {translate(
+                  unreadCount === 1
+                    ? "unread notification"
+                    : "unread notifications",
+                )}
               </p>
             </div>
 
@@ -322,7 +342,7 @@ const NotificationDropdown = () => {
                   type="button"
                   onClick={handleMarkAllRead}
                   disabled={markAllMutation.isPending}
-                  title="Mark all as read"
+                  title={translate("Mark all as read")}
                   className="
                     flex h-8 items-center gap-1.5 rounded-lg
                     px-2 text-xs font-medium text-indigo-600
@@ -341,7 +361,7 @@ const NotificationDropdown = () => {
                   )}
 
                   <span className="hidden sm:inline">
-                    Mark all read
+                    {translate("Mark all read")}
                   </span>
                 </button>
               )}
@@ -350,7 +370,7 @@ const NotificationDropdown = () => {
               <button
                 type="button"
                 onClick={() => setIsOpen(false)}
-                aria-label="Close notifications"
+                aria-label={translate("Close notifications")}
                 className="
                   flex h-8 w-8 shrink-0 items-center justify-center
                   rounded-lg text-gray-500 transition
@@ -381,7 +401,7 @@ const NotificationDropdown = () => {
                 />
 
                 <p className="text-sm text-gray-500 dark:text-gray-400">
-                  Loading notifications...
+                  {translate("Loading notifications...")}
                 </p>
               </div>
             ) : isError ? (
@@ -390,7 +410,8 @@ const NotificationDropdown = () => {
                 <AlertCircle size={28} className="text-red-500" />
 
                 <p className="text-sm text-gray-600 dark:text-gray-300">
-                  {error?.message || "Failed to load notifications."}
+                  {error?.message ||
+                    translate("Failed to load notifications.")}
                 </p>
 
                 <button
@@ -408,7 +429,7 @@ const NotificationDropdown = () => {
                     size={14}
                     className={isFetching ? "animate-spin" : ""}
                   />
-                  Try again
+                  {translate("Try again")}
                 </button>
               </div>
             ) : notifications.length === 0 ? (
@@ -422,11 +443,11 @@ const NotificationDropdown = () => {
                 </div>
 
                 <p className="mt-3 text-sm font-semibold text-gray-700 dark:text-gray-300">
-                  No notifications
+                  {translate("No notifications")}
                 </p>
 
                 <p className="mt-1 text-xs text-gray-500 dark:text-gray-500">
-                  You're all caught up.
+                  {translate("You're all caught up.")}
                 </p>
               </div>
             ) : (
@@ -445,7 +466,7 @@ const NotificationDropdown = () => {
                       size={14}
                       className="animate-spin"
                     />
-                    Updating notifications...
+                    {translate("Updating notifications...")}
                   </div>
                 )}
 

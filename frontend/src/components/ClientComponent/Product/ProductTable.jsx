@@ -4,6 +4,8 @@ import StatusBadge from "../../common/StatusBadge";
 import { getImageUrl } from "../../../utils/imageUrl";
 import profile from "../../../assets/profile1.jpg";
 import { useSelector } from "react-redux";
+import { useLanguage } from "../../../context/LanguageContext";
+import { translateShared } from "../../../context/translations/sharedComponents";
 
 export default function ProductTable({
   products = [],
@@ -11,6 +13,8 @@ export default function ProductTable({
   onEdit,
   onDelete,
 }) {
+  const { t, language } = useLanguage();
+  const translate = (text) => translateShared(text, t, language);
   const { client } = useSelector(
     (state) => state?.ClientReducer?.clientSlice || {},
   );
@@ -31,7 +35,7 @@ export default function ProductTable({
               dark:border-gray-600 dark:border-t-blue-400
             "
           />
-          Loading products...
+          {translate("Loading products...")}
         </div>
       </div>
     );
@@ -56,11 +60,11 @@ export default function ProductTable({
         </div>
 
         <h3 className="text-sm font-semibold text-gray-900 dark:text-white">
-          No products found
+          {translate("No products found")}
         </h3>
 
         <p className="mt-1 text-xs text-gray-500 dark:text-gray-400">
-          Add your first product to get started.
+          {translate("Add your first product to get started.")}
         </p>
       </div>
     );
@@ -85,27 +89,27 @@ export default function ProductTable({
               "
             >
               <th className="px-5 py-3 text-left text-xs font-semibold text-gray-500 dark:text-gray-400">
-                Product
+                {translate("Product")}
               </th>
 
               <th className="px-5 py-3 text-left text-xs font-semibold text-gray-500 dark:text-gray-400">
-                Category
+                {translate("Category")}
               </th>
 
               <th className="px-5 py-3 text-left text-xs font-semibold text-gray-500 dark:text-gray-400">
-                Price
+                {translate("Price")}
               </th>
 
               <th className="px-5 py-3 text-left text-xs font-semibold text-gray-500 dark:text-gray-400">
-                Availability
+                {translate("Availability")}
               </th>
 
               <th className="px-5 py-3 text-left text-xs font-semibold text-gray-500 dark:text-gray-400">
-                Status
+                {translate("Status")}
               </th>
               {client?.active_plan && (
                 <th className="px-5 py-3 text-right text-xs font-semibold text-gray-500 dark:text-gray-400">
-                  Action
+                  {translate("Action")}
                 </th>
               )}
             </tr>
@@ -148,7 +152,7 @@ export default function ProductTable({
                       </p>
 
                       <p className="mt-1 max-w-75 truncate text-xs text-gray-500 dark:text-gray-400">
-                        {product.description || "No description"}
+                        {product.description || translate("No description")}
                       </p>
                     </div>
                   </div>
@@ -169,7 +173,9 @@ export default function ProductTable({
                       {Number(product.price).toLocaleString()}
                     </span>
                   ) : (
-                    <span className="text-sm text-gray-400">Contact us</span>
+                    <span className="text-sm text-gray-400">
+                      {translate("Contact us")}
+                    </span>
                   )}
                 </td>
 
@@ -188,14 +194,14 @@ export default function ProductTable({
                     <div className="flex items-center justify-end gap-2">
                       <ActionButton
                         icon={<Edit2 size={15} />}
-                        title="Edit FAQ"
+                        title={translate("Edit FAQ")}
                         onClick={() => onEdit(product)}
                       />
 
                       <ActionButton
                         danger
                         icon={<Trash2 size={15} />}
-                        title="Delete FAQ"
+                        title={translate("Delete FAQ")}
                         onClick={() => onDelete(product)}
                       />
                     </div>
@@ -243,7 +249,7 @@ export default function ProductTable({
                   </h3>
 
                   <p className="mt-1 truncate text-xs text-gray-500 dark:text-gray-400">
-                    {product.category || "No category"}
+                    {product.category || translate("No category")}
                   </p>
                 </div>
               </div>
@@ -251,21 +257,21 @@ export default function ProductTable({
               <div className="flex shrink-0 gap-1">
                 <ActionButton
                   icon={<Edit2 size={14} />}
-                  title="Edit"
+                  title={translate("Edit")}
                   onClick={() => onEdit(product)}
                 />
 
                 <ActionButton
                   danger
                   icon={<Trash2 size={14} />}
-                  title="Delete"
+                  title={translate("Delete")}
                   onClick={() => onDelete(product)}
                 />
               </div>
             </div>
 
             <p className="mt-3 line-clamp-2 text-xs text-gray-500 dark:text-gray-400">
-              {product.description || "No description"}
+              {product.description || translate("No description")}
             </p>
 
             <div className="mt-4 flex flex-wrap items-center gap-2">
@@ -286,6 +292,7 @@ export default function ProductTable({
 }
 
 function AvailabilityBadge({ availability }) {
+  const { t, language } = useLanguage();
   const config = {
     in_stock: {
       label: "In Stock",
@@ -314,7 +321,7 @@ function AvailabilityBadge({ availability }) {
     <span
       className={`inline-flex rounded-full px-2.5 py-1 text-[11px] font-medium ${item.className}`}
     >
-      {item.label}
+      {translateShared(item.label, t, language)}
     </span>
   );
 }

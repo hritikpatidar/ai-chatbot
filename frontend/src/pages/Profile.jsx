@@ -19,9 +19,14 @@ import { setIsProfileModalOpen } from "../redux/features/Auth/authSlice";
 import ChangePasswordModal from "../components/ChangePasswordModal";
 import { useNavigate } from "react-router-dom";
 import { getImageUrl } from "../utils/imageUrl";
+import { useLanguage } from "../context/LanguageContext";
+import accountScreens from "../context/translations/accountScreens";
 
 export default function Profile() {
   const navigate = useNavigate();
+  const { t: translate, language } = useLanguage();
+  const t = (key) =>
+    language === "hi" ? accountScreens[key] || translate(key) : key;
   const dispatch = useDispatch();
   const { profileDetails, isProfileModalOpen } = useSelector(
     (store) => store.authReducer.AuthSlice,
@@ -83,8 +88,8 @@ export default function Profile() {
           <button
             type="button"
             onClick={() => navigate(-1)}
-            aria-label="Go back"
-            title="Go Back"
+            aria-label={t("Go back")}
+            title={t("Go Back")}
             className="
               group
               flex
@@ -141,7 +146,7 @@ export default function Profile() {
                 md:text-3xl
               "
             >
-              Profile
+              {t("Profile")}
             </h1>
 
             <p
@@ -155,7 +160,7 @@ export default function Profile() {
                 sm:text-sm
               "
             >
-              Manage your personal information and account.
+              {t("Manage your personal information and account.")}
             </p>
           </div>
         </motion.div>
@@ -218,7 +223,7 @@ export default function Profile() {
                 >
                   <img
                     src={getImageUrl(profileDetails?.profileImage, profile)}
-                    alt="Profile"
+                    alt={t("Profile")}
                     onError={(e) => {
                       e.currentTarget.onerror = null;
                       e.currentTarget.src = profile;
@@ -268,9 +273,9 @@ export default function Profile() {
                   sm:mt-5
                   sm:text-xl
                 "
-                title={profileDetails?.fullName || "User"}
+                title={profileDetails?.fullName || t("User")}
               >
-                {profileDetails?.fullName || "User"}
+                {profileDetails?.fullName || t("User")}
               </h2>
 
               {/* Email */}
@@ -287,9 +292,9 @@ export default function Profile() {
                   dark:text-gray-400
                   sm:text-sm
                 "
-                title={profileDetails?.email || "No email available"}
+                title={profileDetails?.email || t("No email available")}
               >
-                {profileDetails?.email || "No email available"}
+                {profileDetails?.email || t("No email available")}
               </p>
 
               {/* Status */}
@@ -315,7 +320,7 @@ export default function Profile() {
                 "
               >
                 <span className="h-1.5 w-1.5 shrink-0 rounded-full bg-green-500" />
-                <span>Active Account</span>
+                <span>{t("Active Account")}</span>
               </div>
             </div>
 
@@ -354,7 +359,7 @@ export default function Profile() {
               "
             >
               <Edit3 size={15} />
-              Edit Profile
+              {t("Edit Profile")}
             </button>
           </motion.div>
 
@@ -393,11 +398,11 @@ export default function Profile() {
             >
               <div className="min-w-0">
                 <h2 className="truncate text-base font-semibold sm:text-lg">
-                  Account Information
+                  {t("Account Information")}
                 </h2>
 
                 <p className="mt-1 text-[11px] text-gray-500 dark:text-gray-400 sm:text-xs">
-                  Your basic account details.
+                  {t("Your basic account details.")}
                 </p>
               </div>
 
@@ -469,14 +474,14 @@ export default function Profile() {
 
                   <div className="min-w-0">
                     <p className="text-[10px] text-gray-500 dark:text-gray-400 sm:text-[11px]">
-                      Full Name
+                      {t("Full Name")}
                     </p>
 
                     <p
                       className="mt-1 truncate text-xs font-medium sm:text-sm"
                       title={profileDetails?.fullName}
                     >
-                      {profileDetails?.fullName || "Not available"}
+                      {profileDetails?.fullName || t("Not available")}
                     </p>
                   </div>
                 </div>
@@ -516,14 +521,14 @@ export default function Profile() {
 
                   <div className="min-w-0">
                     <p className="text-[10px] text-gray-500 dark:text-gray-400 sm:text-[11px]">
-                      Email Address
+                      {t("Email Address")}
                     </p>
 
                     <p
                       className="mt-1 truncate text-xs font-medium sm:text-sm"
                       title={profileDetails?.email}
                     >
-                      {profileDetails?.email || "Not available"}
+                      {profileDetails?.email || t("Not available")}
                     </p>
                   </div>
                 </div>
@@ -563,11 +568,11 @@ export default function Profile() {
 
                   <div className="min-w-0">
                     <p className="text-[10px] text-gray-500 dark:text-gray-400 sm:text-[11px]">
-                      Account Status
+                      {t("Account Status")}
                     </p>
 
                     <p className="mt-1 text-xs font-medium text-green-600 dark:text-green-400 sm:text-sm">
-                      Verified
+                      {t("Verified")}
                     </p>
                   </div>
                 </div>
@@ -607,7 +612,7 @@ export default function Profile() {
 
                   <div className="min-w-0">
                     <p className="text-[10px] text-gray-500 dark:text-gray-400 sm:text-[11px]">
-                      Member Since
+                      {t("Member Since")}
                     </p>
 
                     <p className="mt-1 text-xs font-medium sm:text-sm">
@@ -620,7 +625,7 @@ export default function Profile() {
                               year: "numeric",
                             },
                           )
-                        : "Not available"}
+                        : t("Not available")}
                     </p>
                   </div>
                 </div>
@@ -630,7 +635,9 @@ export default function Profile() {
             {/* Security */}
 
             <div className="mt-6 sm:mt-8">
-              <h3 className="text-sm font-semibold sm:text-base">Security</h3>
+              <h3 className="text-sm font-semibold sm:text-base">
+                {t("Security")}
+              </h3>
 
               <div
                 className="
@@ -673,10 +680,12 @@ export default function Profile() {
                   </div>
 
                   <div className="min-w-0">
-                    <p className="text-xs font-medium sm:text-sm">Password</p>
+                    <p className="text-xs font-medium sm:text-sm">
+                      {t("Password")}
+                    </p>
 
                     <p className="mt-1 truncate text-[10px] text-gray-500 dark:text-gray-400 sm:text-xs">
-                      Keep your account secure.
+                      {t("Keep your account secure.")}
                     </p>
                   </div>
                 </div>
@@ -710,7 +719,7 @@ export default function Profile() {
                     sm:w-auto
                   "
                 >
-                  Change Password
+                  {t("Change Password")}
                 </button>
               </div>
             </div>

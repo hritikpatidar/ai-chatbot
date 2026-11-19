@@ -14,6 +14,7 @@ import { Controller, useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { subscriptionPlanValidation } from "../../../utils/validation";
 import CustomSelect from "../../common/CustomSelect";
+import { useLanguage } from "../../../context/LanguageContext";
 
 const defaultValues = {
   name: "",
@@ -36,6 +37,7 @@ const SubscriptionPlanForm = ({
   apiError = "",
   success = "",
 }) => {
+  const { t } = useLanguage();
   const [featureInput, setFeatureInput] = useState("");
 
   const isEdit = Boolean(initialData);
@@ -152,7 +154,7 @@ const SubscriptionPlanForm = ({
       ===================================================== */}
       {success && (
         <div className="mb-4 rounded-lg border border-green-300 bg-green-50 px-4 py-3 text-sm text-green-700 dark:border-green-800 dark:bg-green-950/40 dark:text-green-400">
-          {success}
+          {t(success)}
         </div>
       )}
       {apiError && (
@@ -161,11 +163,11 @@ const SubscriptionPlanForm = ({
 
           <div>
             <p className="text-sm font-semibold text-red-700 dark:text-red-400">
-              Unable to save subscription plan
+              {t("Unable to save subscription plan")}
             </p>
 
             <p className="mt-1 text-sm text-red-600 dark:text-red-300">
-              {apiError}
+              {t(apiError)}
             </p>
           </div>
         </div>
@@ -188,11 +190,11 @@ const SubscriptionPlanForm = ({
 
           <div>
             <h1 className="text-xl font-bold text-gray-900 dark:text-white sm:text-2xl">
-              {isEdit ? "Edit Subscription Plan" : "Create Subscription Plan"}
+              {isEdit ? t("Edit Subscription Plan") : t("Create Subscription Plan")}
             </h1>
 
             <p className="mt-1 text-sm text-gray-500 dark:text-gray-400">
-              Configure your subscription pricing and features.
+              {t("Configure your subscription pricing and features.")}
             </p>
           </div>
         </div>
@@ -208,7 +210,7 @@ const SubscriptionPlanForm = ({
             <Save size={17} />
           )}
 
-          {isEdit ? "Update Plan" : "Create Plan"}
+          {isEdit ? t("Update Plan") : t("Create Plan")}
         </button>
       </div>
 
@@ -218,41 +220,41 @@ const SubscriptionPlanForm = ({
 
       <div className="rounded-2xl border border-gray-200 bg-white p-5 shadow-sm dark:border-gray-800 dark:bg-[#11151d] sm:p-6">
         <h2 className="mb-5 text-base font-semibold text-gray-900 dark:text-white">
-          Basic Information
+          {t("Basic Information")}
         </h2>
 
         <div className="grid grid-cols-1 gap-5 md:grid-cols-2">
           <Input
-            label="Plan Name"
+            label={t("Plan Name")}
             required
-            placeholder="Basic"
-            error={errors.name?.message}
+            placeholder={t("Basic")}
+            error={errors.name?.message ? t(errors.name.message) : ""}
             {...register("name")}
           />
 
           <Input
-            label="Currency"
+            label={t("Currency")}
             required
-            placeholder="gbp"
-            error={errors.currency?.message}
+            placeholder={t("gbp")}
+            error={errors.currency?.message ? t(errors.currency.message) : ""}
             {...register("currency")}
           />
 
           <div className="md:col-span-2">
             <label className="mb-2 block text-sm font-medium text-gray-700 dark:text-gray-300">
-              Description
+              {t("Description")}
             </label>
 
             <textarea
               rows={3}
-              placeholder="Basic subscription plan"
+              placeholder={t("Basic subscription plan")}
               {...register("description")}
               className="w-full rounded-xl border border-gray-300 bg-white px-4 py-3 text-sm text-gray-900 outline-none transition placeholder:text-gray-400 focus:border-blue-500 dark:border-gray-700 dark:bg-[#171b23] dark:text-white"
             />
 
             {errors.description && (
               <p className="mt-1 text-xs text-red-500">
-                {errors.description.message}
+                {t(errors.description.message)}
               </p>
             )}
           </div>
@@ -265,23 +267,23 @@ const SubscriptionPlanForm = ({
 
       <div className="rounded-2xl border border-gray-200 bg-white p-5 shadow-sm dark:border-gray-800 dark:bg-[#11151d] sm:p-6">
         <h2 className="mb-5 text-base font-semibold text-gray-900 dark:text-white">
-          Stripe Configuration
+          {t("Stripe Configuration")}
         </h2>
 
         <div className="grid grid-cols-1 gap-5 md:grid-cols-2">
           <Input
-            label="Stripe Product ID"
+            label={t("Stripe Product ID")}
             required
-            placeholder="prod_xxxxxxxxx"
-            error={errors.stripeProductId?.message}
+            placeholder={t("prod_xxxxxxxxx")}
+            error={errors.stripeProductId?.message ? t(errors.stripeProductId.message) : ""}
             {...register("stripeProductId")}
           />
 
           <Input
-            label="Stripe Price ID"
+            label={t("Stripe Price ID")}
             required
-            placeholder="price_xxxxxxxxx"
-            error={errors.stripePriceId?.message}
+            placeholder={t("price_xxxxxxxxx")}
+            error={errors.stripePriceId?.message ? t(errors.stripePriceId.message) : ""}
             {...register("stripePriceId")}
           />
         </div>
@@ -293,18 +295,18 @@ const SubscriptionPlanForm = ({
 
       <div className="rounded-2xl border border-gray-200 bg-white p-5 shadow-sm dark:border-gray-800 dark:bg-[#11151d] sm:p-6">
         <h2 className="mb-5 text-base font-semibold text-gray-900 dark:text-white">
-          Pricing
+          {t("Pricing")}
         </h2>
 
         <div className="grid grid-cols-1 gap-5 md:grid-cols-3">
           <Input
-            label="Amount"
+            label={t("Amount")}
             required
             type="number"
             min="0"
             step="1"
-            placeholder="1099"
-            error={errors.amount?.message}
+            placeholder={t("1099")}
+            error={errors.amount?.message ? t(errors.amount.message) : ""}
             {...register("amount", {
               valueAsNumber: true,
             })}
@@ -312,7 +314,7 @@ const SubscriptionPlanForm = ({
 
           <div>
             <label className="mb-2 block text-sm font-medium text-gray-700 dark:text-gray-300">
-              Billing Interval
+              {t("Billing Interval")}
             </label>
             <Controller
               name="interval"
@@ -326,31 +328,31 @@ const SubscriptionPlanForm = ({
                   options={[
                     {
                       value: "month",
-                      label: "Monthly",
+                      label: t("Monthly"),
                     },
                     {
                       value: "year",
-                      label: "Yearly",
+                      label: t("Yearly"),
                     },
                   ]}
                   rounded="rounded-xl"
-                  error={errors.interval?.message}
+                  error={errors.interval?.message ? t(errors.interval.message) : ""}
                 />
               )}
             />
             {errors.interval && (
               <p className="mt-1 text-xs text-red-500">
-                {errors.interval.message}
+                {t(errors.interval.message)}
               </p>
             )}
           </div>
 
           <Input
-            label="Sort Order"
+            label={t("Sort Order")}
             required
             type="number"
             min="0"
-            error={errors.sortOrder?.message}
+            error={errors.sortOrder?.message ? t(errors.sortOrder.message) : ""}
             {...register("sortOrder", {
               valueAsNumber: true,
             })}
@@ -364,7 +366,7 @@ const SubscriptionPlanForm = ({
 
       <div className="rounded-2xl border border-gray-200 bg-white p-5 shadow-sm dark:border-gray-800 dark:bg-[#11151d] sm:p-6">
         <h2 className="mb-5 text-base font-semibold text-gray-900 dark:text-white">
-          Plan Features
+          {t("Plan Features")}
         </h2>
 
         <div className="flex flex-col gap-3 sm:flex-row">
@@ -377,7 +379,7 @@ const SubscriptionPlanForm = ({
                 addFeature();
               }
             }}
-            placeholder="e.g. 100 chatbot conversations"
+            placeholder={t("e.g. 100 chatbot conversations")}
             className="flex-1 rounded-xl border border-gray-200 bg-white px-4 py-3 text-sm text-gray-900 outline-none focus:border-blue-500 dark:border-gray-700 dark:bg-[#171b23] dark:text-white"
           />
 
@@ -387,18 +389,18 @@ const SubscriptionPlanForm = ({
             className="inline-flex items-center justify-center gap-2 rounded-xl border border-indigo-200 px-4 py-3 text-sm font-medium text-indigo-600 hover:bg-indigo-50 dark:border-indigo-500/30 dark:text-indigo-400 dark:hover:bg-indigo-500/10"
           >
             <Plus size={17} />
-            Add Feature
+            {t("Add Feature")}
           </button>
         </div>
 
         {errors.features && (
-          <p className="mt-2 text-xs text-red-500">{errors.features.message}</p>
+          <p className="mt-2 text-xs text-red-500">{t(errors.features.message)}</p>
         )}
 
         <div className="mt-4 space-y-2">
           {features.length === 0 && (
             <p className="rounded-xl bg-gray-50 p-4 text-sm text-gray-500 dark:bg-[#171b23] dark:text-gray-400">
-              No features added yet.
+              {t("No features added yet.")}
             </p>
           )}
 
@@ -434,12 +436,12 @@ const SubscriptionPlanForm = ({
 
       <div className="rounded-2xl border border-gray-200 bg-white p-5 shadow-sm dark:border-gray-800 dark:bg-[#11151d] sm:p-6">
         <h2 className="mb-5 text-base font-semibold text-gray-900 dark:text-white">
-          Plan Status
+          {t("Plan Status")}
         </h2>
 
         <div className="max-w-md">
           <label className="mb-2 block text-sm font-medium text-gray-700 dark:text-gray-300">
-            Status
+            {t("Status")}
           </label>
 
           {/* <select
@@ -461,15 +463,15 @@ const SubscriptionPlanForm = ({
                 options={[
                   {
                     value: "active",
-                    label: "Active",
+                    label: t("Active"),
                   },
                   {
                     value: "inactive",
-                    label: "Inactive",
+                    label: t("Inactive"),
                   },
                 ]}
                 rounded="rounded-xl"
-                error={errors.status?.message}
+                error={errors.status?.message ? t(errors.status.message) : ""}
               />
             )}
           />
@@ -487,7 +489,7 @@ const SubscriptionPlanForm = ({
           disabled={loading}
           className="rounded-xl border border-gray-200 px-5 py-2.5 text-sm font-medium text-gray-700 hover:bg-gray-50 disabled:opacity-50 dark:border-gray-700 dark:text-gray-300 dark:hover:bg-gray-800"
         >
-          Cancel
+          {t("Cancel")}
         </button>
 
         <button
@@ -501,7 +503,7 @@ const SubscriptionPlanForm = ({
             <Save size={17} />
           )}
 
-          {isEdit ? "Update Plan" : "Create Plan"}
+          {isEdit ? t("Update Plan") : t("Create Plan")}
         </button>
       </div>
     </form>

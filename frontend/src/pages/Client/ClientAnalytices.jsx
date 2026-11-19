@@ -43,6 +43,8 @@ import {
   useUserSatisfaction,
 } from "../../hooks/Client/useUsageAnalytics";
 import { useSelector } from "react-redux";
+import { useLanguage } from "../../context/LanguageContext";
+import clientScreens from "../../context/translations/clientScreens";
 
 // Demo data: replace with your analytics API response.
 const topics = [
@@ -71,6 +73,7 @@ const UsageCard = ({
   limit,
   unit,
   color = "blue",
+  translate,
 }) => {
   const percentage = limit > 0 ? Math.min((used / limit) * 100, 100) : 0;
 
@@ -153,7 +156,7 @@ const UsageCard = ({
         <div
           className="mt-4 h-2 w-full overflow-hidden rounded-full bg-gray-100 dark:bg-white/10"
           role="progressbar"
-          aria-label={`${title} usage`}
+          aria-label={translate("{title} usage", { title })}
           aria-valuenow={Math.round(percentage)}
           aria-valuemin={0}
           aria-valuemax={100}
@@ -166,11 +169,11 @@ const UsageCard = ({
 
         <div className="mt-3 flex items-center justify-between gap-2">
           <span className="text-xs text-gray-500 dark:text-gray-400">
-            Used this billing period
+            {translate("Used this billing period")}
           </span>
 
           <span className="text-xs font-semibold text-gray-700 dark:text-gray-200">
-            {formatNumber(remaining)} left
+            {formatNumber(remaining)} {translate("left")}
           </span>
         </div>
       </div>
@@ -202,6 +205,7 @@ function MetricCard({
   icon: Icon,
   iconClass,
   description,
+  translate,
 }) {
   return (
     <Card>
@@ -231,7 +235,7 @@ function MetricCard({
           {change}
         </span>
         <span className="text-xs text-gray-500 dark:text-gray-400">
-          {description || "vs previous period"}
+          {description || translate("vs previous period")}
         </span>
       </div>
     </Card>
@@ -247,6 +251,18 @@ const tooltipStyle = {
 };
 
 export default function Analytics() {
+  const { t, language } = useLanguage();
+  const translate = (key, values = {}) => {
+    const translated = t(key);
+    const text =
+      translated === key && language === "hi"
+        ? clientScreens[key] || key
+        : translated;
+    return Object.entries(values).reduce(
+      (result, [name, value]) => result.replaceAll(`{${name}}`, value),
+      text,
+    );
+  };
   const [dateRange, setDateRange] = useState("7");
   const [chartMode, setChartMode] = useState("conversations");
   const [search, setSearch] = useState("");
@@ -369,7 +385,7 @@ export default function Analytics() {
 
   const metrics = [
     {
-      title: "Total Conversations",
+      title: translate("Total Conversations"),
       value: formatNumber(overview?.totalConversations),
       change: conversationChange,
       positive: conversationChange >= 0,
@@ -378,7 +394,7 @@ export default function Analytics() {
         "bg-blue-50 text-blue-600 dark:bg-blue-500/15 dark:text-blue-400",
     },
     {
-      title: "Unique Users",
+      title: translate("Unique Users"),
       value: formatNumber(overview?.uniqueUsers),
       change: userChange,
       positive: userChange >= 0,
@@ -387,7 +403,7 @@ export default function Analytics() {
         "bg-violet-50 text-violet-600 dark:bg-violet-500/15 dark:text-violet-400",
     },
     {
-      title: "Avg. Response Time",
+      title: translate("Avg. Response Time"),
       value: formatResponseTime(overview?.avgResponseTime),
       change: responseTimeChange,
       positive: responseTimeChange <= 0,
@@ -396,7 +412,7 @@ export default function Analytics() {
         "bg-fuchsia-50 text-fuchsia-600 dark:bg-fuchsia-500/15 dark:text-fuchsia-400",
     },
     {
-      title: "Resolution Rate",
+      title: translate("Resolution Rate"),
       value: `${Number(overview?.resolutionRate ?? 0).toFixed(1)}%`,
       change: resolutionChange,
       positive: resolutionChange >= 0,
@@ -415,7 +431,7 @@ export default function Analytics() {
     other: "#f59e0b",
   };
   const sourceData = rawSources.map((item) => {
-    const name = item.name.replace("_", " ") || "Other";
+    const name = item.name.replace("_", " ") || translate("Other");
     return {
       name,
       value: Number(item.count ?? 0),
@@ -447,7 +463,7 @@ export default function Analytics() {
             <div className="flex items-center gap-2">
               <span className="h-2.5 w-2.5 rounded-full bg-indigo-500" />
               <span className="text-xs text-gray-600 dark:text-gray-300">
-                New Users
+                {translate("New Users")}
               </span>
             </div>
 
@@ -460,7 +476,7 @@ export default function Analytics() {
             <div className="flex items-center gap-2">
               <span className="h-2.5 w-2.5 rounded-full bg-sky-400" />
               <span className="text-xs text-gray-600 dark:text-gray-300">
-                Returning
+                {translate("Returning")}
               </span>
             </div>
 
@@ -472,7 +488,7 @@ export default function Analytics() {
           <div className="border-t border-gray-200 pt-2 dark:border-white/10">
             <div className="flex items-center justify-between">
               <span className="text-xs font-medium text-gray-500 dark:text-gray-400">
-                Total Users
+                {translate("Total Users")}
               </span>
               <span className="text-sm font-bold text-gray-900 dark:text-white">
                 {Number(total).toLocaleString("en-IN")}
@@ -486,8 +502,11 @@ export default function Analytics() {
 
   if (isAnalyticsLoading) {
     return (
-      <div className="flex h-full w-full items-center justify-center">
-        <LoaderCircle size={40} className="animate-spin text-blue-500" />
+      <div
+      className="flex h-full w-full items-center justify-center"
+      aria-label={translate("Loading analytics...")}
+      >
+      <LoaderCircle size={40} className="animate-spin text-blue-500" />
       </div>
     );
   }
@@ -519,11 +538,13 @@ export default function Analytics() {
                     dark:text-white
                   "
                 >
-                  Analytics
+                  {translate("Analytics")}
                 </h1>
 
                 <p className="text-xs text-gray-500 dark:text-gray-400">
-                  Track chatbot performance and understand your users.
+                  {translate(
+                    "Track chatbot performance and understand your users.",
+                  )}
                 </p>
               </div>
             </div>
@@ -540,18 +561,18 @@ export default function Analytics() {
                 options={[
                   {
                     value: "7",
-                    label: "Last 7 days",
+                    label: translate("Last 7 days"),
                   },
                   {
                     value: "30",
-                    label: "Last 30 days",
+                    label: translate("Last 30 days"),
                   },
                   {
                     value: "90",
-                    label: "Last 90 days",
+                    label: translate("Last 90 days"),
                   },
                 ]}
-                placeholder="Select status"
+                placeholder={translate("Select status")}
                 required
                 icon={true}
               />
@@ -589,7 +610,7 @@ export default function Analytics() {
                 size={16}
                 className={isAnalyticsFetching ? "animate-spin" : ""}
               />
-              Refresh
+              {translate("Refresh")}
             </button>
           </div>
         </header>
@@ -602,11 +623,12 @@ export default function Analytics() {
           />
           <div>
             <p className="text-sm font-semibold text-gray-900 dark:text-white">
-              Your chatbot performance at a glance
+              {translate("Your chatbot performance at a glance")}
             </p>
             <p className="mt-1 text-sm text-gray-600 dark:text-gray-400">
-              Review conversations, response speed, popular topics and user
-              activity from one dashboard.
+              {translate(
+                "Review conversations, response speed, popular topics and user activity from one dashboard.",
+              )}
             </p>
           </div>
         </div>
@@ -614,7 +636,7 @@ export default function Analytics() {
         {/* KPI cards */}
         <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-4">
           {metrics.map((metric) => (
-            <MetricCard key={metric.title} {...metric} />
+            <MetricCard key={metric.title} {...metric} translate={translate} />
           ))}
         </div>
 
@@ -629,42 +651,47 @@ export default function Analytics() {
             dark:bg-[#171b23]
           "
         >
-          <h2 className="text-base font-semibold">Usage Analytics</h2>
+          <h2 className="text-base font-semibold">
+            {translate("Usage Analytics")}
+          </h2>
 
           <p className="mt-1 text-xs text-gray-500 dark:text-gray-400">
-            Track your Gemini API usage and plan limits.
+            {translate("Track your Gemini API usage and plan limits.")}
           </p>
 
           {/* Usage Cards */}
           <div className="mt-5 grid grid-cols-1 gap-4 md:grid-cols-2 xl:grid-cols-3">
             <UsageCard
-              title="Gemini Tokens"
-              description="Total token consumption"
+              title={translate("Gemini Tokens")}
+              description={translate("Total token consumption")}
               icon={Zap}
               used={usage?.tokens?.used ?? 0}
               limit={usage?.tokens?.limit ?? 0}
-              unit="tokens"
+              unit={translate("tokens")}
               color="blue"
+              translate={translate}
             />
 
             <UsageCard
-              title="Conversations"
-              description="Conversations created"
+              title={translate("Conversations")}
+              description={translate("Conversations created")}
               icon={MessageSquare}
               used={usage?.conversations?.used ?? 0}
               limit={usage?.conversations?.limit ?? 0}
-              unit="conversations"
+              unit={translate("conversations")}
               color="violet"
+              translate={translate}
             />
 
             <UsageCard
-              title="AI Responses"
-              description="Responses generated"
+              title={translate("AI Responses")}
+              description={translate("Responses generated")}
               icon={Bot}
               used={usage?.aiResponses?.used ?? 0}
               limit={usage?.aiResponses?.limit ?? 0}
-              unit="responses"
+              unit={translate("responses")}
               color="emerald"
+              translate={translate}
             />
           </div>
 
@@ -683,29 +710,37 @@ export default function Analytics() {
 
             <div>
               <p className="text-sm font-medium text-gray-800 dark:text-gray-200">
-                Usage summary
+                {translate("Usage summary")}
               </p>
 
               <p className="mt-1 text-xs leading-5 text-gray-500 dark:text-gray-400">
-                You have used{" "}
-                {usage?.tokens?.limit > 0
-                  ? ((usage.tokens.used / usage.tokens.limit) * 100).toFixed(1)
-                  : "0.0"}
-                % of your token quota,{" "}
-                {usage?.conversations?.limit > 0
-                  ? (
-                      (usage.conversations.used / usage.conversations.limit) *
-                      100
-                    ).toFixed(0)
-                  : "0"}
-                % of your conversation quota and{" "}
-                {usage?.aiResponses?.limit > 0
-                  ? (
-                      (usage.aiResponses.used / usage.aiResponses.limit) *
-                      100
-                    ).toFixed(0)
-                  : "0"}
-                % of your AI response quota.
+                {translate(
+                  "You have used {tokens}% of your token quota, {conversations}% of your conversation quota and {responses}% of your AI response quota.",
+                  {
+                    tokens:
+                      usage?.tokens?.limit > 0
+                        ? (
+                            (usage.tokens.used / usage.tokens.limit) *
+                            100
+                          ).toFixed(1)
+                        : "0.0",
+                    conversations:
+                      usage?.conversations?.limit > 0
+                        ? (
+                            (usage.conversations.used /
+                              usage.conversations.limit) *
+                            100
+                          ).toFixed(0)
+                        : "0",
+                    responses:
+                      usage?.aiResponses?.limit > 0
+                        ? (
+                            (usage.aiResponses.used / usage.aiResponses.limit) *
+                            100
+                          ).toFixed(0)
+                        : "0",
+                  },
+                )}
               </p>
             </div>
           </div>
@@ -716,7 +751,7 @@ export default function Analytics() {
           <Card className="xl:col-span-3">
             <SectionHeading
               icon={MessageSquare}
-              title="Conversations Overview"
+              title={translate("Conversations Overview")}
               action={
                 <CustomSelect
                   size="sm"
@@ -726,14 +761,14 @@ export default function Analytics() {
                   options={[
                     {
                       value: "conversations",
-                      label: "Conversations",
+                      label: translate("Conversations"),
                     },
                     {
                       value: "users",
-                      label: "Unique users",
+                      label: translate("Unique users"),
                     },
                   ]}
-                  placeholder="Select status"
+                  placeholder={translate("Select status")}
                   // error={errors.accountStatus?.message}
                   required
                   icon={false}
@@ -744,11 +779,11 @@ export default function Analytics() {
             <div className="mb-4 flex flex-wrap gap-4 text-xs text-gray-500 dark:text-gray-400">
               <span className="flex items-center gap-2">
                 <span className="h-2.5 w-2.5 rounded-full bg-blue-500" />
-                Total Conversations
+                {translate("Total Conversations")}
               </span>
               <span className="flex items-center gap-2">
                 <span className="h-2.5 w-2.5 rounded-full bg-blue-500" />
-                Unique Users
+                {translate("Unique Users")}
               </span>
             </div>
 
@@ -818,8 +853,8 @@ export default function Analytics() {
                     }
                     name={
                       chartMode === "conversations"
-                        ? "Conversations"
-                        : "Unique Users"
+                        ? translate("Conversations")
+                        : translate("Unique Users")
                     }
                     stroke="#6366f1"
                     strokeWidth={3}
@@ -831,7 +866,7 @@ export default function Analytics() {
                     <Area
                       type="monotone"
                       dataKey="users"
-                      name="Unique Users"
+                      name={translate("Unique Users")}
                       stroke="#3b82f6"
                       strokeWidth={2}
                       fill="url(#usersGradient)"
@@ -844,22 +879,25 @@ export default function Analytics() {
           </Card>
 
           <Card className="xl:col-span-2">
-            <SectionHeading icon={Users} title="User Activity" />
+            <SectionHeading
+              icon={Users}
+              title={translate("User Activity")}
+            />
 
             <div className="mb-5 flex flex-wrap items-center justify-between gap-3">
               <p className="text-sm text-gray-500 dark:text-gray-400">
-                New and returning users activity
+                {translate("New and returning users activity")}
               </p>
 
               <div className="flex flex-wrap items-center gap-4 text-xs">
                 <span className="flex items-center gap-2 text-gray-600 dark:text-gray-300">
                   <span className="h-2.5 w-2.5 rounded-full bg-indigo-500" />
-                  New Users
+                  {translate("New Users")}
                 </span>
 
                 <span className="flex items-center gap-2 text-gray-600 dark:text-gray-300">
                   <span className="h-2.5 w-2.5 rounded-full bg-sky-400" />
-                  Returning
+                  {translate("Returning")}
                 </span>
               </div>
             </div>
@@ -919,7 +957,7 @@ export default function Analytics() {
 
                   <Bar
                     dataKey="newUsers"
-                    name="New Users"
+                    name={translate("New Users")}
                     fill="#6366f1"
                     radius={[6, 6, 0, 0]}
                     maxBarSize={22}
@@ -933,7 +971,7 @@ export default function Analytics() {
 
                   <Bar
                     dataKey="returningUsers"
-                    name="Returning Users"
+                    name={translate("Returning Users")}
                     fill="#60a5fa"
                     radius={[6, 6, 0, 0]}
                     maxBarSize={22}
@@ -955,9 +993,11 @@ export default function Analytics() {
           {/* <Card>
             <SectionHeading
               icon={Flame}
-              title="Popular Topics"
+              title={translate("Popular Topics")}
               action={
-                <span className="text-xs font-medium text-gray-400">Top 5</span>
+                <span className="text-xs font-medium text-gray-400">
+                  {translate("Top 5")}
+                </span>
               }
             />
 
@@ -992,7 +1032,10 @@ export default function Analytics() {
           </Card> */}
 
           <Card>
-            <SectionHeading icon={Globe} title="Conversation Sources" />
+            <SectionHeading
+              icon={Globe}
+              title={translate("Conversation Sources")}
+            />
 
             <div className="relative h-52.5">
               <ResponsiveContainer width="100%" height="100%">
@@ -1026,7 +1069,7 @@ export default function Analytics() {
                   {totalConversation?.data?.totalConversations}
                 </span>
                 <span className="text-xs text-gray-500 dark:text-gray-400">
-                  Conversations
+                  {translate("Conversations")}
                 </span>
               </div>
             </div>
@@ -1056,7 +1099,10 @@ export default function Analytics() {
           </Card>
 
           <Card>
-            <SectionHeading icon={Star} title="User Satisfaction" />
+            <SectionHeading
+              icon={Star}
+              title={translate("User Satisfaction")}
+            />
 
             <div className="flex flex-col items-center py-2">
               <div className="flex h-32 w-32 flex-col items-center justify-center rounded-full border-[9px] border-emerald-400/20">
@@ -1071,7 +1117,9 @@ export default function Analytics() {
               </div>
 
               <p className="mt-3 text-xs text-gray-500 dark:text-gray-400">
-                Based on {totalReviews} ratings
+                {translate("Based on {count} ratings", {
+                  count: totalReviews,
+                })}
               </p>
             </div>
 

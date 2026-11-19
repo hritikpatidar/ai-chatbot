@@ -15,6 +15,7 @@ import {
 } from "../redux/features/Chat/chatSlice";
 import { useLocation, useNavigate, useParams } from "react-router-dom";
 import { useSocket } from "../context/SocketContext";
+import { useLanguage } from "../context/LanguageContext";
 import toast from "react-hot-toast";
 import {
   getConversationMessages,
@@ -46,6 +47,7 @@ export default function useSpeechRecognition({
   const dispatch = useDispatch();
   const navigate = useNavigate();
   const { socket, isConnected, clientKey, isClientChatbot } = useSocket();
+  const { language, t } = useLanguage();
   const { conversationId } = useParams();
   const location = useLocation();
   const { isNewConversation } = location.state || {};
@@ -112,7 +114,7 @@ export default function useSpeechRecognition({
       navigate("/", {
         replace: true,
       });
-      toast.error(data?.message || "Somthing went wrong", {
+      toast.error(data?.message || t("Something went wrong"), {
         id: "conversation-error",
       });
     };
@@ -160,7 +162,7 @@ export default function useSpeechRecognition({
       removeConversationList(handleConversation);
       removeConversationError(handleConversationError);
     };
-  }, [enableSocketListeners, dispatch]);
+  }, [enableSocketListeners, dispatch, navigate, t]);
 
   useEffect(() => {
     textareaRef.current?.focus();
@@ -264,7 +266,7 @@ export default function useSpeechRecognition({
     if (!pastedFiles.length) return;
     e.preventDefault();
     if (selectedFiles.length + pastedFiles.length > 5) {
-      alert("You can upload a maximum of 5 files.");
+      alert(t("You can upload a maximum of 5 files."));
       return;
     }
     setSelectedFiles((prev) => [...prev, ...pastedFiles]);
@@ -295,7 +297,7 @@ export default function useSpeechRecognition({
 
     setMessage("");
 
-    sendAIMessage(conversationId, trimmedMessage);
+    sendAIMessage(conversationId, trimmedMessage, language);
 
     if (recognitionRef.current) {
       recognitionRef.current.stop();
@@ -316,7 +318,7 @@ export default function useSpeechRecognition({
     if (!files.length) return;
 
     if (selectedFiles.length + files.length > 5) {
-      alert("You can upload a maximum of 5 files.");
+      alert(t("You can upload a maximum of 5 files."));
       e.target.value = "";
       return;
     }
@@ -341,14 +343,14 @@ export default function useSpeechRecognition({
   };
 
   const handleFeedback = (type) => {
-    toast.success("Thank you for message response");
+    toast.success(t("Thank you for message response"));
   };
 
   const handleCopy = async (text, index) => {
     try {
       await navigator.clipboard.writeText(text);
       setCopiedIndex(index);
-      toast.success("Copied to clipboard", {
+      toast.success(t("Copied to clipboard"), {
         id: "copy-toast",
       });
       setTimeout(() => {

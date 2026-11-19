@@ -6,8 +6,10 @@ import {
   oneDark,
   oneLight,
 } from "react-syntax-highlighter/dist/esm/styles/prism";
+import { useLanguage } from "../../context/LanguageContext";
 
 export default function CodeBlock({ language = "text", code = "" }) {
+  const { t } = useLanguage();
   const [copied, setCopied] = useState(false);
   const [isDark, setIsDark] = useState(() =>
     document.documentElement.classList.contains("dark"),
@@ -106,12 +108,12 @@ export default function CodeBlock({ language = "text", code = "" }) {
                   size={14}
                   className="text-green-600 dark:text-green-400"
                 />
-                Copied
+                {t("Copied")}
               </>
             ) : (
               <>
                 <Copy size={14} />
-                Copy
+                {t("Copy")}
               </>
             )}
           </button>

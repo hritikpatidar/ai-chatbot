@@ -2,10 +2,13 @@ import { useState } from "react";
 import { Menu, X, LogIn, MessageCircle, Moon, Sun, Bot } from "lucide-react";
 import { useTheme } from "../../context/ThemeContext";
 import { useSelector } from "react-redux";
+import LanguageSwitcher from "../common/LanguageSwitcher";
+import { useLanguage } from "../../context/LanguageContext";
 
 export default function GuestHeader() {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const { isDarkMode, toggleTheme } = useTheme();
+  const { t } = useLanguage();
   const { logo, setLogo } = useState("");
   const {
     messages,
@@ -133,7 +136,7 @@ export default function GuestHeader() {
                 sm:block
               "
             >
-              Your trusted business assistant
+              {t("Your trusted business assistant")}
             </p>
           </div>
         </button>
@@ -143,6 +146,7 @@ export default function GuestHeader() {
         ================================================= */}
 
         <div className="hidden items-center gap-2 sm:flex">
+          <LanguageSwitcher />
           {/* Theme */}
           <button
             type="button"
@@ -166,7 +170,7 @@ export default function GuestHeader() {
             dark:text-gray-300
             dark:hover:text-blue-400
           "
-            title={isDarkMode ? "Switch to light mode" : "Switch to dark mode"}
+            title={t(isDarkMode ? "Switch to light mode" : "Switch to dark mode")}
           >
             {isDarkMode ? <Sun size={17} /> : <Moon size={17} />}
           </button>
@@ -204,11 +208,12 @@ export default function GuestHeader() {
         ================================================= */}
 
         <div className="flex items-center gap-1 sm:hidden">
+          <LanguageSwitcher />
           {/* Theme */}
           <button
             type="button"
             onClick={toggleTheme}
-            aria-label="Toggle theme"
+            aria-label={t("Toggle theme")}
             className="
               flex
               h-9
@@ -230,7 +235,7 @@ export default function GuestHeader() {
           {/* <button
             type="button"
             onClick={() => setIsMenuOpen((prev) => !prev)}
-            aria-label="Open menu"
+            aria-label={t("Open menu")}
             className="
               flex
               h-9
@@ -291,7 +296,7 @@ export default function GuestHeader() {
               "
             >
               <MessageCircle size={17} />
-              New Chat
+              {t("New Chat")}
             </button>
 
             {/* Login */}
@@ -318,7 +323,7 @@ export default function GuestHeader() {
               "
             >
               <LogIn size={16} />
-              Login
+              {t("Login")}
             </button>
           </div>
         </div>

@@ -110,7 +110,7 @@ export const reserveAIUsage = async ({
         tokensReserved: reservedTokens,
       },
     },
-    { new: true }
+    { returnDocument: "after" }
   );
 
   if (!updated) {
@@ -212,7 +212,7 @@ export const claimMonthlyUsageAlert = async ({
       ],
     },
     { $set: { usageAlertClaimedAt: claimedAt } },
-    { new: true },
+    { returnDocument: "after" },
   ).lean();
 
   if (!claim) {
@@ -321,7 +321,7 @@ export const reserveConversationCreation = async ({
         conversationsReserved: 1,
       },
     },
-    { new: true }
+    { returnDocument: "after" }
   );
 
   if (!updated) {

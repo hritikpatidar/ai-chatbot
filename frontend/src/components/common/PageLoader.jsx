@@ -1,4 +1,8 @@
+import { useLanguage } from "../../context/LanguageContext";
+
 export default function PageLoader() {
+  const { t } = useLanguage();
+
   return (
     <div
       className="
@@ -29,7 +33,7 @@ export default function PageLoader() {
             dark:text-gray-400
           "
         >
-          Loading...
+          {t("Loading...")}
         </p>
       </div>
     </div>

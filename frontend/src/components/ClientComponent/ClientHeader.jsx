@@ -6,6 +6,8 @@ import profile from "../../assets/profile1.jpg";
 import { getImageUrl } from "../../utils/imageUrl";
 import NotificationDropdown from "../common/NotificationDropdown";
 import { useNotifications } from "../../hooks/useNotifications";
+import LanguageSwitcher from "../common/LanguageSwitcher";
+import { useLanguage } from "../../context/LanguageContext";
 
 export default function ClientHeader({ onMenuClick }) {
   const { profileDetails } = useSelector(
@@ -15,6 +17,7 @@ export default function ClientHeader({ onMenuClick }) {
     (state) => state?.ClientReducer?.clientSlice || {},
   );
   const { isDarkMode, toggleTheme } = useTheme();
+  const { t } = useLanguage();
 
   return (
     <header
@@ -56,18 +59,21 @@ export default function ClientHeader({ onMenuClick }) {
 
         <div>
           <p className="text-sm font-medium">
-            Welcome back, {profileDetails?.fullName?.split(" ")[0] || "Admin"}
+            {t("Welcome back, {name}", {
+              name: profileDetails?.fullName?.split(" ")[0] || "Admin",
+            })}
             👋
           </p>
 
           <p className="hidden text-xs text-gray-500 dark:text-gray-400 sm:block">
-            Manage your AI chatbot from here.
+            {t("Manage your AI chatbot from here.")}
           </p>
         </div>
       </div>
 
       {/* Right */}
-      <div className="flex items-center gap-2">
+      <div className="flex items-center gap-2 m-2">
+        <LanguageSwitcher />
         {/* Theme */}
         <button
           type="button"
@@ -76,6 +82,7 @@ export default function ClientHeader({ onMenuClick }) {
             flex
             h-9
             w-9
+            p-2
             items-center
             justify-center
             rounded-lg
@@ -91,7 +98,7 @@ export default function ClientHeader({ onMenuClick }) {
             dark:text-gray-300
             dark:hover:text-blue-400
           "
-          title={isDarkMode ? "Switch to light mode" : "Switch to dark mode"}
+          title={t(isDarkMode ? "Switch to light mode" : "Switch to dark mode")}
         >
           {isDarkMode ? <Sun size={17} /> : <Moon size={17} />}
         </button>
@@ -131,11 +138,11 @@ export default function ClientHeader({ onMenuClick }) {
           {/* Profile Name & Plan */}
           <div className="max-w-36 min-w-0">
             <p className="truncate text-xs font-medium">
-              {profileDetails?.fullName || "Admin"}
+              {profileDetails?.fullName || t("Admin")}
             </p>
 
             <p className="truncate text-[10px] text-gray-500 dark:text-gray-400">
-              {`${client?.active_plan || "Free"} Plan`}
+              {`${client?.active_plan || t("Free")} ${t("Plan")}`}
             </p>
           </div>
         </div>

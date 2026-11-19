@@ -3,7 +3,6 @@
 import { useEffect, useMemo, useState } from "react";
 import {
   X,
-  Check,
   ArrowUp,
   ArrowDown,
   Loader2,
@@ -19,6 +18,7 @@ import { useStripe, useElements, CardElement } from "@stripe/react-stripe-js";
 import { useNavigate } from "react-router-dom";
 import { useTheme } from "../../context/ThemeContext";
 import { usePaymentMethods } from "../../hooks/Subscription/usePaymentMethods";
+import { useLanguage } from "../../context/LanguageContext";
 
 const ChangePlanModal = ({
   isOpen,
@@ -28,20 +28,19 @@ const ChangePlanModal = ({
   subscriptionId,
   onSuccess,
 }) => {
+  const { t } = useLanguage();
   const stripe = useStripe();
   const elements = useElements();
   const navigate = useNavigate();
-  const { isDarkMode, toggleTheme } = useTheme();
+  const { isDarkMode } = useTheme();
   const [selectedPaymentMethod, setSelectedPaymentMethod] = useState(null);
   const [showNewCard, setShowNewCard] = useState(false);
   const [paymentError, setPaymentError] = useState("");
-  const [loading, setLoading] = useState(false);
   const previewMutation = usePreviewSubscription();
   const changeMutation = useChangeSubscriptionPlan();
   const {
     data: cardsData,
     isLoading: cardsLoading,
-    isFetching: cardsFetching,
     isError: cardsError,
   } = usePaymentMethods(subscriptionId);
 
@@ -87,11 +86,10 @@ const ChangePlanModal = ({
     subscription,
   ) => {
     if (!stripe) {
-      setPaymentError("Stripe is not loaded.");
+      setPaymentError(t("Stripe is not loaded."));
       return;
     }
     try {
-      setLoading(true);
       const { error, paymentIntent } =
         await stripe.confirmCardPayment(clientSecret);
       if (error) {
@@ -111,9 +109,7 @@ const ChangePlanModal = ({
         onClose();
       }
     } catch (error) {
-      setPaymentError(error.message || "Payment confirmation failed.");
-    } finally {
-      setLoading(false);
+      setPaymentError(error.message ? t(error.message) : t("Payment confirmation failed."));
     }
   };
 
@@ -121,17 +117,15 @@ const ChangePlanModal = ({
     if (!subscriptionId || !selectedPlan?._id) return;
     setPaymentError("");
     let paymentMethodId = selectedPaymentMethod?.id;
-    try {
-      setLoading(true);
-      // New card selected
+    // New card selected
       if (showNewCard) {
         if (!stripe || !elements) {
-          setPaymentError("Stripe is not loaded.");
+          setPaymentError(t("Stripe is not loaded."));
           return;
         }
         const cardElement = elements.getElement(CardElement);
         if (!cardElement) {
-          setPaymentError("Card information is required.");
+          setPaymentError(t("Card information is required."));
           return;
         }
         const { error, paymentMethod } = await stripe.createPaymentMethod({
@@ -183,14 +177,11 @@ const ChangePlanModal = ({
           onError: (error) => {
             setPaymentError(
               error?.response?.data?.message ||
-                "Unable to change subscription.",
+                t("Unable to change subscription."),
             );
           },
         },
       );
-    } finally {
-      setLoading(false);
-    }
   };
 
   return (
@@ -238,12 +229,12 @@ const ChangePlanModal = ({
               )}
 
               <h2 className="text-lg font-bold text-gray-900 dark:text-white">
-                {isUpgrade ? "Upgrade Plan" : "Downgrade Plan"}
+                {isUpgrade ? t("Upgrade Plan") : t("Downgrade Plan")}
               </h2>
             </div>
 
             <p className="mt-1 text-sm text-gray-500 dark:text-gray-400">
-              Review your plan change before confirming.
+              {t("Review your plan change before confirming.")}
             </p>
           </div>
 
@@ -277,7 +268,7 @@ const ChangePlanModal = ({
 
               <div className="rounded-xl border border-gray-200 bg-gray-50 p-4 dark:border-gray-800 dark:bg-[#1d222c]">
                 <p className="text-xs font-medium uppercase tracking-wide text-gray-500 dark:text-gray-400">
-                  Current Plan
+                  {t("Current Plan")}
                 </p>
 
                 <h3 className="mt-2 text-lg font-bold text-gray-900 dark:text-white">
@@ -290,7 +281,7 @@ const ChangePlanModal = ({
                   {currentPlan.currency?.toUpperCase()}{" "}
                   {(Number(currentAmount) / 100).toFixed(2)}
                   {" / "}
-                  {currentPlan?.interval}
+                  {t(currentPlan?.interval)}
                 </p>
               </div>
 
@@ -298,7 +289,7 @@ const ChangePlanModal = ({
 
               <div className="rounded-xl border border-indigo-200 bg-indigo-50 p-4 dark:border-indigo-500/20 dark:bg-indigo-500/10">
                 <p className="text-xs font-medium uppercase tracking-wide text-indigo-600 dark:text-indigo-400">
-                  New Plan
+                  {t("New Plan")}
                 </p>
 
                 <h3 className="mt-2 text-lg font-bold text-gray-900 dark:text-white">
@@ -310,7 +301,7 @@ const ChangePlanModal = ({
                   {currentPlan.currency?.toUpperCase()}{" "}
                   {(Number(newAmount) / 100).toFixed(2)}
                   {" / "}
-                  {selectedPlan?.interval}
+                  {t(selectedPlan?.interval)}
                 </p>
               </div>
             </div>
@@ -322,11 +313,11 @@ const ChangePlanModal = ({
                 <Loader2 size={28} className="animate-spin text-indigo-600" />
 
                 <p className="mt-3 text-sm font-medium text-gray-700 dark:text-gray-300">
-                  Calculating your plan change...
+                  {t("Calculating your plan change...")}
                 </p>
 
                 <p className="mt-1 text-xs text-gray-500">
-                  Please wait while we calculate the prorated amount.
+                  {t("Please wait while we calculate the prorated amount.")}
                 </p>
               </div>
             )}
@@ -340,12 +331,12 @@ const ChangePlanModal = ({
 
                   <div>
                     <p className="text-sm font-semibold text-red-700 dark:text-red-400">
-                      Unable to calculate plan change
+                      {t("Unable to calculate plan change")}
                     </p>
 
                     <p className="mt-1 text-xs text-red-600 dark:text-red-400">
                       {previewMutation.error?.response?.data?.message ||
-                        "Please try again."}
+                        t("Please try again.")}
                     </p>
                   </div>
                 </div>
@@ -361,7 +352,7 @@ const ChangePlanModal = ({
                 <div className="space-y-3">
                   <div className="flex items-center justify-between text-sm">
                     <span className="text-gray-500 dark:text-gray-400">
-                      Current plan
+                      {t("Current plan")}
                     </span>
 
                     <span className="font-medium text-gray-900 dark:text-white">
@@ -374,7 +365,7 @@ const ChangePlanModal = ({
 
                   <div className="flex items-center justify-between text-sm">
                     <span className="text-gray-500 dark:text-gray-400">
-                      New plan
+                      {t("New plan")}
                     </span>
 
                     <span className="font-medium text-gray-900 dark:text-white">
@@ -387,7 +378,7 @@ const ChangePlanModal = ({
 
                   <div className="flex items-center justify-between text-sm">
                     <span className="text-gray-500 dark:text-gray-400">
-                      Plan difference
+                      {t("Plan difference")}
                     </span>
 
                     <span
@@ -407,11 +398,11 @@ const ChangePlanModal = ({
 
                   <div className="flex items-center justify-between text-sm">
                     <span className="text-gray-500 dark:text-gray-400">
-                      Billing period
+                      {t("Billing period")}
                     </span>
 
                     <span className="font-medium text-gray-900 dark:text-white">
-                      {selectedPlan?.interval}
+                      {t(selectedPlan?.interval)}
                     </span>
                   </div>
                 </div>
@@ -422,11 +413,11 @@ const ChangePlanModal = ({
                   <div className="flex items-center justify-between">
                     <div>
                       <p className="text-sm font-semibold text-gray-700 dark:text-gray-300">
-                        {isUpgrade ? "Amount due now" : "Amount due"}
+                        {isUpgrade ? t("Amount due now") : t("Amount due")}
                       </p>
 
                       <p className="mt-1 text-xs text-gray-500 dark:text-gray-400">
-                        Calculated by Stripe
+                        {t("Calculated by Stripe")}
                       </p>
                     </div>
 
@@ -449,8 +440,7 @@ const ChangePlanModal = ({
                   />
 
                   <p className="text-xs leading-5 text-indigo-700 dark:text-indigo-300">
-                    The amount shown above is calculated based on the remaining
-                    time in your current billing period.
+                    {t("The amount shown above is calculated based on the remaining time in your current billing period.")}
                   </p>
                 </div>
               </>
@@ -472,11 +462,11 @@ const ChangePlanModal = ({
             >
               <div className="mt-4">
                 <h3 className="text-sm font-semibold text-gray-900 dark:text-white">
-                  Payment Method
+                  {t("Payment Method")}
                 </h3>
 
                 <p className="mt-1 text-xs leading-5 text-gray-500 dark:text-gray-400">
-                  Choose how you want to pay for this plan change.
+                  {t("Choose how you want to pay for this plan change.")}
                 </p>
               </div>
 
@@ -495,7 +485,7 @@ const ChangePlanModal = ({
                   <Loader2 size={19} className="animate-spin text-indigo-600" />
 
                   <span className="text-sm text-gray-500 dark:text-gray-400">
-                    Loading payment methods...
+                    {t("Loading payment methods...")}
                   </span>
                 </div>
               </div>
@@ -509,11 +499,11 @@ const ChangePlanModal = ({
 
                   <div>
                     <p className="text-sm font-medium text-red-700 dark:text-red-400">
-                      Unable to load payment methods
+                      {t("Unable to load payment methods")}
                     </p>
 
                     <p className="mt-1 text-xs text-red-600 dark:text-red-400">
-                      Please try again or use a different card.
+                      {t("Please try again or use a different card.")}
                     </p>
                   </div>
                 </div>
@@ -586,13 +576,13 @@ const ChangePlanModal = ({
 
                             {defaultPaymentMethod?.id === method.id && (
                               <span className="shrink-0 rounded-full bg-indigo-100 px-2 py-0.5 text-[10px] font-semibold text-indigo-700 dark:bg-indigo-500/15 dark:text-indigo-300">
-                                Default
+                                {t("Default")}
                               </span>
                             )}
                           </div>
 
                           <p className="mt-1 text-xs text-gray-500 dark:text-gray-400">
-                            Expires{" "}
+                            {t("Expires")}{" "}
                             {String(method.card?.exp_month).padStart(2, "0")}/
                             {method.card?.exp_year}
                           </p>
@@ -627,11 +617,11 @@ const ChangePlanModal = ({
 
                   <div>
                     <p className="text-sm font-medium text-gray-800 dark:text-gray-200">
-                      No saved card
+                      {t("No saved card")}
                     </p>
 
                     <p className="mt-1 text-xs text-gray-500 dark:text-gray-400">
-                      Add a card to continue with the payment.
+                      {t("Add a card to continue with the payment.")}
                     </p>
                   </div>
                 </div>
@@ -670,7 +660,7 @@ const ChangePlanModal = ({
             >
               <CreditCard size={17} />
 
-              {showNewCard ? "Using a different card" : "Use a different card"}
+              {showNewCard ? t("Using a different card") : t("Use a different card")}
             </button>
 
             {/* NEW CARD */}
@@ -678,11 +668,11 @@ const ChangePlanModal = ({
               <div className="mt-3 rounded-xl border border-indigo-200 bg-indigo-50/50 p-4 dark:border-indigo-500/20 dark:bg-indigo-500/5">
                 <div className="mb-3">
                   <p className="text-sm font-semibold text-gray-900 dark:text-white">
-                    Enter new card details
+                    {t("Enter new card details")}
                   </p>
 
                   <p className="mt-1 text-xs text-gray-500 dark:text-gray-400">
-                    Your card will be securely processed by Stripe.
+                    {t("Your card will be securely processed by Stripe.")}
                   </p>
                 </div>
 
@@ -762,7 +752,7 @@ const ChangePlanModal = ({
               dark:hover:bg-white/5
             "
           >
-            Cancel
+            {t("Cancel")}
           </button>
 
           <button
@@ -791,10 +781,10 @@ const ChangePlanModal = ({
             {changeMutation.isPending ? (
               <>
                 <Loader2 size={17} className="animate-spin" />
-                Processing...
+                {t("Processing...")}
               </>
             ) : (
-              <>{isUpgrade ? "Confirm Upgrade" : "Confirm Downgrade"}</>
+              <>{isUpgrade ? t("Confirm Upgrade") : t("Confirm Downgrade")}</>
             )}
           </button>
         </div>

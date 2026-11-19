@@ -17,9 +17,18 @@ import useFAQs from "../../hooks/Client/useFAQs";
 import { useSelector } from "react-redux";
 import { useNavigate } from "react-router-dom";
 import toast from "react-hot-toast";
+import { useLanguage } from "../../context/LanguageContext";
+import clientScreens from "../../context/translations/clientScreens";
 
 export default function ClientFAQs() {
   const navigate = useNavigate();
+  const { t, language } = useLanguage();
+  const translate = (key) => {
+    const translated = t(key);
+    return translated === key && language === "hi"
+      ? clientScreens[key] || key
+      : translated;
+  };
   const [page, setPage] = useState(1);
   const [limit] = useState(5);
   const [search, setSearch] = useState("");
@@ -88,14 +97,14 @@ export default function ClientFAQs() {
     const isProPlan = client.active_plan.trim().toLowerCase() === "pro";
     if (isBasicPlan && pagination.total >= 5) {
       toast.error(
-        "Basic plan allows a maximum of 5 FAQs. Upgrade to Pro to add more.",
+        translate(
+          "Basic plan allows a maximum of 5 FAQs. Upgrade to Pro to add more.",
+        ),
       );
       return;
     }
     if (isProPlan && pagination.total >= 20) {
-      toast.error(
-        "Pro plan allows a maximum of 20 FAQs.",
-      );
+      toast.error(translate("Pro plan allows a maximum of 20 FAQs."));
       return;
     }
     setSelectedFAQ(null);
@@ -244,7 +253,7 @@ export default function ClientFAQs() {
         >
           <CheckCircle2 size={18} className="shrink-0" />
 
-          <span>{successMessage}</span>
+          <span>{translate(successMessage)}</span>
         </div>
       )}
 
@@ -274,7 +283,7 @@ export default function ClientFAQs() {
           <span>
             {typeof error === "string"
               ? error
-              : error?.message || "Something went wrong."}
+              : error?.message || translate("Something went wrong.")}
           </span>
         </div>
       )}
@@ -301,11 +310,11 @@ export default function ClientFAQs() {
                     dark:text-white
                   "
               >
-                FAQs
+                {translate("FAQs")}
               </h1>
 
               <p className="text-xs text-gray-500 dark:text-gray-400">
-                Manage frequently asked questions
+                {translate("Manage frequently asked questions")}
               </p>
             </div>
           </div>
@@ -326,7 +335,7 @@ export default function ClientFAQs() {
             "
         >
           <Plus size={17} />
-          Add FAQ
+          {translate("Add FAQ")}
         </button>
       </div>
 
@@ -335,15 +344,15 @@ export default function ClientFAQs() {
         ================================================= */}
 
       <div className="mt-6 grid grid-cols-2 gap-3 lg:grid-cols-4">
-        <StatBox title="Total FAQs" value={pagination.total} />
-        <StatBox title="Total Pages" value={pagination.totalPages} />
+        <StatBox title={translate("Total FAQs")} value={pagination.total} />
+        <StatBox title={translate("Total Pages")} value={pagination.totalPages} />
         <StatBox
-          title="Active"
+          title={translate("Active")}
           value={faqs.filter((item) => item.status !== "inactive").length}
         />
 
         <StatBox
-          title="Inactive"
+          title={translate("Inactive")}
           value={faqs.filter((item) => item.status !== "active").length}
         />
       </div>
@@ -377,7 +386,7 @@ export default function ClientFAQs() {
             type="text"
             value={search}
             onChange={handleSearch}
-            placeholder="Search FAQs..."
+            placeholder={translate("Search FAQs...")}
             className="
                 w-full rounded-lg border
                 border-gray-200 bg-gray-50
@@ -410,7 +419,7 @@ export default function ClientFAQs() {
             "
         >
           <RefreshCw size={15} className={isFetching ? "animate-spin" : ""} />
-          Refresh
+          {translate("Refresh")}
         </button>
       </div>
 
@@ -430,7 +439,7 @@ export default function ClientFAQs() {
               dark:text-red-400
             "
         >
-          {error?.message || "Something went wrong"}
+          {error?.message || translate("Something went wrong")}
         </div>
       )}
 
@@ -479,18 +488,20 @@ export default function ClientFAQs() {
 
       <ConfirmModal
         isOpen={Boolean(deleteFAQDetails)}
-        title="Delete FAQ"
+        title={translate("Delete FAQ")}
         message={
           <>
-            Are you sure you want to delete{" "}
+            {translate("Are you sure you want to delete")}{" "}
             <strong>{deleteFAQDetails?.question}</strong>
             ?
             <br />
-            <span className="text-xs">This action cannot be undone.</span>
+            <span className="text-xs">
+              {translate("This action cannot be undone.")}
+            </span>
           </>
         }
-        confirmText="Delete"
-        cancelText="Cancel"
+        confirmText={translate("Delete")}
+        cancelText={translate("Cancel")}
         loading={deleteLoading}
         onCancel={() => setDeleteFAQDetails(null)}
         onConfirm={handleConfirmDelete}

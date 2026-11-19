@@ -14,6 +14,8 @@ import {
 import ActionButton from "../../common/ActionButton";
 import StatusBadge from "../../common/StatusBadge";
 import { useSelector } from "react-redux";
+import { useLanguage } from "../../../context/LanguageContext";
+import { translateShared } from "../../../context/translations/sharedComponents";
 
 function formatDate(date) {
   if (!date) return "-";
@@ -32,6 +34,8 @@ export default function TicketTable({
   onDelete,
   onUpdatePlan,
 }) {
+  const { t, language } = useLanguage();
+  const translate = (text) => translateShared(text, t, language);
   const { client } = useSelector(
     (state) => state?.ClientReducer?.clientSlice || {},
   );
@@ -112,7 +116,7 @@ export default function TicketTable({
             dark:text-white
           "
         >
-          No tickets found
+          {translate("No tickets found")}
         </h3>
 
         <p
@@ -124,7 +128,7 @@ export default function TicketTable({
             dark:text-gray-400
           "
         >
-          No tickets match your search or filters.
+          {translate("No tickets match your search or filters.")}
         </p>
       </div>
     );
@@ -155,27 +159,27 @@ export default function TicketTable({
               "
             >
               <th className="px-5 py-4 text-left text-xs font-semibold text-gray-500 dark:text-gray-400">
-                Ticket
+                {translate("Ticket")}
               </th>
 
               <th className="px-5 py-4 text-left text-xs font-semibold text-gray-500 dark:text-gray-400">
-                Customer
+                {translate("Customer")}
               </th>
 
               <th className="px-5 py-4 text-left text-xs font-semibold text-gray-500 dark:text-gray-400">
-                Contact
+                {translate("Contact")}
               </th>
 
               <th className="px-5 py-4 text-left text-xs font-semibold text-gray-500 dark:text-gray-400">
-                Status
+                {translate("Status")}
               </th>
 
               <th className="px-5 py-4 text-left text-xs font-semibold text-gray-500 dark:text-gray-400">
-                Created
+                {translate("Created")}
               </th>
 
               <th className="px-5 py-4 text-right text-xs font-semibold text-gray-500 dark:text-gray-400">
-                Actions
+                {translate("Actions")}
               </th>
             </tr>
           </thead>
@@ -227,7 +231,7 @@ export default function TicketTable({
                         "
                         title={ticket.subject}
                       >
-                        {ticket.subject || "Untitled Ticket"}
+                        {ticket.subject || translate("Untitled Ticket")}
                       </p>
 
                       <p
@@ -254,7 +258,7 @@ export default function TicketTable({
                     <p className="mt-0.5 truncate text-xs text-gray-500 dark:text-gray-400">
                       {hasActivePlan
                         ? ticket.guestKeyId?.email || "-"
-                        : "Contact details locked"}
+                        : translate("Contact details locked")}
                     </p>
                   </div>
                 </td>
@@ -277,7 +281,7 @@ export default function TicketTable({
 
                       <div>
                         <p className="text-xs font-medium text-gray-600 dark:text-gray-300">
-                          Contact details hidden
+                          {translate("Contact details hidden")}
                         </p>
 
                         <button
@@ -290,7 +294,7 @@ export default function TicketTable({
                             dark:text-blue-400 dark:hover:text-blue-300
                           "
                         >
-                          Upgrade plan
+                          {translate("Upgrade plan")}
                           <ArrowUpRight size={12} />
                         </button>
                       </div>
@@ -329,14 +333,14 @@ export default function TicketTable({
                   <div className="flex justify-end gap-2">
                     <ActionButton
                       icon={<Edit2 size={15} />}
-                      label="Edit"
+                      label={translate("Edit")}
                       onClick={() => onEdit?.(ticket)}
                     />
                     {(ticket.status === "resolved" ||
                       ticket.status === "closed") && (
                       <ActionButton
                         icon={<Trash2 size={15} />}
-                        label="Delete"
+                        label={translate("Delete")}
                         danger
                         onClick={() => onDelete?.(ticket)}
                       />
@@ -407,7 +411,7 @@ export default function TicketTable({
                         dark:text-white
                       "
                       >
-                        {ticket.subject || "Untitled Ticket"}
+                        {ticket.subject || translate("Untitled Ticket")}
                       </h3>
 
                       <p
@@ -434,7 +438,7 @@ export default function TicketTable({
                 text-gray-500
                 dark:text-gray-400"
               >
-                Name - {ticket?.guestKeyId?.fullName || "-"}
+                {translate("Name - ")} {ticket?.guestKeyId?.fullName || "-"}
               </p>
 
               {/* Contact Information */}
@@ -444,7 +448,7 @@ export default function TicketTable({
                     <div className="min-w-0 flex-1 space-y-2">
                       <div>
                         <p className="text-[11px] font-medium uppercase tracking-wide text-gray-400">
-                          Email
+                          {translate("Email")}
                         </p>
 
                         <p className="mt-0.5 break-all text-sm text-gray-700 dark:text-gray-200">
@@ -454,7 +458,7 @@ export default function TicketTable({
 
                       <div>
                         <p className="text-[11px] font-medium uppercase tracking-wide text-gray-400">
-                          Phone
+                          {translate("Phone")}
                         </p>
 
                         <p className="mt-0.5 text-sm text-gray-700 dark:text-gray-200">
@@ -476,12 +480,13 @@ export default function TicketTable({
 
                       <div className="min-w-0 flex-1">
                         <p className="text-sm font-medium text-gray-800 dark:text-gray-200">
-                          Contact details are hidden
+                          {translate("Contact details are hidden")}
                         </p>
 
                         <p className="mt-1 text-xs leading-5 text-gray-500 dark:text-gray-400">
-                          Upgrade your subscription to view customer email and
-                          phone number.
+                          {translate(
+                            "Upgrade your subscription to view customer email and phone number.",
+                          )}
                         </p>
 
                         <button
@@ -494,7 +499,7 @@ export default function TicketTable({
                           transition hover:bg-blue-700
                         "
                         >
-                          Upgrade Plan
+                          {translate("Upgrade Plan")}
                           <ArrowUpRight size={13} />
                         </button>
                       </div>
@@ -514,7 +519,8 @@ export default function TicketTable({
                 dark:text-gray-400
               "
               >
-                Description - {ticket.description || "No description provided."}
+                {translate("Description - ")}{" "}
+                {ticket.description || translate("No description provided.")}
               </p>
 
               {/* Meta */}
@@ -534,7 +540,7 @@ export default function TicketTable({
                   text-gray-400
                 "
                 >
-                  Created: {formatDate(ticket.createdAt)}
+                  {translate("Created:")} {formatDate(ticket.createdAt)}
                 </span>
               </div>
 
@@ -554,14 +560,14 @@ export default function TicketTable({
               >
                 <ActionButton
                   icon={<Edit2 size={15} />}
-                  label="Edit"
+                  label={translate("Edit")}
                   onClick={() => onEdit?.(ticket)}
                 />
                 {(ticket.status === "resolved" ||
                   ticket.status === "closed") && (
                   <ActionButton
                     icon={<Trash2 size={15} />}
-                    label="Delete"
+                    label={translate("Delete")}
                     danger
                     onClick={() => onDelete?.(ticket)}
                   />

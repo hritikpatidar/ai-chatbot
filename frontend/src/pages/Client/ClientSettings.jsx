@@ -19,10 +19,19 @@ import profile from "../../assets/profile1.jpg";
 import PaymentMethods from "../../components/ClientComponent/PaymentMethods";
 import { useCurrentSubscription } from "../../hooks/Subscription/useSubscription";
 import StripeProvider from "../../components/Subscription/StripeProvider";
+import { useLanguage } from "../../context/LanguageContext";
+import clientScreens from "../../context/translations/clientScreens";
 
 export default function ClientSettings() {
   const dispatch = useDispatch();
   const navigate = useNavigate();
+  const { t, language } = useLanguage();
+  const translate = (key) => {
+    const translated = t(key);
+    return translated === key && language === "hi"
+      ? clientScreens[key] || key
+      : translated;
+  };
 
   const { profileDetails } = useSelector(
     (state) => state?.authReducer?.AuthSlice || {},
@@ -53,16 +62,16 @@ export default function ClientSettings() {
 
       alert(
         error?.response?.data?.message ||
-          "Unable to delete account. Please try again.",
+          translate("Unable to delete account. Please try again."),
       );
     } finally {
       setLoading(false);
     }
   };
 
-  const adminName = profileDetails?.fullName || "Client";
-  const adminEmail = profileDetails?.email || "No email available";
-  const adminRole = profileDetails?.role || "client";
+  const adminName = profileDetails?.fullName || translate("Client");
+  const adminEmail = profileDetails?.email || translate("No email available");
+  const adminRole = profileDetails?.role || translate("Client");
 
   return (
     <div
@@ -99,11 +108,11 @@ export default function ClientSettings() {
                   dark:text-white
                 "
               >
-                Settings
+                {translate("Settings")}
               </h1>
 
               <p className="text-xs text-gray-500 dark:text-gray-400">
-                Manage your administrator account and preferences.
+                {translate("Manage your administrator account and preferences.")}
               </p>
             </div>
           </div>
@@ -132,11 +141,11 @@ export default function ClientSettings() {
             "
         >
           <h2 className="text-base font-semibold text-gray-900 dark:text-white">
-            Administrator Profile
+            {translate("Administrator Profile")}
           </h2>
 
           <p className="mt-1 text-xs text-gray-500 dark:text-gray-400">
-            Your administrator account information.
+            {translate("Your administrator account information.")}
           </p>
         </div>
         <div className="p-5">
@@ -167,7 +176,7 @@ export default function ClientSettings() {
               {profileDetails?.profileImage ? (
                 <img
                   src={getImageUrl(profileDetails?.profileImage, profile)}
-                  alt="Profile"
+                  alt={translate("Profile")}
                   className="h-full w-full rounded-xl object-cover"
                 />
               ) : (
@@ -189,7 +198,7 @@ export default function ClientSettings() {
               </h3>
 
               <p className="mt-1 text-sm text-gray-500 dark:text-gray-400">
-                Administrator
+                {translate("Administrator")}
               </p>
             </div>
             <div
@@ -209,7 +218,7 @@ export default function ClientSettings() {
                 "
             >
               <CheckCircle2 size={14} />
-              Active
+              {translate("Active")}
             </div>
           </div>
           <div
@@ -236,7 +245,7 @@ export default function ClientSettings() {
                 <User size={18} className="text-blue-600 dark:text-blue-400" />
                 <div className="min-w-0">
                   <p className="text-xs text-gray-500 dark:text-gray-400">
-                    Full Name
+                    {translate("Full Name")}
                   </p>
                   <p
                     className="
@@ -269,7 +278,7 @@ export default function ClientSettings() {
                 <Mail size={18} className="text-blue-600 dark:text-blue-400" />
                 <div className="min-w-0">
                   <p className="text-xs text-gray-500 dark:text-gray-400">
-                    Email
+                    {translate("Email")}
                   </p>
                   <p
                     className="
@@ -306,7 +315,7 @@ export default function ClientSettings() {
 
                 <div>
                   <p className="text-xs text-gray-500 dark:text-gray-400">
-                    Account Role
+                    {translate("Account Role")}
                   </p>
 
                   <p className="mt-1 text-sm font-medium capitalize text-gray-900 dark:text-white">
@@ -330,10 +339,10 @@ export default function ClientSettings() {
                 <Lock size={18} className="text-blue-600 dark:text-blue-400" />
                 <div>
                   <p className="text-xs text-gray-500 dark:text-gray-400">
-                    Account Status
+                    {translate("Account Status")}
                   </p>
                   <p className="mt-1 text-sm font-medium text-green-600 dark:text-green-400">
-                    Active
+                    {translate("Active")}
                   </p>
                 </div>
               </div>
@@ -363,11 +372,11 @@ export default function ClientSettings() {
             "
         >
           <h2 className="text-base font-semibold text-gray-900 dark:text-white">
-            Preferences
+            {translate("Preferences")}
           </h2>
 
           <p className="mt-1 text-xs text-gray-500 dark:text-gray-400">
-            Application preferences and appearance settings.
+            {translate("Application preferences and appearance settings.")}
           </p>
         </div>
 
@@ -403,12 +412,13 @@ export default function ClientSettings() {
 
               <div>
                 <p className="text-sm font-medium text-gray-900 dark:text-white">
-                  Appearance
+                  {translate("Appearance")}
                 </p>
 
                 <p className="mt-1 text-xs text-gray-500 dark:text-gray-400">
-                  Manage your dashboard theme from the application theme
-                  control.
+                  {translate(
+                    "Manage your dashboard theme from the application theme control.",
+                  )}
                 </p>
               </div>
             </div>
@@ -427,7 +437,7 @@ export default function ClientSettings() {
                   dark:text-gray-300
                 "
             >
-              Theme enabled
+              {translate("Theme enabled")}
             </span>
           </div>
           <div
@@ -461,11 +471,13 @@ export default function ClientSettings() {
 
               <div>
                 <p className="text-sm font-medium text-gray-900 dark:text-white">
-                  Account Security
+                  {translate("Account Security")}
                 </p>
 
                 <p className="mt-1 text-xs text-gray-500 dark:text-gray-400">
-                  Your administrator account is protected by authentication.
+                  {translate(
+                    "Your administrator account is protected by authentication.",
+                  )}
                 </p>
               </div>
             </div>
@@ -483,7 +495,7 @@ export default function ClientSettings() {
                   dark:text-green-400
                 "
             >
-              Protected
+              {translate("Protected")}
             </span>
           </div>
         </div>
@@ -524,12 +536,13 @@ export default function ClientSettings() {
 
             <div className="min-w-0 flex-1">
               <h2 className="text-base font-semibold text-gray-900 dark:text-white">
-                Delete Account
+                {translate("Delete Account")}
               </h2>
 
               <p className="mt-1 text-xs leading-5 text-gray-500 dark:text-gray-400">
-                Permanently delete your administrator account. This action
-                cannot be undone.
+                {translate(
+                  "Permanently delete your administrator account. This action cannot be undone.",
+                )}
               </p>
             </div>
           </div>
@@ -566,7 +579,7 @@ export default function ClientSettings() {
               "
           >
             <Trash2 size={16} />
-            Delete Account
+            {translate("Delete Account")}
           </button>
         </div>
       </div>
@@ -579,16 +592,20 @@ export default function ClientSettings() {
         }}
         onConfirm={handleDeleteAccount}
         loading={loading}
-        title="Delete Account?"
-        message="Are you sure you want to permanently delete your administrator account? This action cannot be undone."
-        confirmText={loading ? "Deleting..." : "Delete Account"}
-        cancelText="Cancel"
+        title={translate("Delete Account?")}
+        message={translate(
+          "Are you sure you want to permanently delete your administrator account? This action cannot be undone.",
+        )}
+        confirmText={
+          loading ? translate("Deleting...") : translate("Delete Account")
+        }
+        cancelText={translate("Cancel")}
         danger
       />
 
       <div className="py-6 text-center">
         <p className="text-xs text-gray-400 dark:text-gray-500">
-          AI Chatbot Client Panel
+          {translate("AI Chatbot Client Panel")}
         </p>
       </div>
     </div>

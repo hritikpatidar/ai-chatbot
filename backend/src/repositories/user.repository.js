@@ -44,7 +44,7 @@ export const verifyUserEmail = async (email) => {
       isEmailVerified: true,
     },
     {
-      new: true,
+      returnDocument: "after",
     },
   );
 };

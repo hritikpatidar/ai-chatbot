@@ -21,18 +21,23 @@ import {
 
 import ConfirmModal from "./ConfirmModal";
 import { useTheme } from "../../context/ThemeContext";
+import { useLanguage } from "../../context/LanguageContext";
+import { translateShared } from "../../context/translations/sharedComponents";
 
 const getApiError = (error, fallback) => {
   return error?.response?.data?.message || error?.message || fallback;
 };
 
-const getCardBrand = (brand) => {
-  if (!brand) return "Card";
+const getCardBrand = (brand, fallback = "Card") => {
+  if (!brand) return fallback;
 
   return brand.charAt(0).toUpperCase() + brand.slice(1);
 };
 
 export default function PaymentMethods({ subscriptionId }) {
+  const { t, language } = useLanguage();
+  const translate = (text, values) =>
+    translateShared(text, t, language, values);
   const stripe = useStripe();
   const elements = useElements();
   const { isDarkMode, toggleTheme } = useTheme();
@@ -99,13 +104,13 @@ export default function PaymentMethods({ subscriptionId }) {
     setCardError("");
 
     if (!stripe || !elements) {
-      setErrorMessage("Stripe is not ready. Please try again.");
+      setErrorMessage(translate("Stripe is not ready. Please try again."));
       return;
     }
 
     if (!subscriptionId) {
       setErrorMessage(
-        "Active subscription is required to add a payment method.",
+        translate("Active subscription is required to add a payment method."),
       );
       return;
     }
@@ -113,12 +118,12 @@ export default function PaymentMethods({ subscriptionId }) {
     const cardElement = elements.getElement(CardElement);
 
     if (!cardElement) {
-      setErrorMessage("Card input is not available.");
+      setErrorMessage(translate("Card input is not available."));
       return;
     }
 
     if (!cardComplete) {
-      setCardError("Please enter complete card details.");
+      setCardError(translate("Please enter complete card details."));
       return;
     }
 
@@ -130,13 +135,13 @@ export default function PaymentMethods({ subscriptionId }) {
       });
 
       if (error) {
-        setCardError(error.message || "Unable to validate card.");
+        setCardError(error.message || translate("Unable to validate card."));
 
         return;
       }
 
       if (!paymentMethod?.id) {
-        setCardError("Unable to create payment method.");
+        setCardError(translate("Unable to create payment method."));
 
         return;
       }
@@ -145,11 +150,13 @@ export default function PaymentMethods({ subscriptionId }) {
         paymentMethodId: paymentMethod.id,
       });
 
-      setSuccessMessage("Payment method added successfully.");
+      setSuccessMessage(translate("Payment method added successfully."));
 
       resetAddCardForm();
     } catch (error) {
-      setErrorMessage(getApiError(error, "Unable to add payment method."));
+      setErrorMessage(
+        getApiError(error, translate("Unable to add payment method.")),
+      );
     }
   };
 
@@ -173,15 +180,20 @@ export default function PaymentMethods({ subscriptionId }) {
       await refetch();
       if (response?.data?.success)
         setSuccessMessage(
-          response?.data?.message || "Default payment method updated.",
+          response?.data?.message ||
+            translate("Default payment method updated."),
         );
       else
         setSuccessMessage(
-          response?.data?.message || "Something went wrong, Try again.",
+          response?.data?.message ||
+            translate("Something went wrong, Try again."),
         );
     } catch (error) {
       setErrorMessage(
-        getApiError(error, "Unable to update default payment method."),
+        getApiError(
+          error,
+          translate("Unable to update default payment method."),
+        ),
       );
     } finally {
       setUpdatingCardId(null);
@@ -208,17 +220,21 @@ export default function PaymentMethods({ subscriptionId }) {
       });
       if (response?.data?.success) {
         setSuccessMessage(
-          response?.data?.message || "Payment method removed successfully.",
+          response?.data?.message ||
+            translate("Payment method removed successfully."),
         );
         setDeleteModalOpen(false);
         setSelectedCard(null);
       } else {
         setSuccessMessage(
-          response?.data?.message || "Something went wrong, Try again.",
+          response?.data?.message ||
+            translate("Something went wrong, Try again."),
         );
       }
     } catch (error) {
-      setErrorMessage(getApiError(error, "Unable to remove payment method."));
+      setErrorMessage(
+        getApiError(error, translate("Unable to remove payment method.")),
+      );
     } finally {
       setUpdatingCardId(null);
     }
@@ -265,12 +281,13 @@ export default function PaymentMethods({ subscriptionId }) {
 
             <div>
               <h2 className="text-base font-semibold text-gray-900 dark:text-white">
-                Payment Methods
+                {translate("Payment Methods")}
               </h2>
 
               <p className="mt-1 text-sm text-gray-500 dark:text-gray-400">
-                Payment methods will be available after you have an active
-                subscription.
+                {translate(
+                  "Payment methods will be available after you have an active subscription.",
+                )}
               </p>
             </div>
           </div>
@@ -330,11 +347,13 @@ export default function PaymentMethods({ subscriptionId }) {
 
             <div>
               <h2 className="text-base font-semibold text-gray-900 dark:text-white">
-                Payment Methods
+                {translate("Payment Methods")}
               </h2>
 
               <p className="mt-1 text-xs text-gray-500 dark:text-gray-400">
-                Manage your saved cards and default payment method.
+                {translate(
+                  "Manage your saved cards and default payment method.",
+                )}
               </p>
             </div>
           </div>
@@ -363,12 +382,12 @@ export default function PaymentMethods({ subscriptionId }) {
             {showAddCard ? (
               <>
                 <X size={16} />
-                Cancel
+                {translate("Cancel")}
               </>
             ) : (
               <>
                 <Plus size={16} />
-                Add Card
+                {translate("Add Card")}
               </>
             )}
           </button>
@@ -448,11 +467,13 @@ export default function PaymentMethods({ subscriptionId }) {
 
                 <div>
                   <h3 className="text-sm font-semibold text-gray-900 dark:text-white">
-                    Add a new card
+                    {translate("Add a new card")}
                   </h3>
 
                   <p className="mt-1 text-xs text-gray-500 dark:text-gray-400">
-                    Your card details are securely handled by Stripe.
+                    {translate(
+                      "Your card details are securely handled by Stripe.",
+                    )}
                   </p>
                 </div>
               </div>
@@ -537,12 +558,12 @@ export default function PaymentMethods({ subscriptionId }) {
                   {addPaymentMethod.isPending ? (
                     <>
                       <Loader2 size={16} className="animate-spin" />
-                      Adding...
+                      {translate("Adding...")}
                     </>
                   ) : (
                     <>
                       <Plus size={16} />
-                      Add Card
+                      {translate("Add Card")}
                     </>
                   )}
                 </button>
@@ -574,7 +595,7 @@ export default function PaymentMethods({ subscriptionId }) {
             >
               {getApiError(
                 paymentMethodsError,
-                "Unable to load payment methods.",
+                translate("Unable to load payment methods."),
               )}
             </div>
           ) : paymentMethods.length === 0 ? (
@@ -592,12 +613,13 @@ export default function PaymentMethods({ subscriptionId }) {
               <CreditCard size={32} className="mx-auto text-gray-400" />
 
               <h3 className="mt-3 text-sm font-semibold text-gray-900 dark:text-white">
-                No saved cards
+                {translate("No saved cards")}
               </h3>
 
               <p className="mt-1 text-xs text-gray-500 dark:text-gray-400">
-                Add a payment method to make future subscription payments
-                easier.
+                {translate(
+                  "Add a payment method to make future subscription payments easier.",
+                )}
               </p>
             </div>
           ) : (
@@ -652,7 +674,10 @@ export default function PaymentMethods({ subscriptionId }) {
                       <div className="min-w-0">
                         <div className="flex flex-wrap items-center gap-2">
                           <p className="text-sm font-semibold text-gray-900 dark:text-white">
-                            {getCardBrand(card?.card?.brand)} ••••{" "}
+                            {getCardBrand(
+                              card?.card?.brand,
+                              translate("Card"),
+                            )}{" "}
                             {card?.card?.last4 ||
                               card?.card?.lastFour ||
                               "----"}
@@ -675,7 +700,7 @@ export default function PaymentMethods({ subscriptionId }) {
                               "
                             >
                               <Star size={11} />
-                              Default
+                              {translate("Default")}
                             </span>
                           )}
                         </div>
@@ -686,7 +711,7 @@ export default function PaymentMethods({ subscriptionId }) {
                                 2,
                                 "0",
                               )}/${String(card.exp_year).slice(-2)}`
-                            : "Saved payment method"}
+                            : translate("Saved payment method")}
                         </p>
                       </div>
                     </div>
@@ -725,7 +750,7 @@ export default function PaymentMethods({ subscriptionId }) {
                           ) : (
                             <Check size={14} />
                           )}
-                          Make Default
+                          {translate("Make Default")}
                         </button>
                       )}
 
@@ -735,8 +760,10 @@ export default function PaymentMethods({ subscriptionId }) {
                         onClick={() => openDeleteModal(card)}
                         title={
                           paymentMethods.length === 1
-                            ? "At least one payment method is required"
-                            : "Remove card"
+                            ? translate(
+                                "At least one payment method is required",
+                              )
+                            : translate("Remove card")
                         }
                         className="
                           inline-flex
@@ -769,7 +796,7 @@ export default function PaymentMethods({ subscriptionId }) {
 
           {isFetching && !isLoading && (
             <div className="mt-3 text-right text-[11px] text-gray-400">
-              Updating payment methods...
+              {translate("Updating payment methods...")}
             </div>
           )}
         </div>
@@ -785,18 +812,24 @@ export default function PaymentMethods({ subscriptionId }) {
         }}
         onConfirm={handleDeleteCard}
         loading={removePaymentMethod.isPending}
-        title="Remove Payment Method?"
+        title={translate("Remove Payment Method?")}
         message={
           selectedCard
-            ? `Are you sure you want to remove ${getCardBrand(
-                selectedCard.card.brand,
-              )} ending in ${selectedCard.card.last4 || "----"}?`
-            : "Are you sure you want to remove this payment method?"
+            ? translate("Are you sure you want to remove {brand} ending in {last4}?", {
+                brand: getCardBrand(
+                  selectedCard.card.brand,
+                  translate("Card"),
+                ),
+                last4: selectedCard.card.last4 || "----",
+              })
+            : translate("Are you sure you want to remove this payment method?")
         }
         confirmText={
-          removePaymentMethod.isPending ? "Removing..." : "Remove Card"
+          removePaymentMethod.isPending
+            ? translate("Removing...")
+            : translate("Remove Card")
         }
-        cancelText="Cancel"
+        cancelText={translate("Cancel")}
         danger
       />
     </>

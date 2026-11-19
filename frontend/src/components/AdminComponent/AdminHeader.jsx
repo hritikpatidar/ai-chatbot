@@ -15,11 +15,14 @@ import { useNavigate } from "react-router-dom";
 import { handleLogout } from "../../utils/logout";
 import NotificationDropdown from "../common/NotificationDropdown";
 import ConfirmModal from "../ClientComponent/ConfirmModal";
+import LanguageSwitcher from "../common/LanguageSwitcher";
+import { useLanguage } from "../../context/LanguageContext";
 
 export default function AdminHeader({ onMenuClick, collapsed }) {
   const dispatch = useDispatch();
   const navigate = useNavigate();
   const { isDarkMode, toggleTheme } = useTheme();
+  const { t } = useLanguage();
   const [isLogoutLoading, setIsLogoutLoading] = useState(false);
   const [logOutModalOpen, setLogOutModalOpen] = useState(false);
   const [isProfileOpen, setIsProfileOpen] = useState(false);
@@ -27,7 +30,7 @@ export default function AdminHeader({ onMenuClick, collapsed }) {
     (store) => store.authReducer.AuthSlice,
   );
   const profileRef = useRef(null);
-  const fullName = profileDetails?.fullName || "Administrator";
+  const fullName = profileDetails?.fullName || t("Administrator");
   const email = profileDetails?.email || "admin@example.com";
   const profileImage = profileDetails?.profileImage || "";
 
@@ -121,7 +124,7 @@ export default function AdminHeader({ onMenuClick, collapsed }) {
               dark:text-white
             "
             >
-              Admin Dashboard
+              {t("Admin Dashboard")}
             </p>
 
             <p
@@ -131,7 +134,7 @@ export default function AdminHeader({ onMenuClick, collapsed }) {
               dark:text-gray-400
             "
             >
-              Manage your chatbot platform
+              {t("Manage your chatbot platform")}
             </p>
           </div>
 
@@ -164,7 +167,7 @@ export default function AdminHeader({ onMenuClick, collapsed }) {
 
             <input
               type="text"
-              placeholder="Search..."
+              placeholder={t("Search...")}
               className="
               w-full
               bg-transparent
@@ -194,12 +197,13 @@ export default function AdminHeader({ onMenuClick, collapsed }) {
         </div>
 
         <div className="flex items-center gap-2 sm:gap-3">
+          <LanguageSwitcher />
           {/* Theme */}
 
           <button
             type="button"
             onClick={toggleTheme}
-            title="Toggle theme"
+            title={t("Toggle theme")}
             className="
             flex
             h-10
@@ -440,7 +444,7 @@ export default function AdminHeader({ onMenuClick, collapsed }) {
                 "
                 >
                   <User size={15} />
-                  Profile
+                  {t("Profile")}
                 </button>
 
                 {/* Logout */}
@@ -464,7 +468,7 @@ export default function AdminHeader({ onMenuClick, collapsed }) {
                 "
                 >
                   <LogOut size={15} />
-                  Logout
+                  {t("Logout")}
                 </button>
               </div>
             )}
@@ -478,12 +482,12 @@ export default function AdminHeader({ onMenuClick, collapsed }) {
         }}
         onConfirm={handleAuth}
         loading={isLogoutLoading}
-        title="Logout Confirmation"
+        title={t("Logout Confirmation")}
         message={
-          "Are you sure you want to logout? You will need to login again to access your account."
+          t("Are you sure you want to logout? You will need to login again to access your account.")
         }
-        confirmText={isLogoutLoading ? "Logging out..." : "Logout"}
-        cancelText="Cancel"
+        confirmText={isLogoutLoading ? t("Logging out...") : t("Logout")}
+        cancelText={t("Cancel")}
         danger
       />
     </>

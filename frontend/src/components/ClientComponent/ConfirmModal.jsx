@@ -1,4 +1,6 @@
 import { AlertTriangle, X } from "lucide-react";
+import { useLanguage } from "../../context/LanguageContext";
+import { translateShared } from "../../context/translations/sharedComponents";
 
 export default function ConfirmModal({
   isOpen,
@@ -11,6 +13,8 @@ export default function ConfirmModal({
   loading = false,
   danger = true,
 }) {
+  const { t, language } = useLanguage();
+
   if (!isOpen) return null;
 
   return (
@@ -67,7 +71,7 @@ export default function ConfirmModal({
             </div>
 
             <h2 className="text-base font-semibold text-gray-900 dark:text-white">
-              {title}
+              {translateShared(title, t, language)}
             </h2>
           </div>
 
@@ -95,7 +99,7 @@ export default function ConfirmModal({
 
         <div className="px-5 py-5">
           <p className="text-sm leading-6 text-gray-600 dark:text-gray-400">
-            {message}
+            {translateShared(message, t, language)}
           </p>
         </div>
 
@@ -134,7 +138,7 @@ export default function ConfirmModal({
               dark:hover:bg-white/10
             "
           >
-            {cancelText}
+            {translateShared(cancelText, t, language)}
           </button>
 
           <button
@@ -156,7 +160,9 @@ export default function ConfirmModal({
               }
             `}
           >
-            {loading ? "Processing..." : confirmText}
+            {loading
+              ? translateShared("Processing...", t, language)
+              : translateShared(confirmText, t, language)}
           </button>
         </div>
       </div>

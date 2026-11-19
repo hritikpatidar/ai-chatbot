@@ -6,6 +6,8 @@ import { z } from "zod";
 
 import CustomSelect from "../../common/CustomSelect";
 import { faqSchema } from "../../../utils/validation";
+import { useLanguage } from "../../../context/LanguageContext";
+import { translateShared } from "../../../context/translations/sharedComponents";
 /* =========================================================
    DEFAULT VALUES
 ========================================================= */
@@ -27,6 +29,8 @@ export default function FAQModal({
 }) {
   const isEdit = Boolean(faq);
 
+  const { t, language } = useLanguage();
+  const translate = (text) => translateShared(text, t, language);
   const {
     register,
     handleSubmit,
@@ -125,13 +129,13 @@ export default function FAQModal({
         >
           <div>
             <h2 className="text-base font-semibold text-gray-900 dark:text-white">
-              {isEdit ? "Edit FAQ" : "Add FAQ"}
+              {translate(isEdit ? "Edit FAQ" : "Add FAQ")}
             </h2>
 
             <p className="mt-0.5 text-xs text-gray-500 dark:text-gray-400">
               {isEdit
-                ? "Update your frequently asked question."
-                : "Create a new frequently asked question."}
+                ? translate("Update your frequently asked question.")
+                : translate("Create a new frequently asked question.")}
             </p>
           </div>
 
@@ -178,13 +182,16 @@ export default function FAQModal({
                   dark:text-gray-300
                 "
               >
-                Question <span className="text-red-500">*</span>
+                {translate("Question")}{" "}
+                <span className="text-red-500">*</span>
               </label>
 
               <input
                 id="question"
                 {...register("question")}
-                placeholder="e.g. What are your delivery timings?"
+                placeholder={translate(
+                  "e.g. What are your delivery timings?",
+                )}
                 disabled={loading}
                 className={`
                   w-full rounded-xl
@@ -240,13 +247,13 @@ export default function FAQModal({
                   dark:text-gray-300
                 "
               >
-                Answer <span className="text-red-500">*</span>
+                {translate("Answer")} <span className="text-red-500">*</span>
               </label>
 
               <textarea
                 id="answer"
                 {...register("answer")}
-                placeholder="Write the answer..."
+                placeholder={translate("Write the answer...")}
                 rows={5}
                 disabled={loading}
                 className={`
@@ -307,13 +314,13 @@ export default function FAQModal({
                     dark:text-gray-300
                   "
                 >
-                  Category
+                  {translate("Category")}
                 </label>
 
                 <input
                   id="category"
                   {...register("category")}
-                  placeholder="e.g. Delivery"
+                  placeholder={translate("e.g. Delivery")}
                   disabled={loading}
                   className={`
                     w-full rounded-xl
@@ -367,7 +374,7 @@ export default function FAQModal({
                     dark:text-gray-300
                   "
                 >
-                  Status
+                  {translate("Status")}
                 </label>
 
                 <Controller
@@ -383,11 +390,11 @@ export default function FAQModal({
                       options={[
                         {
                           value: "active",
-                          label: "Active",
+                          label: translate("Active"),
                         },
                         {
                           value: "inactive",
-                          label: "Inactive",
+                          label: translate("Inactive"),
                         },
                       ]}
                     />
@@ -416,13 +423,13 @@ export default function FAQModal({
                   dark:text-gray-300
                 "
               >
-                Keywords
+                {translate("Keywords")}
               </label>
 
               <input
                 id="keywords"
                 {...register("keywords")}
-                placeholder="delivery, shipping, order"
+                placeholder={translate("delivery, shipping, order")}
                 disabled={loading}
                 className={`
                   w-full rounded-xl
@@ -458,7 +465,7 @@ export default function FAQModal({
               />
 
               <p className="mt-1.5 text-[11px] text-gray-400 dark:text-gray-500">
-                Separate multiple keywords using commas.
+                {translate("Separate multiple keywords using commas.")}
               </p>
 
               {errors.keywords && (
@@ -501,7 +508,7 @@ export default function FAQModal({
                 dark:hover:bg-white/10
               "
             >
-              Cancel
+              {translate("Cancel")}
             </button>
 
             <button
@@ -529,12 +536,12 @@ export default function FAQModal({
                     size={15}
                     className="animate-spin"
                   />
-                  Saving...
+                  {translate("Saving...")}
                 </>
               ) : (
                 <>
                   <Save size={15} />
-                  {isEdit ? "Update FAQ" : "Create FAQ"}
+                  {translate(isEdit ? "Update FAQ" : "Create FAQ")}
                 </>
               )}
             </button>

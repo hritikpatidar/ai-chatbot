@@ -5,6 +5,8 @@ import { Save, Ticket, X } from "lucide-react";
 
 import CustomSelect from "../../common/CustomSelect";
 import { ticketSchema } from "../../../utils/validation";
+import { useLanguage } from "../../../context/LanguageContext";
+import { translateShared } from "../../../context/translations/sharedComponents";
 
 const INITIAL_FORM = {
   subject: "",
@@ -56,6 +58,8 @@ export default function TicketModal({
 }) {
   const isEdit = Boolean(ticket?._id);
 
+  const { t, language } = useLanguage();
+  const translate = (text) => translateShared(text, t, language);
   const {
     register,
     control,
@@ -200,13 +204,13 @@ export default function TicketModal({
 
             <div className="min-w-0">
               <h2 className="truncate text-base font-semibold text-gray-900 dark:text-white">
-                {isEdit ? "Edit Ticket" : "Create Ticket"}
+                {translate(isEdit ? "Edit Ticket" : "Create Ticket")}
               </h2>
 
               <p className="mt-0.5 text-xs text-gray-500 dark:text-gray-400">
                 {isEdit
-                  ? "Update ticket information."
-                  : "Create a new support ticket."}
+                  ? translate("Update ticket information.")
+                  : translate("Create a new support ticket.")}
               </p>
             </div>
           </div>
@@ -254,13 +258,14 @@ export default function TicketModal({
                   dark:text-gray-300
                 "
               >
-                Subject <span className="ml-1 text-red-500">*</span>
+                {translate("Subject")}{" "}
+                <span className="ml-1 text-red-500">*</span>
               </label>
 
               <input
                 id="ticket-subject"
                 type="text"
-                placeholder="Enter ticket subject"
+                placeholder={translate("Enter ticket subject")}
                 maxLength={150}
                 disabled={true}
                 className={`
@@ -300,7 +305,7 @@ export default function TicketModal({
                     dark:text-gray-300
                   "
                 >
-                  Priority
+                  {translate("Priority")}
                 </label>
 
                 <Controller
@@ -335,7 +340,7 @@ export default function TicketModal({
                       dark:text-gray-300
                     "
                   >
-                    Status
+                    {translate("Status")}
                   </label>
 
                   <Controller
@@ -371,12 +376,13 @@ export default function TicketModal({
                   dark:text-gray-300
                 "
               >
-                Description <span className="ml-1 text-red-500">*</span>
+                {translate("Description")}{" "}
+                <span className="ml-1 text-red-500">*</span>
               </label>
 
               <textarea
                 id="ticket-description"
-                placeholder="Describe your issue or request..."
+                placeholder={translate("Describe your issue or request...")}
                 rows={6}
                 maxLength={2000}
                 disabled={true}
@@ -449,7 +455,7 @@ export default function TicketModal({
                 dark:hover:bg-white/10
               "
             >
-              Cancel
+              {translate("Cancel")}
             </button>
 
             <button
@@ -476,10 +482,10 @@ export default function TicketModal({
               <Save size={16} />
 
               {isSaving
-                ? "Saving..."
+                ? translate("Saving...")
                 : isEdit
-                  ? "Update Ticket"
-                  : "Create Ticket"}
+                  ? translate("Update Ticket")
+                  : translate("Create Ticket")}
             </button>
           </div>
         </form>

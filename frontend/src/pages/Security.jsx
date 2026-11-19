@@ -16,9 +16,14 @@ import {
 import { useNavigate } from "react-router-dom";
 import { useState } from "react";
 import ChangePasswordModal from "../components/ChangePasswordModal";
+import { useLanguage } from "../context/LanguageContext";
+import accountScreens from "../context/translations/accountScreens";
 
 export default function Security() {
   const navigate = useNavigate();
+  const { t: translate, language } = useLanguage();
+  const t = (key) =>
+    language === "hi" ? accountScreens[key] || translate(key) : key;
 
   const [openChangePasswordModal, setOpenChangePasswordModal] = useState(false);
 
@@ -68,8 +73,8 @@ export default function Security() {
           <button
             type="button"
             onClick={() => navigate(-1)}
-            aria-label="Go back"
-            title="Go Back"
+            aria-label={t("Go back")}
+            title={t("Go Back")}
             className="
               group
               flex
@@ -124,7 +129,7 @@ export default function Security() {
                 md:text-3xl
               "
             >
-              Security
+              {t("Security")}
             </h1>
 
             <p
@@ -138,7 +143,7 @@ export default function Security() {
                 sm:text-sm
               "
             >
-              Manage your password, security settings and active sessions.
+              {t("Manage your password, security settings and active sessions.")}
             </p>
           </div>
         </motion.div>
@@ -197,7 +202,7 @@ export default function Security() {
 
               <div className="min-w-0">
                 <h2 className="text-base font-semibold sm:text-lg">
-                  Account Security
+                  {t("Account Security")}
                 </h2>
 
                 <p
@@ -210,7 +215,7 @@ export default function Security() {
                     sm:text-sm
                   "
                 >
-                  Your account security is currently in good condition.
+                  {t("Your account security is currently in good condition.")}
                 </p>
               </div>
             </div>
@@ -235,7 +240,7 @@ export default function Security() {
               "
             >
               <CheckCircle2 size={14} />
-              Secure
+              {t("Secure")}
             </div>
           </div>
         </motion.div>
@@ -285,11 +290,11 @@ export default function Security() {
 
                 <div className="min-w-0">
                   <h2 className="text-base font-semibold sm:text-lg">
-                    Password
+                    {t("Password")}
                   </h2>
 
                   <p className="mt-1 text-xs text-gray-500 dark:text-gray-400">
-                    Manage your account password.
+                    {t("Manage your account password.")}
                   </p>
                 </div>
               </div>
@@ -312,7 +317,7 @@ export default function Security() {
 
                 <div className="min-w-0">
                   <p className="text-sm font-medium">
-                    Keep your password secure
+                    {t("Keep your password secure")}
                   </p>
 
                   <p
@@ -324,7 +329,7 @@ export default function Security() {
                       dark:text-gray-400
                     "
                   >
-                    Use a strong password and avoid sharing it with anyone.
+                    {t("Use a strong password and avoid sharing it with anyone.")}
                   </p>
                 </div>
               </div>
@@ -359,7 +364,7 @@ export default function Security() {
                 dark:hover:text-blue-400
               "
             >
-              Change Password
+              {t("Change Password")}
             </button>
           </motion.div>
 
@@ -404,11 +409,11 @@ export default function Security() {
 
               <div className="min-w-0">
                 <h2 className="text-base font-semibold sm:text-lg">
-                  Two-Factor Authentication
+                  {t("Two-Factor Authentication")}
                 </h2>
 
                 <p className="mt-1 text-xs text-gray-500 dark:text-gray-400">
-                  Add an extra layer of protection.
+                  {t("Add an extra layer of protection.")}
                 </p>
               </div>
             </div>
@@ -431,7 +436,7 @@ export default function Security() {
 
                 <div>
                   <p className="text-sm font-medium text-yellow-700 dark:text-yellow-400">
-                    Not enabled
+                    {t("Not enabled")}
                   </p>
 
                   <p
@@ -443,8 +448,9 @@ export default function Security() {
                       dark:text-yellow-400/70
                     "
                   >
-                    Enable two-factor authentication to improve account
-                    protection.
+                    {t(
+                      "Enable two-factor authentication to improve account protection.",
+                    )}
                   </p>
                 </div>
               </div>
@@ -471,7 +477,7 @@ export default function Security() {
                 active:scale-[0.98]
               "
             >
-              Enable 2FA
+              {t("Enable 2FA")}
             </button>
           </motion.div>
 
@@ -517,11 +523,11 @@ export default function Security() {
 
                 <div>
                   <h2 className="text-base font-semibold sm:text-lg">
-                    Active Sessions
+                    {t("Active Sessions")}
                   </h2>
 
                   <p className="mt-1 text-xs text-gray-500 dark:text-gray-400">
-                    Devices currently signed in.
+                    {t("Devices currently signed in.")}
                   </p>
                 </div>
               </div>
@@ -538,7 +544,7 @@ export default function Security() {
                   dark:text-green-400
                 "
               >
-                1 Active
+                {t("1 Active")}
               </span>
             </div>
 
@@ -573,7 +579,9 @@ export default function Security() {
 
                 <div className="min-w-0 flex-1">
                   <div className="flex flex-wrap items-center gap-2">
-                    <p className="text-sm font-medium">Current Device</p>
+                    <p className="text-sm font-medium">
+                      {t("Current Device")}
+                    </p>
 
                     <span
                       className="
@@ -587,7 +595,7 @@ export default function Security() {
                         dark:text-green-400
                       "
                     >
-                      Active
+                      {t("Active")}
                     </span>
                   </div>
 
@@ -597,7 +605,7 @@ export default function Security() {
 
                   <p className="mt-1 flex items-center gap-1 text-[11px] text-gray-400">
                     <Clock size={12} />
-                    Active now
+                    {t("Active now")}
                   </p>
                 </div>
               </div>
@@ -632,7 +640,7 @@ export default function Security() {
               "
             >
               <LogOut size={16} />
-              Sign Out Other Devices
+              {t("Sign Out Other Devices")}
             </button>
           </motion.div>
 
@@ -677,11 +685,11 @@ export default function Security() {
 
               <div>
                 <h2 className="text-base font-semibold sm:text-lg">
-                  Security Recommendations
+                  {t("Security Recommendations")}
                 </h2>
 
                 <p className="mt-1 text-xs text-gray-500 dark:text-gray-400">
-                  Keep your account protected.
+                  {t("Keep your account protected.")}
                 </p>
               </div>
             </div>
@@ -707,10 +715,12 @@ export default function Security() {
                 />
 
                 <div>
-                  <p className="text-sm font-medium">Use a strong password</p>
+                  <p className="text-sm font-medium">
+                    {t("Use a strong password")}
+                  </p>
 
                   <p className="mt-1 text-xs leading-5 text-gray-500 dark:text-gray-400">
-                    Avoid common passwords and reuse across multiple services.
+                    {t("Avoid common passwords and reuse across multiple services.")}
                   </p>
                 </div>
               </div>
@@ -736,11 +746,11 @@ export default function Security() {
 
                 <div>
                   <p className="text-sm font-medium">
-                    Keep your sessions secure
+                    {t("Keep your sessions secure")}
                   </p>
 
                   <p className="mt-1 text-xs leading-5 text-gray-500 dark:text-gray-400">
-                    Sign out from devices you no longer use.
+                    {t("Sign out from devices you no longer use.")}
                   </p>
                 </div>
               </div>
@@ -766,11 +776,11 @@ export default function Security() {
 
                 <div>
                   <p className="text-sm font-medium">
-                    Enable two-factor authentication
+                    {t("Enable two-factor authentication")}
                   </p>
 
                   <p className="mt-1 text-xs leading-5 text-gray-500 dark:text-gray-400">
-                    Add another verification step when signing in.
+                    {t("Add another verification step when signing in.")}
                   </p>
                 </div>
               </div>

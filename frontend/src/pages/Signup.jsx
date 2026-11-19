@@ -9,8 +9,11 @@ import { signupService } from "../service/Auth/AuthServices";
 import toast from "react-hot-toast";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
+import LanguageSwitcher from "../components/common/LanguageSwitcher";
+import { useLanguage } from "../context/LanguageContext";
 
 export default function Signup() {
+  const { t } = useLanguage();
   const navigate = useNavigate();
   const dispatch = useDispatch();
 
@@ -44,7 +47,7 @@ export default function Signup() {
       });
 
       if (response.data.success) {
-        toast.success(response.data.message || "Account created successfully.");
+        toast.success(t(response.data.message || "Account created successfully."));
 
         navigate("/otp-verification", {
           state: {
@@ -53,12 +56,14 @@ export default function Signup() {
           },
         });
       } else {
-        toast.error(response.data.message || "Failed to create account.");
+        toast.error(t(response.data.message || "Failed to create account."));
       }
     } catch (error) {
       console.error(error);
 
-      toast.error(error.response?.data?.message || "Failed to create account.");
+      toast.error(
+        t(error.response?.data?.message || "Failed to create account."),
+      );
     }
   };
 
@@ -76,6 +81,9 @@ export default function Signup() {
         dark:text-white
       "
     >
+      <div className="absolute right-4 top-4 z-20">
+        <LanguageSwitcher />
+      </div>
       {/* Background */}
       {/* <AnimatedBackground /> */}
 
@@ -288,7 +296,7 @@ export default function Signup() {
                 dark:text-white
               "
             >
-              Join AI Assistant
+              {t("Join AI Assistant")}
             </motion.h1>
 
             {/* Description */}
@@ -310,8 +318,7 @@ export default function Signup() {
                 dark:text-gray-400
               "
             >
-              Create your account and unlock powerful AI tools, conversations,
-              image generation and much more.
+              {t("Create your account and unlock powerful AI tools, conversations, image generation and much more.")}
             </motion.p>
           </div>
         </motion.div>
@@ -378,7 +385,7 @@ export default function Signup() {
                 dark:text-white
               "
             >
-              Create Account 🚀
+              {t("Create Account 🚀")}
             </motion.h2>
 
             <p
@@ -389,7 +396,7 @@ export default function Signup() {
                 dark:text-gray-400
               "
             >
-              Fill your details to get started.
+              {t("Fill your details to get started.")}
             </p>
 
             <motion.form
@@ -425,7 +432,7 @@ export default function Signup() {
                     dark:text-gray-300
                   "
                 >
-                  Full Name{" "}
+                  {t("Full Name")}{" "}
                   <span className="text-red-500 dark:text-red-400">*</span>
                 </label>
 
@@ -448,7 +455,7 @@ export default function Signup() {
 
                   <input
                     type="text"
-                    placeholder="Enter your full name"
+                    placeholder={t("Enter your full name")}
                     {...register("fullName")}
                     className="
                       w-full
@@ -495,7 +502,7 @@ export default function Signup() {
                     dark:text-gray-300
                   "
                 >
-                  Email Address{" "}
+                  {t("Email Address")}{" "}
                   <span className="text-red-500 dark:text-red-400">*</span>
                 </label>
 
@@ -518,7 +525,7 @@ export default function Signup() {
 
                   <input
                     type="email"
-                    placeholder="Enter your email"
+                    placeholder={t("Enter your email")}
                     {...register("email")}
                     className="
                       w-full
@@ -565,7 +572,7 @@ export default function Signup() {
                     dark:text-gray-300
                   "
                 >
-                  Password{" "}
+                  {t("Password")}{" "}
                   <span className="text-red-500 dark:text-red-400">*</span>
                 </label>
 
@@ -588,7 +595,7 @@ export default function Signup() {
 
                   <input
                     type={showPassword ? "text" : "password"}
-                    placeholder="Create password"
+                    placeholder={t("Create password")}
                     {...register("password")}
                     className="
                       w-full
@@ -653,7 +660,7 @@ export default function Signup() {
                     dark:text-gray-300
                   "
                 >
-                  Confirm Password{" "}
+                  {t("Confirm Password")}{" "}
                   <span className="text-red-500 dark:text-red-400">*</span>
                 </label>
 
@@ -676,7 +683,7 @@ export default function Signup() {
 
                   <input
                     type={showConfirmPassword ? "text" : "password"}
-                    placeholder="Confirm password"
+                    placeholder={t("Confirm password")}
                     {...register("confirmPassword")}
                     className="
                       w-full
@@ -816,7 +823,9 @@ export default function Signup() {
                   disabled:opacity-60
                 "
               >
-                {isSubmitting ? "Creating Account..." : "Create Account"}
+                {isSubmitting
+                  ? t("Creating Account...")
+                  : t("Create Account")}
               </motion.button>
 
               <div className="flex items-center gap-3">
@@ -829,7 +838,7 @@ export default function Signup() {
                   "
                 />
 
-                <span className="text-sm text-gray-500">OR</span>
+                <span className="text-sm text-gray-500">{t("OR")}</span>
 
                 <div
                   className="
@@ -869,7 +878,7 @@ export default function Signup() {
                   alt="Google"
                   className="h-5 w-5"
                 />
-                Continue with Google
+                {t("Continue with Google")}
               </button>
             </motion.form>
 
@@ -899,7 +908,7 @@ export default function Signup() {
                   dark:hover:text-blue-300
                 "
               >
-                Login
+                {t("Login")}
               </button>
             </p>
           </motion.div>

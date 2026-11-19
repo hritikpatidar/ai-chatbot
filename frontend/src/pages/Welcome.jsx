@@ -44,8 +44,10 @@ import ClientNotFound from "../components/ClientNotFound";
 import { useSocket } from "../context/SocketContext";
 import { onAIError, removeAIError } from "../service/message.services";
 import toast from "react-hot-toast";
+import { useLanguage } from "../context/LanguageContext";
 
 export default function Welcome() {
+  const { t } = useLanguage();
   const {
     isSendDisable,
     message,
@@ -121,7 +123,7 @@ export default function Welcome() {
       navigate("/", {
         replace: true,
       });
-      toast.error(data?.message || "Somthing went wrong", {
+      toast.error(data?.message || t("Something went wrong"), {
         id: "conversation-error",
       });
     };
@@ -168,9 +170,9 @@ export default function Welcome() {
     chatbot?.name || `${clientConfig?.businessName || "Business"} Assistant`;
   const welcomeMessage =
     chatbot?.welcomeMessage ||
-    `Hi 👋 Welcome to ${
-      clientConfig?.businessName || "our business"
-    }! How can I help you today?`;
+    t("Hi 👋 Welcome to {business}! How can I help you today?", {
+      business: clientConfig?.businessName || "our business",
+    });
 
   const predefinedQuestions =
     chatbot?.predefinedQuestions
@@ -303,7 +305,7 @@ export default function Welcome() {
                 dark:text-white
               "
             >
-              {getGreeting()},
+              {t(getGreeting())},
               <span
                 className="
                   bg-linear-to-r
@@ -332,7 +334,7 @@ export default function Welcome() {
                 dark:text-gray-400
               "
             >
-              Can I help you with anything today?
+              {t("Can I help you with anything today?")}
             </p>
           </div>
 
@@ -494,7 +496,7 @@ export default function Welcome() {
                     e.currentTarget.form.requestSubmit();
                   }
                 }}
-                placeholder="Message AI Chat..."
+                placeholder={t("Message AI Chat...")}
                 className="
                   min-h-10
                   max-h-40
@@ -596,7 +598,7 @@ export default function Welcome() {
                   >
                     <Globe size={16} />
 
-                    <span className="hidden text-xs lg:inline">Search web</span>
+                    <span className="hidden text-xs lg:inline">{t("Search web")}</span>
                   </button>
                 </div>
 
@@ -741,8 +743,10 @@ export default function Welcome() {
               "
             >
               {clientConfig?.businessName
-                ? `Ask anything about ${clientConfig.businessName}`
-                : "How can I help you today?"}
+                ? t("Ask anything about {business}", {
+                    business: clientConfig.businessName,
+                  })
+                : t("How can I help you today?")}
             </p>
           </div>
 
@@ -959,8 +963,10 @@ export default function Welcome() {
                 }}
                 placeholder={
                   clientConfig?.businessName
-                    ? `Ask ${clientConfig.businessName} anything...`
-                    : "Ask anything..."
+                    ? t("Ask {business} anything...", {
+                        business: clientConfig.businessName,
+                      })
+                    : t("Ask anything...")
                 }
                 className="
                   min-h-10
@@ -1097,7 +1103,7 @@ export default function Welcome() {
                   >
                     <Globe size={16} />
 
-                    <span className="hidden text-xs lg:inline">Search web</span>
+                    <span className="hidden text-xs lg:inline">{t("Search web")}</span>
                   </button>
                 </div>
 
@@ -1197,12 +1203,12 @@ export default function Welcome() {
                   "
                 />
 
-                <span>Loading questions...</span>
+                <span>{t("Loading questions...")}</span>
               </div>
             ) : predefinedQuestions.length > 0 ? (
               <div>
                 <p className="mb-3 text-center text-xs font-medium text-gray-500 dark:text-gray-400">
-                  You can ask
+                  {t("You can ask")}
                 </p>
 
                 <div className="flex flex-wrap justify-center gap-2">

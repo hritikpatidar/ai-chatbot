@@ -1,19 +1,21 @@
 import { Check, ArrowRight } from "lucide-react";
 import { useNavigate } from "react-router-dom";
+import { useLanguage } from "../../context/LanguageContext";
 
 const PlanCard = ({ plan, currentPlanId, currentPlan, onSelect }) => {
+  const { t } = useLanguage();
   const navigate = useNavigate();
   const isCurrent = currentPlanId === plan.name || currentPlanId === plan._id;
   const isUpgrade =
     currentPlan && Number(plan.sortOrder) > Number(currentPlan.sortOrder);
 
   const actionText = !currentPlan
-    ? "Choose Plan"
+    ? t("Choose Plan")
     : isCurrent
-      ? "Current Plan"
+      ? t("Current Plan")
       : isUpgrade
-        ? `Upgrade to ${plan.name}`
-        : `Downgrade to ${plan.name}`;
+        ? t("Upgrade to {planName}", { planName: plan.name })
+        : t("Downgrade to {planName}", { planName: plan.name });
   return (
     <div
       className={`
@@ -37,7 +39,7 @@ const PlanCard = ({ plan, currentPlanId, currentPlan, onSelect }) => {
     >
       {isCurrent && (
         <div className="absolute right-5 top-5 rounded-full bg-emerald-100 px-3 py-1 text-xs font-semibold text-emerald-700 dark:bg-emerald-500/10 dark:text-emerald-400">
-          Current Plan
+          {t("Current Plan")}
         </div>
       )}
 
@@ -59,7 +61,7 @@ const PlanCard = ({ plan, currentPlanId, currentPlan, onSelect }) => {
                   {(Number(plan.amount) / 100).toFixed(2)}
           </span>
 
-          <span className="mb-1 text-sm text-gray-500">/ {plan.interval}</span>
+          <span className="mb-1 text-sm text-gray-500">/ {t(plan.interval)}</span>
         </div>
       </div>
 
@@ -122,7 +124,7 @@ const PlanCard = ({ plan, currentPlanId, currentPlan, onSelect }) => {
               hover:bg-indigo-700
             "
           >
-            View Details
+            {t("View Details")}
             {isCurrent && <ArrowRight size={17} />}
           </button>
         )}

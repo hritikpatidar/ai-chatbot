@@ -30,6 +30,8 @@ import {
 } from "../../service/Client/clientServices";
 import CustomSelect from "../common/CustomSelect";
 import { useUpdateAdminClient } from "../../hooks/Admin/useAdminClients";
+import { useLanguage } from "../../context/LanguageContext";
+import { translateShared } from "../../context/translations/sharedComponents";
 
 const defaultValues = {
   fullName: "",
@@ -81,6 +83,8 @@ export default function AdminAddClientModal({
   onClose,
   onSuccess,
 }) {
+  const { t, language } = useLanguage();
+  const translate = (text) => translateShared(text, t, language);
   const schema = isEdit ? editClientSchema : clientSchema;
   const {
     register,
@@ -294,13 +298,19 @@ export default function AdminAddClientModal({
       if (response?.data?.success === true) {
         setSuccessMessage(
           response?.data?.message ||
-            `Client ${isEdit ? "updated" : "created"} successfully`,
+              translate(
+                isEdit
+                  ? "Client updated successfully"
+                  : "Client created successfully",
+              ),
         );
         await onSuccess?.(response?.data);
       } else {
         throw new Error(
           response?.data?.message ||
-            `Failed to ${isEdit ? "update" : "create"} client`,
+            translate(
+              isEdit ? "Failed to update client" : "Failed to create client",
+            ),
         );
       }
     } catch (error) {
@@ -309,7 +319,9 @@ export default function AdminAddClientModal({
       setApiError(
         error?.response?.data?.message ||
           error?.message ||
-          (client ? "Failed to update client." : "Failed to create client."),
+          translate(
+            client ? "Failed to update client." : "Failed to create client.",
+          ),
       );
     } finally {
       setLoading(false);
@@ -396,11 +408,13 @@ export default function AdminAddClientModal({
 
             <div className="min-w-0">
               <h2 className="truncate text-base font-semibold text-gray-900 dark:text-white">
-                {client ? "Edit Client" : "Add New Client"}
+                {translate(client ? "Edit Client" : "Add New Client")}
               </h2>
 
               <p className="mt-0.5 truncate text-xs text-gray-500 dark:text-gray-400">
-                Create a new client, business and chatbot configuration
+                {translate(
+                  "Create a new client, business and chatbot configuration",
+                )}
               </p>
             </div>
           </div>
@@ -466,7 +480,7 @@ export default function AdminAddClientModal({
               <AlertCircle size={18} className="mt-0.5 shrink-0" />
 
               <div>
-                <p className="font-medium">Error</p>
+                <p className="font-medium">{translate("Error")}</p>
 
                 <p className="mt-0.5 text-xs">{apiError}</p>
               </div>
@@ -476,12 +490,12 @@ export default function AdminAddClientModal({
             <div className="space-y-5">
               <FormSection
                 icon={User}
-                title="Account Information"
-                description="Login credentials for the client."
+                title={translate("Account Information")}
+                description={translate("Login credentials for the client.")}
               >
                 <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
                   <FormField
-                    label="Full Name"
+                    label={translate("Full Name")}
                     required
                     error={errors.fullName?.message}
                   >
@@ -494,7 +508,7 @@ export default function AdminAddClientModal({
                   </FormField>
 
                   <FormField
-                    label="Email"
+                    label={translate("Email")}
                     required
                     error={errors.email?.message}
                   >
@@ -507,7 +521,7 @@ export default function AdminAddClientModal({
                   </FormField>
                   {!client && (
                     <FormField
-                      label="Password"
+                      label={translate("Password")}
                       required={client ? false : true}
                       error={errors.password?.message}
                     >
@@ -516,8 +530,8 @@ export default function AdminAddClientModal({
                           type={showPassword ? "text" : "password"}
                           placeholder={
                             client
-                              ? "Leave blank to keep current password"
-                              : "Enter password"
+                              ? translate("Leave blank to keep current password")
+                              : translate("Enter password")
                           }
                           disabled={isLoading}
                           className="pr-10"
@@ -529,7 +543,9 @@ export default function AdminAddClientModal({
                           onClick={() => setShowPassword((prev) => !prev)}
                           disabled={isLoading}
                           aria-label={
-                            showPassword ? "Hide password" : "Show password"
+                            showPassword
+                              ? translate("Hide password")
+                              : translate("Show password")
                           }
                           className="
                             absolute
@@ -563,7 +579,7 @@ export default function AdminAddClientModal({
                   )}
                   {isEdit && (
                     <FormField
-                      label="Account Status"
+                      label={translate("Account Status")}
                       error={errors.accountStatus?.message}
                     >
                       <Controller
@@ -579,14 +595,14 @@ export default function AdminAddClientModal({
                             options={[
                               {
                                 value: "active",
-                                label: "Active",
+                                label: translate("Active"),
                               },
                               {
                                 value: "blocked",
-                                label: "Blocked",
+                                label: translate("Blocked"),
                               },
                             ]}
-                            placeholder="Select status"
+                            placeholder={translate("Select status")}
                             error={errors.accountStatus?.message}
                             required
                           />
@@ -599,12 +615,14 @@ export default function AdminAddClientModal({
 
               <FormSection
                 icon={Building2}
-                title="Business Information"
-                description="Basic information about the client's business."
+                title={translate("Business Information")}
+                description={translate(
+                  "Basic information about the client's business.",
+                )}
               >
                 <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
                   <FormField
-                    label="Business Name"
+                    label={translate("Business Name")}
                     required
                     error={errors.businessName?.message}
                   >
@@ -617,13 +635,15 @@ export default function AdminAddClientModal({
                   </FormField>
 
                   <FormField
-                    label="Business Type"
+                    label={translate("Business Type")}
                     required
                     error={errors.businessType?.message}
                   >
                     <Input
                       type="text"
-                      placeholder="IT Software and Technology Company"
+                      placeholder={translate(
+                        "IT Software and Technology Company",
+                      )}
                       disabled={isLoading}
                       {...register("businessType")}
                     />
@@ -631,12 +651,14 @@ export default function AdminAddClientModal({
 
                   <div className="sm:col-span-2">
                     <FormField
-                      label="Business Description"
+                      label={translate("Business Description")}
                       error={errors.businessDescription?.message}
                     >
                       <Textarea
                         rows={4}
-                        placeholder="Describe the client's business..."
+                        placeholder={translate(
+                          "Describe the client's business...",
+                        )}
                         disabled={isLoading}
                         {...register("businessDescription")}
                       />
@@ -647,12 +669,14 @@ export default function AdminAddClientModal({
 
               <FormSection
                 icon={KeyRound}
-                title="Client Configuration"
-                description="Unique identifiers used by the chatbot widget."
+                title={translate("Client Configuration")}
+                description={translate(
+                  "Unique identifiers used by the chatbot widget.",
+                )}
               >
                 <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
                   <FormField
-                    label="Client Key"
+                    label={translate("Client Key")}
                     required
                     error={errors.clientKey?.message}
                   >
@@ -670,16 +694,20 @@ export default function AdminAddClientModal({
                         disabled={isLoading}
                         className="shrink-0 rounded-lg border border-gray-200 bg-white px-3 text-xs font-medium text-gray-700 transition hover:bg-gray-50 disabled:cursor-not-allowed disabled:opacity-50 dark:border-white/10 dark:bg-[#171b23] dark:text-gray-300 dark:hover:bg-white/5"
                       >
-                        Generate
+                        {translate("Generate")}
                       </button>
                     </div>
 
                     <p className="mt-1.5 text-[11px] text-gray-400">
-                      Example: saviesa-infotech
+                      {translate("Example:")} saviesa-infotech
                     </p>
                   </FormField>
 
-                  <FormField label="Slug" required error={errors.slug?.message}>
+                  <FormField
+                    label={translate("Slug")}
+                    required
+                    error={errors.slug?.message}
+                  >
                     <Input
                       type="text"
                       placeholder="saviesa-infotech"
@@ -692,12 +720,14 @@ export default function AdminAddClientModal({
 
               <FormSection
                 icon={MapPin}
-                title="Business Address"
-                description="Physical location of the client business."
+                title={translate("Business Address")}
+                description={translate(
+                  "Physical location of the client business.",
+                )}
               >
                 <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
                   <FormField
-                    label="Address Line 1"
+                    label={translate("Address Line 1")}
                     error={errors.address?.addressLine1?.message}
                   >
                     <Input
@@ -708,48 +738,51 @@ export default function AdminAddClientModal({
                   </FormField>
 
                   <FormField
-                    label="Address Line 2"
+                    label={translate("Address Line 2")}
                     error={errors.address?.addressLine2?.message}
                   >
                     <Input
-                      placeholder="Near..."
+                      placeholder={translate("Near...")}
                       disabled={isLoading}
                       {...register("address.addressLine2")}
                     />
                   </FormField>
 
-                  <FormField label="City" error={errors.address?.city?.message}>
+                  <FormField
+                    label={translate("City")}
+                    error={errors.address?.city?.message}
+                  >
                     <Input
-                      placeholder="Indore"
+                      placeholder={translate("Indore")}
                       disabled={isLoading}
                       {...register("address.city")}
                     />
                   </FormField>
 
                   <FormField
-                    label="State"
+                    label={translate("State")}
                     error={errors.address?.state?.message}
                   >
                     <Input
-                      placeholder="Madhya Pradesh"
+                      placeholder={translate("Madhya Pradesh")}
                       disabled={isLoading}
                       {...register("address.state")}
                     />
                   </FormField>
 
                   <FormField
-                    label="Country"
+                    label={translate("Country")}
                     error={errors.address?.country?.message}
                   >
                     <Input
-                      placeholder="India"
+                      placeholder={translate("India")}
                       disabled={isLoading}
                       {...register("address.country")}
                     />
                   </FormField>
 
                   <FormField
-                    label="Postal Code"
+                    label={translate("Postal Code")}
                     error={errors.address?.postalCode?.message}
                   >
                     <Input
@@ -761,7 +794,7 @@ export default function AdminAddClientModal({
 
                   <div className="sm:col-span-2">
                     <FormField
-                      label="Google Maps URL"
+                      label={translate("Google Maps URL")}
                       error={errors.address?.googleMapsUrl?.message}
                     >
                       <Input
@@ -777,8 +810,10 @@ export default function AdminAddClientModal({
 
               <FormSection
                 icon={Phone}
-                title="Contact Information"
-                description="Contact details that your chatbot can provide to customers."
+                title={translate("Contact Information")}
+                description={translate(
+                  "Contact details that your chatbot can provide to customers.",
+                )}
               >
                 <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
                   <Controller
@@ -786,7 +821,7 @@ export default function AdminAddClientModal({
                     control={control}
                     render={({ field }) => (
                       <PhoneInputField
-                        label="Phone"
+                        label={translate("Phone")}
                         name={field.name}
                         value={field.value}
                         onChange={field.onChange}
@@ -802,7 +837,7 @@ export default function AdminAddClientModal({
                     control={control}
                     render={({ field }) => (
                       <PhoneInputField
-                        label="Alternate Phone"
+                        label={translate("Alternate Phone")}
                         name={field.name}
                         value={field.value}
                         onChange={field.onChange}
@@ -813,7 +848,7 @@ export default function AdminAddClientModal({
                   />
 
                   <FormField
-                    label="Email"
+                    label={translate("Email")}
                     error={errors.contact?.email?.message}
                   >
                     <Input
@@ -829,7 +864,7 @@ export default function AdminAddClientModal({
                     control={control}
                     render={({ field }) => (
                       <PhoneInputField
-                        label="WhatsApp"
+                        label={translate("WhatsApp")}
                         name={field.name}
                         value={field.value}
                         onChange={field.onChange}
@@ -841,7 +876,7 @@ export default function AdminAddClientModal({
 
                   <div className="sm:col-span-2">
                     <FormField
-                      label="Website"
+                      label={translate("Website")}
                       error={errors.contact?.website?.message}
                     >
                       <Input
@@ -857,21 +892,23 @@ export default function AdminAddClientModal({
 
               <FormSection
                 icon={Bot}
-                title="Chatbot Configuration"
-                description="Configure the chatbot identity, behavior and predefined questions."
+                title={translate("Chatbot Configuration")}
+                description={translate(
+                  "Configure the chatbot identity, behavior and predefined questions.",
+                )}
               >
                 <div className="space-y-5">
                   <div>
                     <div className="mb-3 flex items-center gap-2">
                       <MessageSquare size={16} className="text-blue-500" />
                       <h4 className="text-sm font-semibold text-gray-900 dark:text-white">
-                        Basic Chatbot Information
+                        {translate("Basic Chatbot Information")}
                       </h4>
                     </div>
 
                     <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
                       <FormField
-                        label="Chatbot Name"
+                        label={translate("Chatbot Name")}
                         required
                         error={errors.chatbot?.name?.message}
                       >
@@ -884,7 +921,7 @@ export default function AdminAddClientModal({
                       </FormField>
 
                       <FormField
-                        label="Language"
+                        label={translate("Language")}
                         required
                         error={errors.chatbot?.language?.message}
                       >
@@ -901,18 +938,18 @@ export default function AdminAddClientModal({
                               options={[
                                 {
                                   value: "english",
-                                  label: "English",
+                                  label: translate("English"),
                                 },
                                 {
                                   value: "hindi",
-                                  label: "Hindi",
+                                  label: translate("Hindi"),
                                 },
                                 {
                                   value: "hinglish",
-                                  label: "Hinglish",
+                                  label: translate("Hinglish"),
                                 },
                               ]}
-                              placeholder="Select language"
+                              placeholder={translate("Select language")}
                               error={errors.chatbot?.language?.message}
                               required
                             />
@@ -921,7 +958,7 @@ export default function AdminAddClientModal({
                       </FormField>
 
                       <FormField
-                        label="Tone"
+                        label={translate("Tone")}
                         required
                         error={errors.chatbot?.tone?.message}
                       >
@@ -938,22 +975,22 @@ export default function AdminAddClientModal({
                               options={[
                                 {
                                   value: "friendly",
-                                  label: "Friendly",
+                                  label: translate("Friendly"),
                                 },
                                 {
                                   value: "professional",
-                                  label: "Professional",
+                                  label: translate("Professional"),
                                 },
                                 {
                                   value: "casual",
-                                  label: "Casual",
+                                  label: translate("Casual"),
                                 },
                                 {
                                   value: "formal",
-                                  label: "Formal",
+                                  label: translate("Formal"),
                                 },
                               ]}
-                              placeholder="Select tone"
+                              placeholder={translate("Select tone")}
                               error={errors.chatbot?.tone?.message}
                               required
                             />
@@ -961,7 +998,7 @@ export default function AdminAddClientModal({
                         />
                       </FormField>
                       <FormField
-                        label="Business Status"
+                        label={translate("Business Status")}
                         error={errors.status?.message}
                       >
                         <Controller
@@ -977,14 +1014,14 @@ export default function AdminAddClientModal({
                               options={[
                                 {
                                   value: "active",
-                                  label: "Active",
+                                  label: translate("Active"),
                                 },
                                 {
                                   value: "inactive",
-                                  label: "Inactive",
+                                  label: translate("Inactive"),
                                 },
                               ]}
-                              placeholder="Select status"
+                              placeholder={translate("Select status")}
                               error={errors.status?.message}
                               required
                               disabled={true}
@@ -994,13 +1031,15 @@ export default function AdminAddClientModal({
                       </FormField>
 
                       <FormField
-                        label="Welcome Message"
+                        label={translate("Welcome Message")}
                         required
                         error={errors.chatbot?.welcomeMessage?.message}
                       >
                         <Textarea
                           rows={3}
-                          placeholder="Hi 👋 Welcome to our company..."
+                          placeholder={translate(
+                            "Hi 👋 Welcome to our company...",
+                          )}
                           disabled={isLoading}
                           {...register("chatbot.welcomeMessage")}
                         />
@@ -1010,20 +1049,23 @@ export default function AdminAddClientModal({
 
                   <div>
                     <FormField
-                      label="AI Instructions"
+                      label={translate("AI Instructions")}
                       error={errors.chatbot?.aiInstructions?.message}
                     >
                       <Textarea
                         rows={14}
-                        placeholder="Enter instructions for the AI chatbot..."
+                        placeholder={translate(
+                          "Enter instructions for the AI chatbot...",
+                        )}
                         disabled={isLoading}
                         className="font-mono text-xs leading-5"
                         {...register("chatbot.aiInstructions")}
                       />
 
                       <p className="mt-1.5 text-[11px] leading-4 text-gray-400">
-                        These instructions control what the chatbot knows, how
-                        it answers and what information it should not reveal.
+                        {translate(
+                          "These instructions control what the chatbot knows, how it answers and what information it should not reveal.",
+                        )}
                       </p>
                     </FormField>
                   </div>
@@ -1035,12 +1077,14 @@ export default function AdminAddClientModal({
                           <MessageSquare size={16} className="text-blue-500" />
 
                           <h4 className="text-sm font-semibold text-gray-900 dark:text-white">
-                            Predefined Questions
+                            {translate("Predefined Questions")}
                           </h4>
                         </div>
 
                         <p className="mt-1 text-xs text-gray-500 dark:text-gray-400">
-                          Questions customers can quickly ask your chatbot.
+                          {translate(
+                            "Questions customers can quickly ask your chatbot.",
+                          )}
                         </p>
                       </div>
 
@@ -1051,7 +1095,7 @@ export default function AdminAddClientModal({
                         className="inline-flex items-center justify-center gap-1.5 rounded-lg bg-blue-600 px-3 py-2 text-xs font-medium text-white transition hover:bg-blue-700 disabled:cursor-not-allowed disabled:opacity-50"
                       >
                         <Plus size={15} />
-                        Add Question
+                        {translate("Add Question")}
                       </button>
                     </div>
 
@@ -1071,7 +1115,7 @@ export default function AdminAddClientModal({
                           <div className="flex items-center gap-3">
                             <div
                               className="flex h-9 w-6 shrink-0 cursor-grab items-center justify-center text-gray-400 active:cursor-grabbing dark:text-gray-500"
-                              title="Drag to reorder"
+                              title={translate("Drag to reorder")}
                             >
                               <GripVertical size={18} />
                             </div>
@@ -1086,7 +1130,9 @@ export default function AdminAddClientModal({
                               >
                                 <Input
                                   type="text"
-                                  placeholder="Tell me about Saviesa Infotech"
+                                  placeholder={translate(
+                                    "Tell me about Saviesa Infotech",
+                                  )}
                                   disabled={isLoading}
                                   {...register(
                                     `chatbot.predefinedQuestions.${index}.question`,
@@ -1104,7 +1150,7 @@ export default function AdminAddClientModal({
                                   `chatbot.predefinedQuestions.${index}.enabled`,
                                 )}
                               />
-                              <span>Enabled</span>
+                              <span>{translate("Enabled")}</span>
                             </label>
 
                             <button
@@ -1113,7 +1159,7 @@ export default function AdminAddClientModal({
                               disabled={
                                 isLoading || questionFields.length === 1
                               }
-                              title="Remove question"
+                              title={translate("Remove question")}
                               className="shrink-0 rounded-lg p-2 text-red-500 transition hover:bg-red-50 disabled:cursor-not-allowed disabled:opacity-30 dark:hover:bg-red-500/10"
                             >
                               <Trash2 size={17} />
@@ -1147,7 +1193,7 @@ export default function AdminAddClientModal({
               disabled={isLoading}
               className="rounded-lg border border-gray-200 px-4 py-2.5 text-sm font-medium text-gray-700 transition hover:bg-gray-50 disabled:cursor-not-allowed disabled:opacity-50 dark:border-white/10 dark:text-gray-300 dark:hover:bg-white/5"
             >
-              Cancel
+              {translate("Cancel")}
             </button>
 
             <button
@@ -1175,11 +1221,11 @@ export default function AdminAddClientModal({
 
               {loading
                 ? client
-                  ? "Updating..."
-                  : "Creating..."
+                  ? translate("Updating...")
+                  : translate("Creating...")
                 : client
-                  ? "Update Client"
-                  : "Create Client"}
+                  ? translate("Update Client")
+                  : translate("Create Client")}
             </button>
           </div>
         </form>

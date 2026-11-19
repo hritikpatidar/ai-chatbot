@@ -8,9 +8,14 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { resetPasswordSchema } from "../utils/validation";
 import { resetPasswordService } from "../service/Auth/AuthServices";
 import toast from "react-hot-toast";
+import { useLanguage } from "../context/LanguageContext";
+import accountScreens from "../context/translations/accountScreens";
 
 export default function ResetPassword() {
   const navigate = useNavigate();
+  const { t: translate, language } = useLanguage();
+  const t = (key) =>
+    language === "hi" ? accountScreens[key] || translate(key) : key;
   const { state } = useLocation();
   const { email = "", purpose = "", resetToken = "" } = state || {};
 
@@ -41,7 +46,7 @@ export default function ResetPassword() {
       }
     } catch (error) {
       console.error("Reset Password Error:", error);
-      toast.error("An error occurred while resetting your password.");
+      toast.error(t("An error occurred while resetting your password."));
     }
   };
 
@@ -73,11 +78,11 @@ export default function ResetPassword() {
         {/* Heading */}
 
         <h2 className="mt-6 text-center text-2xl font-bold text-white">
-          Reset Password
+          {t("Reset Password")}
         </h2>
 
         <p className="mt-2 text-center text-sm text-gray-400">
-          Create a strong password for your account.
+          {t("Create a strong password for your account.")}
         </p>
 
         {/* Form */}
@@ -87,7 +92,7 @@ export default function ResetPassword() {
 
           <div>
             <label className="mb-2 block text-xs font-medium text-gray-300">
-              New Password <span className={"text-red-400"}>*</span>
+              {t("New Password")} <span className={"text-red-400"}>*</span>
             </label>
 
             <div className="flex items-center rounded-xl border border-white/10 bg-[#222938] px-3 focus-within:border-blue-500">
@@ -95,7 +100,7 @@ export default function ResetPassword() {
 
               <input
                 type={showPassword ? "text" : "password"}
-                placeholder="Enter new password"
+                placeholder={t("Enter new password")}
                 className="w-full bg-transparent px-3 py-3 text-sm text-white outline-none placeholder:text-gray-500"
                 {...register("password")}
               />
@@ -103,6 +108,8 @@ export default function ResetPassword() {
               <button
                 type="button"
                 onClick={() => setShowPassword(!showPassword)}
+                aria-label={t(showPassword ? "Hide password" : "Show password")}
+                title={t(showPassword ? "Hide password" : "Show password")}
               >
                 {showPassword ? (
                   <EyeOff size={17} className="text-gray-400" />
@@ -113,7 +120,7 @@ export default function ResetPassword() {
             </div>
             {errors.password && (
               <p className="mt-2 text-xs text-red-500">
-                {errors.password.message}
+                {t(errors.password.message)}
               </p>
             )}
           </div>
@@ -122,7 +129,7 @@ export default function ResetPassword() {
 
           <div>
             <label className="mb-2 block text-xs font-medium text-gray-300">
-              Confirm Password <span className={"text-red-400"}>*</span>
+              {t("Confirm Password")} <span className={"text-red-400"}>*</span>
             </label>
 
             <div className="flex items-center rounded-xl border border-white/10 bg-[#222938] px-3 focus-within:border-blue-500">
@@ -130,7 +137,7 @@ export default function ResetPassword() {
 
               <input
                 type={showConfirmPassword ? "text" : "password"}
-                placeholder="Confirm password"
+                placeholder={t("Confirm password")}
                 className="w-full bg-transparent px-3 py-3 text-sm text-white outline-none placeholder:text-gray-500"
                 {...register("confirmPassword")}
               />
@@ -138,6 +145,8 @@ export default function ResetPassword() {
               <button
                 type="button"
                 onClick={() => setShowConfirmPassword(!showConfirmPassword)}
+                aria-label={t(showConfirmPassword ? "Hide password" : "Show password")}
+                title={t(showConfirmPassword ? "Hide password" : "Show password")}
               >
                 {showConfirmPassword ? (
                   <EyeOff size={17} className="text-gray-400" />
@@ -148,7 +157,7 @@ export default function ResetPassword() {
             </div>
             {errors.confirmPassword && (
               <p className="mt-2 text-xs text-red-500">
-                {errors.confirmPassword.message}
+                {t(errors.confirmPassword.message)}
               </p>
             )}
           </div>
@@ -162,7 +171,7 @@ export default function ResetPassword() {
             className="w-full rounded-xl bg-linear-to-r from-cyan-500 to-blue-600 py-3 text-sm font-semibold text-white shadow-lg"
             disabled={isSubmitting}
           >
-            {isSubmitting ? "Resetting..." : "Reset Password"}
+            {isSubmitting ? t("Resetting...") : t("Reset Password")}
           </motion.button>
         </form>
 
@@ -173,7 +182,7 @@ export default function ResetPassword() {
           className="mt-6 flex w-full items-center justify-center gap-2 text-sm text-gray-400 transition hover:text-white"
         >
           <ArrowLeft size={16} />
-          Back
+          {t("Back")}
         </button>
       </motion.div>
     </div>

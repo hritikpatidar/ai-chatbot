@@ -25,6 +25,7 @@ import {
   useClientById,
   useUsageAnalytics,
 } from "../../hooks/Client/useUsageAnalytics";
+import { useLanguage } from "../../context/LanguageContext";
 
 const UsageCard = ({
   title,
@@ -142,6 +143,7 @@ const UsageCard = ({
 };
 
 export default function ClientDashboard() {
+  const { t } = useLanguage();
   const dispatch = useDispatch();
   const navigate = useNavigate();
   const { clientConfigLoading } = useSelector((store) => store.chatSlice);
@@ -207,11 +209,11 @@ export default function ClientDashboard() {
 
             <div>
               <h1 className="text-xl font-semibold text-gray-900 dark:text-white">
-                Admin Dashboard
+                {t("Client Dashboard")}
               </h1>
 
               <p className="text-xs text-gray-500 dark:text-gray-400">
-                Manage your client, products, FAQs and chatbot configuration.
+                {t("Manage your client, products, FAQs and chatbot configuration.")}
               </p>
             </div>
           </div>
@@ -292,31 +294,31 @@ export default function ClientDashboard() {
       {/* Stats */}
       <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-4">
         <StatCard
-          title="Client"
-          value={clientDetails?.businessName || "Not configured"}
+          title={t("Client")}
+          value={clientDetails?.businessName || t("Not configured")}
           icon={Building2}
           description={clientDetails?.status || "inactive"}
         />
 
         <StatCard
-          title="Products"
-          value="Manage"
+          title={t("Products")}
+          value={t("Manage")}
           icon={Package}
-          description="Product catalogue"
+          description={t("Product catalogue")}
           onClick={() => navigate("/client/products")}
         />
 
         <StatCard
-          title="FAQs"
-          value="Manage"
+          title={t("FAQs")}
+          value={t("Manage")}
           icon={HelpCircle}
-          description="Frequently asked questions"
+          description={t("Frequently asked questions")}
           onClick={() => navigate("/client/faqs")}
         />
 
         <StatCard
-          title="Chatbot"
-          value={chatbot?.name || "AI Assistant"}
+          title={t("Chatbot")}
+          value={chatbot?.name || t("AI Assistant")}
           icon={Bot}
           description={chatbot?.language || "English"}
         />
@@ -341,17 +343,17 @@ export default function ClientDashboard() {
               dark:bg-[#171b23]
             "
           >
-            <h2 className="text-base font-semibold">Usage Analytics</h2>
+            <h2 className="text-base font-semibold">{t("Usage Analytics")}</h2>
 
             <p className="mt-1 text-xs text-gray-500 dark:text-gray-400">
-              Track your Gemini API usage and plan limits.
+              {t("Track your Gemini API usage and plan limits.")}
             </p>
 
             {/* Usage Cards */}
             <div className="grid grid-cols-1 gap-4 mt-5">
               <UsageCard
-                title="Gemini Tokens"
-                description="Total token consumption"
+                title={t("Gemini Tokens")}
+                description={t("Total token consumption")}
                 icon={Zap}
                 used={usage?.tokens?.used ?? 0}
                 limit={usage?.tokens?.limit ?? 0}
@@ -360,8 +362,8 @@ export default function ClientDashboard() {
               />
 
               <UsageCard
-                title="Conversations"
-                description="Conversations created"
+                title={t("Conversations")}
+                description={t("Conversations created")}
                 icon={MessageSquare}
                 used={usage?.conversations?.used ?? 0}
                 limit={usage?.conversations?.limit ?? 0}
@@ -370,8 +372,8 @@ export default function ClientDashboard() {
               />
 
               <UsageCard
-                title="AI Responses"
-                description="Responses generated"
+                title={t("AI Responses")}
+                description={t("Responses generated")}
                 icon={Bot}
                 used={usage?.aiResponses?.used ?? 0}
                 limit={usage?.aiResponses?.limit ?? 0}
@@ -458,44 +460,44 @@ export default function ClientDashboard() {
               dark:bg-[#171b23]
             "
           >
-            <h2 className="text-base font-semibold">Quick Actions</h2>
+            <h2 className="text-base font-semibold">{t("Quick Actions")}</h2>
 
             <p className="mt-1 text-xs text-gray-500 dark:text-gray-400">
-              Manage your chatbot data quickly.
+              {t("Manage your chatbot data quickly.")}
             </p>
 
             <div className="mt-5 space-y-3">
               <QuickAction
-                title="Manage Products"
-                description="Add or update products"
+                title={t("Manage Products")}
+                description={t("Add or update products")}
                 icon={Package}
                 onClick={() => navigate("/client/products")}
               />
 
               <QuickAction
-                title="Manage FAQs"
-                description="Add or update FAQs"
+                title={t("Manage FAQs")}
+                description={t("Add or update FAQs")}
                 icon={HelpCircle}
                 onClick={() => navigate("/client/faqs")}
               />
 
               <QuickAction
-                title="Manage Tickets"
-                description="Resolve your tickets"
+                title={t("Manage Tickets")}
+                description={t("Resolve your tickets")}
                 icon={Ticket}
                 onClick={() => navigate("/client/tickets")}
               />
 
               <QuickAction
-                title="Chatbot Settings"
-                description="Configure your AI chatbot"
+                title={t("Chatbot Settings")}
+                description={t("Configure your AI chatbot")}
                 icon={Bot}
                 onClick={() => navigate("/client/chatbot-settings")}
               />
 
               <QuickAction
-                title="Client Settings"
-                description="Update business information"
+                title={t("Client Settings")}
+                description={t("Update business information")}
                 icon={Building2}
                 onClick={() => navigate("/client/client-settings")}
               />
@@ -522,11 +524,11 @@ export default function ClientDashboard() {
             <div className="flex items-center gap-2">
               <Bot size={20} className="text-blue-500" />
 
-              <h2 className="text-base font-semibold">Chatbot Configuration</h2>
+              <h2 className="text-base font-semibold">{t("Chatbot Configuration")}</h2>
             </div>
 
             <p className="mt-1 text-xs text-gray-500 dark:text-gray-400">
-              Current chatbot configuration for your client.
+              {t("Current chatbot configuration for your client.")}
             </p>
           </div>
 
@@ -545,17 +547,23 @@ export default function ClientDashboard() {
                 dark:hover:text-blue-300
               "
           >
-            Edit
+            {t("Edit")}
             <ArrowRight size={15} />
           </button>
         </div>
 
         <div className="mt-5 grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
-          <InfoItem label="Bot Name" value={chatbot?.name || "AI Assistant"} />
-          <InfoItem label="Language" value={chatbot?.language || "English"} />
-          <InfoItem label="Tone" value={chatbot?.tone || "Friendly"} />
+          <InfoItem label={t("Bot Name")} value={chatbot?.name || t("AI Assistant")} />
           <InfoItem
-            label="Status"
+            label={t("Language")}
+            value={t(chatbot?.language || "English")}
+          />
+          <InfoItem
+            label={t("Tone")}
+            value={t(chatbot?.tone || "Friendly")}
+          />
+          <InfoItem
+            label={t("Status")}
             value={clientDetails?.status || "inactive"}
           />
         </div>

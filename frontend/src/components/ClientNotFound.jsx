@@ -1,6 +1,10 @@
 import { AlertCircle, ArrowLeft, Building2, Mail } from "lucide-react";
+import { useLanguage } from "../context/LanguageContext";
+import { translateShared } from "../context/translations/sharedComponents";
 
 export default function ClientNotFound() {
+  const { t, language } = useLanguage();
+  const translate = (text) => translateShared(text, t, language);
   const handleGoBack = () => {
     window.history.back();
   };
@@ -61,7 +65,7 @@ export default function ClientNotFound() {
                 "
               >
                 <AlertCircle size={12} />
-                Chatbot Unavailable
+                {translate("Chatbot Unavailable")}
               </span>
             </div>
 
@@ -75,7 +79,7 @@ export default function ClientNotFound() {
                   dark:text-white
                 "
               >
-                Chatbot Is Currently Unavailable
+                {translate("Chatbot Is Currently Unavailable")}
               </h1>
 
               <p
@@ -87,9 +91,9 @@ export default function ClientNotFound() {
                   dark:text-gray-400
                 "
               >
-                Your administrator does not currently have an active chatbot
-                plan. You’ll be able to chat with them once an active chatbot
-                plan has been purchased.
+                {translate(
+                  "Your administrator does not currently have an active chatbot plan. You’ll be able to chat with them once an active chatbot plan has been purchased.",
+                )}
               </p>
             </div>
 
@@ -124,8 +128,9 @@ export default function ClientNotFound() {
                   dark:text-gray-400
                 "
               >
-                In the meantime, you can contact your administrator directly via
-                email for any assistance.
+                {translate(
+                  "In the meantime, you can contact your administrator directly via email for any assistance.",
+                )}
               </p>
             </div>
 
@@ -152,7 +157,7 @@ export default function ClientNotFound() {
                 "
               >
                 <ArrowLeft size={15} />
-                Go Back
+                {translate("Go Back")}
               </button>
 
               <button
@@ -171,7 +176,7 @@ export default function ClientNotFound() {
                 "
               >
                 <Mail size={15} />
-                Contact Admin
+                {translate("Contact Admin")}
               </button>
             </div>
           </div>
@@ -184,8 +189,9 @@ export default function ClientNotFound() {
             dark:text-gray-500
           "
         >
-          Chatbot access will become available once the administrator activates
-          a chatbot plan.
+          {translate(
+            "Chatbot access will become available once the administrator activates a chatbot plan.",
+          )}
         </p>
       </div>
     </div>

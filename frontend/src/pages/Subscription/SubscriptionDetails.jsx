@@ -13,10 +13,21 @@ import toast from "react-hot-toast";
 import { useNavigate } from "react-router-dom";
 import { useDispatch, useSelector } from "react-redux";
 import { getClientById } from "../../redux/features/Client/clientSlice";
+import { useLanguage } from "../../context/LanguageContext";
+import accountScreens from "../../context/translations/accountScreens";
 
 const SubscriptionDetails = () => {
   const navigate = useNavigate();
   const dispatch = useDispatch();
+  const { t: translate, language } = useLanguage();
+  const t = (key, values = {}) => {
+    const translated =
+      language === "hi" ? accountScreens[key] || translate(key) : key;
+    return Object.entries(values).reduce(
+      (text, [name, value]) => text.replaceAll(`{${name}}`, value),
+      translated,
+    );
+  };
   const { data, isLoading, refetch, isFetching } = useCurrentSubscription();
 
   const [showCancelModal, setShowCancelModal] = useState(false);
@@ -42,7 +53,7 @@ const SubscriptionDetails = () => {
   if (isLoading) {
     return (
       <div className="flex min-h-100 items-center justify-center">
-        Loading...
+        {t("Loading...")}
       </div>
     );
   }
@@ -53,10 +64,12 @@ const SubscriptionDetails = () => {
         <div className="rounded-2xl border border-gray-200 bg-white p-8 text-center dark:border-gray-800 dark:bg-[#171b23]">
           <CreditCard className="mx-auto text-gray-400" size={40} />
 
-          <h2 className="mt-4 text-lg font-semibold">No Active Subscription</h2>
+          <h2 className="mt-4 text-lg font-semibold">
+            {t("No Active Subscription")}
+          </h2>
 
           <p className="mt-1 text-sm text-gray-500">
-            Choose a plan to get started.
+            {t("Choose a plan to get started.")}
           </p>
         </div>
       </div>
@@ -105,11 +118,11 @@ const SubscriptionDetails = () => {
       <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
         <div>
           <h1 className="text-2xl font-bold text-gray-900 dark:text-white">
-            Subscription
+            {t("Subscription")}
           </h1>
 
           <p className="mt-1 text-sm text-gray-500 dark:text-gray-400">
-            Manage your current subscription.
+            {t("Manage your current subscription.")}
           </p>
         </div>
 
@@ -145,7 +158,7 @@ const SubscriptionDetails = () => {
             "
           >
             <RefreshCw size={16} className={isFetching ? "animate-spin" : ""} />
-            Refresh
+            {t("Refresh")}
           </button>
 
           {/* Cancel Subscription */}
@@ -179,7 +192,7 @@ const SubscriptionDetails = () => {
               "
             >
               <XCircle size={16} />
-              Cancel Subscription
+              {t("Cancel Subscription")}
             </button>
           )}
         </div>
@@ -211,7 +224,9 @@ const SubscriptionDetails = () => {
               {(Number(subscription.amount) / 100).toFixed(2)}
             </p>
 
-            <p className="text-sm text-gray-500">/ {subscription.interval}</p>
+            <p className="text-sm text-gray-500">
+              / {t(subscription.interval)}
+            </p>
           </div>
         </div>
 
@@ -222,7 +237,7 @@ const SubscriptionDetails = () => {
           <div className="rounded-xl bg-gray-50 p-4 dark:bg-gray-950">
             <div className="flex items-center gap-2 text-gray-500">
               <CalendarDays size={17} />
-              <span className="text-xs">Current Period Start</span>
+              <span className="text-xs">{t("Current Period Start")}</span>
             </div>
 
             <p className="mt-2 text-sm font-semibold text-gray-900 dark:text-white">
@@ -235,7 +250,7 @@ const SubscriptionDetails = () => {
           <div className="rounded-xl bg-gray-50 p-4 dark:bg-gray-950">
             <div className="flex items-center gap-2 text-gray-500">
               <CalendarDays size={17} />
-              <span className="text-xs">Current Period End</span>
+              <span className="text-xs">{t("Current Period End")}</span>
             </div>
 
             <p className="mt-2 text-sm font-semibold text-gray-900 dark:text-white">
@@ -250,7 +265,7 @@ const SubscriptionDetails = () => {
         {plan.features?.length > 0 && (
           <div className="mt-7">
             <h3 className="font-semibold text-gray-900 dark:text-white">
-              Included Features
+              {t("Included Features")}
             </h3>
 
             <div className="mt-4 grid grid-cols-1 gap-3 sm:grid-cols-2">
@@ -280,28 +295,29 @@ const SubscriptionDetails = () => {
           }
         }}
         onConfirm={handleConfirmCancel}
-        title="Cancel Subscription"
+        title={t("Cancel Subscription")}
         message={
           <>
             <p className="mb-3">
-              We recommend cancelling your subscription on{" "}
-              <strong>{formattedCancelDate}</strong> to make the most of your
-              current plan.
+              {t(
+                "We recommend cancelling your subscription on {date} to make the most of your current plan.",
+                { date: formattedCancelDate },
+              )}
             </p>
 
             <p className="mb-3">
-              If you cancel your subscription now, your remaining subscription
-              period will be forfeited, and you will not be eligible for a
-              refund for the unused time, as we do not offer refunds.
+              {t(
+                "If you cancel your subscription now, your remaining subscription period will be forfeited, and you will not be eligible for a refund for the unused time, as we do not offer refunds.",
+              )}
             </p>
 
             <p className="font-semibold">
-              Are you sure you want to cancel your subscription now?
+              {t("Are you sure you want to cancel your subscription now?")}
             </p>
           </>
         }
-        confirmText="Cancel Subscription"
-        cancelText="Keep Subscription"
+        confirmText={t("Cancel Subscription")}
+        cancelText={t("Keep Subscription")}
         loading={isCanceling}
         danger={true}
       />

@@ -11,10 +11,14 @@ import { changePasswordSchema } from "../utils/validation";
 import { ChangePasswordService } from "../service/Auth/AuthServices";
 import { useNavigate } from "react-router-dom";
 import { handleLogout } from "../utils/logout";
+import { useLanguage } from "../context/LanguageContext";
+import { translateShared } from "../context/translations/sharedComponents";
 
 const PasswordInput = ({
   label,
   placeholder,
+  showPasswordLabel,
+  hidePasswordLabel,
   registerName,
   error,
   showPassword,
@@ -104,7 +108,7 @@ const PasswordInput = ({
             dark:text-gray-400
             dark:hover:text-white
           "
-          aria-label={showPassword ? `Hide ${label}` : `Show ${label}`}
+          aria-label={showPassword ? hidePasswordLabel : showPasswordLabel}
         >
           {showPassword ? <EyeOff size={16} /> : <Eye size={16} />}
         </button>
@@ -129,6 +133,8 @@ const PasswordInput = ({
 };
 
 const ChangePasswordModal = ({ setOpenChangePasswordModal }) => {
+  const { t, language } = useLanguage();
+  const translate = (text) => translateShared(text, t, language);
   const dispatch = useDispatch();
   const navigate = useNavigate();
 
@@ -170,7 +176,7 @@ const ChangePasswordModal = ({ setOpenChangePasswordModal }) => {
 
       if (response?.data?.success) {
         toast.success(
-          response?.data?.message || "Password changed successfully.",
+          response?.data?.message || translate("Password changed successfully."),
         );
 
         reset();
@@ -180,13 +186,16 @@ const ChangePasswordModal = ({ setOpenChangePasswordModal }) => {
           refreshToken,
         });
       } else {
-        toast.error(response?.data?.message || "Unable to change password.");
+        toast.error(
+          response?.data?.message || translate("Unable to change password."),
+        );
       }
     } catch (error) {
       console.error("Change Password Error:", error);
 
       toast.error(
-        error?.response?.data?.message || "Current password is incorrect.",
+        error?.response?.data?.message ||
+          translate("Current password is incorrect."),
       );
     }
   };
@@ -292,7 +301,7 @@ const ChangePasswordModal = ({ setOpenChangePasswordModal }) => {
             sm:text-2xl
           "
         >
-          Change Password
+          {translate("Change Password")}
         </h2>
 
         <p
@@ -304,7 +313,7 @@ const ChangePasswordModal = ({ setOpenChangePasswordModal }) => {
             dark:text-gray-400
           "
         >
-          Update your account password securely.
+          {translate("Update your account password securely.")}
         </p>
 
         <form
@@ -317,8 +326,10 @@ const ChangePasswordModal = ({ setOpenChangePasswordModal }) => {
           {/* Current Password */}
 
           <PasswordInput
-            label="Current Password"
-            placeholder="Enter current password"
+            label={translate("Current Password")}
+            placeholder={translate("Enter current password")}
+            showPasswordLabel={translate("Show password")}
+            hidePasswordLabel={translate("Hide password")}
             registerName={register("currentPassword")}
             error={errors.currentPassword}
             showPassword={showCurrentPassword}
@@ -328,8 +339,10 @@ const ChangePasswordModal = ({ setOpenChangePasswordModal }) => {
           {/* New Password */}
 
           <PasswordInput
-            label="New Password"
-            placeholder="Enter new password"
+            label={translate("New Password")}
+            placeholder={translate("Enter new password")}
+            showPasswordLabel={translate("Show password")}
+            hidePasswordLabel={translate("Hide password")}
             registerName={register("password")}
             error={errors.password}
             showPassword={showNewPassword}
@@ -339,8 +352,10 @@ const ChangePasswordModal = ({ setOpenChangePasswordModal }) => {
           {/* Confirm Password */}
 
           <PasswordInput
-            label="Confirm Password"
-            placeholder="Confirm new password"
+            label={translate("Confirm Password")}
+            placeholder={translate("Confirm new password")}
+            showPasswordLabel={translate("Show password")}
+            hidePasswordLabel={translate("Hide password")}
             registerName={register("confirmPassword")}
             error={errors.confirmPassword}
             showPassword={showConfirmPassword}
@@ -364,8 +379,9 @@ const ChangePasswordModal = ({ setOpenChangePasswordModal }) => {
                 dark:text-blue-300
               "
             >
-              Your current password is required to verify your identity before
-              changing your password.
+              {translate(
+                "Your current password is required to verify your identity before changing your password.",
+              )}
             </p>
           </div>
 
@@ -394,7 +410,9 @@ const ChangePasswordModal = ({ setOpenChangePasswordModal }) => {
               disabled:opacity-60
             "
           >
-            {isSubmitting ? "Changing Password..." : "Change Password"}
+            {isSubmitting
+              ? translate("Changing Password...")
+              : translate("Change Password")}
           </motion.button>
         </form>
 
@@ -418,7 +436,7 @@ const ChangePasswordModal = ({ setOpenChangePasswordModal }) => {
           "
         >
           <ArrowLeft size={14} />
-          Back
+          {translate("Back")}
         </button>
       </motion.div>
     </motion.div>

@@ -1,6 +1,10 @@
 import { AlertCircle } from "lucide-react";
+import { useLanguage } from "../../context/LanguageContext";
+import { translateShared } from "../../context/translations/sharedComponents";
 
 export default function StatusBadge({ status = "", priority = "" }) {
+  const { t, language } = useLanguage();
+
   const STATUS_CONFIG = {
     open: {
       label: "Open",
@@ -71,7 +75,7 @@ export default function StatusBadge({ status = "", priority = "" }) {
       `}
     >
       {showAlert && <AlertCircle size={12} className="mr-1"/>}
-      {config.label}
+      {translateShared(config.label, t, language)}
     </span>
   );
 }

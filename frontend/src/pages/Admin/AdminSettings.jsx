@@ -25,12 +25,13 @@ import {
 import { zodResolver } from "@hookform/resolvers/zod";
 import { adminSettingSchema } from "../../utils/validation";
 import { useForm } from "react-hook-form";
+import { useLanguage } from "../../context/LanguageContext";
 
 // Default settings
 const initialSettings = {
   platformName: "",
   supportEmail: "",
-  defaultLanguage: "",
+  defaultLanguage: "en",
   timezone: "",
 
   aiModel: "",
@@ -99,6 +100,7 @@ const getErrorMessage = (error) =>
   "Something went wrong. Please try again.";
 
 export default function AdminSettings() {
+  const { t } = useLanguage();
   const [activeTab, setActiveTab] = useState("general");
   const [success, setSuccess] = useState(false);
   const [saveError, setSaveError] = useState("");
@@ -232,7 +234,7 @@ export default function AdminSettings() {
         <AlertCircle size={35} className="text-red-500" />
 
         <h2 className="mt-3 text-base font-semibold text-gray-900 dark:text-white">
-          Failed to load settings
+          {t("Failed to load settings")}
         </h2>
 
         <p className="mt-1 text-sm text-gray-500 dark:text-gray-400">
@@ -246,7 +248,7 @@ export default function AdminSettings() {
           className="mt-4 flex items-center gap-2 rounded-xl bg-indigo-600 px-4 py-2.5 text-sm font-semibold text-white hover:bg-indigo-700 disabled:opacity-60"
         >
           <RefreshCw size={16} className={isFetching ? "animate-spin" : ""} />
-          Retry
+          {t("Retry")}
         </button>
       </div>
     );
@@ -261,12 +263,12 @@ export default function AdminSettings() {
             <Settings className="h-6 w-6 text-indigo-600 dark:text-indigo-400" />
 
             <h1 className="text-xl font-bold text-gray-900 dark:text-white sm:text-2xl">
-              Admin Settings
+              {t("Admin Settings")}
             </h1>
           </div>
 
           <p className="mt-1 text-sm text-gray-500 dark:text-gray-400">
-            Manage your AI chatbot platform configuration and preferences.
+            {t("Manage your AI chatbot platform configuration and preferences.")}
           </p>
         </div>
 
@@ -278,7 +280,7 @@ export default function AdminSettings() {
             className="flex items-center justify-center gap-2 rounded-xl border border-gray-200 bg-white px-4 py-2.5 text-sm font-medium text-gray-700 transition hover:bg-gray-100 disabled:opacity-60 dark:border-gray-700 dark:bg-[#161b22] dark:text-gray-300 dark:hover:bg-gray-800"
           >
             <RefreshCw size={16} />
-            Reset
+            {t("Reset")}
           </button>
 
           <button
@@ -293,7 +295,7 @@ export default function AdminSettings() {
               <Save size={16} />
             )}
 
-            {saving ? "Saving..." : "Save Changes"}
+            {saving ? t("Saving...") : t("Save Changes")}
           </button>
         </div>
       </div>
@@ -302,7 +304,7 @@ export default function AdminSettings() {
       {success && (
         <div className="flex items-center gap-2 rounded-xl border border-green-200 bg-green-50 px-4 py-3 text-sm text-green-700 dark:border-green-500/20 dark:bg-green-500/10 dark:text-green-400">
           <CheckCircle2 size={18} />
-          Settings updated successfully.
+          {t("Settings updated successfully.")}
         </div>
       )}
 
@@ -319,7 +321,7 @@ export default function AdminSettings() {
         {/* Sidebar */}
         <aside className="h-fit rounded-2xl border border-gray-200 bg-white p-3 dark:border-gray-800 dark:bg-[#161b22]">
           <p className="px-3 pb-3 pt-2 text-xs font-semibold uppercase tracking-wider text-gray-400">
-            Preferences
+            {t("Preferences")}
           </p>
 
           <div className="flex gap-2 overflow-x-auto lg:flex-col">
@@ -339,7 +341,7 @@ export default function AdminSettings() {
                   }`}
                 >
                   <Icon size={18} />
-                  {item.label}
+                  {t(item.label)}
                 </button>
               );
             })}
@@ -348,12 +350,11 @@ export default function AdminSettings() {
           <div className="mt-5 hidden rounded-xl bg-gray-50 p-4 dark:bg-[#0d1117] lg:block">
             <div className="mb-2 flex items-center gap-2 text-indigo-600 dark:text-indigo-400">
               <Sparkles size={17} />
-              <span className="text-sm font-semibold">AI Platform</span>
+              <span className="text-sm font-semibold">{t("AI Platform")}</span>
             </div>
 
             <p className="text-xs leading-5 text-gray-500 dark:text-gray-400">
-              Manage your platform, AI models, client usage and security from
-              one place.
+              {t("Manage your platform, AI models, client usage and security from one place.")}
             </p>
           </div>
         </aside>
@@ -364,38 +365,48 @@ export default function AdminSettings() {
           {activeTab === "general" && (
             <>
               <Section
-                title="General Settings"
-                description="Configure your platform's basic information."
+                title={t("General Settings")}
+                description={t("Configure your platform's basic information.")}
                 icon={Globe}
               >
                 <div className="grid grid-cols-1 gap-5 md:grid-cols-2">
                   <InputField
-                    label="Platform Name"
+                    label={t("Platform Name")}
                     value={settings.platformName}
                     onChange={(v) => updateSetting("platformName", v)}
-                    placeholder="Enter platform name"
+                    placeholder={t("Enter platform name")}
                     error={errors.platformName?.message}
                   />
 
                   <InputField
-                    label="Support Email"
+                    label={t("Support Email")}
                     type="email"
                     value={settings.supportEmail}
                     onChange={(v) => updateSetting("supportEmail", v)}
                     placeholder="support@example.com"
                     error={errors.supportEmail?.message}
                   />
+
+                  <SelectField
+                    label={t("Default Language")}
+                    value={settings.defaultLanguage}
+                    onChange={(value) => updateSetting("defaultLanguage", value)}
+                    options={[
+                      { value: "en", label: t("English") },
+                      { value: "hi", label: t("Hindi") },
+                    ]}
+                  />
                 </div>
               </Section>
 
               <Section
-                title="Platform Status"
-                description="Control the availability of your SaaS platform."
+                title={t("Platform Status")}
+                description={t("Control the availability of your SaaS platform.")}
                 icon={Globe}
               >
                 <SettingToggle
-                  title="Maintenance Mode"
-                  description="Temporarily restrict client access while maintenance is in progress."
+                  title={t("Maintenance Mode")}
+                  description={t("Temporarily restrict client access while maintenance is in progress.")}
                   checked={settings.maintenanceMode}
                   onChange={(v) => updateSetting("maintenanceMode", v)}
                 />
@@ -407,14 +418,14 @@ export default function AdminSettings() {
           {activeTab === "ai" && (
             <>
               <Section
-                title="AI Configuration"
-                description="Set default AI behavior for newly created client chatbots."
+                title={t("AI Configuration")}
+                description={t("Set default AI behavior for newly created client chatbots.")}
                 icon={Bot}
               >
                 <div className="grid grid-cols-1 gap-5 md:grid-cols-2">
                   <div>
                     <SelectField
-                      label="Default AI Model"
+                      label={t("Default AI Model")}
                       value={settings.aiModel}
                       onChange={(v) => updateSetting("aiModel", v)}
                       isDisabled={
@@ -453,7 +464,7 @@ export default function AdminSettings() {
                   </div>
 
                   <InputField
-                    label="Temperature (0-2)"
+                    label={t("Temperature (0-2)")}
                     type="number"
                     min="0"
                     max="2"
@@ -465,7 +476,7 @@ export default function AdminSettings() {
                   />
 
                   <InputField
-                    label="Max Output Tokens (1-8192)"
+                    label={t("Max Output Tokens (1-8192)")}
                     type="number"
                     min="1"
                     max="8192"
@@ -479,24 +490,24 @@ export default function AdminSettings() {
 
                 <div className="mt-6 space-y-4">
                   <SettingToggle
-                    title="Chat History"
-                    description="Allow chatbots to use previous conversation context."
+                    title={t("Chat History")}
+                    description={t("Allow chatbots to use previous conversation context.")}
                     checked={settings.enableChatHistory}
                     onChange={(v) => updateSetting("enableChatHistory", v)}
                     disabled={true}
                   />
 
                   <SettingToggle
-                    title="Streaming Responses"
-                    description="Display AI responses as they are generated."
+                    title={t("Streaming Responses")}
+                    description={t("Display AI responses as they are generated.")}
                     checked={settings.enableStreaming}
                     onChange={(v) => updateSetting("enableStreaming", v)}
                     disabled={true}
                   />
 
                   <SettingToggle
-                    title="Fallback Responses"
-                    description="Enable a fallback response when AI generation fails."
+                    title={t("Fallback Responses")}
+                    description={t("Enable a fallback response when AI generation fails.")}
                     checked={settings.enableFallback}
                     onChange={(v) => updateSetting("enableFallback", v)}
                     disabled={true}
@@ -506,8 +517,8 @@ export default function AdminSettings() {
 
               <InfoCard
                 icon={Sparkles}
-                title="AI Configuration Note"
-                description="These values should act as platform defaults. Client-specific chatbot settings and subscription plan limits should take priority wherever configured."
+                title={t("AI Configuration Note")}
+                description={t("These values should act as platform defaults. Client-specific chatbot settings and subscription plan limits should take priority wherever configured.")}
               />
             </>
           )}
@@ -516,13 +527,13 @@ export default function AdminSettings() {
           {activeTab === "usage" && (
             <>
               <Section
-                title="Usage & Limits"
-                description="Configure when clients receive monthly usage alerts."
+                title={t("Usage & Limits")}
+                description={t("Configure when clients receive monthly usage alerts.")}
                 icon={Gauge}
               >
                 <div className="grid grid-cols-1 gap-5 md:grid-cols-2">
                   <InputField
-                    label="Client Usage Alert Threshold (%)"
+                    label={t("Client Usage Alert Threshold (%)")}
                     type="number"
                     min="1"
                     max="100"
@@ -536,8 +547,8 @@ export default function AdminSettings() {
 
                 <div className="mt-6 space-y-4">
                   <SettingToggle
-                    title="Monthly Usage Alerts"
-                    description="When on, notify clients as monthly responses, token budget, or conversations reach this threshold. When off, no usage alerts are sent."
+                    title={t("Monthly Usage Alerts")}
+                    description={t("When on, notify clients as monthly responses, token budget, or conversations reach this threshold. When off, no usage alerts are sent.")}
                     checked={settings.monthlyUsageAlert}
                     onChange={(v) => updateSetting("monthlyUsageAlert", v)}
                   />
@@ -546,8 +557,8 @@ export default function AdminSettings() {
 
               <InfoCard
                 icon={CreditCard}
-                title="Plan-based Limits"
-                description="Client message limits, token limits, FAQ limits and chatbot configuration restrictions should be controlled through Subscription Plans, not by overriding individual client settings here."
+                title={t("Plan-based Limits")}
+                description={t("Client message limits, token limits, FAQ limits and chatbot configuration restrictions should be controlled through Subscription Plans, not by overriding individual client settings here.")}
               />
             </>
           )}
@@ -555,13 +566,13 @@ export default function AdminSettings() {
           {/* NOTIFICATIONS */}
           {activeTab === "notifications" && (
             <Section
-              title="Notification Preferences"
-              description="Choose which platform events should trigger admin notifications."
+              title={t("Notification Preferences")}
+              description={t("Choose which platform events should trigger admin notifications.")}
               icon={Bell}
             >
               <SettingToggle
-                title="Email Notifications"
-                description="Enable email notifications for important platform events."
+                title={t("Email Notifications")}
+                description={t("Enable email notifications for important platform events.")}
                 checked={settings.emailNotifications}
                 onChange={(v) => updateSetting("emailNotifications", v)}
               />
@@ -569,8 +580,8 @@ export default function AdminSettings() {
               <div className="my-4 border-t border-gray-100 dark:border-gray-800" />
 
               <SettingToggle
-                title="New Client Registration"
-                description="Get notified whenever a new client is created."
+                title={t("New Client Registration")}
+                description={t("Get notified whenever a new client is created.")}
                 checked={settings.newClientNotification}
                 onChange={(v) => updateSetting("newClientNotification", v)}
               />
@@ -578,8 +589,8 @@ export default function AdminSettings() {
               <div className="my-4 border-t border-gray-100 dark:border-gray-800" />
 
               <SettingToggle
-                title="Subscription Events"
-                description="Receive notifications for subscription creation, upgrade, downgrade and cancellation."
+                title={t("Subscription Events")}
+                description={t("Receive notifications for subscription creation, upgrade, downgrade and cancellation.")}
                 checked={settings.subscriptionNotification}
                 onChange={(v) => updateSetting("subscriptionNotification", v)}
               />
@@ -587,8 +598,8 @@ export default function AdminSettings() {
               <div className="my-4 border-t border-gray-100 dark:border-gray-800" />
 
               <SettingToggle
-                title="Payment Notifications"
-                description="Receive notifications for successful and failed payments."
+                title={t("Payment Notifications")}
+                description={t("Receive notifications for successful and failed payments.")}
                 checked={settings.paymentNotification}
                 onChange={(v) => updateSetting("paymentNotification", v)}
               />
@@ -599,13 +610,13 @@ export default function AdminSettings() {
           {activeTab === "security" && (
             <>
               <Section
-                title="Security Settings"
-                description="Manage platform access and session security."
+                title={t("Security Settings")}
+                description={t("Manage platform access and session security.")}
                 icon={ShieldCheck}
               >
                 <div className="grid grid-cols-1 gap-5 md:grid-cols-2">
                   <InputField
-                    label="Maximum Login Attempts"
+                    label={t("Maximum Login Attempts")}
                     type="number"
                     value={settings.maxLoginAttempts}
                     onChange={(v) => updateSetting("maxLoginAttempts", v)}
@@ -616,8 +627,8 @@ export default function AdminSettings() {
 
                 <div className="mt-6 space-y-4">
                   <SettingToggle
-                    title="Two-Factor Authentication"
-                    description="Require an additional verification step for admin login."
+                    title={t("Two-Factor Authentication")}
+                    description={t("Require an additional verification step for admin login.")}
                     checked={settings.twoFactorAuth}
                     onChange={(v) => updateSetting("twoFactorAuth", v)}
                   />
@@ -626,8 +637,8 @@ export default function AdminSettings() {
 
               <InfoCard
                 icon={Lock}
-                title="Security Recommendation"
-                description="Use strong passwords, secure HTTP-only cookies, server-side session validation and rate limiting for admin APIs."
+                title={t("Security Recommendation")}
+                description={t("Use strong passwords, secure HTTP-only cookies, server-side session validation and rate limiting for admin APIs.")}
               />
             </>
           )}
@@ -635,7 +646,7 @@ export default function AdminSettings() {
           {/* Bottom Save */}
           <div className="flex flex-col-reverse justify-between gap-3 rounded-2xl border border-gray-200 bg-white p-4 dark:border-gray-800 dark:bg-[#161b22] sm:flex-row sm:items-center">
             <p className="text-xs text-gray-500 dark:text-gray-400">
-              Make sure to save your changes before leaving this page.
+              {t("Make sure to save your changes before leaving this page.")}
             </p>
 
             <button
@@ -650,7 +661,7 @@ export default function AdminSettings() {
                 <Save size={16} />
               )}
 
-              {saving ? "Saving..." : "Save Settings"}
+              {saving ? t("Saving...") : t("Save Settings")}
             </button>
           </div>
         </main>

@@ -1,4 +1,6 @@
 import { useEffect, useRef, useState } from "react";
+import { useLanguage } from "../../context/LanguageContext";
+import { translateShared } from "../../context/translations/sharedComponents";
 import { CalendarDays, Check, ChevronDown } from "lucide-react";
 
 export default function CustomSelect({
@@ -17,6 +19,8 @@ export default function CustomSelect({
   labelClassName = "",
   icon = false,
 }) {
+  const { t, language } = useLanguage();
+  const translatedPlaceholder = translateShared(placeholder, t, language);
   const [isOpen, setIsOpen] = useState(false);
   const [openDirection, setOpenDirection] = useState("bottom");
 
@@ -193,7 +197,7 @@ export default function CustomSelect({
             ${labelClassName}
           `}
         >
-          {label}
+          {translateShared(label, t, language)}
 
           {required && <span className="ml-1 text-red-500">*</span>}
         </label>
@@ -280,7 +284,9 @@ export default function CustomSelect({
               }
             `}
           >
-            {selectedOption ? selectedOption.label : placeholder}
+            {selectedOption
+              ? translateShared(selectedOption.label, t, language)
+              : translatedPlaceholder}
           </span>
 
           {/* Arrow */}
@@ -349,7 +355,7 @@ export default function CustomSelect({
                     dark:text-gray-500
                   "
                 >
-                  No options available
+                  {translateShared("No options available", t, language)}
                 </div>
               ) : (
                 options.map((option) => {
@@ -402,7 +408,7 @@ export default function CustomSelect({
                         }
                       `}
                     >
-                      <span className="truncate">{option.label}</span>
+                      <span className="truncate">                      {translateShared(option.label, t, language)}</span>
 
                       {isSelected && (
                         <Check

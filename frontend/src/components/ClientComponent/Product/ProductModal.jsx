@@ -13,6 +13,8 @@ import {
 import CustomSelect from "../../common/CustomSelect";
 import { productSchema } from "../../../utils/validation";
 import { getImageUrl } from "../../../utils/imageUrl";
+import { useLanguage } from "../../../context/LanguageContext";
+import { translateShared } from "../../../context/translations/sharedComponents";
 
 const initialForm = {
   name: "",
@@ -117,6 +119,8 @@ export default function ProductModal({
   product = null,
   loading = false,
 }) {
+  const { t, language } = useLanguage();
+  const translate = (text) => translateShared(text, t, language);
   const isEdit = Boolean(product);
 
   const [imagePreview, setImagePreview] = useState("");
@@ -411,7 +415,7 @@ export default function ProductModal({
                   dark:text-white
                 "
               >
-                {isEdit ? "Edit Product" : "Add Product"}
+                {translate(isEdit ? "Edit Product" : "Add Product")}
               </h2>
 
               <p
@@ -422,8 +426,8 @@ export default function ProductModal({
                 "
               >
                 {isEdit
-                  ? "Update product information"
-                  : "Add a new product to your catalog"}
+                  ? translate("Update product information")
+                  : translate("Add a new product to your catalog")}
               </p>
             </div>
           </div>
@@ -462,7 +466,7 @@ export default function ProductModal({
             ================================================= */}
 
             <FormField
-              label="Product Name"
+              label={translate("Product Name")}
               required
               error={errors.name?.message}
             >
@@ -470,7 +474,7 @@ export default function ProductModal({
                 type="text"
                 {...register("name")}
                 disabled={loading}
-                placeholder="Enter product name"
+                placeholder={translate("Enter product name")}
                 className={`
                   input-style
                   ${errors.name ? "input-error" : ""}
@@ -482,12 +486,15 @@ export default function ProductModal({
                 DESCRIPTION
             ================================================= */}
 
-            <FormField label="Description" error={errors.description?.message}>
+            <FormField
+              label={translate("Description")}
+              error={errors.description?.message}
+            >
               <textarea
                 {...register("description")}
                 disabled={loading}
                 rows={3}
-                placeholder="Enter product description"
+                placeholder={translate("Enter product description")}
                 className={`
                   input-style
                   resize-none
@@ -507,12 +514,15 @@ export default function ProductModal({
                 sm:grid-cols-2
               "
             >
-              <FormField label="Category" error={errors.category?.message}>
+              <FormField
+                label={translate("Category")}
+                error={errors.category?.message}
+              >
                 <input
                   type="text"
                   {...register("category")}
                   disabled={loading}
-                  placeholder="e.g. Electronics"
+                  placeholder={translate("e.g. Electronics")}
                   className={`
                     input-style
                     ${errors.category ? "input-error" : ""}
@@ -520,7 +530,10 @@ export default function ProductModal({
                 />
               </FormField>
 
-              <FormField label="Currency" error={errors.currency?.message}>
+              <FormField
+                label={translate("Currency")}
+                error={errors.currency?.message}
+              >
                 <Controller
                   name="currency"
                   control={control}
@@ -568,7 +581,10 @@ export default function ProductModal({
                 sm:grid-cols-2
               "
             >
-              <FormField label="Price" error={errors.price?.message}>
+              <FormField
+                label={translate("Price")}
+                error={errors.price?.message}
+              >
                 <input
                   type="number"
                   {...register("price")}
@@ -583,7 +599,10 @@ export default function ProductModal({
                 />
               </FormField>
 
-              <FormField label="Stock" error={errors.stock?.message}>
+              <FormField
+                label={translate("Stock")}
+                error={errors.stock?.message}
+              >
                 <input
                   type="number"
                   {...register("stock")}
@@ -611,7 +630,7 @@ export default function ProductModal({
               "
             >
               <FormField
-                label="Availability"
+                label={translate("Availability")}
                 error={errors.availability?.message}
               >
                 <Controller
@@ -627,19 +646,19 @@ export default function ProductModal({
                       options={[
                         {
                           value: "in_stock",
-                          label: "In Stock",
+                          label: translate("In Stock"),
                         },
                         {
                           value: "out_of_stock",
-                          label: "Out of Stock",
+                          label: translate("Out of Stock"),
                         },
                         {
                           value: "pre_order",
-                          label: "Pre Order",
+                          label: translate("Pre Order"),
                         },
                         {
                           value: "unavailable",
-                          label: "Unavailable",
+                          label: translate("Unavailable"),
                         },
                       ]}
                       rounded="rounded-lg"
@@ -649,7 +668,10 @@ export default function ProductModal({
                 />
               </FormField>
 
-              <FormField label="Status" error={errors.status?.message}>
+              <FormField
+                label={translate("Status")}
+                error={errors.status?.message}
+              >
                 <Controller
                   name="status"
                   control={control}
@@ -663,11 +685,11 @@ export default function ProductModal({
                       options={[
                         {
                           value: "active",
-                          label: "Active",
+                          label: translate("Active"),
                         },
                         {
                           value: "inactive",
-                          label: "Inactive",
+                          label: translate("Inactive"),
                         },
                       ]}
                       rounded="rounded-lg"
@@ -682,7 +704,10 @@ export default function ProductModal({
                 IMAGE UPLOAD
             ================================================= */}
 
-            <FormField label="Product Image" error={errors.image?.message}>
+            <FormField
+              label={translate("Product Image")}
+              error={errors.image?.message}
+            >
               <div className="space-y-3">
                 {/* IMAGE PREVIEW */}
 
@@ -701,7 +726,7 @@ export default function ProductModal({
                   >
                     <img
                       src={imagePreview}
-                      alt="Product preview"
+                      alt={translate("Product preview")}
                       className="
                         h-48
                         w-full
@@ -731,7 +756,7 @@ export default function ProductModal({
                         disabled:cursor-not-allowed
                         disabled:opacity-50
                       "
-                      title="Remove image"
+                      title={translate("Remove image")}
                     >
                       <X size={16} />
                     </button>
@@ -783,7 +808,7 @@ export default function ProductModal({
                         dark:text-gray-200
                       "
                     >
-                      Select product image
+                      {translate("Select product image")}
                     </p>
 
                     <p
@@ -793,7 +818,7 @@ export default function ProductModal({
                         dark:text-gray-400
                       "
                     >
-                      JPG, JPEG, PNG or WEBP
+                      {translate("JPG, JPEG, PNG or WEBP")}
                     </p>
 
                     <p
@@ -803,7 +828,7 @@ export default function ProductModal({
                         dark:text-gray-500
                       "
                     >
-                      Maximum size: 5MB
+                      {translate("Maximum size: 5MB")}
                     </p>
 
                     <input
@@ -845,7 +870,7 @@ export default function ProductModal({
                     "
                   >
                     <Upload size={14} />
-                    Change Image
+                    {translate("Change Image")}
                     <input
                       type="file"
                       accept="
@@ -896,7 +921,7 @@ export default function ProductModal({
                       dark:text-white
                     "
                   >
-                    Metadata
+                    {translate("Metadata")}
                   </h3>
 
                   <p
@@ -906,7 +931,7 @@ export default function ProductModal({
                       dark:text-gray-400
                     "
                   >
-                    Add custom information about this product.
+                    {translate("Add custom information about this product.")}
                   </p>
                 </div>
 
@@ -937,7 +962,7 @@ export default function ProductModal({
                   "
                 >
                   <Plus size={14} />
-                  Add Metadata
+                  {translate("Add Metadata")}
                 </button>
               </div>
 
@@ -961,7 +986,7 @@ export default function ProductModal({
                       dark:text-gray-400
                     "
                   >
-                    No metadata added yet.
+                    {translate("No metadata added yet.")}
                   </p>
 
                   <p
@@ -971,7 +996,9 @@ export default function ProductModal({
                       dark:text-gray-500
                     "
                   >
-                    Add fields like technologies, features, projectType, etc.
+                    {translate(
+                      "Add fields like technologies, features, projectType, etc.",
+                    )}
                   </p>
                 </div>
               ) : (
@@ -1006,7 +1033,7 @@ export default function ProductModal({
                               dark:text-gray-300
                             "
                         >
-                          Key
+                          {translate("Key")}
                         </label>
 
                         <Controller
@@ -1019,10 +1046,13 @@ export default function ProductModal({
                               value={field.value}
                               onChange={field.onChange}
                               disabled={loading}
-                              placeholder="Select metadata"
+                              placeholder={translate("Select metadata")}
                               rounded="rounded-lg"
                               error={errors.metadata?.[index]?.key?.message}
-                              options={metadataOptions}
+                              options={metadataOptions.map((option) => ({
+                                ...option,
+                                label: translate(option.label),
+                              }))}
                             />
                           )}
                         />
@@ -1040,16 +1070,16 @@ export default function ProductModal({
                               dark:text-gray-300
                             "
                         >
-                          Value
+                          {translate("Value")}
                         </label>
 
                         <input
                           type="text"
                           {...register(`metadata.${index}.value`)}
                           disabled={loading}
-                          placeholder="
-                              e.g. React.js, Node.js, MongoDB
-                            "
+                          placeholder={translate(
+                            "e.g. React.js, Node.js, MongoDB",
+                          )}
                           className={`
                               input-style
                               ${
@@ -1101,7 +1131,7 @@ export default function ProductModal({
                             dark:hover:bg-red-500/10
                             dark:hover:text-red-400
                           "
-                        title="Remove metadata"
+                        title={translate("Remove metadata")}
                       >
                         <Trash2 size={16} />
                       </button>
@@ -1182,10 +1212,10 @@ export default function ProductModal({
               )}
 
               {loading
-                ? "Saving..."
+                ? translate("Saving...")
                 : isEdit
-                  ? "Update Product"
-                  : "Add Product"}
+                  ? translate("Update Product")
+                  : translate("Add Product")}
             </button>
           </div>
         </form>

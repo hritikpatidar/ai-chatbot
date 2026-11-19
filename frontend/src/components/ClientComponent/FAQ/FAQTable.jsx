@@ -8,6 +8,8 @@ import {
 import ActionButton from "../../common/ActionButton";
 import StatusBadge from "../../common/StatusBadge";
 import { useSelector } from "react-redux";
+import { useLanguage } from "../../../context/LanguageContext";
+import { translateShared } from "../../../context/translations/sharedComponents";
 
 export default function FAQTable({
   faqs = [],
@@ -15,6 +17,8 @@ export default function FAQTable({
   onDelete,
   loading = false,
 }) {
+  const { t, language } = useLanguage();
+  const translate = (text) => translateShared(text, t, language);
   const { client } = useSelector(
     (state) => state?.ClientReducer?.clientSlice || {},
   );
@@ -163,14 +167,14 @@ export default function FAQTable({
                     <div className="flex justify-end gap-2">
                       <ActionButton
                         icon={<Edit2 size={15} />}
-                        title="Edit FAQ"
+                        title={translate("Edit FAQ")}
                         onClick={() => onEdit(faq)}
                       />
 
                       <ActionButton
                         danger
                         icon={<Trash2 size={15} />}
-                        title="Delete FAQ"
+                        title={translate("Delete FAQ")}
                         onClick={() => onDelete(faq)}
                       />
                     </div>
@@ -227,21 +231,23 @@ export default function FAQTable({
                     {faq.category}
                   </span>
                 ) : (
-                  <span className="text-[11px] text-gray-400">No category</span>
+                  <span className="text-[11px] text-gray-400">
+                    {translate("No category")}
+                  </span>
                 )}
               </div>
 
               <div className="flex gap-2">
                 <ActionButton
                   icon={<Edit2 size={14} />}
-                  title="Edit"
+                  title={translate("Edit")}
                   onClick={() => onEdit(faq)}
                 />
 
                 <ActionButton
                   danger
                   icon={<Trash2 size={14} />}
-                  title="Delete"
+                  title={translate("Delete")}
                   onClick={() => onDelete(faq)}
                 />
               </div>

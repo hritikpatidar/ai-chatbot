@@ -12,6 +12,8 @@ import { useTheme } from "../../context/ThemeContext";
 import { motion, AnimatePresence } from "framer-motion";
 import { getImageUrl } from "../../utils/imageUrl";
 import ConfirmModal from "../ClientComponent/ConfirmModal";
+import LanguageSwitcher from "../common/LanguageSwitcher";
+import { useLanguage } from "../../context/LanguageContext";
 
 const ChatHeader = () => {
   const dispatch = useDispatch();
@@ -30,6 +32,7 @@ const ChatHeader = () => {
 
   const { isConnected, isClientChatbot } = useSocket();
   const { isDarkMode, toggleTheme } = useTheme();
+  const { t } = useLanguage();
 
   useEffect(() => {
     const handleClickOutside = (event) => {
@@ -59,22 +62,22 @@ const ChatHeader = () => {
     try {
       if (navigator.share) {
         await navigator.share({
-          title: "Chat",
-          text: "Check out this chat",
+          title: t("Chat"),
+          text: t("Check out this chat"),
           url,
         });
       } else {
         await navigator.clipboard.writeText(url);
-        alert("Chat link copied!");
+        alert(t("Chat link copied!"));
       }
     } catch (err) {
       console.error(err);
 
       try {
         await navigator.clipboard.writeText(url);
-        alert("Chat link copied!");
+        alert(t("Chat link copied!"));
       } catch {
-        alert("Unable to copy link.");
+        alert(t("Unable to copy link."));
       }
     }
   };
@@ -131,13 +134,14 @@ const ChatHeader = () => {
       </div>
 
       <div className="flex shrink-0 items-center gap-2">
+        <LanguageSwitcher />
         <button
           type="button"
           onClick={toggleTheme}
           aria-label={
-            isDarkMode ? "Switch to light mode" : "Switch to dark mode"
+            t(isDarkMode ? "Switch to light mode" : "Switch to dark mode")
           }
-          title={isDarkMode ? "Switch to Light Mode" : "Switch to Dark Mode"}
+          title={t(isDarkMode ? "Switch to light mode" : "Switch to dark mode")}
           className="
             group
             flex
@@ -260,7 +264,7 @@ const ChatHeader = () => {
                 dark:text-gray-400
               "
             />
-            <span className="hidden sm:block">Share</span>
+            <span className="hidden sm:block">{t("Share")}</span>
           </button>
         )}
 
@@ -295,7 +299,7 @@ const ChatHeader = () => {
             <div className="relative shrink-0">
               <img
                 src={getImageUrl(profileDetails?.profileImage, profile)}
-                alt="Profile"
+                alt={t("Profile")}
                 onError={(e) => {
                   e.currentTarget.onerror = null;
                   e.currentTarget.src = profile;
@@ -341,7 +345,7 @@ const ChatHeader = () => {
                 dark:text-gray-200
               "
             >
-              {profileDetails?.fullName || "User"}
+              {profileDetails?.fullName || t("User")}
             </span>
 
             <ChevronDown
@@ -390,7 +394,7 @@ const ChatHeader = () => {
                   <div className="relative shrink-0">
                     <img
                       src={getImageUrl(profileDetails?.profileImage, profile)}
-                      alt="Profile"
+                      alt={t("Profile")}
                       onError={(e) => {
                         e.currentTarget.onerror = null;
                         e.currentTarget.src = profile;
@@ -435,7 +439,7 @@ const ChatHeader = () => {
                       "
                       title={profileDetails?.fullName}
                     >
-                      {profileDetails?.fullName || "User"}
+                      {profileDetails?.fullName || t("User")}
                     </p>
 
                     <p
@@ -448,7 +452,7 @@ const ChatHeader = () => {
                       "
                       title={profileDetails?.email}
                     >
-                      {profileDetails?.email || "No email available"}
+                      {profileDetails?.email || t("No email available")}
                     </p>
                   </div>
                 </div>
@@ -509,12 +513,12 @@ const ChatHeader = () => {
         }}
         onConfirm={handleAuth}
         loading={isLogoutLoading}
-        title="Logout Confirmation"
+        title={t("Logout Confirmation")}
         message={
-          "Are you sure you want to logout? You will need to login again to access your account."
+          t("Are you sure you want to logout? You will need to login again to access your account.")
         }
-        confirmText={isLogoutLoading ? "Logging out..." : "Logout"}
-        cancelText="Cancel"
+        confirmText={isLogoutLoading ? t("Logging out...") : t("Logout")}
+        cancelText={t("Cancel")}
         danger
       />
     </div>

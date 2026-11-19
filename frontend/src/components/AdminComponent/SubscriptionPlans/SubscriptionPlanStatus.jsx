@@ -1,4 +1,7 @@
+import { useLanguage } from "../../../context/LanguageContext";
+
 const SubscriptionPlanStatus = ({ status }) => {
+  const { t } = useLanguage();
   const isActive = status === "active";
 
   return (
@@ -15,7 +18,7 @@ const SubscriptionPlanStatus = ({ status }) => {
         }`}
       />
 
-      {isActive ? "Active" : "Inactive"}
+      {isActive ? t("Active") : t("Inactive")}
     </span>
   );
 };

@@ -1,5 +1,8 @@
 import { FileQuestion, Plus } from "lucide-react";
 
+import { useLanguage } from "../../context/LanguageContext";
+import { translateShared } from "../../context/translations/sharedComponents";
+
 export default function EmptyState({
   title = "No data found",
   description = "There is no data available at the moment.",
@@ -7,6 +10,7 @@ export default function EmptyState({
   onButtonClick,
   icon: Icon = FileQuestion,
 }) {
+  const { t, language } = useLanguage();
   return (
     <div
       className="
@@ -53,7 +57,7 @@ export default function EmptyState({
           dark:text-white
         "
       >
-        {title}
+        {translateShared(title, t, language)}
       </h3>
 
       <p
@@ -66,7 +70,7 @@ export default function EmptyState({
           dark:text-gray-400
         "
       >
-        {description}
+        {translateShared(description, t, language)}
       </p>
 
       {buttonText && onButtonClick && (
@@ -91,7 +95,7 @@ export default function EmptyState({
           "
         >
           <Plus size={16} />
-          {buttonText}
+          {translateShared(buttonText, t, language)}
         </button>
       )}
     </div>

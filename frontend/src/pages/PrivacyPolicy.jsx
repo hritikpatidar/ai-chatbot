@@ -9,6 +9,7 @@ import {
 } from "lucide-react";
 
 import { useNavigate } from "react-router-dom";
+import { useLanguage } from "../context/LanguageContext";
 
 const sections = [
   {
@@ -51,6 +52,11 @@ const sections = [
 
 export default function PrivacyPolicy() {
   const navigate = useNavigate();
+  const { language, t } = useLanguage();
+  const lastUpdated = new Intl.DateTimeFormat(
+    language === "hi" ? "hi-IN" : "en-US",
+    { dateStyle: "long", timeZone: "UTC" },
+  ).format(new Date("2026-07-27T00:00:00Z"));
 
   return (
     <div
@@ -95,7 +101,7 @@ export default function PrivacyPolicy() {
           "
         >
           <ChevronLeft size={18} />
-          Back
+          {t("Back")}
         </button>
 
         <div className="mb-10">
@@ -107,7 +113,7 @@ export default function PrivacyPolicy() {
               dark:text-white
             "
           >
-            Privacy <span className="text-cyan-500">Policy</span>
+            {t("Privacy")} <span className="text-cyan-500">{t("Policy")}</span>
           </h1>
 
           <p
@@ -119,9 +125,7 @@ export default function PrivacyPolicy() {
               dark:text-gray-400
             "
           >
-            Your privacy is important to us. This Privacy Policy explains how we
-            collect, use, store, and protect your personal information while
-            using our platform.
+            {t("Your privacy is important to us. This Privacy Policy explains how we collect, use, store, and protect your personal information while using our platform.")}
           </p>
 
           <div
@@ -132,9 +136,9 @@ export default function PrivacyPolicy() {
               dark:text-gray-500
             "
           >
-            <span className="font-medium">Last Updated</span>
+            <span className="font-medium">{t("Last Updated")}</span>
             <br />
-            July 27, 2026
+            {lastUpdated}
           </div>
         </div>
 
@@ -197,7 +201,7 @@ export default function PrivacyPolicy() {
                         dark:group-hover:text-cyan-400
                       "
                     >
-                      {section.title}
+                      {t(section.title)}
                     </h2>
 
                     <p
@@ -208,7 +212,7 @@ export default function PrivacyPolicy() {
                         dark:text-gray-400
                       "
                     >
-                      {section.content}
+                      {t(section.content)}
                     </p>
                   </div>
                 </div>
@@ -251,7 +255,7 @@ export default function PrivacyPolicy() {
               dark:text-white
             "
           >
-            Your Privacy Matters
+            {t("Your Privacy Matters")}
           </h3>
 
           <p
@@ -264,9 +268,7 @@ export default function PrivacyPolicy() {
               dark:text-gray-400
             "
           >
-            We are committed to maintaining the confidentiality and security of
-            your personal information. Our policies are regularly updated to
-            ensure transparency and compliance with privacy standards.
+            {t("We are committed to maintaining the confidentiality and security of your personal information. Our policies are regularly updated to ensure transparency and compliance with privacy standards.")}
           </p>
 
           <button
@@ -284,7 +286,7 @@ export default function PrivacyPolicy() {
               hover:scale-105
             "
           >
-            Contact Support
+            {t("Contact Support")}
           </button>
         </div>
       </div>

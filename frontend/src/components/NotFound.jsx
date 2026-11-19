@@ -8,8 +8,12 @@ import {
   Search,
   Sparkles,
 } from "lucide-react";
+import { useLanguage } from "../context/LanguageContext";
+import { translateShared } from "../context/translations/sharedComponents";
 
 const NotFound = () => {
+  const { t, language } = useLanguage();
+  const translate = (text) => translateShared(text, t, language);
   const navigate = useNavigate();
 
   const handleGoBack = () => {
@@ -42,7 +46,7 @@ const NotFound = () => {
         <div className="order-2 text-center lg:order-1 lg:text-left">
           <div className="mb-6 inline-flex items-center gap-2 rounded-full border border-blue-200 bg-blue-50 px-4 py-2 text-sm font-medium text-blue-700 dark:border-blue-400/20 dark:bg-blue-400/10 dark:text-blue-300">
             <Sparkles size={16} />
-            AI Chatbot Navigation
+            {translate("AI Chatbot Navigation")}
           </div>
 
           <h1 className="text-7xl font-black tracking-tighter sm:text-8xl md:text-9xl">
@@ -50,16 +54,16 @@ const NotFound = () => {
           </h1>
 
           <h2 className="mt-4 text-2xl font-bold tracking-tight sm:text-3xl md:text-4xl">
-            Oops! Lost in the{" "}
+            {translate("Oops! Lost in the")}{" "}
             <span className="text-blue-600 dark:text-blue-400">
-              AI universe?
+              {translate("AI universe?")}
             </span>
           </h2>
 
           <p className="mx-auto mt-5 max-w-lg text-sm leading-7 text-gray-600 dark:text-gray-400 sm:text-base lg:mx-0">
-            Looks like this page has gone off the grid. Our AI searched
-            everywhere, but couldn't find what you're looking for.
-            Let's get you back on track.
+            {translate(
+              "Looks like this page has gone off the grid. Our AI searched everywhere, but couldn't find what you're looking for. Let's get you back on track.",
+            )}
           </p>
 
           {/* Actions */}
@@ -70,7 +74,7 @@ const NotFound = () => {
               className="inline-flex min-h-12 items-center justify-center gap-2 rounded-xl bg-blue-600 px-6 py-3 font-semibold text-white shadow-lg shadow-blue-600/20 transition hover:-translate-y-0.5 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 dark:focus:ring-offset-[#090b10]"
             >
               <Home size={18} />
-              Back to Home
+              {translate("Back to Home")}
               <ArrowRight size={17} />
             </button>
 
@@ -80,13 +84,13 @@ const NotFound = () => {
               className="inline-flex min-h-12 items-center justify-center gap-2 rounded-xl border border-gray-200 bg-white px-6 py-3 font-semibold text-gray-700 transition hover:bg-gray-100 focus:outline-none focus:ring-2 focus:ring-gray-400 dark:border-white/10 dark:bg-white/5 dark:text-gray-200 dark:hover:bg-white/10"
             >
               <ArrowLeft size={18} />
-              Go Back
+              {translate("Go Back")}
             </button>
           </div>
 
           <div className="mt-8 flex items-center justify-center gap-2 text-sm text-gray-500 dark:text-gray-500 lg:justify-start">
             <Search size={16} />
-            <span>Error code:</span>
+            <span>{translate("Error code:")}</span>
             <span className="font-mono font-semibold">404_PAGE_NOT_FOUND</span>
           </div>
         </div>
@@ -99,7 +103,7 @@ const NotFound = () => {
               <div className="flex items-center gap-2">
                 <span className="h-2 w-2 rounded-full bg-red-500" />
                 <span className="text-xs font-medium text-gray-600 dark:text-gray-300">
-                  Page not found
+                  {translate("Page not found")}
                 </span>
               </div>
             </div>
@@ -108,7 +112,7 @@ const NotFound = () => {
               <div className="flex items-center gap-2 text-blue-600 dark:text-blue-300">
                 <MessageCircle size={17} />
                 <span className="text-xs font-semibold">
-                  Searching the universe...
+                  {translate("Searching the universe...")}
                 </span>
               </div>
             </div>
@@ -124,10 +128,10 @@ const NotFound = () => {
                   </div>
 
                   <div>
-                    <p className="font-bold">AI Assistant</p>
+                    <p className="font-bold">{translate("AI Assistant")}</p>
                     <p className="mt-0.5 flex items-center gap-1.5 text-xs text-gray-500 dark:text-gray-400">
                       <span className="h-2 w-2 rounded-full bg-green-500" />
-                      Online and ready
+                      {translate("Online and ready")}
                     </p>
                   </div>
                 </div>
@@ -162,12 +166,13 @@ const NotFound = () => {
               <div className="rounded-2xl border border-gray-100 bg-gray-50 p-4 dark:border-white/5 dark:bg-white/4">
                 <div className="mb-2 flex items-center gap-2 text-xs font-semibold text-blue-600 dark:text-blue-300">
                   <Bot size={15} />
-                  AI Assistant
+                  {translate("AI Assistant")}
                 </div>
 
                 <p className="text-sm leading-6 text-gray-600 dark:text-gray-300">
-                  Hmm... I couldn't find this page. But don't worry, we can
-                  find another way!
+                  {translate(
+                    "Hmm... I couldn't find this page. But don't worry, we can find another way!",
+                  )}
                 </p>
 
                 <div className="mt-4 flex gap-1.5">
@@ -178,16 +183,16 @@ const NotFound = () => {
               </div>
 
               <div className="mt-5 flex items-center justify-between text-xs text-gray-500">
-                <span>Powered by AI</span>
+                <span>{translate("Powered by AI")}</span>
                 <span className="flex items-center gap-1.5">
                   <Sparkles size={13} />
-                  Always learning
+                  {translate("Always learning")}
                 </span>
               </div>
             </div>
 
             <p className="mt-5 text-center text-xs text-gray-500 dark:text-gray-500">
-              Even the smartest AI can't find every page.
+              {translate("Even the smartest AI can't find every page.")}
             </p>
           </div>
         </div>

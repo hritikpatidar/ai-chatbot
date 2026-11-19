@@ -10,6 +10,8 @@ import {
   FileText,
 } from "lucide-react";
 import { useState } from "react";
+import { useLanguage } from "../context/LanguageContext";
+import accountScreens from "../context/translations/accountScreens";
 
 const projectsData = [
   {
@@ -51,6 +53,9 @@ const projectsData = [
 ];
 
 export default function Projects() {
+  const { t: translate, language } = useLanguage();
+  const t = (key) =>
+    language === "hi" ? accountScreens[key] || translate(key) : key;
   const [openModal, setOpenModal] = useState(false);
   const [projectName, setProjectName] = useState("");
 
@@ -62,10 +67,10 @@ export default function Projects() {
     const newProject = {
       id: Date.now(),
       name: projectName,
-      description: "New AI Project",
+      description: t("New AI Project"),
       files: 0,
       members: 1,
-      updated: "Just now",
+      updated: t("Just now"),
       favorite: false,
     };
 
@@ -99,7 +104,7 @@ export default function Projects() {
                 dark:text-white
               "
             >
-              Projects
+              {t("Projects")}
             </h1>
 
             <p
@@ -110,7 +115,7 @@ export default function Projects() {
                 dark:text-gray-400
               "
             >
-              Organize your AI workspaces and files.
+              {t("Organize your AI workspaces and files.")}
             </p>
           </div>
 
@@ -128,7 +133,7 @@ export default function Projects() {
               />
 
               <input
-                placeholder="Search projects..."
+                placeholder={t("Search projects...")}
                 className="
                   w-full
                   rounded-xl
@@ -175,7 +180,7 @@ export default function Projects() {
               "
             >
               <Plus size={16} />
-              New Project
+              {t("New Project")}
             </button>
           </div>
         </div>
@@ -184,10 +189,10 @@ export default function Projects() {
 
         <div className="mt-6 grid grid-cols-2 gap-3 lg:grid-cols-4">
           {[
-            ["Total", "12"],
-            ["Active", "8"],
-            ["Archived", "2"],
-            ["Shared", "5"],
+            [t("Total"), "12"],
+            [t("Active"), "8"],
+            [t("Archived"), "2"],
+            [t("Shared"), "5"],
           ].map(([title, value]) => (
             <div
               key={title}
@@ -272,6 +277,8 @@ export default function Projects() {
 
                     <button
                       type="button"
+                      aria-label={t("More options")}
+                      title={t("More options")}
                       className="
                         rounded-lg
                         p-1
@@ -296,7 +303,7 @@ export default function Projects() {
                     dark:text-white
                   "
                 >
-                  {project.name}
+                  {t(project.name)}
                 </h2>
 
                 <p
@@ -308,7 +315,7 @@ export default function Projects() {
                     dark:text-gray-400
                   "
                 >
-                  {project.description}
+                  {t(project.description)}
                 </p>
 
                 <div
@@ -324,7 +331,7 @@ export default function Projects() {
                 >
                   <div className="flex items-center gap-1">
                     <FileText size={14} />
-                    {project.files} Files
+                    {project.files} {t("Files")}
                   </div>
 
                   <div className="flex items-center gap-1">
@@ -334,7 +341,7 @@ export default function Projects() {
 
                   <div className="flex items-center gap-1">
                     <Clock size={14} />
-                    {project.updated}
+                    {t(project.updated)}
                   </div>
                 </div>
               </div>
@@ -402,7 +409,7 @@ export default function Projects() {
                   dark:text-white
                 "
               >
-                Create New Project
+                {t("Create New Project")}
               </h2>
 
               <div className="mt-5">
@@ -415,14 +422,14 @@ export default function Projects() {
                     dark:text-gray-300
                   "
                 >
-                  Project Name
+                  {t("Project Name")}
                 </label>
 
                 <input
                   autoFocus
                   value={projectName}
                   onChange={(e) => setProjectName(e.target.value)}
-                  placeholder="Enter project name..."
+                  placeholder={t("Enter project name...")}
                   className="
                     w-full
                     rounded-xl
@@ -469,9 +476,9 @@ export default function Projects() {
                     dark:text-emerald-300
                   "
                 >
-                  ✨ Projects help you organize AI conversations, uploaded
-                  files, prompts and generated content in one workspace. Give
-                  your project a clear, memorable name to find it quickly later.
+                  {t(
+                    "✨ Projects help you organize AI conversations, uploaded files, prompts and generated content in one workspace. Give your project a clear, memorable name to find it quickly later.",
+                  )}
                 </p>
               </div>
 
@@ -497,7 +504,7 @@ export default function Projects() {
                     dark:hover:bg-white/10
                   "
                 >
-                  Cancel
+                  {t("Cancel")}
                 </button>
 
                 <button
@@ -518,7 +525,7 @@ export default function Projects() {
                     dark:hover:bg-gray-200
                   "
                 >
-                  Create Project
+                  {t("Create Project")}
                 </button>
               </div>
             </motion.div>

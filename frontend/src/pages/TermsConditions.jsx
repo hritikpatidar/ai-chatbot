@@ -8,6 +8,7 @@ import {
   ChevronLeft,
 } from "lucide-react";
 import { useNavigate } from "react-router-dom";
+import { useLanguage } from "../context/LanguageContext";
 
 const sections = [
   {
@@ -50,6 +51,11 @@ const sections = [
 
 export default function TermsConditions() {
   const navigate = useNavigate();
+  const { language, t } = useLanguage();
+  const lastUpdated = new Intl.DateTimeFormat(
+    language === "hi" ? "hi-IN" : "en-US",
+    { dateStyle: "long", timeZone: "UTC" },
+  ).format(new Date("2026-07-27T00:00:00Z"));
 
   return (
     <div
@@ -94,7 +100,7 @@ export default function TermsConditions() {
           "
         >
           <ChevronLeft size={18} />
-          Back
+          {t("Back")}
         </button>
 
         <div className="mb-8">
@@ -107,7 +113,7 @@ export default function TermsConditions() {
               dark:text-white
             "
           >
-            Terms &
+            {t("Terms")} &
             <span
               className="
                 bg-linear-to-r
@@ -120,7 +126,7 @@ export default function TermsConditions() {
               "
             >
               {" "}
-              Conditions
+              {t("Conditions")}
             </span>
           </h1>
 
@@ -132,8 +138,7 @@ export default function TermsConditions() {
               dark:text-gray-400
             "
           >
-            Please read these Terms & Conditions carefully before using our
-            platform.
+            {t("Please read these Terms & Conditions carefully before using our platform.")}
           </p>
         </div>
 
@@ -159,7 +164,7 @@ export default function TermsConditions() {
               dark:text-gray-400
             "
           >
-            Last Updated
+            {t("Last Updated")}
           </p>
 
           <p
@@ -170,7 +175,7 @@ export default function TermsConditions() {
               dark:text-white
             "
           >
-            July 27, 2026
+            {lastUpdated}
           </p>
         </div>
 
@@ -237,7 +242,7 @@ export default function TermsConditions() {
                         dark:group-hover:text-cyan-400
                       "
                     >
-                      {item.title}
+                      {t(item.title)}
                     </h2>
 
                     <p
@@ -248,7 +253,7 @@ export default function TermsConditions() {
                         dark:text-gray-400
                       "
                     >
-                      {item.content}
+                      {t(item.content)}
                     </p>
                   </div>
                 </div>
@@ -281,7 +286,7 @@ export default function TermsConditions() {
               dark:text-white
             "
           >
-            Need Help?
+            {t("Need Help?")}
           </h3>
 
           <p
@@ -293,8 +298,7 @@ export default function TermsConditions() {
               dark:text-gray-400
             "
           >
-            If you have any questions about our Terms & Conditions, please
-            contact our support team.
+            {t("If you have any questions about our Terms & Conditions, please contact our support team.")}
           </p>
 
           <button
@@ -313,7 +317,7 @@ export default function TermsConditions() {
               hover:scale-105
             "
           >
-            Contact Support
+            {t("Contact Support")}
           </button>
         </div>
       </div>

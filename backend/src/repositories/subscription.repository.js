@@ -117,7 +117,7 @@ export const updateSubscriptionByStripeId = async (
       $set: updateData,
     },
     {
-      new: true,
+      returnDocument: "after",
       runValidators: true,
     },
   )

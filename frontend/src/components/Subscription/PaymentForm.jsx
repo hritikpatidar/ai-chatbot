@@ -10,11 +10,13 @@ import {
 
 import { CreditCard, Loader2, Lock } from "lucide-react";
 import { useTheme } from "../../context/ThemeContext";
+import { useLanguage } from "../../context/LanguageContext";
 
 const PaymentForm = ({ loading, onSubmit, error }) => {
+  const { t } = useLanguage();
   const stripe = useStripe();
   const elements = useElements();
-  const { isDarkMode, toggleTheme } = useTheme();
+  const { isDarkMode } = useTheme();
 
   const [cardholderName, setCardholderName] = useState("");
 
@@ -43,19 +45,19 @@ const PaymentForm = ({ loading, onSubmit, error }) => {
     setCardError("");
 
     if (!stripe || !elements) {
-      setCardError("Payment system is not ready. Please try again.");
+      setCardError(t("Payment system is not ready. Please try again."));
       return;
     }
 
     if (!cardholderName.trim()) {
-      setCardError("Cardholder name is required.");
+      setCardError(t("Cardholder name is required."));
       return;
     }
 
     const cardNumber = elements.getElement(CardNumberElement);
 
     if (!cardNumber) {
-      setCardError("Card details are required.");
+      setCardError(t("Card details are required."));
       return;
     }
 
@@ -73,7 +75,7 @@ const PaymentForm = ({ loading, onSubmit, error }) => {
 
       <div>
         <label className="mb-2 block text-sm font-medium text-gray-700 dark:text-gray-300">
-          Cardholder Name
+          {t("Cardholder Name")}
           <span className="ml-1 text-red-500">*</span>
         </label>
 
@@ -84,7 +86,7 @@ const PaymentForm = ({ loading, onSubmit, error }) => {
             setCardholderName(e.target.value);
             setCardError("");
           }}
-          placeholder="John Doe"
+          placeholder={t("John Doe")}
           disabled={loading}
           className="
             w-full
@@ -108,7 +110,7 @@ const PaymentForm = ({ loading, onSubmit, error }) => {
 
       <div>
         <label className="mb-2 block text-sm font-medium text-gray-700 dark:text-gray-300">
-          Card Number
+          {t("Card Number")}
           <span className="ml-1 text-red-500">*</span>
         </label>
 
@@ -127,7 +129,7 @@ const PaymentForm = ({ loading, onSubmit, error }) => {
       <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
         <div>
           <label className="mb-2 block text-sm font-medium text-gray-700 dark:text-gray-300">
-            Expiry Date
+            {t("Expiry Date")}
             <span className="ml-1 text-red-500">*</span>
           </label>
 
@@ -143,7 +145,7 @@ const PaymentForm = ({ loading, onSubmit, error }) => {
 
         <div>
           <label className="mb-2 block text-sm font-medium text-gray-700 dark:text-gray-300">
-            CVC
+            {t("CVC")}
             <span className="ml-1 text-red-500">*</span>
           </label>
 
@@ -162,7 +164,7 @@ const PaymentForm = ({ loading, onSubmit, error }) => {
 
       {(cardError || error) && (
         <div className="rounded-xl border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-600 dark:border-red-500/20 dark:bg-red-500/10 dark:text-red-400">
-          {cardError || error}
+          {cardError ? t(cardError) : t(error)}
         </div>
       )}
 
@@ -170,7 +172,7 @@ const PaymentForm = ({ loading, onSubmit, error }) => {
 
       <div className="flex items-center gap-2 text-xs text-gray-500 dark:text-gray-400">
         <Lock size={14} />
-        Your payment information is securely processed by Stripe.
+        {t("Your payment information is securely processed by Stripe.")}
       </div>
 
       {/* SUBMIT */}
@@ -201,12 +203,12 @@ const PaymentForm = ({ loading, onSubmit, error }) => {
         {loading ? (
           <>
             <Loader2 size={18} className="animate-spin" />
-            Processing Payment...
+            {t("Processing Payment...")}
           </>
         ) : (
           <>
             <CreditCard size={18} />
-            Pay & Subscribe
+            {t("Pay & Subscribe")}
           </>
         )}
       </button>

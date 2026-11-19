@@ -20,9 +20,14 @@ import {
 } from "../hooks/useNotifications";
 import { useNavigate } from "react-router-dom";
 import Pagination from "../components/common/Pagination";
+import { useLanguage } from "../context/LanguageContext";
+import accountScreens from "../context/translations/accountScreens";
 
 const Notifications = () => {
   const navigate = useNavigate();
+  const { t: translate, language } = useLanguage();
+  const t = (key) =>
+    language === "hi" ? accountScreens[key] || translate(key) : key;
   const [filter, setFilter] = useState("all");
   const [page, setPage] = useState(1);
   const limit = 10;
@@ -230,7 +235,7 @@ const Notifications = () => {
                     dark:text-white
                   "
                 >
-                  Notifications
+                  {t("Notifications")}
                 </h1>
 
                 <p
@@ -241,7 +246,7 @@ const Notifications = () => {
                     dark:text-gray-400
                   "
                 >
-                  Stay updated with your account activity.
+                  {t("Stay updated with your account activity.")}
                 </p>
               </div>
             </div>
@@ -275,7 +280,7 @@ const Notifications = () => {
               "
             >
               <CheckCheck size={17} />
-              Mark all as read
+              {t("Mark all as read")}
             </button>
           )}
         </div>
@@ -327,7 +332,7 @@ const Notifications = () => {
                 }
               `}
             >
-              All
+              {t("All")}
               <span className="ml-1.5 text-xs">{readCount}</span>
             </button>
 
@@ -363,7 +368,7 @@ const Notifications = () => {
                 }
               `}
             >
-              Unread
+              {t("Unread")}
               {unreadCount > 0 && (
                 <span
                   className="
@@ -396,7 +401,7 @@ const Notifications = () => {
               dark:text-gray-500
             "
           >
-            {unreadCount} unread
+            {unreadCount} {t("unread")}
           </span>
         </div>
 
@@ -406,26 +411,26 @@ const Notifications = () => {
           <div className="flex min-h-62.5 flex-col items-center justify-center gap-3">
             <LoaderCircle size={32} className="animate-spin text-blue-600" />
             <p className="text-sm text-gray-500 dark:text-gray-400">
-              Loading notifications...
+              {t("Loading notifications...")}
             </p>
           </div>
         ) : isError ? (
           <div className="flex min-h-62.5 flex-col items-center justify-center gap-2">
             <p className="text-sm text-red-500">
-              {error?.message || "Failed to load notifications."}
+              {error?.message || t("Failed to load notifications.")}
             </p>
             <button
               type="button"
               onClick={() => window.location.reload()}
               className="text-sm font-medium text-blue-600 hover:underline"
             >
-              Try again
+              {t("Try again")}
             </button>
           </div>
         ) : notifications.length === 0 ? (
           <div className="flex min-h-62.5 items-center justify-center">
             <p className="text-sm text-gray-500 dark:text-gray-400">
-              No notifications found.
+              {t("No notifications found.")}
             </p>
           </div>
         ) : (
@@ -515,7 +520,7 @@ const Notifications = () => {
                         disabled:cursor-not-allowed disabled:opacity-50
                         dark:hover:bg-red-500/10
                       "
-                      aria-label="Delete notification"
+                      aria-label={t("Delete notification")}
                     >
                       {deleteMutation.isPending &&
                       deletingNotificationId === notification.id ? (

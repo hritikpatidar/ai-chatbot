@@ -33,7 +33,7 @@ export const updateRefreshToken = async (userId, data) => {
       $set: data,
     },
     {
-      new: true,
+      returnDocument: "after",
       runValidators: true,
     },
   );

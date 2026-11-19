@@ -8,6 +8,8 @@ import {
   Clock,
   MoreHorizontal,
 } from "lucide-react";
+import { useLanguage } from "../context/LanguageContext";
+import accountScreens from "../context/translations/accountScreens";
 
 const files = [
   {
@@ -69,6 +71,10 @@ const files = [
 ];
 
 export default function Library() {
+  const { t: translate, language } = useLanguage();
+  const t = (key) =>
+    language === "hi" ? accountScreens[key] || translate(key) : key;
+
   const getIcon = (type) => {
     switch (type) {
       case "pdf":
@@ -100,7 +106,7 @@ export default function Library() {
                 dark:text-white
               "
             >
-              Library
+              {t("Library")}
             </h1>
 
             <p
@@ -111,7 +117,7 @@ export default function Library() {
                 dark:text-gray-400
               "
             >
-              Organize and manage your AI resources.
+              {t("Organize and manage your AI resources.")}
             </p>
           </div>
 
@@ -129,7 +135,7 @@ export default function Library() {
             />
 
             <input
-              placeholder="Search files..."
+              placeholder={t("Search files...")}
               className="
                 w-full
                 rounded-lg
@@ -158,10 +164,10 @@ export default function Library() {
 
         <div className="mt-6 grid grid-cols-2 gap-3 md:grid-cols-4">
           {[
-            ["Documents", "24"],
-            ["Images", "15"],
-            ["Projects", "8"],
-            ["Favorites", "11"],
+            [t("Documents"), "24"],
+            [t("Images"), "15"],
+            [t("Projects"), "8"],
+            [t("Favorites"), "11"],
           ].map(([title, count], index) => (
             <div
               key={index}
@@ -204,7 +210,7 @@ export default function Library() {
                   dark:text-gray-400
                 "
               >
-                {count} Items
+                {count} {t("Items")}
               </p>
             </div>
           ))}
@@ -222,7 +228,7 @@ export default function Library() {
               dark:text-white
             "
           >
-            Recent Files
+            {t("Recent Files")}
           </h2>
 
           <div className="h-[calc(100vh-320px)] space-y-4 overflow-y-auto pr-2">
@@ -292,7 +298,7 @@ export default function Library() {
 
                       <span className="flex items-center gap-1">
                         <Clock size={13} />
-                        {item.updated}
+                        {t(item.updated)}
                       </span>
                     </div>
                   </div>
@@ -308,6 +314,8 @@ export default function Library() {
 
                   <button
                     type="button"
+                    aria-label={t("More options")}
+                    title={t("More options")}
                     className="
                       rounded-md
                       p-1.5

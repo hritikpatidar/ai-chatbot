@@ -8,31 +8,33 @@ import {
 } from "lucide-react";
 
 import { useSelector } from "react-redux";
+import { useLanguage } from "../../../context/LanguageContext";
 
 export default function ClientOverview() {
-  const { client, loading } = useSelector(
+  const { t } = useLanguage();
+  const { client } = useSelector(
     (state) => state?.ClientReducer?.clientSlice || {},
   );
 
   const stats = [
     {
-      title: "Products",
+      title: t("Products"),
       value: client?.productCount ?? "—",
       icon: Package,
     },
     {
-      title: "FAQs",
+      title: t("FAQs"),
       value: client?.faqCount ?? "—",
       icon: HelpCircle,
     },
     {
-      title: "Chatbot",
-      value: client?.chatbot?.name || "AI Assistant",
+      title: t("Chatbot"),
+      value: client?.chatbot?.name || t("AI Assistant"),
       icon: Bot,
     },
     {
-      title: "Status",
-      value: client?.status || "active",
+      title: t("Status"),
+      value: client?.status || t("active"),
       icon: Activity,
     },
   ];
@@ -63,11 +65,11 @@ export default function ClientOverview() {
 
             <div>
               <h1 className="text-xl font-semibold text-gray-900 dark:text-white">
-                {client?.businessName || "Business Name"}
+                {client?.businessName || t("Business Name")}
               </h1>
 
               <p className="mt-1 text-sm text-gray-500 dark:text-gray-400">
-                {client?.businessType || "Business Type"}
+                {client?.businessType || t("Business Type")}
               </p>
 
               {client?.businessDescription && (
@@ -89,7 +91,7 @@ export default function ClientOverview() {
               }
             `}
           >
-            {client?.status || "active"}
+            {t(client?.status || "active")}
           </span>
         </div>
       </div>
@@ -166,29 +168,29 @@ export default function ClientOverview() {
         "
       >
         <h2 className="text-base font-semibold text-gray-900 dark:text-white">
-          Business Information
+          {t("Business Information")}
         </h2>
 
         <div className="mt-5 grid grid-cols-1 gap-5 md:grid-cols-2">
-          <InfoItem label="Business Name" value={client?.businessName} />
+          <InfoItem label={t("Business Name")} value={client?.businessName} />
 
-          <InfoItem label="Business Type" value={client?.businessType} />
+          <InfoItem label={t("Business Type")} value={client?.businessType} />
 
           <InfoItem
-            label="Client Key"
+            label={t("Client Key")}
             value={client?.clientKey}
             icon={<KeyRound size={14} />}
           />
 
-          <InfoItem label="Slug" value={client?.slug} />
+          <InfoItem label={t("Slug")} value={client?.slug} />
 
-          <InfoItem label="Chatbot Name" value={client?.chatbot?.name} />
+          <InfoItem label={t("Chatbot Name")} value={client?.chatbot?.name} />
 
-          <InfoItem label="Language" value={client?.chatbot?.language} />
+          <InfoItem label={t("Language")} value={client?.chatbot?.language} />
 
-          <InfoItem label="Tone" value={client?.chatbot?.tone} />
+          <InfoItem label={t("Tone")} value={client?.chatbot?.tone} />
 
-          <InfoItem label="Status" value={client?.status} />
+          <InfoItem label={t("Status")} value={client?.status} />
         </div>
       </div>
 
@@ -204,13 +206,13 @@ export default function ClientOverview() {
           <Bot size={18} className="text-blue-500" />
 
           <h2 className="text-base font-semibold text-gray-900 dark:text-white">
-            Welcome Message
+            {t("Welcome Message")}
           </h2>
         </div>
 
         <div className="mt-4 rounded-xl bg-gray-50 p-4 text-sm text-gray-700 dark:bg-white/5 dark:text-gray-300">
           {client?.chatbot?.welcomeMessage ||
-            "Hi 👋 Welcome! How can I help you today?"}
+            t("Hi 👋 Welcome! How can I help you today?")}
         </div>
       </div>
     </div>

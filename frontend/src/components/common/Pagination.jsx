@@ -1,4 +1,6 @@
 import { ChevronLeft, ChevronRight } from "lucide-react";
+import { useLanguage } from "../../context/LanguageContext";
+import { translateShared } from "../../context/translations/sharedComponents";
 
 export default function Pagination({
   page = 1,
@@ -10,6 +12,8 @@ export default function Pagination({
   onPrevious,
   onNext,
 }) {
+  const { t, language } = useLanguage();
+  const translate = (text) => translateShared(text, t, language);
   const hasExactTotal = total !== null && total !== undefined;
 
   if (totalPages <= 1 && !hasMore) {
@@ -40,20 +44,20 @@ export default function Pagination({
           whitespace-nowrap
         "
       >
-        Showing{" "}
+        {translate("Showing")}{" "}
         <span className="font-medium text-gray-900 dark:text-white">
           {currentCount}
         </span>
         {hasExactTotal ? (
           <>
             {" "}
-            of{" "}
+            {translate("of")}{" "}
             <span className="font-medium text-gray-900 dark:text-white">
               {total}
             </span>
           </>
         ) : (
-          " on this page"
+          ` ${translate("on this page")}`
         )}
       </p>
 
@@ -101,7 +105,7 @@ export default function Pagination({
         >
           <ChevronLeft size={14} className="shrink-0 sm:hidden" />
           <ChevronLeft size={16} className="hidden shrink-0 sm:block" />
-          Previous
+          {translate("Previous")}
         </button>
 
         <span
@@ -159,7 +163,7 @@ export default function Pagination({
             dark:text-gray-200
           "
         >
-          Next
+          {translate("Next")}
           <ChevronRight size={14} className="shrink-0 sm:hidden" />
           <ChevronRight size={16} className="hidden shrink-0 sm:block" />
         </button>

@@ -25,6 +25,8 @@ import EditProfileModal from "../components/EditProfileModal";
 import { setIsProfileModalOpen } from "../redux/features/Auth/authSlice";
 import { getImageUrl } from "../utils/imageUrl";
 import ConfirmModal from "../components/ClientComponent/ConfirmModal";
+import { useLanguage } from "../context/LanguageContext";
+import accountScreens from "../context/translations/accountScreens";
 
 const settingsSections = [
   {
@@ -79,6 +81,9 @@ const settingsSections = [
 export default function Settings() {
   const dispatch = useDispatch();
   const navigate = useNavigate();
+  const { t: translate, language } = useLanguage();
+  const t = (key) =>
+    language === "hi" ? accountScreens[key] || translate(key) : key;
   const { profileDetails, refreshToken } = useSelector(
     (store) => store.authReducer.AuthSlice,
   );
@@ -122,7 +127,7 @@ export default function Settings() {
               dark:text-white
             "
           >
-            Settings
+            {t("Settings")}
           </h1>
 
           <p
@@ -133,7 +138,7 @@ export default function Settings() {
               dark:text-gray-400
             "
           >
-            Manage your account and application preferences.
+            {t("Manage your account and application preferences.")}
           </p>
         </div>
 
@@ -156,7 +161,7 @@ export default function Settings() {
               <div className="relative h-12 w-12 shrink-0">
                 <img
                   src={getImageUrl(profileDetails?.profileImage, profile)}
-                  alt="Profile"
+                  alt={t("Profile")}
                   onError={(e) => {
                     e.currentTarget.onerror = null;
                     e.currentTarget.src = profile;
@@ -190,7 +195,7 @@ export default function Settings() {
                     dark:text-white
                   "
                 >
-                  {profileDetails?.fullName || "User"}
+                  {profileDetails?.fullName || t("User")}
 
                   {profileDetails?.email && (
                     <span className="font-normal text-gray-500 dark:text-gray-400">
@@ -208,7 +213,7 @@ export default function Settings() {
                     dark:text-gray-400
                   "
                 >
-                  Manage your profile information
+                  {t("Manage your profile information")}
                 </p>
               </div>
             </div>
@@ -236,7 +241,7 @@ export default function Settings() {
                 dark:hover:bg-white/10
               "
             >
-              Edit Profile
+              {t("Edit Profile")}
             </button>
           </div>
         </div>
@@ -253,7 +258,7 @@ export default function Settings() {
                   dark:text-white
                 "
               >
-                {section.title}
+                {t(section.title)}
               </h2>
 
               <div className="grid gap-3">
@@ -315,7 +320,7 @@ export default function Settings() {
                             dark:text-white
                           "
                         >
-                          {item.title}
+                          {t(item.title)}
                         </h3>
 
                         <p
@@ -327,7 +332,7 @@ export default function Settings() {
                             dark:text-gray-400
                           "
                         >
-                          {item.description}
+                          {t(item.description)}
                         </p>
                       </div>
 
@@ -432,7 +437,7 @@ export default function Settings() {
                       dark:text-white
                     "
                   >
-                    Dark Mode
+                    {t("Dark Mode")}
                   </h3>
 
                   <p
@@ -444,8 +449,8 @@ export default function Settings() {
                     "
                   >
                     {isDarkMode
-                      ? "Dark theme is currently enabled"
-                      : "Dark theme is currently disabled"}
+                      ? t("Dark theme is currently enabled")
+                      : t("Dark theme is currently disabled")}
                   </p>
                 </div>
 
@@ -453,7 +458,8 @@ export default function Settings() {
 
                 <motion.button
                   type="button"
-                  aria-label="Toggle dark mode"
+                  aria-label={t("Toggle dark mode")}
+                  title={t("Toggle dark mode")}
                   onClick={toggleTheme}
                   whileTap={{ scale: 0.92 }}
                   className={`
@@ -501,7 +507,7 @@ export default function Settings() {
                 dark:text-white
               "
             >
-              Privacy
+              {t("Privacy")}
             </h2>
 
             <button
@@ -550,7 +556,7 @@ export default function Settings() {
                     dark:text-white
                   "
                 >
-                  Privacy & Data
+                  {t("Privacy & Data")}
                 </h3>
 
                 <p
@@ -561,7 +567,7 @@ export default function Settings() {
                     dark:text-gray-400
                   "
                 >
-                  Manage your data and privacy preferences
+                  {t("Manage your data and privacy preferences")}
                 </p>
               </div>
 
@@ -590,7 +596,7 @@ export default function Settings() {
                 dark:text-white
               "
             >
-              Account
+              {t("Account")}
             </h2>
 
             <button
@@ -642,7 +648,7 @@ export default function Settings() {
                     dark:text-red-400
                   "
                 >
-                  Log Out
+                  {t("Log Out")}
                 </h3>
 
                 <p
@@ -653,7 +659,7 @@ export default function Settings() {
                     dark:text-gray-400
                   "
                 >
-                  Sign out from your account
+                  {t("Sign out from your account")}
                 </p>
               </div>
 
@@ -697,12 +703,14 @@ export default function Settings() {
         }}
         onConfirm={handleAuth}
         loading={isLogoutLoading}
-        title="Logout Confirmation"
+        title={t("Logout Confirmation")}
         message={
-          "Are you sure you want to logout? You will need to login again to access your account."
+          t(
+            "Are you sure you want to logout? You will need to login again to access your account.",
+          )
         }
-        confirmText={isLogoutLoading ? "Logging out..." : "Logout"}
-        cancelText="Cancel"
+        confirmText={isLogoutLoading ? t("Logging out...") : t("Logout")}
+        cancelText={t("Cancel")}
         danger
       />
     </div>

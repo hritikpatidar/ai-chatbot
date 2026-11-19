@@ -19,6 +19,7 @@ import {
 } from "../../hooks/Admin/useAdminTransactions";
 import Pagination from "../../components/common/Pagination";
 import CustomSelect from "../../components/common/CustomSelect";
+import { useLanguage } from "../../context/LanguageContext";
 
 const EMPTY_TRANSACTIONS = [];
 
@@ -74,6 +75,7 @@ const statusDetails = {
 };
 
 const TransactionStatus = ({ status }) => {
+  const { t } = useLanguage();
   const details = statusDetails[status] || {
     label: status || "Unknown",
     className: "bg-gray-100 text-gray-600 dark:bg-white/5 dark:text-gray-300",
@@ -83,7 +85,7 @@ const TransactionStatus = ({ status }) => {
     <span
       className={`inline-flex whitespace-nowrap rounded-full px-2.5 py-1 text-xs font-medium ${details.className}`}
     >
-      {details.label}
+      {t(details.label)}
     </span>
   );
 };
@@ -121,18 +123,18 @@ const PaymentMethod = ({ method }) => {
   return method.type || "—";
 };
 
-const exportTransactions = (transactions) => {
+const exportTransactions = (transactions, t) => {
   const columns = [
-    "Transaction ID",
-    "Date",
-    "Customer",
-    "Email",
-    "Amount",
-    "Currency",
-    "Status",
-    "Payment method",
-    "Invoice ID",
-    "Payment intent ID",
+    t("Transaction ID"),
+    t("Date"),
+    t("Customer"),
+    t("Email"),
+    t("Amount"),
+    t("Currency"),
+    t("Status"),
+    t("Payment method"),
+    t("Invoice ID"),
+    t("Payment intent ID"),
   ];
   const rows = transactions.map((transaction) => [
     transaction.id,
@@ -162,6 +164,8 @@ const exportTransactions = (transactions) => {
 };
 
 const TransactionDetails = ({ transaction, onClose }) => {
+  const { t } = useLanguage();
+
   useEffect(() => {
     const handleKeyDown = (event) => {
       if (event.key === "Escape") {
@@ -199,7 +203,7 @@ const TransactionDetails = ({ transaction, onClose }) => {
                 id="transaction-details-title"
                 className="text-base font-semibold text-gray-900 dark:text-white"
               >
-                Transaction details
+                {t("Transaction details")}
               </h2>
               <p className="truncate text-xs text-gray-500 dark:text-gray-400">
                 {transaction.id}
@@ -209,7 +213,7 @@ const TransactionDetails = ({ transaction, onClose }) => {
           <button
             type="button"
             onClick={onClose}
-            aria-label="Close transaction details"
+            aria-label={t("Close transaction details")}
             className="rounded-lg p-2 text-gray-500 hover:bg-gray-100 dark:text-gray-400 dark:hover:bg-white/5"
           >
             <X size={18} />
@@ -220,7 +224,7 @@ const TransactionDetails = ({ transaction, onClose }) => {
           <div className="flex flex-wrap items-center justify-between gap-3 rounded-xl bg-gray-50 p-4 dark:bg-white/5">
             <div>
               <p className="text-xs text-gray-500 dark:text-gray-400">
-                Amount
+                {t("Amount")}
               </p>
               <p className="mt-1 text-2xl font-bold text-gray-900 dark:text-white">
                 {formatCurrency(transaction.amount, transaction.currency)}
@@ -230,35 +234,35 @@ const TransactionDetails = ({ transaction, onClose }) => {
           </div>
 
           <dl className="grid grid-cols-1 gap-4 sm:grid-cols-2">
-            <Detail label="Customer">
+            <Detail label={t("Customer")}>
               {transaction.customer?.businessName ||
                 transaction.customer?.name ||
-                "Unknown customer"}
+                t("Unknown customer")}
             </Detail>
-            <Detail label="Email">
+            <Detail label={t("Email")}>
               {transaction.customer?.email || "—"}
             </Detail>
-            <Detail label="Payment method">
+            <Detail label={t("Payment method")}>
               <PaymentMethod method={method} />
             </Detail>
-            <Detail label="Date">{formatDate(transaction.created)}</Detail>
-            <Detail label="Invoice ID">{transaction.invoiceId || "—"}</Detail>
-            <Detail label="Payment intent">
+            <Detail label={t("Date")}>{formatDate(transaction.created)}</Detail>
+            <Detail label={t("Invoice ID")}>{transaction.invoiceId || "—"}</Detail>
+            <Detail label={t("Payment intent")}>
               {transaction.paymentIntentId || "—"}
             </Detail>
-            <Detail label="Refunded amount">
+            <Detail label={t("Refunded amount")}>
               {formatCurrency(
                 transaction.amountRefunded,
                 transaction.currency,
               )}
             </Detail>
-            <Detail label="Customer ID">
+            <Detail label={t("Customer ID")}>
               {transaction.customer?.id || "—"}
             </Detail>
           </dl>
 
           {transaction.description && (
-            <Detail label="Description">{transaction.description}</Detail>
+            <Detail label={t("Description")}>{transaction.description}</Detail>
           )}
           {transaction.failureMessage && (
             <div className="rounded-xl border border-red-200 bg-red-50 p-3 text-sm text-red-700 dark:border-red-500/20 dark:bg-red-500/10 dark:text-red-300">
@@ -275,7 +279,7 @@ const TransactionDetails = ({ transaction, onClose }) => {
               rel="noreferrer"
               className="inline-flex w-full items-center justify-center gap-2 rounded-xl bg-blue-600 px-4 py-2.5 text-sm font-semibold text-white transition hover:bg-blue-700"
             >
-              Open Stripe receipt <ExternalLink size={16} />
+              {t("Open Stripe receipt")} <ExternalLink size={16} />
             </a>
           )}
         </div>
@@ -294,6 +298,7 @@ const Detail = ({ label, children }) => (
 );
 
 export default function AdminTransactions() {
+  const { t } = useLanguage();
   const [search, setSearch] = useState("");
   const [status, setStatus] = useState("all");
   const [from, setFrom] = useState("");
@@ -363,21 +368,21 @@ export default function AdminTransactions() {
             Stripe
           </div>
           <h1 className="mt-1 text-xl font-bold text-gray-900 dark:text-white sm:text-2xl">
-            Transactions
+            {t("Transactions")}
           </h1>
           <p className="mt-1 text-sm text-gray-500 dark:text-gray-400">
-            Review Stripe payments, failures, refunds, and receipts.
+            {t("Review Stripe payments, failures, refunds, and receipts.")}
           </p>
         </div>
         <div className="flex flex-row gap-2">
           <button
             type="button"
-            onClick={() => exportTransactions(transactions)}
+            onClick={() => exportTransactions(transactions, t)}
             disabled={!transactions.length}
             className="inline-flex items-center justify-center gap-2 rounded-xl border border-gray-200 bg-white px-4 py-2.5 text-sm font-medium text-gray-700 transition hover:bg-gray-50 disabled:cursor-not-allowed disabled:opacity-50 dark:border-white/10 dark:bg-[#171b23] dark:text-gray-300 dark:hover:bg-white/5"
           >
             <Download size={16} />
-            Export page
+            {t("Export page")}
           </button>
           <button
             type="button"
@@ -392,37 +397,37 @@ export default function AdminTransactions() {
               size={16}
               className={isFetching || isStatsFetching ? "animate-spin" : ""}
             />
-            Refresh
+            {t("Refresh")}
           </button>
         </div>
       </div>
 
       <div className="mb-6 grid grid-cols-1 gap-3 sm:grid-cols-2 xl:grid-cols-4">
         <StatCard
-          title="Total transactions"
+          title={t("Total transactions")}
           value={isStatsLoading || isStatsError ? "—" : allTimeStats?.total ?? "—"}
-          description="All-time Stripe charges"
+          description={t("All-time Stripe charges")}
           icon={Receipt}
           tone="bg-blue-50 text-blue-600 dark:bg-blue-500/10 dark:text-blue-400"
         />
         <StatCard
-          title="Successful transactions"
+          title={t("Successful transactions")}
           value={isStatsLoading || isStatsError ? "—" : allTimeStats?.succeeded ?? "—"}
-          description="All-time successful payments"
+          description={t("All-time successful payments")}
           icon={CheckCircle2}
           tone="bg-emerald-50 text-emerald-600 dark:bg-emerald-500/10 dark:text-emerald-400"
         />
         <StatCard
-          title="Failed"
+          title={t("Failed")}
           value={isLoading ? "—" : stats.failed}
-          description="Failed payments on this page"
+          description={t("Failed payments on this page")}
           icon={XCircle}
           tone="bg-red-50 text-red-600 dark:bg-red-500/10 dark:text-red-400"
         />
         <StatCard
-          title="Refunded"
+          title={t("Refunded")}
           value={isLoading ? "—" : stats.refunded}
-          description="Full or partial refunds on this page"
+          description={t("Full or partial refunds on this page")}
           icon={RotateCcw}
           tone="bg-purple-50 text-purple-600 dark:bg-purple-500/10 dark:text-purple-400"
         />
@@ -449,7 +454,7 @@ export default function AdminTransactions() {
                   setSearch(event.target.value);
                   setCursorStack([null]);
                 }}
-                placeholder="Search customer, email, charge ID..."
+                placeholder={t("Search customer, email, charge ID...")}
                 className="min-w-0 flex-1 bg-transparent text-sm text-gray-800 outline-none placeholder:text-gray-400 dark:text-white"
               />
             </label>
@@ -462,16 +467,16 @@ export default function AdminTransactions() {
                 setStatus(event.target.value);
                 setCursorStack([null]);
               }}
-              placeholder="All statuses"
+              placeholder={t("All statuses")}
               options={[
-                { value: "all", label: "All statuses" },
-                { value: "succeeded", label: "Succeeded" },
-                { value: "failed", label: "Failed" },
-                { value: "pending", label: "Pending" },
-                { value: "refunded", label: "Refunded" },
+                { value: "all", label: t("All statuses") },
+                { value: "succeeded", label: t("Succeeded") },
+                { value: "failed", label: t("Failed") },
+                { value: "pending", label: t("Pending") },
+                { value: "refunded", label: t("Refunded") },
                 {
                   value: "partially_refunded",
-                  label: "Partially refunded",
+                  label: t("Partially refunded"),
                 },
               ]}
               className="w-full dark:border-white/10 dark:bg-[#171b23] sm:w-auto"
@@ -487,7 +492,7 @@ export default function AdminTransactions() {
                   setFrom(event.target.value);
                   setCursorStack([null]);
                 }}
-                aria-label="From date"
+                aria-label={t("From date")}
                 className="min-w-0 w-full bg-transparent text-sm text-gray-700 outline-none dark:text-gray-200"
               />
             </label>
@@ -502,7 +507,7 @@ export default function AdminTransactions() {
                   setTo(event.target.value);
                   setCursorStack([null]);
                 }}
-                aria-label="To date"
+                aria-label={t("To date")}
                 className="min-w-0 w-full bg-transparent text-sm text-gray-700 outline-none dark:text-gray-200"
               />
             </label>
@@ -514,7 +519,7 @@ export default function AdminTransactions() {
               className="inline-flex h-10 items-center justify-center gap-2 rounded-lg px-3 text-sm font-medium text-gray-600 transition hover:bg-gray-100 disabled:cursor-not-allowed disabled:opacity-40 dark:text-gray-300 dark:hover:bg-white/5"
             >
               <X size={15} />
-              Clear
+              {t("Clear")}
             </button>
           </div>
         </div>
@@ -524,12 +529,12 @@ export default function AdminTransactions() {
             <AlertCircle size={19} className="mt-0.5 shrink-0 text-red-500" />
             <div className="min-w-0 flex-1">
               <p className="text-sm font-semibold text-red-700 dark:text-red-400">
-                Could not load Stripe transactions
+                {t("Could not load Stripe transactions")}
               </p>
               <p className="mt-1 wrap-break-word text-xs text-red-600 dark:text-red-300">
                 {error?.response?.data?.message ||
                   error?.message ||
-                  "Please try again."}
+                  t("Please try again.")}
               </p>
             </div>
             <button
@@ -558,7 +563,7 @@ export default function AdminTransactions() {
             >
               <div className="flex items-center gap-3 rounded-xl border border-gray-200 bg-white px-4 py-3 text-sm font-medium text-gray-700 shadow-lg dark:border-white/10 dark:bg-[#171b23] dark:text-gray-200">
                 <RefreshCw size={17} className="animate-spin text-blue-600" />
-                Loading transactions...
+                {t("Loading transactions...")}
               </div>
             </div>
           )}
@@ -567,13 +572,13 @@ export default function AdminTransactions() {
             <table className="w-full min-w-245 text-left">
               <thead>
                 <tr className="border-b border-gray-200 bg-gray-50 text-xs font-semibold uppercase tracking-wide text-gray-500 dark:border-white/10 dark:bg-white/3 dark:text-gray-400">
-                  <th className="px-5 py-3.5">Transaction</th>
-                  <th className="px-5 py-3.5">Customer</th>
-                  <th className="px-5 py-3.5">Payment method</th>
-                  <th className="px-5 py-3.5">Date</th>
-                  <th className="px-5 py-3.5">Status</th>
-                  <th className="px-5 py-3.5 text-right">Amount</th>
-                  <th className="px-5 py-3.5 text-right">Details</th>
+                  <th className="px-5 py-3.5">{t("Transaction")}</th>
+                  <th className="px-5 py-3.5">{t("Customer")}</th>
+                  <th className="px-5 py-3.5">{t("Payment method")}</th>
+                  <th className="px-5 py-3.5">{t("Date")}</th>
+                  <th className="px-5 py-3.5">{t("Status")}</th>
+                  <th className="px-5 py-3.5 text-right">{t("Amount")}</th>
+                  <th className="px-5 py-3.5 text-right">{t("Details")}</th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-gray-100 dark:divide-white/5">
@@ -597,17 +602,17 @@ export default function AdminTransactions() {
                             {transaction.id}
                           </p>
                           <p className="mt-1 max-w-48 truncate text-xs text-gray-500 dark:text-gray-400">
-                            {transaction.description || "Stripe payment"}
+                            {transaction.description || t("Stripe payment")}
                           </p>
                         </td>
                         <td className="px-5 py-4">
                           <p className="max-w-48 truncate text-sm font-medium text-gray-900 dark:text-white">
                             {transaction.customer?.businessName ||
                               transaction.customer?.name ||
-                              "Unknown customer"}
+                              t("Unknown customer")}
                           </p>
                           <p className="mt-1 max-w-48 truncate text-xs text-gray-500 dark:text-gray-400">
-                            {transaction.customer?.email || "No email"}
+                            {transaction.customer?.email || t("No email")}
                           </p>
                         </td>
                         <td className="px-5 py-4 text-sm text-gray-600 dark:text-gray-300">
@@ -655,7 +660,7 @@ export default function AdminTransactions() {
                         <p className="truncate text-sm font-semibold text-gray-900 dark:text-white">
                           {transaction.customer?.businessName ||
                             transaction.customer?.name ||
-                            "Unknown customer"}
+                            t("Unknown customer")}
                         </p>
                         <p className="mt-1 truncate font-mono text-[11px] text-gray-500 dark:text-gray-400">
                           {transaction.id}

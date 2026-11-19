@@ -5,14 +5,12 @@ import {
   Building2,
   MapPin,
   Phone,
-  Globe,
   Plus,
   Trash2,
   Save,
   X,
   GripVertical,
   MessageCircle,
-  Sparkles,
   CheckCircle2,
   AlertCircle,
   Loader2,
@@ -20,7 +18,6 @@ import {
 } from "lucide-react";
 
 import { useForm, useFieldArray, Controller } from "react-hook-form";
-import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
 
 import {
@@ -30,6 +27,7 @@ import {
 import { formSchema } from "../../utils/validation";
 import CustomSelect from "../../components/common/CustomSelect";
 import PhoneInputField from "../../components/common/PhoneInputField";
+import { useLanguage } from "../../context/LanguageContext";
 
 const defaultValues = {
   businessName: "",
@@ -67,6 +65,7 @@ const defaultValues = {
 };
 
 export default function ClientChatbotSettings() {
+  const { t } = useLanguage();
   const dispatch = useDispatch();
 
   const { client, loading } = useSelector(
@@ -289,12 +288,11 @@ export default function ClientChatbotSettings() {
                     dark:text-white
                   "
               >
-                Chatbot Settings
+                {t("Chatbot Settings")}
               </h1>
 
               <p className="text-xs text-gray-500 dark:text-gray-400">
-                Manage your business information, contact details, chatbot
-                configuration and AI instructions.
+                {t("Manage your business information, contact details, chatbot configuration and AI instructions.")}
               </p>
             </div>
           </div>
@@ -326,7 +324,7 @@ export default function ClientChatbotSettings() {
               <Save size={17} />
             )}
 
-            {saving ? "Saving..." : "Save Changes"}
+            {saving ? t("Saving...") : t("Save Changes")}
           </button>
         </div>
       </div>
@@ -386,12 +384,12 @@ export default function ClientChatbotSettings() {
 
           <SectionCard
             icon={Building2}
-            title="Business Information"
-            description="Basic information about your business."
+            title={t("Business Information")}
+            description={t("Basic information about your business.")}
           >
             <div className="grid grid-cols-1 gap-5 md:grid-cols-2">
               <FormInput
-                label="Business Name"
+                label={t("Business Name")}
                 required
                 placeholder="ABC Books"
                 error={errors.businessName?.message}
@@ -399,17 +397,17 @@ export default function ClientChatbotSettings() {
               />
 
               <FormInput
-                label="Business Type"
+                label={t("Business Type")}
                 required
-                placeholder="Book Store"
+                placeholder={t("Book Store")}
                 error={errors.businessType?.message}
                 {...register("businessType")}
               />
 
               <div className="md:col-span-2">
                 <FormTextarea
-                  label="Business Description"
-                  placeholder="Tell customers about your business..."
+                  label={t("Business Description")}
+                  placeholder={t("Tell customers about your business...")}
                   rows={4}
                   error={errors.businessDescription?.message}
                   {...register("businessDescription")}
@@ -422,49 +420,49 @@ export default function ClientChatbotSettings() {
 
           <SectionCard
             icon={MapPin}
-            title="Business Address"
-            description="Add the physical location of your business."
+            title={t("Business Address")}
+            description={t("Add the physical location of your business.")}
           >
             <div className="grid grid-cols-1 gap-5 md:grid-cols-2">
               <FormInput
-                label="Address Line 1"
-                placeholder="12 Main Market"
+                label={t("Address Line 1")}
+                placeholder={t("12 Main Market")}
                 {...register("address.addressLine1")}
               />
 
               <FormInput
-                label="Address Line 2"
-                placeholder="Near City Mall"
+                label={t("Address Line 2")}
+                placeholder={t("Near City Mall")}
                 {...register("address.addressLine2")}
               />
 
               <FormInput
-                label="City"
-                placeholder="Neemuch"
+                label={t("City")}
+                placeholder={t("Neemuch")}
                 {...register("address.city")}
               />
 
               <FormInput
-                label="State"
-                placeholder="Madhya Pradesh"
+                label={t("State")}
+                placeholder={t("Madhya Pradesh")}
                 {...register("address.state")}
               />
 
               <FormInput
-                label="Country"
-                placeholder="India"
+                label={t("Country")}
+                placeholder={t("India")}
                 {...register("address.country")}
               />
 
               <FormInput
-                label="Postal Code"
+                label={t("Postal Code")}
                 placeholder="458441"
                 {...register("address.postalCode")}
               />
 
               <div className="md:col-span-2">
                 <FormInput
-                  label="Google Maps URL"
+                  label={t("Google Maps URL")}
                   placeholder="https://maps.google.com/..."
                   error={errors.address?.googleMapsUrl?.message}
                   {...register("address.googleMapsUrl")}
@@ -477,8 +475,8 @@ export default function ClientChatbotSettings() {
 
           <SectionCard
             icon={Phone}
-            title="Contact Information"
-            description="Contact details that your chatbot can provide to customers."
+            title={t("Contact Information")}
+            description={t("Contact details that your chatbot can provide to customers.")}
           >
             <div className="grid grid-cols-1 gap-5 md:grid-cols-2">
               {/* Phone */}
@@ -487,7 +485,7 @@ export default function ClientChatbotSettings() {
                 control={control}
                 render={({ field }) => (
                   <PhoneInputField
-                    label="Phone"
+                    label={t("Phone")}
                     name={field.name}
                     value={field.value}
                     onChange={field.onChange}
@@ -503,7 +501,7 @@ export default function ClientChatbotSettings() {
                 control={control}
                 render={({ field }) => (
                   <PhoneInputField
-                    label="Alternate Phone"
+                    label={t("Alternate Phone")}
                     name={field.name}
                     value={field.value}
                     onChange={field.onChange}
@@ -514,7 +512,7 @@ export default function ClientChatbotSettings() {
 
               {/* Email */}
               <FormInput
-                label="Email"
+                label={t("Email")}
                 type="email"
                 placeholder="contact@example.com"
                 error={errors.contact?.email?.message}
@@ -527,7 +525,7 @@ export default function ClientChatbotSettings() {
                 control={control}
                 render={({ field }) => (
                   <PhoneInputField
-                    label="WhatsApp"
+                    label={t("WhatsApp")}
                     name={field.name}
                     value={field.value}
                     onChange={field.onChange}
@@ -539,7 +537,7 @@ export default function ClientChatbotSettings() {
               {/* Website */}
               <div className="md:col-span-2">
                 <FormInput
-                  label="Website"
+                  label={t("Website")}
                   placeholder="https://example.com"
                   error={errors.contact?.website?.message}
                   {...register("contact.website")}
@@ -552,12 +550,12 @@ export default function ClientChatbotSettings() {
 
           <SectionCard
             icon={Bot}
-            title="Chatbot Configuration"
-            description="Configure how your AI chatbot appears and communicates with customers."
+            title={t("Chatbot Configuration")}
+            description={t("Configure how your AI chatbot appears and communicates with customers.")}
           >
             <div className="grid grid-cols-1 gap-5 md:grid-cols-2">
               <FormInput
-                label="Bot Name"
+                label={t("Bot Name")}
                 required
                 placeholder="ABC Books Assistant"
                 error={errors.chatbot?.name?.message}
@@ -571,7 +569,7 @@ export default function ClientChatbotSettings() {
                 render={({ field }) => (
                   <CustomSelect
                     size="sm"
-                    label="Language"
+                    label={t("Language")}
                     name={field.name}
                     value={field.value}
                     onChange={field.onChange}
@@ -589,7 +587,7 @@ export default function ClientChatbotSettings() {
                         label: "Hinglish",
                       },
                     ]}
-                    placeholder="Select language"
+                    placeholder={t("Select language")}
                     error={errors.chatbot?.language?.message}
                     required
                     disabled={client?.active_plan === "Pro" ? false : true}
@@ -604,7 +602,7 @@ export default function ClientChatbotSettings() {
                 render={({ field }) => (
                   <CustomSelect
                     size="sm"
-                    label="Tone"
+                    label={t("Tone")}
                     name={field.name}
                     value={field.value}
                     onChange={field.onChange}
@@ -626,7 +624,7 @@ export default function ClientChatbotSettings() {
                         label: "Formal",
                       },
                     ]}
-                    placeholder="Select tone"
+                    placeholder={t("Select tone")}
                     error={errors.chatbot?.tone?.message}
                     required
                     disabled={client?.active_plan === "Pro" ? false : true}
@@ -641,7 +639,7 @@ export default function ClientChatbotSettings() {
                 render={({ field }) => (
                   <CustomSelect
                     size="sm"
-                    label="Business Status"
+                    label={t("Business Status")}
                     name={field.name}
                     value={field.value}
                     onChange={field.onChange}
@@ -655,7 +653,7 @@ export default function ClientChatbotSettings() {
                         label: "Inactive",
                       },
                     ]}
-                    placeholder="Select status"
+                    placeholder={t("Select status")}
                     error={errors.status?.message}
                     required
                     disabled={true}
@@ -665,9 +663,9 @@ export default function ClientChatbotSettings() {
 
               <div className="md:col-span-2">
                 <FormTextarea
-                  label="Welcome Message"
+                  label={t("Welcome Message")}
                   rows={3}
-                  placeholder="Hi 👋 Welcome! How can I help you today?"
+                  placeholder={t("Hi 👋 Welcome! How can I help you today?")}
                   error={errors.chatbot?.welcomeMessage?.message}
                   {...register("chatbot.welcomeMessage")}
                 />
@@ -675,9 +673,9 @@ export default function ClientChatbotSettings() {
 
               <div className="md:col-span-2">
                 <FormTextarea
-                  label="AI Instructions"
+                  label={t("AI Instructions")}
                   rows={7}
-                  placeholder="Tell the AI how it should help customers..."
+                  placeholder={t("Tell the AI how it should help customers...")}
                   error={errors.chatbot?.aiInstructions?.message}
                   {...register("chatbot.aiInstructions")}
                 />
@@ -693,8 +691,8 @@ export default function ClientChatbotSettings() {
 
           <SectionCard
             icon={MessageCircle}
-            title="Predefined Questions"
-            description="Questions customers can quickly ask your chatbot."
+            title={t("Predefined Questions")}
+            description={t("Questions customers can quickly ask your chatbot.")}
             action={
               fields.length === 0 && (
                 <button
@@ -768,7 +766,7 @@ export default function ClientChatbotSettings() {
                   >
                     <div
                       className="flex h-9 w-6 shrink-0 cursor-grab items-center justify-center text-gray-400 active:cursor-grabbing dark:text-gray-500"
-                      title="Drag to reorder"
+                      title={t("Drag to reorder")}
                     >
                       <GripVertical size={18} />
                     </div>
@@ -778,7 +776,7 @@ export default function ClientChatbotSettings() {
                         {...register(
                           `chatbot.predefinedQuestions.${index}.question`,
                         )}
-                        placeholder="Enter customer question..."
+                        placeholder={t("Enter customer question...")}
                         className="
                             w-full
                             rounded-lg
@@ -842,7 +840,7 @@ export default function ClientChatbotSettings() {
                           transition
                           hover:bg-red-500/10
                         "
-                      title="Delete question"
+                      title={t("Delete question")}
                     >
                       <Trash2 size={17} />
                     </button>
@@ -953,7 +951,7 @@ export default function ClientChatbotSettings() {
               "
           >
             <div>
-              <p className="text-sm font-medium">Save your changes</p>
+              <p className="text-sm font-medium">{t("Save your changes")}</p>
 
               <p className="mt-1 text-xs text-gray-500 dark:text-gray-400">
                 Changes will immediately update your business chatbot

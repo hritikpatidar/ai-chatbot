@@ -17,6 +17,7 @@ import {
 import AdminStatCard from "../../components/AdminComponent/AdminStatCard";
 import ActionButton from "../../components/common/ActionButton";
 import { useNavigate } from "react-router-dom";
+import { useLanguage } from "../../context/LanguageContext";
 import useAdminDashboard from "../../hooks/Admin/useAdminDashboard";
 
 //  HELPERS
@@ -137,6 +138,7 @@ const statusStyles = {
 //  MAIN COMPONENT
 
 export default function AdminDashboard() {
+  const { t } = useLanguage();
   const navigate = useNavigate();
 
   const { dashboard, isLoading, isFetching, error, refetch } =
@@ -253,7 +255,7 @@ export default function AdminDashboard() {
               sm:text-2xl
             "
           >
-            Dashboard
+            {t("Dashboard")}
           </h1>
 
           <p
@@ -265,7 +267,7 @@ export default function AdminDashboard() {
               sm:text-sm
             "
           >
-            Monitor clients and chatbot activity.
+            {t("Monitor clients and chatbot activity.")}
           </p>
         </div>
 
@@ -300,7 +302,7 @@ export default function AdminDashboard() {
             "
           >
             <RefreshCw size={15} className={isFetching ? "animate-spin" : ""} />
-            <span className="hidden sm:inline">Refresh</span>
+            <span className="hidden sm:inline">{t("Refresh")}</span>
           </button>
 
           {/* View Clients */}
@@ -325,7 +327,7 @@ export default function AdminDashboard() {
             "
           >
             <Users size={16} />
-            <span>View All Clients</span>
+            <span>{t("View All Clients")}</span>
           </button>
         </div>
       </div>
@@ -415,9 +417,9 @@ export default function AdminDashboard() {
         "
       >
         <AdminStatCard
-          title="Total Clients"
+          title={t("Total Clients")}
           value={formatNumber(totalClients)}
-          description="Registered clients"
+          description={t("Registered clients")}
           icon={Users}
           iconClass="
             bg-blue-500/10
@@ -428,9 +430,9 @@ export default function AdminDashboard() {
         />
 
         <AdminStatCard
-          title="Active Clients"
+          title={t("Active Clients")}
           value={formatNumber(activeClients)}
-          description="Currently active"
+          description={t("Currently active")}
           icon={UserCheck}
           iconClass="
             bg-green-500/10
@@ -441,9 +443,9 @@ export default function AdminDashboard() {
         />
 
         <AdminStatCard
-          title="Inactive Clients"
+          title={t("Inactive Clients")}
           value={formatNumber(inactiveClients)}
-          description="Currently inactive"
+          description={t("Currently inactive")}
           icon={UserX}
           iconClass="
             bg-orange-500/10
@@ -453,9 +455,9 @@ export default function AdminDashboard() {
         />
 
         <AdminStatCard
-          title="New Clients"
+          title={t("New Clients")}
           value={formatNumber(newClients)}
-          description="Added this month"
+          description={t("Added this month")}
           icon={UserPlus}
           iconClass="
             bg-purple-500/10
@@ -520,7 +522,7 @@ export default function AdminDashboard() {
                     dark:text-white
                   "
                 >
-                  Client Activity
+                  {t("Client Activity")}
                 </h2>
               </div>
 
@@ -532,7 +534,7 @@ export default function AdminDashboard() {
                   dark:text-gray-400
                 "
               >
-                Client activity overview
+                {t("Client activity overview")}
               </p>
             </div>
 
@@ -559,7 +561,7 @@ export default function AdminDashboard() {
                 dark:hover:bg-white/5
                 dark:hover:text-gray-300
               "
-              title="Refresh activity"
+              title={t("Refresh activity")}
             >
               <RefreshCw
                 size={15}
@@ -908,19 +910,19 @@ export default function AdminDashboard() {
 
           <div className="mt-6 space-y-5">
             <ProgressItem
-              label="Active Clients"
+              label={t("Active Clients")}
               value={`${activeClientsPercentage}%`}
               progress={activeClientsPercentage}
             />
 
             <ProgressItem
-              label="Chatbots Online"
+              label={t("Chatbots Online")}
               value={`${chatbotsOnlinePercentage}%`}
               progress={chatbotsOnlinePercentage}
             />
 
             <ProgressItem
-              label="Subscriptions Active"
+              label={t("Subscriptions Active")}
               value={`${subscriptionsActivePercentage}%`}
               progress={subscriptionsActivePercentage}
             />
@@ -1142,12 +1144,12 @@ export default function AdminDashboard() {
                     dark:border-white/5
                   "
                 >
-                  <th className="table-head">Client</th>
-                  <th className="table-head">Plan</th>
-                  <th className="table-head">Status</th>
-                  <th className="table-head">Chatbot</th>
-                  <th className="table-head">Last Login</th>
-                  <th className="table-head text-right">Action</th>
+                  <th className="table-head">{t("Client")}</th>
+                  <th className="table-head">{t("Plan")}</th>
+                  <th className="table-head">{t("Status")}</th>
+                  <th className="table-head">{t("Chatbot")}</th>
+                  <th className="table-head">{t("Last Login")}</th>
+                  <th className="table-head text-right">{t("Action")}</th>
                 </tr>
               </thead>
 
@@ -1358,7 +1360,7 @@ export default function AdminDashboard() {
                         >
                           <ActionButton
                             icon={<Eye size={14} />}
-                            title="View"
+                            title={t("View")}
                             onClick={() => handleViewClient(client)}
                           />
                         </div>

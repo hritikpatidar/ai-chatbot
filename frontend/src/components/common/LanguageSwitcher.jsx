@@ -1,7 +1,10 @@
 import { useLanguage } from "../../context/LanguageContext";
 import CustomSelect from "./CustomSelect";
 
-export default function LanguageSwitcher({ className = "" }) {
+export default function LanguageSwitcher({
+  className = "",
+  onLanguageChange,
+}) {
   const { language, setLanguage, t } = useLanguage();
 
   return (
@@ -10,9 +13,12 @@ export default function LanguageSwitcher({ className = "" }) {
       label={t("Toggle language")}
       labelClassName="sr-only"
       size="sm"
-      className={`w-28 ${className}`}
+      className={className || "w-28"}
       value={language}
-      onChange={(event) => setLanguage(event.target.value)}
+      onChange={(event) => {
+        setLanguage(event.target.value);
+        onLanguageChange?.(event.target.value);
+      }}
       options={[
         { value: "en", label: t("English") },
         { value: "hi", label: t("Hindi") },

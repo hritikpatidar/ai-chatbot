@@ -1,9 +1,8 @@
-import React, { useEffect, useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import {
   Menu,
   Sun,
   Moon,
-  Bell,
   Search,
   ChevronDown,
   LogOut,
@@ -40,11 +39,18 @@ export default function AdminHeader({ onMenuClick, collapsed }) {
         setIsProfileOpen(false);
       }
     };
+    const handleKeyDown = (event) => {
+      if (event.key === "Escape") {
+        setIsProfileOpen(false);
+      }
+    };
 
     document.addEventListener("mousedown", handleClickOutside);
+    document.addEventListener("keydown", handleKeyDown);
 
     return () => {
       document.removeEventListener("mousedown", handleClickOutside);
+      document.removeEventListener("keydown", handleKeyDown);
     };
   }, []);
 
@@ -197,30 +203,6 @@ export default function AdminHeader({ onMenuClick, collapsed }) {
         </div>
 
         <div className="flex items-center gap-2 sm:gap-3">
-          <LanguageSwitcher />
-          {/* Theme */}
-
-          <button
-            type="button"
-            onClick={toggleTheme}
-            title={t("Toggle theme")}
-            className="
-            flex
-            h-10
-            w-10
-            items-center
-            justify-center
-            rounded-lg
-            text-gray-600
-            transition
-            hover:bg-gray-100
-            dark:text-gray-300
-            dark:hover:bg-white/5
-          "
-          >
-            {isDarkMode ? <Sun size={18} /> : <Moon size={18} />}
-          </button>
-
           {/* Notification */}
 
           {/* <button
@@ -279,6 +261,8 @@ export default function AdminHeader({ onMenuClick, collapsed }) {
               type="button"
               onClick={handleProfileToggle}
               aria-expanded={isProfileOpen}
+              aria-haspopup="true"
+              aria-controls="admin-profile-menu"
               className="
               flex
               items-center
@@ -369,11 +353,12 @@ export default function AdminHeader({ onMenuClick, collapsed }) {
 
             {isProfileOpen && (
               <div
+                id="admin-profile-menu"
                 className="
                 absolute
                 right-0
                 top-12
-                w-52
+                w-64
                 rounded-xl
                 border
                 border-gray-200
@@ -418,6 +403,37 @@ export default function AdminHeader({ onMenuClick, collapsed }) {
                     {email}
                   </p>
                 </div>
+
+                <p className="px-3 pt-2.5 text-[10px] font-semibold uppercase tracking-wide text-gray-400">
+                  {t("Appearance")}
+                </p>
+                <button
+                  type="button"
+                  onClick={() => {
+                    toggleTheme();
+                    setIsProfileOpen(false);
+                  }}
+                  className="
+                    mt-1 flex w-full items-center gap-2 rounded-lg px-3 py-2.5
+                    text-xs text-gray-600 hover:bg-gray-100
+                    dark:text-gray-300 dark:hover:bg-white/5
+                  "
+                >
+                  {isDarkMode ? <Sun size={15} /> : <Moon size={15} />}
+                  {t(isDarkMode ? "Switch to light mode" : "Switch to dark mode")}
+                </button>
+
+                <div className="my-1 border-t border-gray-100 dark:border-white/10" />
+                <p className="px-3 pt-1.5 text-[10px] font-semibold uppercase tracking-wide text-gray-400">
+                  {t("Language")}
+                </p>
+                <div className="px-2 py-1">
+                  <LanguageSwitcher
+                    className="w-full"
+                    onLanguageChange={() => setIsProfileOpen(false)}
+                  />
+                </div>
+                <div className="my-1 border-t border-gray-100 dark:border-white/10" />
 
                 {/* Profile */}
 

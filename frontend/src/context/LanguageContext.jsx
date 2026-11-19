@@ -71,6 +71,7 @@ const translations = {
   "New chat": "नई चैट",
   Login: "लॉग इन",
   "Toggle language": "भाषा बदलें",
+  "Profile settings": "प्रोफ़ाइल सेटिंग्स",
   English: "अंग्रेज़ी",
   Hindi: "हिन्दी",
   "AI Assistant": "एआई सहायक",

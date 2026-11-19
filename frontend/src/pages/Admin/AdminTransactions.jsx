@@ -13,6 +13,7 @@ import {
   X,
   XCircle,
 } from "lucide-react";
+import { useSearchParams } from "react-router-dom";
 import {
   useAdminTransactions,
   useAdminTransactionStats,
@@ -299,11 +300,34 @@ const Detail = ({ label, children }) => (
 
 export default function AdminTransactions() {
   const { t } = useLanguage();
-  const [search, setSearch] = useState("");
+  const [searchParams] = useSearchParams();
+  const routeSearch = searchParams.get("search") || "";
+  const [searchState, setSearchState] = useState({
+    source: routeSearch,
+    value: routeSearch,
+  });
+  const search =
+    searchState.source === routeSearch ? searchState.value : routeSearch;
   const [status, setStatus] = useState("all");
   const [from, setFrom] = useState("");
   const [to, setTo] = useState("");
-  const [cursorStack, setCursorStack] = useState([null]);
+  const [cursorState, setCursorState] = useState({
+    search: routeSearch,
+    stack: [null],
+  });
+  const cursorStack =
+    cursorState.search === routeSearch ? cursorState.stack : [null];
+  const setCursorStack = (update) => {
+    setCursorState((current) => {
+      const currentStack =
+        current.search === routeSearch ? current.stack : [null];
+      return {
+        search: routeSearch,
+        stack:
+          typeof update === "function" ? update(currentStack) : update,
+      };
+    });
+  };
   const [selectedTransaction, setSelectedTransaction] = useState(null);
   const page = cursorStack.length;
   const startingAfter = cursorStack[page - 1];
@@ -352,7 +376,7 @@ export default function AdminTransactions() {
   };
 
   const resetFilters = () => {
-    setSearch("");
+    setSearchState({ source: routeSearch, value: "" });
     setStatus("all");
     setFrom("");
     setTo("");
@@ -451,7 +475,10 @@ export default function AdminTransactions() {
                 type="search"
                 value={search}
                 onChange={(event) => {
-                  setSearch(event.target.value);
+                  setSearchState({
+                    source: routeSearch,
+                    value: event.target.value,
+                  });
                   setCursorStack([null]);
                 }}
                 placeholder={t("Search customer, email, charge ID...")}

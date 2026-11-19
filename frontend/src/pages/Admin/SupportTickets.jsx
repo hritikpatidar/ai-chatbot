@@ -1,4 +1,5 @@
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
+import { useSearchParams } from "react-router-dom";
 import {
   Search,
   RefreshCw,
@@ -53,12 +54,34 @@ const getErrorMessage = (error) =>
   error?.response?.data?.message || error?.message || "Something went wrong";
 
 export default function SupportTickets() {
+  const [searchParams] = useSearchParams();
+  const routeSearch = searchParams.get("search") || "";
   const [selectedTicketId, setSelectedTicketId] = useState(null);
 
-  const [search, setSearch] = useState("");
+  const [searchState, setSearchState] = useState({
+    source: routeSearch,
+    value: routeSearch,
+  });
+  const search =
+    searchState.source === routeSearch ? searchState.value : routeSearch;
   const [statusFilter, setStatusFilter] = useState("");
   const [priorityFilter, setPriorityFilter] = useState("");
-  const [page, setPage] = useState(1);
+  const [pageState, setPageState] = useState({
+    search: routeSearch,
+    page: 1,
+  });
+  const page = pageState.search === routeSearch ? pageState.page : 1;
+  const setPage = useCallback((update) => {
+    setPageState((current) => {
+      const currentPage =
+        current.search === routeSearch ? current.page : 1;
+      return {
+        search: routeSearch,
+        page:
+          typeof update === "function" ? update(currentPage) : update,
+      };
+    });
+  }, [routeSearch]);
 
   const [reply, setReply] = useState("");
   const [replyStatus, setReplyStatus] = useState("In Progress");
@@ -103,7 +126,7 @@ export default function SupportTickets() {
     if (page > totalPages) {
       setPage(totalPages);
     }
-  }, [page, totalPages]);
+  }, [page, setPage, totalPages]);
 
   useEffect(() => {
     if (!selectedTicket) return;
@@ -172,7 +195,7 @@ export default function SupportTickets() {
 
   const handleSearchChange = (value) => {
     setPage(1);
-    setSearch(value);
+    setSearchState({ source: routeSearch, value });
   };
 
   const handleStatusFilterChange = (value) => {

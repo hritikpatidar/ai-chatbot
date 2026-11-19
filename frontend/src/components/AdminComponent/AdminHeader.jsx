@@ -7,6 +7,13 @@ import {
   ChevronDown,
   LogOut,
   User,
+  Building2,
+  Ticket,
+  CreditCard,
+  Layers3,
+  Receipt,
+  LoaderCircle,
+  X,
 } from "lucide-react";
 import { useTheme } from "../../context/ThemeContext";
 import { useDispatch, useSelector } from "react-redux";
@@ -16,6 +23,15 @@ import NotificationDropdown from "../common/NotificationDropdown";
 import ConfirmModal from "../ClientComponent/ConfirmModal";
 import LanguageSwitcher from "../common/LanguageSwitcher";
 import { useLanguage } from "../../context/LanguageContext";
+import { useAdminGlobalSearch } from "../../hooks/Admin/useAdminGlobalSearch";
+
+const searchResultTypes = {
+  client: { label: "Clients", icon: Building2 },
+  ticket: { label: "Support tickets", icon: Ticket },
+  subscription: { label: "Subscriptions", icon: CreditCard },
+  plan: { label: "Subscription Plans", icon: Layers3 },
+  transaction: { label: "Transactions", icon: Receipt },
+};
 
 export default function AdminHeader({ onMenuClick, collapsed }) {
   const dispatch = useDispatch();
@@ -25,18 +41,32 @@ export default function AdminHeader({ onMenuClick, collapsed }) {
   const [isLogoutLoading, setIsLogoutLoading] = useState(false);
   const [logOutModalOpen, setLogOutModalOpen] = useState(false);
   const [isProfileOpen, setIsProfileOpen] = useState(false);
+  const [searchValue, setSearchValue] = useState("");
+  const [isSearchOpen, setIsSearchOpen] = useState(false);
+  const [activeResultIndex, setActiveResultIndex] = useState(0);
   const { profileDetails, refreshToken } = useSelector(
     (store) => store.authReducer.AuthSlice,
   );
   const profileRef = useRef(null);
+  const searchRef = useRef(null);
+  const searchInputRef = useRef(null);
   const fullName = profileDetails?.fullName || t("Administrator");
   const email = profileDetails?.email || "admin@example.com";
   const profileImage = profileDetails?.profileImage || "";
+  const {
+    data: searchResults = [],
+    isFetching: isSearchLoading,
+    isDebouncing: isSearchDebouncing,
+    isError: isSearchError,
+  } = useAdminGlobalSearch(searchValue, isSearchOpen);
 
   useEffect(() => {
     const handleClickOutside = (event) => {
       if (profileRef.current && !profileRef.current.contains(event.target)) {
         setIsProfileOpen(false);
+      }
+      if (searchRef.current && !searchRef.current.contains(event.target)) {
+        setIsSearchOpen(false);
       }
     };
     const handleKeyDown = (event) => {
@@ -54,6 +84,25 @@ export default function AdminHeader({ onMenuClick, collapsed }) {
     };
   }, []);
 
+  useEffect(() => {
+    const handleSearchShortcut = (event) => {
+      const target = event.target;
+      const isTyping =
+        target instanceof HTMLElement &&
+        (target.isContentEditable ||
+          ["INPUT", "TEXTAREA", "SELECT"].includes(target.tagName));
+
+      if (event.key === "/" && !isTyping) {
+        event.preventDefault();
+        searchInputRef.current?.focus();
+        setIsSearchOpen(true);
+      }
+    };
+
+    document.addEventListener("keydown", handleSearchShortcut);
+    return () => document.removeEventListener("keydown", handleSearchShortcut);
+  }, []);
+
   const handleProfileToggle = () => {
     setIsProfileOpen((previous) => !previous);
   };
@@ -66,6 +115,36 @@ export default function AdminHeader({ onMenuClick, collapsed }) {
       setIsLogoutLoading,
       refreshToken,
     });
+  };
+
+  const handleSearchResultSelect = (result) => {
+    setIsSearchOpen(false);
+    setSearchValue("");
+    searchInputRef.current?.blur();
+    navigate(result.route);
+  };
+
+  const handleSearchKeyDown = (event) => {
+    if (event.key === "Escape") {
+      setIsSearchOpen(false);
+      searchInputRef.current?.blur();
+      return;
+    }
+
+    if (!searchResults.length) return;
+
+    if (event.key === "ArrowDown") {
+      event.preventDefault();
+      setActiveResultIndex((index) =>
+        Math.min(index + 1, searchResults.length - 1),
+      );
+    } else if (event.key === "ArrowUp") {
+      event.preventDefault();
+      setActiveResultIndex((index) => Math.max(index - 1, 0));
+    } else if (event.key === "Enter") {
+      event.preventDefault();
+      handleSearchResultSelect(searchResults[activeResultIndex] || searchResults[0]);
+    }
   };
 
   return (
@@ -96,7 +175,7 @@ export default function AdminHeader({ onMenuClick, collapsed }) {
         left-0
       `}
       >
-        <div className="flex items-center gap-3">
+        <div className="flex min-w-0 flex-1 items-center gap-3">
           {/* Mobile Menu */}
 
           <button
@@ -147,10 +226,13 @@ export default function AdminHeader({ onMenuClick, collapsed }) {
           {/* Search */}
 
           <div
+            ref={searchRef}
             className="
-            hidden
+            relative
+            flex
+            flex-1
+            min-w-0
             h-10
-            w-65
             items-center
             gap-2
             rounded-lg
@@ -158,9 +240,10 @@ export default function AdminHeader({ onMenuClick, collapsed }) {
             border-gray-400
             bg-gray-50
             px-3
-            md:flex
             dark:border-white/10
             dark:bg-white/3
+            md:w-65
+            md:flex-none
           "
           >
             <Search
@@ -172,9 +255,24 @@ export default function AdminHeader({ onMenuClick, collapsed }) {
             />
 
             <input
+              ref={searchInputRef}
               type="text"
-              placeholder={t("Search...")}
+              value={searchValue}
+              onFocus={() => setIsSearchOpen(true)}
+              onChange={(event) => {
+                setSearchValue(event.target.value);
+                setActiveResultIndex(0);
+                setIsSearchOpen(true);
+              }}
+              onKeyDown={handleSearchKeyDown}
+              role="combobox"
+              aria-autocomplete="list"
+              aria-expanded={isSearchOpen}
+              aria-controls="admin-global-search-results"
+              placeholder={t("Search admin records...")}
+              autoComplete="off"
               className="
+              min-w-0
               w-full
               bg-transparent
               text-sm
@@ -199,10 +297,102 @@ export default function AdminHeader({ onMenuClick, collapsed }) {
             >
               /
             </span>
+            {searchValue && (
+              <button
+                type="button"
+                onClick={() => {
+                  setSearchValue("");
+                  setActiveResultIndex(0);
+                  searchInputRef.current?.focus();
+                }}
+                aria-label={t("Clear search")}
+                className="rounded p-1 text-gray-400 hover:bg-gray-200 dark:hover:bg-white/10"
+              >
+                <X size={14} />
+              </button>
+            )}
+
+            {isSearchOpen && (
+              <div
+                id="admin-global-search-results"
+                role="listbox"
+                aria-label={t("Search results")}
+                className="
+                  fixed left-3 right-3 top-18 z-50 max-h-[70vh] overflow-y-auto
+                  rounded-xl border border-gray-200 bg-white p-2 shadow-xl
+                  dark:border-white/10 dark:bg-[#171b23]
+                  md:absolute md:left-0 md:right-auto md:top-full md:mt-2
+                  md:w-96
+                "
+              >
+                {searchValue.trim().length < 2 ? (
+                  <p className="px-3 py-4 text-center text-sm text-gray-500 dark:text-gray-400">
+                    {t("Type at least 2 characters")}
+                  </p>
+                ) : isSearchDebouncing || isSearchLoading ? (
+                  <div className="flex items-center justify-center gap-2 px-3 py-5 text-sm text-gray-500 dark:text-gray-400">
+                    <LoaderCircle size={16} className="animate-spin" />
+                    {t("Searching...")}
+                  </div>
+                ) : isSearchError ? (
+                  <p role="alert" className="px-3 py-4 text-center text-sm text-red-600 dark:text-red-400">
+                    {t("Search failed. Please try again.")}
+                  </p>
+                ) : searchResults.length === 0 ? (
+                  <p className="px-3 py-4 text-center text-sm text-gray-500 dark:text-gray-400">
+                    {t("No results found")}
+                  </p>
+                ) : (
+                  <div className="space-y-1">
+                    {searchResults.map((result, index) => {
+                      const resultType =
+                        searchResultTypes[result.type] || searchResultTypes.client;
+                      const ResultIcon = resultType.icon;
+                      const isActive = index === activeResultIndex;
+
+                      return (
+                        <button
+                          key={`${result.type}-${result.id}`}
+                          type="button"
+                          role="option"
+                          aria-selected={isActive}
+                          onMouseEnter={() => setActiveResultIndex(index)}
+                          onClick={() => handleSearchResultSelect(result)}
+                          className={`
+                            flex w-full min-w-0 items-center gap-3 rounded-lg
+                            px-3 py-2.5 text-left transition-colors
+                            ${
+                              isActive
+                                ? "bg-blue-50 dark:bg-blue-500/10"
+                                : "hover:bg-gray-50 dark:hover:bg-white/5"
+                            }
+                          `}
+                        >
+                          <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-gray-100 text-gray-600 dark:bg-white/5 dark:text-gray-300">
+                            <ResultIcon size={17} />
+                          </span>
+                          <span className="min-w-0 flex-1">
+                            <span className="block truncate text-sm font-medium text-gray-900 dark:text-white">
+                              {result.title}
+                            </span>
+                            <span className="block truncate text-xs text-gray-500 dark:text-gray-400">
+                              {result.subtitle}
+                            </span>
+                          </span>
+                          <span className="shrink-0 text-[10px] text-gray-400 dark:text-gray-500">
+                            {t(resultType.label)}
+                          </span>
+                        </button>
+                      );
+                    })}
+                  </div>
+                )}
+              </div>
+            )}
           </div>
         </div>
 
-        <div className="flex items-center gap-2 sm:gap-3">
+        <div className="flex shrink-0 items-center gap-2 sm:gap-3">
           {/* Notification */}
 
           {/* <button

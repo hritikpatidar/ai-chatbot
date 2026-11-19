@@ -951,6 +951,7 @@
 
 import React, { useEffect, useState } from "react";
 import { Controller, useForm } from "react-hook-form";
+import { useSearchParams } from "react-router-dom";
 
 import {
   CreditCard,
@@ -1273,9 +1274,16 @@ const MobileInfo = ({ label, value }) => {
 };
 
 export default function AdminSubscriptions() {
-  const [search, setSearch] = useState("");
+  const [searchParams] = useSearchParams();
+  const routeSearch = searchParams.get("search") || "";
+  const [search, setSearch] = useState(routeSearch);
   const [page, setPage] = useState(1);
   const limit = 10;
+
+  useEffect(() => {
+    setSearch(routeSearch);
+    setPage(1);
+  }, [routeSearch]);
 
   const {
     control,

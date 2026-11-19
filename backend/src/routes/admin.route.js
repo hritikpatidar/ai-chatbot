@@ -21,6 +21,7 @@ import {
   getGeminiModelsController,
   updateAdminSettingsController,
 } from "../controllers/adminSetting.controller.js";
+import { searchAdminRecordsController } from "../controllers/adminSearch.controller.js";
 
 const router = express.Router();
 const adminOnly = (req, res, next) => {
@@ -46,6 +47,7 @@ router.get("/transactions", authMiddleware, adminOnly, getAdminTransactionsContr
 router.get("/settings", authMiddleware, adminOnly, getAdminSettingsController);
 router.patch("/settings", authMiddleware, adminOnly, updateAdminSettingsController);
 router.get("/ai-models", authMiddleware, adminOnly, getGeminiModelsController);
+router.get("/search", authMiddleware, adminOnly, searchAdminRecordsController);
 
 router.post(
   "/subscription-plans",

@@ -143,6 +143,7 @@ const matchesSearch = (transaction, search) => {
     transaction.customer.email,
     transaction.customer.id,
     transaction.description,
+    transaction.status,
     transaction.paymentIntentId,
     transaction.invoiceId,
   ];

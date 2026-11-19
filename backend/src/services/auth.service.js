@@ -328,7 +328,6 @@ export const loginService = async (body) => {
         { EX: TWO_FACTOR_CHALLENGE_SECONDS },
       );
       console.log("otp",otp)
-      console.log("email",email)
       try {
         await sendOTPEmail(email, otp);
       } catch (error) {

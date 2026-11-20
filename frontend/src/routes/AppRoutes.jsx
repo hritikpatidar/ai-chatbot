@@ -72,6 +72,7 @@ import NotFound from "../components/NotFound";
 import ClientSupport from "../pages/Client/ClientSupport";
 import ConversationHistory from "../components/ClientComponent/ConversationHistory";
 import SupportTickets from "../pages/Admin/SupportTickets";
+import LandingPage from "../pages/LandingPage";
 
 export default function AppRoutes() {
   useEffect(() => {
@@ -98,6 +99,7 @@ export default function AppRoutes() {
         <Routes>
           {/* PUBLIC AUTH ROUTES */}
           <Route element={<PublicRoute />}>
+            <Route path="/" element={<LandingPage />} />
             <Route path="/login" element={<Login />} />
             <Route path="/signup" element={<Signup />} />
             <Route path="/forgot-password" element={<ForgotPassword />} />

@@ -8,9 +8,12 @@ import {
   Check,
   ShieldCheck,
 } from "lucide-react";
-import { useNavigate } from "react-router-dom";
+import { useLocation, useNavigate } from "react-router-dom";
 import { motion } from "framer-motion";
-import { getItemLocalStorage, setItemLocalStorage } from "../utils/browserServices";
+import {
+  getItemLocalStorage,
+  setItemLocalStorage,
+} from "../utils/browserServices";
 import AnimatedBackground from "../components/AnimatedBackground";
 import { useDispatch } from "react-redux";
 import { useForm } from "react-hook-form";
@@ -29,7 +32,8 @@ export default function Login() {
   const { t } = useLanguage();
   const navigate = useNavigate();
   const dispatch = useDispatch();
-
+  const location = useLocation();
+  const selectedRole = location.state?.role ?? "user";
   const [showPassword, setShowPassword] = useState(false);
   const [challengeId, setChallengeId] = useState("");
   const [otp, setOtp] = useState("");
@@ -332,7 +336,9 @@ export default function Login() {
                 dark:text-gray-400
               "
             >
-              {t("Experience next-generation AI conversations with a clean, fast and intelligent assistant.")}
+              {t(
+                "Experience next-generation AI conversations with a clean, fast and intelligent assistant.",
+              )}
             </motion.p>
           </div>
         </motion.div>
@@ -393,9 +399,7 @@ export default function Login() {
                 dark:text-white
               "
             >
-              {challengeId
-                ? t("Verify your login")
-                : t("Welcome Back 👋")}
+              {challengeId ? t("Verify your login") : t("Welcome Back 👋")}
             </motion.h2>
 
             <p
@@ -423,26 +427,26 @@ export default function Login() {
               onSubmit={handleLoginSubmit}
             >
               {!challengeId && (
-              <motion.div
-                initial={{ y: 25, opacity: 0 }}
-                animate={{ y: 0, opacity: 1 }}
-                transition={{ duration: 0.45 }}
-              >
-                <label
-                  className="
+                <motion.div
+                  initial={{ y: 25, opacity: 0 }}
+                  animate={{ y: 0, opacity: 1 }}
+                  transition={{ duration: 0.45 }}
+                >
+                  <label
+                    className="
                     mb-2
                     block
                     text-sm
                     text-gray-700
                     dark:text-gray-300
                   "
-                >
-                  {t("Email")}{" "}
-                  <span className="text-red-500 dark:text-red-400">*</span>
-                </label>
+                  >
+                    {t("Email")}{" "}
+                    <span className="text-red-500 dark:text-red-400">*</span>
+                  </label>
 
-                <div
-                  className="
+                  <div
+                    className="
                     flex
                     items-center
                     rounded-xl
@@ -455,13 +459,13 @@ export default function Login() {
                     dark:border-white/10
                     dark:bg-[#222938]
                   "
-                >
-                  <Mail size={16} className="text-gray-400" />
+                  >
+                    <Mail size={16} className="text-gray-400" />
 
-                  <input
-                    type="email"
-                    placeholder={t("Enter your email")}
-                    className="
+                    <input
+                      type="email"
+                      placeholder={t("Enter your email")}
+                      className="
                       w-full
                       bg-transparent
                       px-3
@@ -472,39 +476,39 @@ export default function Login() {
                       dark:text-white
                       dark:placeholder:text-gray-500
                     "
-                    {...register("email")}
-                  />
-                </div>
+                      {...register("email")}
+                    />
+                  </div>
 
-                {errors.email && (
-                  <p className="mt-1 text-xs text-red-500">
-                    {errors.email.message}
-                  </p>
-                )}
-              </motion.div>
+                  {errors.email && (
+                    <p className="mt-1 text-xs text-red-500">
+                      {errors.email.message}
+                    </p>
+                  )}
+                </motion.div>
               )}
 
               {!challengeId && (
-              <motion.div
-                initial={{ y: 25, opacity: 0 }}
-                animate={{ y: 0, opacity: 1 }}
-                transition={{ duration: 0.45 }}
-              >
-                <label
-                  className="
+                <motion.div
+                  initial={{ y: 25, opacity: 0 }}
+                  animate={{ y: 0, opacity: 1 }}
+                  transition={{ duration: 0.45 }}
+                >
+                  <label
+                    className="
                     mb-2
                     block
                     text-sm
                     text-gray-700
                     dark:text-gray-300
                   "
-                >
-                  {t("Password")}{" "}
-                  <span className="text-red-500 dark:text-red-400">*</span>
-                </label>
+                  >
+                    {t("Password")}{" "}
+                    <span className="text-red-500 dark:text-red-400">*</span>
+                  </label>
 
-                <div
-                  className="
+                  <div
+                    className="
                     flex
                     items-center
                     rounded-xl
@@ -517,13 +521,13 @@ export default function Login() {
                     dark:border-white/10
                     dark:bg-[#222938]
                   "
-                >
-                  <Lock size={18} className="text-gray-400" />
+                  >
+                    <Lock size={18} className="text-gray-400" />
 
-                  <input
-                    type={showPassword ? "text" : "password"}
-                    placeholder={t("Enter your password")}
-                    className="
+                    <input
+                      type={showPassword ? "text" : "password"}
+                      placeholder={t("Enter your password")}
+                      className="
                       w-full
                       bg-transparent
                       px-3
@@ -534,34 +538,34 @@ export default function Login() {
                       dark:text-white
                       dark:placeholder:text-gray-500
                     "
-                    {...register("password")}
-                  />
+                      {...register("password")}
+                    />
 
-                  <button
-                    type="button"
-                    onClick={() => setShowPassword(!showPassword)}
-                    className="shrink-0"
-                  >
-                    {showPassword ? (
-                      <EyeOff
-                        size={16}
-                        className="text-gray-500 dark:text-gray-400"
-                      />
-                    ) : (
-                      <Eye
-                        size={16}
-                        className="text-gray-500 dark:text-gray-400"
-                      />
-                    )}
-                  </button>
-                </div>
+                    <button
+                      type="button"
+                      onClick={() => setShowPassword(!showPassword)}
+                      className="shrink-0"
+                    >
+                      {showPassword ? (
+                        <EyeOff
+                          size={16}
+                          className="text-gray-500 dark:text-gray-400"
+                        />
+                      ) : (
+                        <Eye
+                          size={16}
+                          className="text-gray-500 dark:text-gray-400"
+                        />
+                      )}
+                    </button>
+                  </div>
 
-                {errors.password && (
-                  <p className="mt-1 text-xs text-red-500">
-                    {errors.password.message}
-                  </p>
-                )}
-              </motion.div>
+                  {errors.password && (
+                    <p className="mt-1 text-xs text-red-500">
+                      {errors.password.message}
+                    </p>
+                  )}
+                </motion.div>
               )}
 
               {challengeId ? (
@@ -606,7 +610,9 @@ export default function Login() {
                       placeholder={t("Enter 6-digit code")}
                       value={otp}
                       onChange={(event) =>
-                        setOtp(event.target.value.replace(/\D/g, "").slice(0, 6))
+                        setOtp(
+                          event.target.value.replace(/\D/g, "").slice(0, 6),
+                        )
                       }
                       className="
                         w-full
@@ -625,54 +631,54 @@ export default function Login() {
                   </div>
                 </motion.div>
               ) : (
-              <motion.div
-                initial={{ y: 25, opacity: 0 }}
-                animate={{ y: 0, opacity: 1 }}
-                transition={{ duration: 0.45 }}
-                className="
+                <motion.div
+                  initial={{ y: 25, opacity: 0 }}
+                  animate={{ y: 0, opacity: 1 }}
+                  transition={{ duration: 0.45 }}
+                  className="
                   flex
                   items-center
                   justify-between
                   text-sm
                 "
-              >
-                <label className="flex cursor-pointer items-center gap-3">
-                  <input
-                    type="checkbox"
-                    className="
+                >
+                  <label className="flex cursor-pointer items-center gap-3">
+                    <input
+                      type="checkbox"
+                      className="
                       h-4
                       w-4
                       cursor-pointer
                       rounded
                       accent-blue-600
                     "
-                    {...register("remember")}
-                  />
+                      {...register("remember")}
+                    />
 
-                  <span
-                    className="
+                    <span
+                      className="
                       text-sm
                       text-gray-600
                       dark:text-gray-400
                     "
-                  >
-                    {t("Remember me")}
-                  </span>
-                </label>
+                    >
+                      {t("Remember me")}
+                    </span>
+                  </label>
 
-                <button
-                  type="button"
-                  className="
+                  <button
+                    type="button"
+                    className="
                     text-blue-600
                     hover:text-blue-700
                     dark:text-blue-400
                     dark:hover:text-blue-300
                   "
-                  onClick={() => navigate("/forgot-password")}
-                >
-                  {t("Forgot Password?")}
-                </button>
-              </motion.div>
+                    onClick={() => navigate("/forgot-password")}
+                  >
+                    {t("Forgot Password?")}
+                  </button>
+                </motion.div>
               )}
 
               <motion.button
@@ -718,33 +724,33 @@ export default function Login() {
                 </button>
               )}
 
-              {!challengeId && (
-              <>
-              <div className="flex items-center gap-3">
-                <div
-                  className="
+              {!challengeId && selectedRole === "user" && (
+                <>
+                  <div className="flex items-center gap-3">
+                    <div
+                      className="
                     h-px
                     flex-1
                     bg-gray-200
                     dark:bg-white/10
                   "
-                />
+                    />
 
-                <span className="text-sm text-gray-500">{t("OR")}</span>
+                    <span className="text-sm text-gray-500">{t("OR")}</span>
 
-                <div
-                  className="
+                    <div
+                      className="
                     h-px
                     flex-1
                     bg-gray-200
                     dark:bg-white/10
                   "
-                />
-              </div>
+                    />
+                  </div>
 
-              <button
-                type="button"
-                className="
+                  <button
+                    type="button"
+                    className="
                   flex
                   w-full
                   items-center
@@ -764,32 +770,32 @@ export default function Login() {
                   dark:text-white
                   dark:hover:bg-[#2c3547]
                 "
-              >
-                <img
-                  src="https://www.svgrepo.com/show/475656/google-color.svg"
-                  alt="Google"
-                  className="h-5 w-5"
-                />
-                {t("Continue with Google")}
-              </button>
-              </>
+                  >
+                    <img
+                      src="https://www.svgrepo.com/show/475656/google-color.svg"
+                      alt="Google"
+                      className="h-5 w-5"
+                    />
+                    {t("Continue with Google")}
+                  </button>
+                </>
               )}
             </motion.form>
-
-            <p
-              className="
+            {selectedRole === "user" && (
+              <p
+                className="
                 mt-6
                 text-center
                 text-sm
                 text-gray-500
                 dark:text-gray-400
               "
-            >
-              {!challengeId && t("Don't have an account?")}
-              {!challengeId && (
-              <button
-                onClick={() => navigate("/signup")}
-                className="
+              >
+                {!challengeId && t("Don't have an account?")}
+                {!challengeId && (
+                  <button
+                    onClick={() => navigate("/signup")}
+                    className="
                   ml-2
                   font-semibold
                   text-blue-600
@@ -797,11 +803,26 @@ export default function Login() {
                   dark:text-blue-400
                   dark:hover:text-blue-300
                 "
-              >
-                Sign Up
-              </button>
-              )}
-            </p>
+                  >
+                    Sign Up
+                  </button>
+                )}
+              </p>
+            )}
+
+            {selectedRole === "client" && (
+              <p className="mt-4 text-center text-sm text-gray-500">
+                Don't have an account? Please contact your administrator.
+              </p>
+            )}
+
+            <button
+              type="button"
+              onClick={() => navigate(-1)}
+              className="mt-5 w-full text-center text-sm font-medium text-violet-500 transition hover:text-violet-600"
+            >
+              ← Back
+            </button>
           </motion.div>
         </div>
       </motion.div>

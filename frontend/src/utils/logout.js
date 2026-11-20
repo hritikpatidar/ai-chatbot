@@ -50,7 +50,7 @@ export const handleLogout = async ({
     if (theme) {
       setItemLocalStorage("theme", theme);
     }
-    window.location.href = "/login";
+    window.location.href = "/";
     // navigate("/login");
     // setIsLogoutLoading?.(false);
   }

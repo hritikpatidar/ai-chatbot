@@ -860,16 +860,16 @@ export default function LandingPage() {
               <div className="space-y-3">
                 {[
                   {
-                    role: "client",
-                    icon: Users,
-                    title: t("client"),
-                    desc: t("clientDesc"),
-                  },
-                  {
                     role: "user",
                     icon: UserRound,
                     title: t("user"),
                     desc: t("userDesc"),
+                  },
+                  {
+                    role: "client",
+                    icon: Users,
+                    title: t("client"),
+                    desc: t("clientDesc"),
                   },
                 ].map(({ role, icon: Icon, title, desc }) => (
                   <button

@@ -726,7 +726,7 @@
     "ai-chatbot-widget-iframe";
 
   iframe.src =
-    `${CHATBOT_URL}/?clientKey=${encodeURIComponent(clientId)}`;
+    `${CHATBOT_URL}/user/?clientKey=${encodeURIComponent(clientId)}`;
 
   iframe.title =
     "AI Chatbot";

@@ -121,8 +121,8 @@ export default function AppRoutes() {
           ========================================== */}
           <Route element={<ClientRoute />}>
             <Route element={<DashboardLayout />}>
-              <Route path="/" element={<Welcome />} />
-              <Route path="/c/:conversationId" element={<ChatContainer />} />
+              <Route path="/user" element={<Welcome />} />
+              <Route path="/user/c/:conversationId" element={<ChatContainer />} />
             </Route>
           </Route>
 

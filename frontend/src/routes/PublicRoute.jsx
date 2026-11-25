@@ -49,5 +49,5 @@ export const PublicRoute = () => {
   }
 
   // Unknown role
-  return <Navigate to="/login" replace />;
+  return <Navigate to="/" replace />;
 };

@@ -53,7 +53,7 @@ export default function ClientSettings() {
         dispatch(logoutSuccess());
         clearLocalStorage();
         setDeleteModalOpen(false);
-        navigate("/login", {
+        navigate("/", {
           replace: true,
         });
       }

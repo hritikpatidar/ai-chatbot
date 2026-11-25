@@ -36,7 +36,7 @@ export default function ClientRoute() {
   // Not authenticated + no clientKey
   return (
     <Navigate
-      to="/login"
+      to="/"
       replace
       state={{
         from: location,

@@ -45,8 +45,8 @@ export default function Sidebar() {
 
   const location = useLocation();
 
-  const activeChatId = location.pathname.startsWith("/c/")
-    ? location.pathname.split("/c/")[1]
+  const activeChatId = location.pathname.startsWith("/user/c/")
+    ? location.pathname.split("/user/c/")[1]
     : null;
   const [dropdownPosition, setDropdownPosition] = useState("bottom");
   const [isLoading, setLoading] = useState(false);
@@ -82,7 +82,7 @@ export default function Sidebar() {
   }, []);
 
   const handleShare = async (chatId) => {
-    const url = `${window.location.origin}/c/${chatId}`;
+    const url = `${window.location.origin}/user/c/${chatId}`;
 
     try {
       if (navigator.share) {
@@ -115,9 +115,9 @@ export default function Sidebar() {
     setOpen(false);
     dispatch(setActivePage(page));
     dispatch(clearMessages([]));
-    if (page === "newChat") navigate(`/`);
-    else if (page === "recentChat") navigate(`/c/${new Date().getTime()}`);
-    else navigate(`/${page}`);
+    if (page === "newChat") navigate(`/user`);
+    else if (page === "recentChat") navigate(`/user/c/${new Date().getTime()}`);
+    else navigate(`/user/${page}`);
   };
 
   const getMenuClass = (menu) => {
@@ -199,7 +199,7 @@ export default function Sidebar() {
     await dispatch(setConversationLoading(true));
     await dispatch(setActivePage("recentChat"));
     setOpen(false);
-    navigate(`/c/${chat._id}`);
+    navigate(`/user/c/${chat._id}`);
   };
 
   return (

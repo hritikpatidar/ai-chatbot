@@ -100,13 +100,13 @@ export default function Welcome() {
       await dispatch(addConversation(conversation));
       dispatch(setActivePage("recentChat"));
       if (clientKey) {
-        navigate(`/c/${conversation?._id}?clientKey=${clientKey}`, {
+        navigate(`/user/c/${conversation?._id}?clientKey=${clientKey}`, {
           state: {
             isNewConversation: true,
           },
         });
       } else {
-        navigate(`/c/${conversation?._id}`, {
+        navigate(`/user/c/${conversation?._id}`, {
           state: {
             isNewConversation: true,
           },
@@ -598,7 +598,9 @@ export default function Welcome() {
                   >
                     <Globe size={16} />
 
-                    <span className="hidden text-xs lg:inline">{t("Search web")}</span>
+                    <span className="hidden text-xs lg:inline">
+                      {t("Search web")}
+                    </span>
                   </button>
                 </div>
 
@@ -1103,7 +1105,9 @@ export default function Welcome() {
                   >
                     <Globe size={16} />
 
-                    <span className="hidden text-xs lg:inline">{t("Search web")}</span>
+                    <span className="hidden text-xs lg:inline">
+                      {t("Search web")}
+                    </span>
                   </button>
                 </div>
 
@@ -1263,13 +1267,15 @@ export default function Welcome() {
         // Guest user with valid clientConfig
         <></>
       )}
-      <WelcomeUserModal
-        isOpen={showWelcomeModal}
-        onClose={() => setShowWelcomeModal(false)}
-        clientKey={clientKey}
-        guestId={guestId}
-        onSuccess={handleUserSuccess}
-      />
+      {!profileDetails?.role && (
+        <WelcomeUserModal
+          isOpen={showWelcomeModal}
+          onClose={() => setShowWelcomeModal(false)}
+          clientKey={clientKey}
+          guestId={guestId}
+          onSuccess={handleUserSuccess}
+        />
+      )}
     </div>
   );
 }

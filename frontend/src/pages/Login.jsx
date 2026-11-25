@@ -103,7 +103,7 @@ export default function Login() {
     } else if (response?.user?.role === "admin") {
       navigate("/admin");
     } else {
-      navigate("/");
+      navigate("/user");
     }
   };
 

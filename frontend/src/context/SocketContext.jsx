@@ -40,9 +40,9 @@ export const SocketProvider = ({ children }) => {
    *
    * Therefore:
    *
-   * /?clientKey=abc
+   * /user?clientKey=abc
    *       ↓
-   * /c/123?clientKey=abc
+   * /user/c/123?clientKey=abc
    *
    * socket reconnect nahi karega.
    */

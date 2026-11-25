@@ -13,7 +13,7 @@ export const PrivateRoute = ({ allowedRoles = [] }) => {
   if (!isAuthenticated) {
     return (
       <Navigate
-        to="/login"
+        to="/"
         replace
         state={{
           from: location,
@@ -36,7 +36,7 @@ export const PrivateRoute = ({ allowedRoles = [] }) => {
       return <Navigate to="/admin" replace />;
     }
 
-    return <Navigate to="/login" replace />;
+    return <Navigate to="/" replace />;
   }
 
   return <Outlet />;

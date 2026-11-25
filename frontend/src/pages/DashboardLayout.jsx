@@ -17,7 +17,7 @@ export default function DashboardLayout() {
     Boolean(token) && Boolean(profileDetails?._id);
 
   const isWelcomePage = location.pathname === "/";
-  const isChatPage = location.pathname.startsWith("/c/");
+  const isChatPage = location.pathname.startsWith("/user/c/");
 
   return (
     <div

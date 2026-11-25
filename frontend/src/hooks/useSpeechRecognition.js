@@ -98,7 +98,7 @@ export default function useSpeechRecognition({
     const handleConversationCreate = async ({ conversation }) => {
       await dispatch(addConversation(conversation));
       dispatch(setActivePage("recentChat"));
-      navigate(`/c/${conversation?._id}`, {
+      navigate(`/user/c/${conversation?._id}`, {
         state: {
           isNewConversation: true,
         },
